@@ -1,0 +1,9 @@
+ 	private static int canvasHandle;
+	private static int graphicsHandle;
+	private static int midletHandle;
+
+	public static final void initJ2ME(GameScreenCanvas canvas, Graphics graphics, Main midlet) {
+		Syscalls.canvasHandle = CRunTime.registerObject( canvas );
+		Syscalls.graphicsHandle = CRunTime.registerObject( graphics );
+		Syscalls.midletHandle = CRunTime.registerObject( midlet );
+	}

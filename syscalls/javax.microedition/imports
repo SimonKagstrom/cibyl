@@ -1,0 +1,9 @@
+import javax.microedition.midlet.*;
+import javax.microedition.lcdui.*;
+import javax.microedition.lcdui.game.*;
+import javax.microedition.media.*;
+import javax.microedition.rms.*;
+import javax.microedition.io.*;
+#if defined(JSR075)
+import javax.microedition.io.file.*;
+#endif

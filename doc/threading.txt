@@ -1,0 +1,79 @@
+Cibyl is currently not thread-safe. There are two reasons for this: the MIPS
+hi/lo registers and returning the value of the v1 register. To make it
+thread-safe, these should be made private for each thread. This document
+describes how this can be done.
+
+The main idea is to create a base class for a Cibyl context and move parts of
+the CRunTime functionality there. This would be something like
+
+   class CibylProgram
+   {
+	   public int saved_v1;
+	   public int hi;
+	   public int lo;
+
+	   public final void mult(int rsVal, int rtVal)
+	   {
+		   this.hi = ...;
+		   this.lo = ...;
+	   }
+
+	   public abstract int __CIBYL_global_jumptab(...);
+	   public abstract int __CIBYL_start(...);
+	   ...
+   }
+
+The generated class will then inherit from this base class and use the members
+from the base class. Threads can then be supported by creating a new instance
+of the CompiledProgram class and execute that, e.g.,
+
+   public static final void NOPH_thread_create(int startAddress, int stackAddress, int aux)
+   {
+	   /* Assumes this is executing in a new Java thread */
+	   CompiledProgram thread = new CompiledProgram();
+
+	   /* Start the thread somewhere */
+	   thread.__CIBYL_global_jumptab(start, stackAddress, aux, 0, 0, 0);
+   }
+
+The base class should contain most methods from the current CRunTime, apart
+from utility functions such as handling the object registry, converting
+char*->String etc. At first they should probably be kept as well.
+
+
+Exception handling must also be changed, since the exceptions in the object
+repository is currently global. The proposed solution is this:
+
+- Two instance-variables in the base class,
+
+    public int exceptionObjectIndex;
+    public int k0;
+
+- exceptionObjectIndex stores the index of the exception object for this
+  thread.
+
+- k0 is the register k0 and is used a flag which specifies if the exception is
+  active.
+
+
+Parts of CibylProgram need to be protected against multiple access, so
+serialize these (maybe expensive in the non-threaded case?). Probably only
+registerObject and deRegisterObject need serialization, and these should not
+be that performance-critical.
+
+
+Java functionality which sets exceptions need to know which thread it's
+executing in. This can be accomplished by making these calls non-static and
+place them in a class which inherits CibylProgram. Slightly clumsy, yes.
+
+Another option is to pass the CibylCompiledProgram object as a reference to
+the Java calls for threaded calls (or always?) and then act on that.
+
+The classes used would be basically
+
+- CibylProgram: Base class without code, contains register set and the
+  CRunTime functionality. Maybe the name CRunTime should be kept to avoid
+  excessive changes of the current code.
+
+- CibylCompiledProgram: Inherits from CibylProgram, contains program code and
+  implements global_jumptab etc

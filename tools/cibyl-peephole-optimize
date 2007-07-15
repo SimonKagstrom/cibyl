@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+######################################################################
+##
+## Copyright (C) 2007,  Blekinge Institute of Technology
+##
+## Filename:      cibyl-peephole-optimize
+## Author:        Simon Kagstrom <ska@bth.se>
+## Description:   Peephole-optimizer for Cibyl
+##
+## $Id: cibyl-peephole-optimize 14154 2007-03-11 09:20:27Z ska $
+##
+######################################################################
+import sys, re, getopt
+from optparse import OptionParser
+sys.path.append('%s/python/' % sys.path[0])
+from Cibyl.PeepholeOptimizer import parse
+
+usage = """Usage: cibyl-peephole-optimize [-o outfile] infile
+
+Run the Cibyl peephole optimizer. The infile is a Jasmin assembly file.
+"""
+parser = OptionParser(usage = usage)
+parser.add_option("-o", "--outfile", dest="outfile", default=None,
+                  help="Write output to OUTFILE instead of overwriting the input file",
+		  metavar="OUTFILE",
+		  )
+parser.add_option("-p", "--passes", dest="passes", type="int", default=2,
+                  help="Execute PASSES runs over the input. Default is 2.",
+		  metavar="PASSES"
+		  )
+
+(options, args) = parser.parse_args()
+
+if len(args) < 1:
+    parser.error("incorrect number of arguments. Invoke with --help for arguments")
+
+infile = args[0]
+if options.outfile == None:
+    options.outfile = infile
+
+parse.run(options.passes, infile, options.outfile)

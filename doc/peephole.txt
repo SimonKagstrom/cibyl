@@ -1,0 +1,55 @@
+---
+	goto LABEL
+LABEL:
+->
+LABEL:
+---
+	istore $INT
+	goto __CIBYL_function_return
+__CIBYL_function_return:
+	iload $INT
+	ireturn
+->
+	ireturn
+---
+	const  $X
+	istore_$N
+	iinc $N $Y
+->
+	const $X + $Y
+	istore_$N
+---
+; 0x01002030:      sll   v1, a1, 0x00000003
+	iload_2
+	iconst_3
+	ishl
+	istore 6
+; 0x01002034:      sll   v0, a1, 0x00000001
+	iload_2
+	iconst_1
+	ishl
+	istore 5
+; 0x01002038:      addu  v0, v0, v1
+	iload 5
+	iload 6
+	iadd
+	istore 5
+->
+	iload_2
+	iconst_1
+	ishl
+	iload 6
+	iadd
+	istore 5
+
+explanation:
+
+stores to registers in straight-line code which are overwritten later
+can just be removed together with the corresponding loads.
+
+
+putstatic hi
+getstatic hi
+->
+dup
+pustatic  hi

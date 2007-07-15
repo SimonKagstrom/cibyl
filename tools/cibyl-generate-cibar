@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+import struct, sys, os
+
+def usage():
+    print "Usage: generate-cibar DIR outfile"
+    sys.exit(1)
+
+if len(sys.argv) < 2:
+    usage()
+
+dirname = sys.argv[1]
+filename = sys.argv[2]
+
+try:
+    all_filenames = os.listdir(dirname)
+except:
+    print dirname, "is not a directory"
+    usage()
+
+
+all_files = {}
+strtab = {}
+datatab = {}
+header_size = 24 # Size of headers
+file_entry_size = 12 # Size of file entries
+total_size = header_size
+data_offset = 0
+strtab_offset = 0
+
+for name in all_filenames:
+    try:
+        f = open(dirname + "/" + name, "r")
+        all_files[name] = f.read()
+        f.close()
+    except:
+        # Directories etc
+        print "WARNING: Skipping", name
+        pass
+
+# Create the tables
+for k, v in all_files.iteritems():
+    slen = len(k) + 1
+    dlen = len(v)
+
+    strtab[k] = strtab_offset
+    datatab[k] = data_offset
+
+    strtab_offset = strtab_offset + slen
+    data_offset = data_offset + dlen
+
+    total_size = total_size + slen + dlen
+
+# file entries
+total_size = total_size + len(all_files) * file_entry_size
+
+
+of = open(filename, "w")
+of.write(struct.pack(">L", 0x12344321))         # magic
+of.write(struct.pack(">L", total_size))         # size of the file
+of.write(struct.pack(">L", strtab_offset))      # size of the strtab
+of.write(struct.pack(">L", data_offset))        # size of the data
+of.write(struct.pack(">L", len(all_files) ))    # n files
+of.write(struct.pack(">L", total_size - data_offset )) # data start
+
+# Write file entries
+for k, v in all_files.iteritems():
+    soff = strtab[k]
+    doff = datatab[k]
+    of.write(struct.pack(">L", soff))    # string offset
+    of.write(struct.pack(">L", doff))    # data offset
+    of.write(struct.pack(">L", len(v)))  # size of data
+
+# Write strtab
+for k, v in all_files.iteritems():
+    of.write(k + '\0')
+
+# Write data
+for k, v in all_files.iteritems():
+    of.write(v)
+
+of.close()

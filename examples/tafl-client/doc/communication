@@ -1,0 +1,55 @@
+Client connect
+--------------
+->  'CONNid', where id is a positive 2-digit number. 0 if new user
+<-  'IDENid', id as above
+
+
+Client disconnect
+-----------------
+->  'BYE '
+
+
+Client list users
+-----------------
+->  '?USL'
+<-  '!USLnrididid...', where nr is the number of users (two digits), id as above
+
+
+Client get username
+-------------------
+->  '?USRid', id as above
+<-  '!USRidname...', id as above, name is always 16 characters long
+
+
+Client list games
+-----------------
+->  '?GAM'
+<-  '!GAMnrididid...', where nr is the number of active games for this player, id as above
+
+
+Client new game
+---------------
+->  'NGAMid', where id is the player to play against
+<-  'OK  '
+ |  'NAK ', if id does not exist or id or already plays against id
+
+
+Client join game
+----------------
+->  'JOINid', join game against id
+<-  'OK  '
+ |  'NAK ', if no game with id exists
+
+
+Client send move
+----------------
+->  'MOVEsxsydxdy', attempt a move from (sx, sy) to (dx, dy). 1-digit numbers.
+<-  'OK  '
+ |  'NAK ', if this move is invalid
+
+
+Server send playfield
+---------------------
+<-  'PLYFp1p2p3...', playfield (pos 1, pos 2 etc on the field, each a 1-digit number)
+->  'OK  '
+ |  'NAK '

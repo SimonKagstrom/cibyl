@@ -1,0 +1,24 @@
+cibar file format:
+------------------
+All field are big endians
+
+file_header_t:
+
+   uint32_t magic = 0x12344321
+   uint32_t total_length
+   uint32_t strtab_length
+   uint32_t n_file_entries
+   uint32_t data_start          -.
+                                 |
+   file_entry_t entries[]        |
+   ...                           |
+   NULL-terminated strings       |
+   ...                           |
+   data                        <-´
+
+
+file_entry_t:
+
+    uint32_t strtab_offset             (the name)
+    uint32_t data_offset
+    uint32_t data_size

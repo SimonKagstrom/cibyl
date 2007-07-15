@@ -1,0 +1,38 @@
+diff -ru ../gdb-6.6/gdb/mips-tdep.c ./gdb/mips-tdep.c
+--- ../gdb-6.6/gdb/mips-tdep.c	2006-08-08 23:32:37.000000000 +0200
++++ ./gdb/mips-tdep.c	2007-03-24 12:54:10.000000000 +0100
+@@ -946,7 +946,10 @@
+ 	    case 8:		/* JR */
+ 	    case 9:		/* JALR */
+ 	      /* Set PC to that address */
+-	      pc = read_signed_register (rtype_rs (inst));
++              if (step_over_calls == STEP_OVER_ALL)
++                pc = pc + 8;
++              else
++                pc = read_signed_register (rtype_rs (inst));
+ 	      break;
+ 	    default:
+ 	      pc += 4;
+@@ -989,14 +992,20 @@
+ 	    unsigned long reg;
+ 	    reg = jtype_target (inst) << 2;
+ 	    /* Upper four bits get never changed... */
+-	    pc = reg + ((pc + 4) & ~(CORE_ADDR) 0x0fffffff);
++            if (step_over_calls == STEP_OVER_ALL)
++              pc = pc + 8;
++            else
++              pc = reg + ((pc + 4) & ~(CORE_ADDR) 0x0fffffff);
+ 	  }
+ 	  break;
+ 	  /* FIXME case JALX : */
+ 	  {
+ 	    unsigned long reg;
+ 	    reg = jtype_target (inst) << 2;
+-	    pc = reg + ((pc + 4) & ~(CORE_ADDR) 0x0fffffff) + 1;	/* yes, +1 */
++            if (step_over_calls == STEP_OVER_ALL)
++              pc = pc + 8;
++            else
++              pc = reg + ((pc + 4) & ~(CORE_ADDR) 0x0fffffff) + 1;	/* yes, +1 */
+ 	    /* Add 1 to indicate 16 bit mode - Invert ISA mode */
+ 	  }
+ 	  break;		/* The new PC will be alternate mode */

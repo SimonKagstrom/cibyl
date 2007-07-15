@@ -1,0 +1,6 @@
+The Cibyl subversion archive contains code which is released under different
+licsenses. The main license is the LGPL (see trunk/COPYING), but the tools are
+released under plain GPL (trunk/tools/COPYING).
+
+The reason is that I want the libraries ("syscalls") to be possible to link
+with even for projects which does not release the source code.

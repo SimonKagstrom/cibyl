@@ -1,0 +1,78 @@
+I've spent a while looking at how floating point support can be added to Cibyl
+and I'll summarise some of the conclusions here.
+
+
+There are basically three ways of implementing FPU support for Cibyl:
+
+1. Implementing translation of the missing FPU-related MIPS-instructions
+
+2. Using -msoft-float to use software-based implementation of floating point
+   operations
+
+3. A hybrid approach (I'll get back to this)
+
+
+At first, option 1 seems like the natural one since that is the way the
+integer-support has been implemented. However, I've looked at the MIPS FPU
+this afternoon, and unfortunately many of the beautiful design features of the
+MIPS general-purpose instruction set has gone astray in the FPU.
+
+For example, there is a status register which would require emulation, and GCC
+generates code to load and set bits in this to control certain behavior. Also,
+double-precision is supported by using pairs of floating point registers, so
+e.g.,
+
+    add.d	f0, f2, f4
+
+adds the number in f2:f3 with f4:f5 and stores the result in f0:f1. While this
+works fine in hardware, it complicates things a lot for a Java
+implementation. Probably the easiest way of implementing it safely is to keep
+the FPU registers in Java integer local variables and then do something like
+
+    double f2 = Float.longToDoubleBits( (r_f2 << 32) | r_f3 )
+    double f4 = Float.longToDoubleBits( (r_f4 << 32) | r_f5 )
+    ...
+
+, which would be inefficient and cumbersome. For pure floats this would be
+easier, but it's still complicated since the same registers are used for both
+float and double-precision values. The good thing is that I now have some more
+ideas on how to implement a floating point ISA ;-)
+
+
+The second option is of course the easiest one. It only requires runtime
+support for a set of functions such as
+
+    float __addsf3 (float A, float B); /* return A + B; */
+
+, which is found in libgcc. Linking with libgcc directly is not possible on my
+system since libgcc is compiled to access data relative to the gp register,
+which is not done in Cibyl.
+
+
+The main disadvantage with this approach is that the performance will
+_probably_ be worse than implementing direct support for floating point
+operations. I'm not actually certain that the performance will be worse
+because of the things noted above.
+
+
+
+The third option is then to use -msoft-float, but to do certain tricks in the
+implementation of the runtime support routines while implementing it in
+Java. For example (as above)
+
+    public static int __addsf3_helper(int _a, int _b)
+    {
+      float a = Float.intBitsToFloat(_a);
+      float b = Float.intBitsToFloat(_b);
+
+      return Float.floatToIntBits(a + b);
+    }
+
+. For functions such as add, this is probably no gain, but I would guess that
+division and multiplication would benefit quite a lot from such an
+approach. Another advantage is that one can start with only -msoft-float and
+then extend the implementation with optimized versions as the need arises.
+
+
+As you might have guessed, I currently believe that the third approach will be
+the most beneficial, and this is the one I've started on implementing.

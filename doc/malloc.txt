@@ -1,0 +1,9 @@
+The malloc and free implementation (in libs/src/smalloc.c) was
+implemented by Calin A. Culianu and  Mark B. Hanson (with a few
+modifications by me). The copyright statement is below.
+
+All files are Public Domain by Calin A. Culianu <calin@ajvar.org>, but a
+lot of code was stolen from Mark B. Hanson's <mbh@panix.com> simple
+malloc implementation available at
+http://www.panix.com/~mbh/projects.html.
+

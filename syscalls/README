@@ -1,0 +1,4 @@
+These are the standard system calls for Cibyl.
+
+jmicropolygon is an external library for drawing polygons written by
+Simon Turner and adapted to Cibyl by Ehud Shabtai

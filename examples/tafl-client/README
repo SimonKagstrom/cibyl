@@ -1,0 +1,10 @@
+Tafl is a board game for J2ME phones. Tafl-type games are chess-like
+games and were played in northern europe during the middle ages. See
+http://en.wikipedia.org/wiki/Tafl for a description of these games and
+the rules of play.
+
+You can play both against the computer (which is fairly stupid as of
+now) or against a human friend.
+
+The game is released under the GNU GPL, see the file COPYING for more
+information.

@@ -1,0 +1,18 @@
+These are the Cibyl test cases and regression tests. If you find an
+error in Cibyl, please add a test case here.
+
+Expcected failures
+------------------
+Some of the floating point tests are expected to fail due to rounding
+errors. This happens on the host as well and the problem is really
+comparing exact values with floats.
+
+- sinf(), sin(): Inexactness due to conversion (and in the double-case
+  -0.0 vs 0.0)
+
+- The file operations will fail unless you have and can access the
+  file file:///root/a (which will be written, read and listed in the
+  directory)
+
+- Connector read+seek: The J2ME FileConnection/Connector file://
+  protocol does not support the reset() operation

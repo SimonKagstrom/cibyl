@@ -1,0 +1,4 @@
+This example shows how to use external syscalls. The syscalls/
+directory contains the "hello" syscall set, which defines a syscall
+hello() which outputs a message on the screen.
+

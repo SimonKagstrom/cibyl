@@ -1,0 +1,4 @@
+The file syscalls/softfloat/classes/mMath.java contains an implementation of
+asin, atan etc. It is written by Richard Carless and released as public
+domain.
+

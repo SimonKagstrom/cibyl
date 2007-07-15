@@ -1,0 +1,3 @@
+This example shows how event handling (e.g., Canvas::keyPressed()) works.
+
+It also uses a custom Cibyl configuration.

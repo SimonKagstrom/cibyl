@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+######################################################################
+##
+## Copyright (C) 2007,  Blekinge Institute of Technology
+##
+## Filename:      cibyl-gdbserver
+## Author:        Simon Kagstrom <ska@bth.se>
+## Description:   GDB server for Cibyl
+##
+## $Id:$
+##
+######################################################################
+import sys, re, getopt
+from optparse import OptionParser
+sys.path.append('%s/python/' % sys.path[0])
+from Cibyl.GdbServer import gdbserver
+from Cibyl import config
+
+usage = """Usage: cibyl-gdbserver [options] elf-file [java-class args...]
+
+Run the Cibyl GDB server
+"""
+parser = OptionParser(usage = usage)
+parser.add_option("--jdb-address", dest="jdb_address", type="str", default=None,
+                  help="Connect to the JDB server at JDB_ADDRESS.",
+		  metavar="JDB_ADDRESS"
+		  )
+parser.add_option("--gdb-listen-port", dest="port", type="int", default=9899,
+                  help="Port for gdb to listen to for connections. Default 9899.",
+		  metavar="GDB_PORT"
+		  )
+parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                  help="be verbose")
+
+(options, args) = parser.parse_args()
+
+if options.jdb_address:
+    if len(args) < 1:
+	parser.error("incorrect number of arguments. Invoke with --help for arguments")
+elif len(args) < 2:
+    parser.error("incorrect number of arguments. Invoke with --help for arguments")
+
+elf_file = args[0]
+jdb_args = ""
+for s in args[1:]:
+    jdb_args = jdb_args + " " + s
+
+if options.jdb_address:
+    jdb_args = "-attach %s" % (options.jdb_address)
+
+config.verbose = options.verbose
+
+gdbserver.init(elf_file, options.port, jdb_args)

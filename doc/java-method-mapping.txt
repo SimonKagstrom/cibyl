@@ -1,0 +1,88 @@
+This document describes the cases for using one Java method per C function.
+
+fn_simple:
+	sw	ra, xx(sp)
+	...
+	lw	ra, xx(sp)
+	jr	ra
+
+
+fn_tail_recursion:
+	...
+	j	next_fn
+
+
+fn_chained:
+	...
+	lw	a0, xx(XX)
+	jalr	a0
+	...
+
+
+fn_chained_tail_recursive:
+	...
+	lw	a0, xx(XX)
+	jr	a0
+
+
+
+Simple function call:
+---------------------
+	jal	fn_simple
+	->
+	iload	a0     |
+	iload	a1     |
+	iload	a2      -> push_args
+	iload	a3     |
+	iload	sp     |
+	invokestatic CompiledProgram/fn_simple(IIIII)I
+	istore	v0                          |
+	getstatic CompiledProgram/v1return   -> store_return
+	istore	v1                          |
+
+
+Chained function call:
+----------------------
+	lw	a0, xx(XX)
+	jalr	a0
+	->
+	iload	a0	-> dst_addr
+	push_args
+	invokestatic CompiledProgram/__global_jumptab(IIIIII)I
+	store_return
+
+__global_jumptab method:
+	push_args	-> These are the first local variables
+	iload	dst_addr
+	lookupswitch {
+		fn_simple: goto Java_fn_simple
+		...
+		default: error
+	}
+Java_fn_simple:
+	invokestatic	CompiledProgram/fn_simple(IIIII)I
+	goto	Java_return
+Java_return:
+	return	v0
+error:
+	## Abort the program
+
+
+Local register-relative jump:
+-----------------------------
+For example through switch-calls. The local lables which are relevant
+can be found in the relocation information.
+
+	lw	a0, xx(XX)
+	j	a0		-> We get by this way if we forbid tail recursion (-fno-optimize-sibling-calls)
+	->
+	iload	a0
+	goto	Java_lookup
+
+Java_lookup:
+	lookupswitch {
+		local_lab_1: goto local_lab_1
+		local_lab_2: goto local_lab_2
+		...
+		default: error
+	}
