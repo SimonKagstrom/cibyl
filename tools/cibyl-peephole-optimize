@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ######################################################################
 ##
-## Copyright (C) 2007,  Blekinge Institute of Technology
+## Copyright (C) 2007,  Simon Kagstrom
 ##
 ## Filename:      cibyl-peephole-optimize
 ## Author:        Simon Kagstrom <ska@bth.se>

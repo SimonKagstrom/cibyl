@@ -1,8 +1,8 @@
 Cibyl is an environment to compile and run programs written in C,
 Objective-C, C++ and possibly Fortran on J2ME phones. It is documented
-on
+on it's webpage at
 
-http://spel.bth.se/index.php/Cibyl
+http://cibyl.googlecode.com
 
 Prerequisites
 -------------

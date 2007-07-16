@@ -1,6 +1,6 @@
 ######################################################################
 ##
-## Copyright (C) 2006,  Blekinge Institute of Technology
+## Copyright (C) 2006,  Simon Kagstrom
 ##
 ## Filename:      binary.py
 ## Author:        Simon Kagstrom <ska@bth.se>

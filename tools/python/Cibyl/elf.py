@@ -1,8 +1,8 @@
 ######################################################################
 ##
-## Copyright (C) 2006,  Blekinge Institute of Technology
+## Copyright (C) 2006, Simon Kagstrom
 ##
-## Filename:      ElfFile.py
+## Filename:      elf.py
 ## Author:        Simon Kagstrom <ska@bth.se>
 ## Description:   Container class for ELF files
 ##
