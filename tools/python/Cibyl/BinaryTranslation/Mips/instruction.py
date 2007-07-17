@@ -585,11 +585,8 @@ class Jal(BranchInstruction):
 	    self.delayed.compile()
 	otherMethod = self.controller.lookupJavaMethod(self.dstAddress)
 
-        # Is this something we should inline?
-        if config.doInlineAllBuiltins or otherMethod.name in builtins.alwaysInline or self.getFunction().name in config.inlineBuiltinsFunctions:
-            match = builtins.match(self.controller, otherMethod.name)
-            if match != None:
-                return match.compile()
+        if self.builtin and otherMethod.name in builtins.alwaysInline or self.getFunction().name in config.inlineBuiltinsFunctions:
+            return self.builtin.compile()
 
 	for reg in otherMethod.getRegistersToPass():
 	    self.pushRegister(reg)
@@ -615,7 +612,12 @@ class Jal(BranchInstruction):
     def fixup(self):
 	self.controller.addLabel(self.dstAddress, inJumpTab = True)
 	self.isBranch = True
-	self.destination = [ mips.R_RA ]
+	self.destinations = Set([ mips.R_RA ])
+
+        otherName = self.controller.elf.getSymbolByAddress(self.dstAddress).name
+
+        # Is this something we should inline?
+        self.builtin = builtins.match(self.controller, self, otherName)
 
     def __str__(self):
 	out = "0x%08x: %10s 0x%08x" % (self.address, mips.opStrings[self.opCode], self.dstAddress)
@@ -650,7 +652,8 @@ class Jalr(BranchInstruction):
     def fixup(self):
 	self.isBranch = True
 	self.sources = Set([ self.rs ])
-	self.destination = Set([ self.rd ])
+	self.destinations = Set([ self.rd ])
+
     def __str__(self):
 	out = "0x%08x: %10s %s, %s" % (self.address, mips.opStrings[self.opCode],
 				       mips.registerNames[ self.rd ], mips.registerNames[ self.rs ])
