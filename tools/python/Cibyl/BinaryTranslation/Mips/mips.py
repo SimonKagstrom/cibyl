@@ -171,6 +171,7 @@ R_SP = namesToRegisters["sp"]
 R_RA = namesToRegisters["ra"]
 R_HI = namesToRegisters["hi"]
 R_LO = namesToRegisters["lo"]
+R_K1 = namesToRegisters["k1"]
 R_CPC= namesToRegisters["cpc"]
 
 N_REGS = namesToRegisters["cm8"]
