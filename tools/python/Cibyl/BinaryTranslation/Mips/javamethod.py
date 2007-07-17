@@ -28,6 +28,8 @@ class JavaMethod(CodeBlock):
 	self.controller = controller
         self.labels = {}
         self.instructions = []
+        self.exceptionHandlers = []
+
         for fn in self.functions:
             for key, item in fn.labels.iteritems():
                 assert(not self.labels.has_key(key))
@@ -118,6 +120,10 @@ class JavaMethod(CodeBlock):
     def invoke(self, address):
         "Invoke this method (e.g., through a JAL instruction)"
         self.bc.invokestatic( "CompiledProgram/" + self.getJavaMethodName() )
+
+    def addExceptionHandler(self, startAddress, endAddress):
+        self.exceptionHandlers.append( (startAddress, endAddress) )
+        return "EXH_%x_to_%x" % (startAddress, endAddress)
 
     def getRegistersToPass(self):
 	"Get the registers to pass to this function"
@@ -254,6 +260,27 @@ class JavaMethod(CodeBlock):
 	if lookuptab:
 	    self.controller.emit("__CIBYL_local_jumptab:")
 	    self.bc.lookupswitch(lookuptab, "__CIBYL_function_return")
+
+        # Handle try/catch pairs
+        for eh in self.exceptionHandlers:
+            start, end = eh
+            self.bc.emit("EXH_%x_to_%x:" % (start, end))
+            # Register the object
+            self.bc.invokestatic("CRunTime/registerObject(Ljava/lang/Object;)I")
+
+            self.rh.pushRegister(mips.R_K1)
+            self.bc.emit("swap")
+            # Compile the JALR instruction
+            self.rh.pushRegister(mips.R_SP)
+            self.bc.emit("swap")
+            self.bc.pushConst(0)
+            self.bc.pushConst(0)
+            self.bc.pushConst(0)
+            self.bc.invokestatic("CompiledProgram/__CIBYL_global_jumptab(IIIIII)I")
+            self.bc.pop()
+            jalr = instruction.Jalr(self.controller, 0, mips.OP_JALR, 0, 0,mips.R_K1,0, 0)
+            jalr.compile()
+            self.bc.goto( end )
 
 	# Emit the return statement
 	self.controller.emit("__CIBYL_function_return:")
