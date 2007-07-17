@@ -1,4 +1,10 @@
 Cibyl (11)
+	* Implemented catching of exceptions in C with the
+	NOPH_try(handler) / NOPH_catch() pair
+
+	* Fixed bug in jalr and jal where the destination registers were
+	wrong
+
 	* Switched to manage the project at google code,
 	http://cibyl.googlecode.com, the subversion repository is at
 	http://cibyl.googlecode.com/svn/
