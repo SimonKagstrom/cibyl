@@ -72,7 +72,7 @@ class FloatToInt(BuiltinBase):
         self.bc.emit("f2i")
         self.rh.popToRegister(mips.R_V0)
 
-def match(controller, name):
+def match(controller, instruction, name):
     names = {
         # Arithmetic (1 operand)
         "__negsf2" : [Arithmetic1, "fneg"],
@@ -94,7 +94,7 @@ def match(controller, name):
         }
     try:
         cur = names[name]
-        return cur[0](controller, name, cur[1])
+        return cur[0](controller, instruction, name, cur[1])
     except:
         return None
 
