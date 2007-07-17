@@ -12,9 +12,11 @@
 from Cibyl.BinaryTranslation import bytecode, register
 
 class BuiltinBase:
-    def __init__(self, controller, name, operation):
+    def __init__(self, controller, instruction, name, operation):
 	self.name = name
 	self.operation = operation
+        self.instruction = instruction
+        self.controller = controller
 	self.bc = bytecode.ByteCodeGenerator(controller)
 	self.rh = register.RegisterHandler(controller, self.bc)
 
