@@ -37,3 +37,12 @@ void crt0_run_global_destructors(void)
 {
   run_list(&__dtors_begin, &__dtors_end);
 }
+
+/* Dummy functions - handled by builtins always */
+void __NOPH_try(void (*callback)(NOPH_Exception_t exception))
+{
+}
+
+void __NOPH_catch(void)
+{
+}
