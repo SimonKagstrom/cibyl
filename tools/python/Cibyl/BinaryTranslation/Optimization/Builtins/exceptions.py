@@ -41,7 +41,7 @@ class Catch(ExceptionBuiltinBase):
         startLabel = self.controller.getLabel(start)
         endLabel = self.controller.getLabel(end)
 
-        self.bc.emit(".catch java/lang/Exception from %s to %s using %s" % (startLabel, endLabel, handlerLabel) )
+        self.bc.emit(".catch all from %s to %s using %s" % (startLabel, endLabel, handlerLabel) )
 
 def match(controller, instruction, name):
     names = {

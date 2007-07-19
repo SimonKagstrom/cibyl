@@ -278,8 +278,6 @@ class JavaMethod(CodeBlock):
             self.bc.pushConst(0)
             self.bc.invokestatic("CompiledProgram/__CIBYL_global_jumptab(IIIIII)I")
             self.bc.pop()
-            jalr = instruction.Jalr(self.controller, 0, mips.OP_JALR, 0, 0,mips.R_K1,0, 0)
-            jalr.compile()
             self.bc.goto( end )
 
 	# Emit the return statement
