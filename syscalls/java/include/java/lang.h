@@ -38,6 +38,8 @@ static inline int64_t NOPH_System_currentTimeMillis()
 void NOPH_Thread_sleep(int ms); /* Throws */
 
 void NOPH_Throwable_printStackTrace(NOPH_Throwable_t th);
+NOPH_String_t NOPH_Throwable_getMessage(NOPH_Throwable_t th);
+NOPH_String_t NOPH_Throwable_toString(NOPH_Throwable_t th);
 
 #if defined(__cplusplus)
 }
