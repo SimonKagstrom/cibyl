@@ -23,9 +23,11 @@ static void handler(NOPH_Exception_t exception)
 {
   caught_exception++;
   if (exception > 100000)
-    FAIL("Exception number: %x", exception);
+    FAIL("Exception object: %d", exception);
   else
-    PASS("Exception number: %x", exception);
+    PASS("Exception object: %d", exception);
+
+  NOPH_delete(exception);
 }
 
 void exception_test_1(void)
