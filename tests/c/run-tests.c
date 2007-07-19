@@ -72,8 +72,8 @@ void test_run_all_tests(int run_fileops)
   if (run_fileops)
     {
       /* Delay these to avoid having to allow file access too often */
-      file_operations_run();
       exceptions_run();
+      file_operations_run();
       relocation_run();
     }
 
