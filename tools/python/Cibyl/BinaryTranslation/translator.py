@@ -297,6 +297,12 @@ class Controller(codeblock.CodeBlock):
 	    self.emit(".source CompiledProgram.j")
 	self.emit(".class public %s" % (self.outclass) )
 	self.emit(".super java/lang/Object")
+        # Initializer
+        self.emit(".method public <init>()V")
+        self.emit("aload_0")
+        self.emit("invokenonvirtual java/lang/Object.<init>()V")
+        self.emit("return")
+        self.emit(".end method")
 
 	for i in range(0,3):
 	    self.emit('')
