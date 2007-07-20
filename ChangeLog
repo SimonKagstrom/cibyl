@@ -1,6 +1,6 @@
 Cibyl (11)
 	* Implemented catching of exceptions in C with the
-	NOPH_try(handler) / NOPH_catch() pair
+	NOPH_try(handler, arg) / NOPH_catch() pair
 
 	* Fixed bug in jalr and jal where the destination registers were
 	wrong
