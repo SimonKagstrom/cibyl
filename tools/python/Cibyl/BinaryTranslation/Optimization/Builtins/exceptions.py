@@ -20,14 +20,16 @@ tryInstruction = None
 class ExceptionBuiltinBase(BuiltinBase):
     def __init__(self, controller, instruction, name, operation):
         BuiltinBase.__init__(self, controller, instruction, name, operation)
-        self.instruction.destinations = Set([mips.R_K1])
+        self.instruction.destinations = Set([mips.R_EAR, mips.R_ECB])
         self.controller.addLabel(self.instruction.address)
 
 class Try(ExceptionBuiltinBase):
     def compile(self):
         global tryInstruction
         self.rh.pushRegister(mips.R_A0)
-        self.rh.popToRegister(mips.R_K1)
+        self.rh.popToRegister(mips.R_ECB)
+        self.rh.pushRegister(mips.R_A1)
+        self.rh.popToRegister(mips.R_EAR)
         tryInstruction = self
 
 class Catch(ExceptionBuiltinBase):
