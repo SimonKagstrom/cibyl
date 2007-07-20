@@ -39,7 +39,7 @@ void crt0_run_global_destructors(void)
 }
 
 /* Dummy functions - handled by builtins always */
-void __NOPH_try(void (*callback)(NOPH_Exception_t exception))
+void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), void *arg)
 {
 }
 
