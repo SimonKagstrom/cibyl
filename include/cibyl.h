@@ -27,7 +27,7 @@ typedef int bool_t;
 /* Special object! */
 typedef int NOPH_Exception_t;
 
-/** Include the generated syscall definitions
+/* Include the generated syscall definitions
  *
  * Thanks to Ian Lance Taylor for the use of .set push / .set pop.
  */
@@ -39,11 +39,27 @@ register NOPH_Exception_t NOPH_exception asm("$26");
 
 extern void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), void *arg);
 
+/**
+ * Begin a block of catching Java exceptions. Java exceptions will be
+ * catched within the block after NOPH_try (ended by NOPH_catch). The
+ * exception handling works as in Java, so the handler will return to
+ * the statement after the NOPH_catch() statement. The block must be
+ * closed by a @a NOPH_catch.
+ *
+ * @param callback the callback to call if an exception occurs in the block
+ * @param arg the argument to pass to the callback
+ */
 #define NOPH_try(callback, arg) do { \
   asm volatile("");                  \
   __NOPH_try(callback, arg);         \
 } while(0); do
 
+/**
+ * End a Java exception-catching block. Must be preceeded by a @a
+ * NOPH_try
+ *
+ * @see NOPH_try
+ */
 extern void __NOPH_catch(void);
 #define NOPH_catch() while(0); do {  \
   asm volatile("");                  \
