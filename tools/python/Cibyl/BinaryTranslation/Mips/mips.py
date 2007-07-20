@@ -130,6 +130,8 @@ registerNames = {
     41 : "cm6",
     42 : "cm7",
     43 : "cm8",
+    44 : "ecb", # Exception callback address
+    45 : "ear", # Exception argument
 }
 
 # An inversion of the above
@@ -173,8 +175,10 @@ R_HI = namesToRegisters["hi"]
 R_LO = namesToRegisters["lo"]
 R_K1 = namesToRegisters["k1"]
 R_CPC= namesToRegisters["cpc"]
+R_ECB= namesToRegisters["ecb"] # Exception callback address
+R_EAR= namesToRegisters["ear"] # Exception argument
 
-N_REGS = namesToRegisters["cm8"]
+N_REGS = len(namesToRegisters)
 
 ifmtZeroExtend = [
     OP_ANDI,
