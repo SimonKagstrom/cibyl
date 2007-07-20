@@ -52,9 +52,10 @@ reg2local = {
     mips.namesToRegisters["cm7"]: 36,
     mips.namesToRegisters["cm8"]: 37,
     mips.namesToRegisters["gp"] : 38,
-    mips.namesToRegisters["k1"] : 39,
-    mips.namesToRegisters["hi"] : 40,
-    mips.namesToRegisters["lo"] : 41,
+    mips.namesToRegisters["hi"] : 39,
+    mips.namesToRegisters["lo"] : 40,
+    mips.namesToRegisters["ecb"] : 41,
+    mips.namesToRegisters["ear"] : 42,
 }
 
 staticRegs = {
