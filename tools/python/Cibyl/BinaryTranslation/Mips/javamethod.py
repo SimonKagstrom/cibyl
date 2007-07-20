@@ -268,12 +268,12 @@ class JavaMethod(CodeBlock):
             # Register the object
             self.bc.invokestatic("CRunTime/registerObject(Ljava/lang/Object;)I")
 
-            self.rh.pushRegister(mips.R_K1)
+            self.rh.pushRegister(mips.R_ECB)
             self.bc.emit("swap")
             # Compile the JALR instruction
             self.rh.pushRegister(mips.R_SP)
             self.bc.emit("swap")
-            self.bc.pushConst(0)
+            self.rh.pushRegister(mips.R_EAR)
             self.bc.pushConst(0)
             self.bc.pushConst(0)
             self.bc.invokestatic("CompiledProgram/__CIBYL_global_jumptab(IIIIII)I")
