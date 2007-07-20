@@ -19,8 +19,13 @@ int exceptions_b;
 int exceptions_c;
 int caught_exception;
 
-static void handler(NOPH_Exception_t exception)
+static void handler(NOPH_Exception_t exception, void *arg)
 {
+  if ( (int)arg < 1 || (int)arg > 7)
+    FAIL("Exception argument: %x", (int)arg);
+  else
+    PASS("Exception argument: %x", (int)arg);
+
   caught_exception++;
   if (exception > 100000)
     FAIL("Exception object: %d", exception);
@@ -38,7 +43,7 @@ void exception_test_1(void)
   exceptions_b = 10;
   caught_exception = 0;
 
-  NOPH_try(handler)
+  NOPH_try(handler, (void*)3)
     {
       for (i = 10; i >= 0; i--)
         exceptions_c = exceptions_b / i;
@@ -61,7 +66,7 @@ void exception_test_2(void)
   exceptions_b = 10;
   caught_exception = 0;
 
-  NOPH_try(handler)
+  NOPH_try(handler, (void*)4)
     {
       int w = NOPH_GameCanvas_getWidth(-1); /* Should throw an exception */
       exceptions_b = w;
@@ -91,7 +96,7 @@ void exception_div_by_zero(void)
 
 void exception_div_by_zero_catch(void)
 {
-  NOPH_try(handler)
+  NOPH_try(handler, (void*)7)
     {
       exception_div_by_zero();
     } NOPH_catch();
@@ -101,7 +106,7 @@ void exception_test_stacked(void)
 {
   caught_exception = 0;
 
-  NOPH_try(handler)
+  NOPH_try(handler, (void*)5)
     {
       exception_div_by_zero_catch();
       /* Should be OK - we should get here */
@@ -125,12 +130,12 @@ void exception_test_multiple(void)
 {
   caught_exception = 0;
 
-  NOPH_try(handler)
+  NOPH_try(handler, (void*)1)
     {
       exception_div_by_zero();
     } NOPH_catch();
 
-  NOPH_try(handler)
+  NOPH_try(handler, (void*)2)
     {
       int w = NOPH_GameCanvas_getWidth(-1); /* Should throw an exception */
       exceptions_b = w;
