@@ -37,11 +37,11 @@ typedef int NOPH_Exception_t;
 register NOPH_Exception_t NOPH_exception asm("$26");
 
 
-extern void __NOPH_try(void (*callback)(NOPH_Exception_t exception));
+extern void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), void *arg);
 
-#define NOPH_try(callback) do { \
-  asm volatile("");             \
-  __NOPH_try(callback);         \
+#define NOPH_try(callback, arg) do { \
+  asm volatile("");                  \
+  __NOPH_try(callback, arg);         \
 } while(0); do
 
 extern void __NOPH_catch(void);
