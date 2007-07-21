@@ -52,6 +52,18 @@ class ByteCodeGenerator:
     def dup(self):
 	self.emit('dup')
 
+    def dup2(self):
+	self.emit('dup2')
+
+    def l2i(self):
+	self.emit('l2i')
+
+    def i2l(self):
+	self.emit('i2l')
+
+    def lushr(self):
+	self.emit('lushr')
+
     def ldc(self, s):
 	self.emit('ldc "%s"' % (s))
 
@@ -84,6 +96,33 @@ class ByteCodeGenerator:
     def iinc(self, reg, val):
 	"Increment reg by 1 (optimize add rt, rt, 1)"
 	self.emit('iinc %d %d' % (self.regToLocalVariable(reg), val))
+
+    def lmul(self):
+        self.emit("lmul")
+
+    def imul(self):
+        self.emit("imul")
+
+    def ldiv(self):
+        self.emit("ldiv")
+
+    def idiv(self):
+        self.emit("idiv")
+
+    def lrem(self):
+        self.emit("lrem")
+
+    def irem(self):
+        self.emit("irem")
+
+    def nop(self):
+        self.emit("nop")
+
+    def ixor(self):
+        self.emit("ixor")
+
+    def ior(self):
+        self.emit("ior")
 
     def pop(self):
 	self.emit('pop')
