@@ -32,11 +32,33 @@ static int relocation_d(void)
   return 'd';
 }
 
+static int relocation_e(void)
+{
+  return 'e';
+}
+
+int relocation_f(void)
+{
+  return 'f';
+}
+
+typedef int (*fn_t)(void);
+
+const fn_t relocation_fns[] =
+{
+  relocation_e,
+  relocation_f,
+};
+
 int (*relocation_fn)(void) = relocation_a;
 
 static int (*relocation_fn2)(void);
 static int (*relocation_fn3)(void) = relocation_d;
 
+static int trampoline(fn_t fn)
+{
+  return fn();
+}
 
 /* The run-the-tests function */
 void relocation_run(void)
@@ -81,4 +103,10 @@ void relocation_run(void)
     FAIL("Local fnptr call (reassign): %c", v);
   else
     PASS("Local fnptr call (reassign): %c", v);
+
+
+  if ( (v = trampoline(relocation_fns[1])) != 'f')
+    FAIL("Rodata call: %c", v);
+  else
+    PASS("Rodata call: %c", v);
 }
