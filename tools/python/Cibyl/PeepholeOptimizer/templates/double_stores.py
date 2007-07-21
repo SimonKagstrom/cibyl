@@ -276,6 +276,7 @@ class MatchSwapDup(MatchSwap):
 			  )
 
     def match(self, fn, items):
+        return False # FIXME: Disabled for now - causes problems
 	N = items[0].targetLocal
 	if N == items[1].sourceLocal:
 	    return False
