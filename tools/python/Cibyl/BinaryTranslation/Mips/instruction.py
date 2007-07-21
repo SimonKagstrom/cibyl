@@ -261,7 +261,15 @@ class Multxx(Instruction):
 	function = insnToJavaInstruction[self.opCode][1]
 	self.pushRegister( self.rs )
 	self.pushRegister( self.rt )
-	self.invokestatic("CRunTime/%s(II)V" % function)
+	self.invokestatic("CRunTime/%s(II)J" % function)
+        self.dup2()
+        self.pushConst(32)
+        self.lushr()
+        self.l2i()
+        self.popToRegister( mips.R_HI)
+        self.l2i()
+        self.popToRegister( mips.R_LO)
+
     def compileLowWordResult(self):
 	"Optimized version of mult/div to produce 32-bit results only"
 	op = insnToJavaInstruction[self.opCode][3]
@@ -269,6 +277,7 @@ class Multxx(Instruction):
 	self.pushRegister( self.rt )
 	self.emit(op)
 	self.popToRegister( mips.R_LO )
+
     def compileHighWordResult(self):
 	"Optimized version of mult/div to produce 32-bit results only"
 	op = insnToJavaInstruction[self.opCode][4]
@@ -280,6 +289,7 @@ class Multxx(Instruction):
     def fixup(self):
 	self.destinations = Set([ mips.R_HI, mips.R_LO ])
 	self.sources = Set([self.rs, self.rt])
+
     def run(self):
 	rt = self.optimizer.getRegisterValue(self.rt)
 	rs = self.optimizer.getRegisterValue(self.rt)
@@ -290,6 +300,38 @@ class Multxx(Instruction):
 	self.optimizer.setRegisterValue(mips.R_HI, hi)
 	return False # FIXME!
 
+class Mult(Multxx):
+    def compile(self):
+	self.pushRegister( self.rs )
+        self.i2l()
+	self.pushRegister( self.rt )
+        self.i2l()
+	self.lmul()
+        self.dup2()
+        self.pushConst(32)
+        self.lushr()
+        self.l2i()
+        self.popToRegister( mips.R_HI)
+        self.l2i()
+        self.popToRegister( mips.R_LO)
+
+class Div(Multxx):
+    def compile(self):
+	self.pushRegister( self.rs )
+        self.i2l()
+	self.pushRegister( self.rt )
+        self.i2l()
+	self.ldiv()
+	self.pushRegister( self.rs )
+        self.i2l()
+	self.pushRegister( self.rt )
+        self.i2l()
+	self.lrem()
+        self.l2i()
+        self.popToRegister( mips.R_HI)
+        self.l2i()
+        self.popToRegister( mips.R_LO)
+
 # Special-cases
 class ShiftInstructions(Rfmt):
     """The shifts are a special case of the R-format."""
@@ -297,7 +339,7 @@ class ShiftInstructions(Rfmt):
 	if self.rt == 0 and self.extra == 0 and self.rd == 0:
 	    # This is a nop
 	    if config.debug:
-		self.emit("nop")
+		self.nop()
 	    return
 	self.pushRegister( self.rt )
 	self.pushConst( self.extra )
@@ -861,9 +903,9 @@ insnToJavaInstruction = {
 
     ## Misc other instructions
     mips.OP_BREAK: (Nop, None),
-    mips.OP_MULT : (Multxx,  "mult", "*", "imul"),
+    mips.OP_MULT : (Mult,  "mult", "*", "imul"),
     mips.OP_MULTU: (Multxx, "multu", "*"),
-    mips.OP_DIV  : (Multxx,   "div", "/", "idiv", "irem"),
+    mips.OP_DIV  : (Div,   "div", "/", "idiv", "irem"),
     mips.OP_DIVU : (Multxx,  "divu", "/"),
     mips.OP_MFLO : (Mfxx, None, mips.R_LO),
     mips.OP_MFHI : (Mfxx, None, mips.R_HI),
