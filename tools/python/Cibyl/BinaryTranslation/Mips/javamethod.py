@@ -117,6 +117,9 @@ class JavaMethod(CodeBlock):
 	else:
 	    return "V"
 
+    def hasMultipleFunctions(self):
+        return len(self.functions) > 1
+
     def invoke(self, address):
         "Invoke this method (e.g., through a JAL instruction)"
         self.bc.invokestatic( "CompiledProgram/" + self.getJavaMethodName() )
