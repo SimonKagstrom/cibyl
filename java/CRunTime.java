@@ -19,12 +19,6 @@ public class CRunTime
   public static int saved_v1; /* Result from functions */
   public static int ra; /* For the debug target */
 
-  /* k0 is used for the exception number variable. This is really just
-   * a preparation for the threading implementation, when this will be
-   * important.
-   */
-  public static int k0;
-
   /* Pointer to the top of the event stack */
   public static int eventStackPointer;
 
@@ -57,7 +51,6 @@ public class CRunTime
 
     CRunTime.memory[1] = CibylConfig.stackSize;
     CRunTime.memory[3] = memorySize - (CibylConfig.eventStackSize - 8);
-    ;    CRunTime.clearException();
   }
 
   public static final void init(DataInputStream codeStream)
@@ -157,18 +150,6 @@ public class CRunTime
       }
 
     return out;
-  }
-
-  public static void clearException()
-  {
-    CRunTime.objectRepository[1] = null;
-    CRunTime.k0 = 0; /* Reset the exception object */
-  }
-
-  public static void setException(Object o)
-  {
-    CRunTime.objectRepository[1] = o;
-    CRunTime.k0 = 1;
   }
 
   public static Object getRegisteredObject(int handle)

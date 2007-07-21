@@ -19,12 +19,12 @@
 #define min(x,y) ( (x) < (y) ? (x) : (y) )
 #define max(x,y) ( (x) > (y) ? (x) : (y) )
 
+extern void exception_handler_fatal(NOPH_Exception_t exception, void *arg);
+
 #define FATAL_ON_EXCEPTION(x) do { \
-  (x); \
-  if (NOPH_exception) { \
-    NOPH_Throwable_printStackTrace(NOPH_exception); \
-    exit(1); \
-  } \
+  NOPH_try(exception_handler_fatal, NULL) { \
+    (x); \
+  } NOPH_catch(); \
 } while(0)
 
 void int_to_charbuf(unsigned int val, char *buf, int digits);

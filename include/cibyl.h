@@ -19,7 +19,7 @@
 
 #ifndef __ASSEMBLER__
 
-# define SECTION(x) __attribute__((section (x)))
+# define NOPH_SECTION(x) __attribute__((section (x)))
 
 /* Convenience */
 typedef int bool_t;
@@ -32,10 +32,6 @@ typedef int NOPH_Exception_t;
  * Thanks to Ian Lance Taylor for the use of .set push / .set pop.
  */
 # include "cibyl-syscall_defs.h"
-
-/** The exception variable is always in register k0 */
-register NOPH_Exception_t NOPH_exception asm("$26");
-
 
 extern void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), void *arg);
 
@@ -55,8 +51,8 @@ extern void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), 
 } while(0); do
 
 /**
- * End a Java exception-catching block. Must be preceeded by a @a
- * NOPH_try
+ * End a Java exception-catching block, catching all exceptions. Must
+ * be preceeded by a @a NOPH_try
  *
  * @see NOPH_try
  */
@@ -66,7 +62,16 @@ extern void __NOPH_catch(void);
   __NOPH_catch();                    \
 } while(0)
 
-
+/**
+ * End a Java exception-catching block, catching a specific class of
+ * exceptions. Must be preceeded by a @a NOPH_try.
+ *
+ * @warning This is not yet implemented and will now to the same as @a
+ * NOPH_catch
+ *
+ * @see NOPH_try, NOPH_catch
+ */
+#define NOPH_catch_exception(exceptionClass) NOPH_catch()
 
 #endif /* __ASSEMBLER__ */
 

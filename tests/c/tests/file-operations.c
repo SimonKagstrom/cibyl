@@ -89,15 +89,25 @@ static int dir_open(const char *dir)
 }
 
 
+static void handler_file_io(NOPH_Exception_t exception, void *arg)
+{
+  *(int*)arg = 1;
+  NOPH_delete(exception);
+}
+
 #define ROOT_PATH "file:///root/"
 void file_operations_run(void)
 {
   const char *root = ROOT_PATH;
   const char *path = ROOT_PATH"/a";
   FILE *fp;
+  int exception = 0;
 
-  fp = NOPH_Connector_openFILEOutputStream(path);
-  if (fp)
+  NOPH_try(handler_file_io, (void*)&exception) {
+    fp = NOPH_Connector_openFILEOutputStream(path);
+    exception = 0;
+  } NOPH_catch();
+  if (fp && exception == 0)
     {
       PASS("Connector write %s\n", path);
 
@@ -108,8 +118,11 @@ void file_operations_run(void)
   else
     FAIL("Connector write %s\n", path);
 
-  fp = NOPH_Connector_openFILEInputStream(path);
-  if (fp)
+  NOPH_try(handler_file_io, (void*)&exception) {
+    fp = NOPH_Connector_openFILEInputStream(path);
+    exception = 0;
+  } NOPH_catch();
+  if (fp && exception == 0)
     {
       PASS("Connector read %s\n", path);
 
@@ -121,8 +134,11 @@ void file_operations_run(void)
     FAIL("Connector read %s\n", path);
 
   /* Open already tested */
-  fp = NOPH_Connector_openFILEInputStream(path);
-  if (fp)
+  NOPH_try(handler_file_io, (void*)&exception) {
+    fp = NOPH_Connector_openFILEInputStream(path);
+    exception = 0;
+  } NOPH_catch();
+  if (fp && exception == 0)
     {
       parse_return_val("Connector read+seek", path,
 		       test_seek_read(fp), 4 );

@@ -9,7 +9,9 @@ Cibyl (11)
 	implementations. It might also improve performance in some cases
 
 	* Implemented catching of exceptions in C with the
-	NOPH_try(handler, arg) / NOPH_catch() pair
+	NOPH_try(handler, arg) / NOPH_catch() pair. The use of
+	NOPH_exception is now deprecated and should be replaced with
+	NOPH_try/NOPH_catch pairs.
 
 	* Fixed bug in jalr and jal where the destination registers were
 	wrong

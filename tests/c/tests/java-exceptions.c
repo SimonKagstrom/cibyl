@@ -153,10 +153,17 @@ void exception_test_multiple(void)
     PASS("code after multiple exceptions: %d != %d", exceptions_b, exceptions_a);
 }
 
+static void handler_file_io(NOPH_Exception_t exception, void *arg)
+{
+  *(int*)arg = 1;
+  NOPH_delete(exception);
+}
+
 /* The run-the-tests function */
 void exceptions_run(void)
 {
   char *s = "http://spel.bth.se/~ska/index.html";
+  int threw_exception;
 
   exceptions_a = 0;
   exceptions_b = 0;
@@ -167,15 +174,21 @@ void exceptions_run(void)
   exception_test_multiple();
   exception_test_stacked();
 
-  NOPH_Connector_openDataInputStream(s);
-  if (NOPH_exception)
+  NOPH_try(handler_file_io, (void*)&threw_exception) {
+    NOPH_Connector_openDataInputStream(s);
+    threw_exception = 0;
+  } NOPH_catch();
+  if (threw_exception)
     FAIL("opening %s should not throw an exception\n", s);
   else
     PASS("opening %s did not throw an exception\n", s);
 
   s = "bttp://spel.bth.se/~ska/index.html"; /* hopefully never a protocol :-) */
-  NOPH_Connector_openDataInputStream(s);
-  if (!NOPH_exception)
+  NOPH_try(handler_file_io, (void*)&threw_exception) {
+    NOPH_Connector_openDataInputStream(s);
+    threw_exception = 0;
+  } NOPH_catch();
+  if (!threw_exception)
     FAIL("opening %s should throw an exception\n", s);
   else
     PASS("opening %s threw an exception\n", s);

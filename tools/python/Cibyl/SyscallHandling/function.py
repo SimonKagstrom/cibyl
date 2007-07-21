@@ -171,7 +171,11 @@ class Function:
 		out += "int %s%s" % (arg.getName(), addend)
 	    else:
 		out += "int __%s%s" % (arg.getName(), addend)
-	out += ") {"
+
+        throws = ""
+	if self.getQualifier() == "/* Throws */":
+            throws = "throws Exception"
+	out += ") %s {" % (throws)
 	if verbose:
 	    out = out + '\n\tSystem.out.println("%s");\n' % (self.getName())
 
@@ -180,10 +184,6 @@ class Function:
 	    if argString != None:
 		out = out + "\n\t\t" + argString
 	out += "\n\n\t\t"
-
-	if self.getQualifier() == "/* Throws */":
-	    out += "try {\n"
-	    out += "\t\tCRunTime.clearException();\n\t\t"
 
 	if self.getReturnType() != "void":
 	    out += "%s ret = (%s)" % (self.getJavaReturnType(), self.getJavaReturnType())
@@ -219,13 +219,6 @@ class Function:
                 out = out + "\t\treturn %s ? 1 : 0;\n" % (retName)
             else:
                 out = out + "\t\treturn %s;\n" % (retName)
-
-	if self.getQualifier() == "/* Throws */":
-	    out += "\t\t}catch(Exception e) {\n"
-	    out += "\t\tCRunTime.setException(e);\n"
-	    if self.getReturnType() != "void":
-		out += "\t\treturn 0;\n"
-	    out += "\t}\n"
 
 	return out + "\t}\n"
 

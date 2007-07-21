@@ -1,23 +1,11 @@
-public static final int NOPH_Connector_openFILEOutputStream(int _name)
+public static final int NOPH_Connector_openFILEOutputStream(int _name) throws Exception
 {
     String name = CRunTime.charPtrToString(_name);
 
-    CRunTime.clearException();
+    DataOutputStream s = Connector.openDataOutputStream(name);
+    CibylFile f = new CibylFile(name);
 
-    try
-      {
-	DataOutputStream s = Connector.openDataOutputStream(name);
-	CibylFile f = new CibylFile(name);
+    f.outputStream = (OutputStream)s;
 
-	f.outputStream = (OutputStream)s;
-
-	return CRunTime.registerObject(f);
-      }
-    catch (Exception e)
-      {
-	System.out.println("Could not open " + name + ", " + e);
-	e.printStackTrace();
-	CRunTime.setException(e);
-	return 0;
-      }
+    return CRunTime.registerObject(f);
 }

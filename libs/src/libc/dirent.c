@@ -16,21 +16,34 @@
 
 #include <javax/microedition/io.h>
 
+static void handler(NOPH_Exception_t exception, void *arg)
+{
+  *(int*)arg = 1;
+  NOPH_delete(exception);
+}
+
 DIR *opendir(const char *dirname)
 {
   NOPH_FileConnection_t fc;
+  int exception = 0;
   DIR *out;
 
-  fc = NOPH_Connector_openFileConnection(dirname);
-  if (NOPH_exception)  /* Exception - cannot open */
+  NOPH_try(handler, &exception) {
+    fc = NOPH_Connector_openFileConnection(dirname);
+    exception = 0;
+  } NOPH_catch();
+  if (exception)  /* Exception - cannot open */
     return NULL;
 
   if ( !(out = calloc(1, sizeof(DIR))) )
     goto clean_1;
 
   out->fc = fc;
-  out->it = NOPH_FileConnection_list(fc);
-  if (NOPH_exception)
+  NOPH_try(handler, &exception) {
+    out->it = NOPH_FileConnection_list(fc);
+    exception = 0;
+  } NOPH_catch();
+  if (exception)  /* Exception - cannot open */
     goto clean_2;
 
   return out;
@@ -56,16 +69,20 @@ int readdir_r(DIR *dir, struct dirent *entry,
               struct dirent **result)
 {
   NOPH_Object_t cur;
+  int exception = 0;
 
   if (!NOPH_Enumeration_hasMoreElements(dir->it))
     goto cleanup;
 
-  cur = NOPH_Enumeration_nextElement(dir->it);
-  if (NOPH_exception)
+  NOPH_try(handler, &exception) {
+    cur = NOPH_Enumeration_nextElement(dir->it);
+    exception = 0;
+  } NOPH_catch();
+  if (exception)
     goto cleanup;
 
   /* Write the string to the dirent */
-  NOPH_String_toCharPtr(cur, &entry->d_name, 256);
+  NOPH_String_toCharPtr(cur, entry->d_name, 256);
   NOPH_delete(cur); /* Free the temporary object */
   *result = entry;
 
