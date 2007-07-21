@@ -55,6 +55,10 @@ class Instruction(Base):
 class Ireturn(Instruction, PopInstruction):
     pass
 
+class Dup(Instruction, PopInstruction):
+    def __init__(self):
+	Instruction.__init__(self, "\tdup\n")
+
 class Pop(Instruction, PopInstruction):
     def __init__(self):
 	Instruction.__init__(self, "\tpop\n")
