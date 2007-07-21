@@ -59,8 +59,6 @@ reg2local = {
 }
 
 staticRegs = {
-    mips.namesToRegisters["hi"] : "CRunTime/hi I",
-    mips.namesToRegisters["lo"] : "CRunTime/lo I",
     mips.namesToRegisters["k0"] : "CRunTime/k0 I",
     mips.namesToRegisters["ra"] : "CRunTime/ra I", # For the debug target
 }
