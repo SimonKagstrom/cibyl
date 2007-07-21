@@ -14,7 +14,7 @@ import template
 import re, sys
 import emit
 
-from templates import goto_next_line, const_and_inc, double_stores, double_pop, getstatic_v1_pop, putstatic_getstatic
+from templates import goto_next_line, const_and_inc, double_stores, double_pop, getstatic_v1_pop, putstatic_getstatic, dup_pop
 
 FUNCTION_NAME="([A-Z,a-z,0-9,_,\(,\)]+)"
 
@@ -127,7 +127,8 @@ def matchInstruction(line):
     match = instruction.match(line)
     if match:
 	# Check for arithmetic instructions
-	if match.group(1) in ("imul", "idiv", "iadd", "isub", "ishl", "ishr", "iushr", "ixor", "iand", "ior", "irem", "ineg", "fmul", "fdiv", "fadd", "fsub", "fneg"):
+	if match.group(1) in ("imul", "idiv", "iadd", "isub", "ishl", "ishr", "iushr", "ixor", "iand", "ior",\
+                              "irem", "ineg", "lmul", "ldiv", "lrem" "fmul", "fdiv", "fadd", "fsub", "fneg"):
 	    return ArithmeticInstruction(line)
 	if match.group(1) == "ireturn":
 	    return Ireturn(line)
