@@ -17,8 +17,6 @@ public class CRunTime
   public static int memory[];
 
   public static int saved_v1; /* Result from functions */
-  public static int hi;
-  public static int lo;
   public static int ra; /* For the debug target */
 
   /* k0 is used for the exception number variable. This is really just
@@ -412,14 +410,10 @@ public class CRunTime
     CRunTime.memory[-1] = 0;
   }
 
-  public static final void div(int rsVal, int rtVal)
+  public static final long divu(int rsVal, int rtVal)
   {
-    CRunTime.lo = rsVal / rtVal;
-    CRunTime.hi = rsVal % rtVal;
-  }
+    long low, high;
 
-  public static final void divu(int rsVal, int rtVal)
-  {
     if (rsVal < 0 || rtVal < 0)
       {
 	long a = rsVal;
@@ -428,25 +422,19 @@ public class CRunTime
 	a &= 0xffffffffl;
 	b &= 0xffffffffl;
 
-	CRunTime.lo = (int)(a / b);
-	CRunTime.hi = (int)(a % b);
+        low = a / b;
+        high = a % b;
       }
     else
       {
-	CRunTime.lo = rsVal / rtVal;
-	CRunTime.hi = rsVal % rtVal;
+        low = rsVal / rtVal;
+        high = rsVal % rtVal;
       }
+
+    return (high << 32) | low;
   }
 
-  public static final void mult(int rsVal, int rtVal)
-  {
-    long res = (long)rsVal * (long)rtVal;
-
-    CRunTime.hi = (int)(res >>> 32); /* HI */
-    CRunTime.lo = (int)res; /* LO */
-  }
-
-  public static final void multu(int rsVal, int rtVal)
+  public static final long multu(int rsVal, int rtVal)
   {
     long a = (long)rsVal;
     long b = (long)rtVal;
@@ -454,10 +442,7 @@ public class CRunTime
     a &= 0xffffffffl;
     b &= 0xffffffffl;
 
-    long res = a * b;
-
-    CRunTime.hi = (int)(res >> 32);
-    CRunTime.lo = (int)res;
+    return a * b;
   }
 
   public static final int sltu(int aVal, int bVal)
