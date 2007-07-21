@@ -1,4 +1,13 @@
 Cibyl (11)
+	* The peephole optimizer has been improved to catch a few more
+	cases
+
+	* The mult and div instructions are now always handled inlined and
+	the runtime functions multu and divu return a long result. This
+	allows the MIPS hi/lo registers to be represented as normal Java
+	local registers, which will be needed for future threading
+	implementations. It might also improve performance in some cases
+
 	* Implemented catching of exceptions in C with the
 	NOPH_try(handler, arg) / NOPH_catch() pair
 
