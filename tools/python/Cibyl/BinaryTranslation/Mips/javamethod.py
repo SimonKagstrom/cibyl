@@ -348,12 +348,10 @@ class GlobalJumptabMethod(CodeBlock):
                     out.append(method)
 
         # Lookup relocations in the data segment
-        dataRelocs = self.controller.elf.getRelocationsBySection(".data") + self.controller.elf.getRelocationsBySection(".rodata")
-        dataRelocs = [ rel for rel in dataRelocs if rel.value == self.controller.elf.getSectionAddress(".text") and rel.type in ("R_MIPS_32") ]
         dataSection = self.controller.elf.getSectionContents(".data") + self.controller.elf.getSectionContents(".rodata")
-        for rel in dataRelocs:
+        for i in range(0, len(dataSection), 4):
             # Unpack this word
-	    data = dataSection[rel.offset : rel.offset + 4]
+	    data = dataSection[i : i + 4]
 	    address = struct.unpack(">L", data)[0]
             method = self.controller.lookupJavaMethod(address)
             if method and method not in out:
