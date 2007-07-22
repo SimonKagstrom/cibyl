@@ -1,3 +1,7 @@
+Cibyl (12)
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Cibyl (11)
 	* The size of the operand stack is now dynamically set depending
 	on the instructions used by the recompiled method. An option has
