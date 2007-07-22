@@ -321,6 +321,9 @@ class Mult(Multxx):
         self.l2i()
         self.popToRegister( mips.R_LO)
 
+    def maxOperandStackHeight(self):
+        return 6
+
 class Div(Multxx):
     def compile(self):
 	self.pushRegister( self.rs )
@@ -337,6 +340,9 @@ class Div(Multxx):
         self.popToRegister( mips.R_HI)
         self.l2i()
         self.popToRegister( mips.R_LO)
+
+    def maxOperandStackHeight(self):
+        return 6
 
 # Special-cases
 class ShiftInstructions(Rfmt):
