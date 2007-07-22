@@ -45,6 +45,12 @@ class Catch(ExceptionBuiltinBase):
 
         self.bc.emit(".catch all from %s to %s using %s" % (startLabel, endLabel, handlerLabel) )
 
+    def maxOperandStackHeight(self):
+        # Conservative estimate: Itself requires a height of 6, but it
+        # may be thrown by code which has up to 11 (also pessimistic)
+        # entries on the stack
+        return 18
+
 def match(controller, instruction, name):
     names = {
 	"__NOPH_try": Try,

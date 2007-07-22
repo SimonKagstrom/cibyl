@@ -703,6 +703,8 @@ class Jal(BranchInstruction):
 
     def maxOperandStackHeight(self):
 	otherMethod = self.controller.lookupJavaMethod(self.dstAddress)
+        if self.builtin and otherMethod.name in builtins.alwaysInline or self.getFunction().name in config.inlineBuiltinsFunctions:
+            return self.builtin.maxOperandStackHeight()
         return len(otherMethod.getRegistersToPass()) + 2
 
     def __str__(self):

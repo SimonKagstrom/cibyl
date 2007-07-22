@@ -20,5 +20,8 @@ class BuiltinBase:
 	self.bc = bytecode.ByteCodeGenerator(controller)
 	self.rh = register.RegisterHandler(controller, self.bc)
 
+    def maxOperandStackHeight(self):
+        return 2
+
     def compile(self):
 	pass

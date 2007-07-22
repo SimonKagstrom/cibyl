@@ -27,6 +27,9 @@ class Arithmetic1(BuiltinBase):
         self.bc.invokestatic("java/lang/Float/floatToIntBits(F)I")
         self.rh.popToRegister(mips.R_V0)
 
+    def maxOperandStackHeight(self):
+        return 1
+
 class Arithmetic2(BuiltinBase):
     def compile(self):
         # Convert the source registers
