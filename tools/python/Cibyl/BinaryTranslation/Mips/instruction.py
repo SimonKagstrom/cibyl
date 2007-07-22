@@ -161,6 +161,9 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 	"Run the instruction, returns True if the destination register is valid after the instruction"
 	return False
 
+    def maxOperandStackHeight(self):
+        return 2
+
     def emit(self, what):
 	if what.startswith("L_"):
 	    self.controller.emit("%s" % what)
@@ -286,6 +289,9 @@ class Multxx(Instruction):
 	self.emit(op)
 	self.popToRegister( mips.R_HI )
 
+    def maxOperandStackHeight(self):
+        return 5
+
     def fixup(self):
 	self.destinations = Set([ mips.R_HI, mips.R_LO ])
 	self.sources = Set([self.rs, self.rt])
@@ -345,6 +351,12 @@ class ShiftInstructions(Rfmt):
 	self.pushConst( self.extra )
 	self.emit( insnToJavaInstruction[self.opCode][1] )
 	self.popToRegister( self.rd )
+
+    def maxOperandStackHeight(self):
+	if self.rt == 0 and self.extra == 0 and self.rd == 0:
+            return 0
+        return 2
+
     def __str__(self):
 	return "0x%08x: %10s %s, %s, 0x%08x" % (self.address, mips.opStrings[self.opCode],
 						mips.registerNames[self.rd],
@@ -379,6 +391,7 @@ class Nor(Rfmt):
 	self.pushConst(-1)
 	self.emit("ixor")
 	self.popToRegister( self.rd )
+
     def run(self):
 	dst = (self.optimizer.getRegisterValue(self.rt) | self.optimizer.getRegisterValue(self.rs)) ^ (-1)
 	self.optimizer.setRegisterValue(self.rd, dst)
@@ -389,13 +402,17 @@ class Lui(Ifmt):
     def compile(self):
 	self.pushConst(self.extra << 16)
 	self.popToRegister(self.rt)
+
     def run(self):
 	self.optimizer.setRegisterValue(self.rt, KnownValue(self.extra << 16))
+
+    def maxOperandStackHeight(self):
+        return 1
+
     def __str__(self):
 	return "0x%08x: %10s %s, 0x%08x" % (self.address, mips.opStrings[self.opCode],
 					    mips.registerNames[self.rt],
 					    self.extra)
-
 
 
 class MemoryAccess(Instruction):
@@ -407,6 +424,9 @@ class MemoryAccess(Instruction):
 	if self.delayed:
 	    out += "\\n  `- " + str(self.delayed)
 	return out
+
+    def maxOperandStackHeight(self):
+        return 4
 
 
 class LoadXX(MemoryAccess):
@@ -502,13 +522,19 @@ class Mfxx(Instruction):
     def compile(self):
 	self.pushRegister( insnToJavaInstruction[self.opCode][2] )
 	self.popToRegister( self.rd )
+
     def fixup(self):
 	self.destinations = Set([ self.rd ])
 	self.sources = Set([ insnToJavaInstruction[self.opCode][2] ])
+
     def run(self):
 	src = self.optimizer.getRegisterValue(insnToJavaInstruction[self.opCode][2])
 	self.optimizer.setRegisterValue(self.rd, src)
 	return isinstance(src, KnownValue)
+
+    def maxOperandStackHeight(self):
+        return 1
+
 
 
 class Mtxx(Instruction):
@@ -524,6 +550,9 @@ class Mtxx(Instruction):
 	dst = insnToJavaInstruction[self.opCode][2]
 	self.optimizer.setRegisterValue(dst, src)
 	return isinstance(dst, KnownValue)
+
+    def maxOperandStackHeight(self):
+        return 1
 
 
 class Syscall(Instruction):
@@ -551,6 +580,10 @@ class Syscall(Instruction):
 	    self.optimizer.setRegisterValue(mips.R_V0, UnknownValue())
 	return False
 
+    def maxOperandStackHeight(self):
+	call = self.controller.hasSyscall(self.extra) # Will throw an exception if this is not present
+        return call.getNrArgs() + 1
+
 
 class SyscallRegisterArgument(Instruction):
     """The special encoding for register syscall arguemnts"""
@@ -560,6 +593,9 @@ class SyscallRegisterArgument(Instruction):
 	self.sources = Set([ self.extra ])
     def __str__(self):
 	return "0x%08x: syscall_push_r %s" % (self.address, mips.registerNames[ self.extra ])
+
+    def maxOperandStackHeight(self):
+        return 1
 
     def run(self):
 	return False
@@ -603,6 +639,10 @@ class Jump(BranchInstruction):
     def fixup(self):
 	self.controller.addLabel(self.extra << 2)
 	self.isBranch = True
+
+    def maxOperandStackHeight(self):
+        return 0
+
     def __str__(self):
 	out = "0x%08x: %10s 0x%08x" % (self.address, mips.opStrings[self.opCode], self.extra << 2)
     	if self.delayed:
@@ -661,6 +701,10 @@ class Jal(BranchInstruction):
         # Is this something we should inline?
         self.builtin = builtins.match(self.controller, self, otherName)
 
+    def maxOperandStackHeight(self):
+	otherMethod = self.controller.lookupJavaMethod(self.dstAddress)
+        return len(otherMethod.getRegistersToPass()) + 2
+
     def __str__(self):
 	out = "0x%08x: %10s 0x%08x" % (self.address, mips.opStrings[self.opCode], self.dstAddress)
     	if self.delayed:
@@ -696,6 +740,9 @@ class Jalr(BranchInstruction):
 	self.sources = Set([ self.rs ])
 	self.destinations = Set([ self.rd ])
 
+    def maxOperandStackHeight(self):
+        return 9
+
     def __str__(self):
 	out = "0x%08x: %10s %s, %s" % (self.address, mips.opStrings[self.opCode],
 				       mips.registerNames[ self.rd ], mips.registerNames[ self.rs ])
@@ -723,6 +770,10 @@ class Jr(BranchInstruction):
     def fixup(self):
 	self.isBranch = True
 	self.sources = Set([ self.rs ])
+
+    def maxOperandStackHeight(self):
+        return 1
+
     def __str__(self):
 	out = "0x%08x: %10s %s" % (self.address, mips.opStrings[self.opCode],
 				   mips.registerNames[self.rs])
@@ -741,9 +792,11 @@ class OneRegisterSetInstruction(SetInstruction):
 	self.pushConst( self.extra )
 	self.invokestatic("CRunTime/%s(II)I" % insnToJavaInstruction[self.opCode][1])
 	self.popToRegister(self.rt)
+
     def fixup(self):
 	self.sources = Set([ self.rs ])
 	self.destinations = Set([ self.rt ])
+
     def __str__(self):
 	return "0x%08x: %10s %s, %s, 0x%08x" % (self.address, mips.opStrings[self.opCode],
 						mips.registerNames[self.rt],
@@ -776,9 +829,14 @@ class TwoRegisterSetInstruction(SetInstruction):
 	    self.pushRegister( self.rt )
 	    self.invokestatic("CRunTime/%s(II)I" % insnToJavaInstruction[self.opCode][1])
 	self.popToRegister(self.rd)
+
     def fixup(self):
 	self.sources = Set([ self.rs, self.rt ])
 	self.destinations = Set([ self.rd ])
+
+    def maxOperandStackHeight(self):
+        return 3
+
     def __str__(self):
 	return "0x%08x: %10s %s, %s, %s" % (self.address, mips.opStrings[self.opCode],
 					    mips.registerNames[self.rd],
@@ -803,10 +861,15 @@ class OneRegisterConditionalJump(BranchInstruction):
 	    self.delayed.compile()
 	self.emit("%s %s" % (insnToJavaInstruction[self.opCode][1],
 			     str(self.controller.getLabel(self.address + (self.extra<<2) + 4))) )
+
     def fixup(self):
 	self.controller.addLabel( self.address + (self.extra << 2) + 4 )
 	self.isBranch = True
 	self.sources = Set([ self.rs ])
+
+    def maxOperandStackHeight(self):
+        return 1
+
     def __str__(self):
 	out = "0x%08x: %10s %s, 0x%08x" % (self.address, mips.opStrings[self.opCode],
 					   mips.registerNames[self.rs],
@@ -828,6 +891,7 @@ class TwoRegisterConditionalJump(BranchInstruction):
 	self.controller.addLabel( self.address + (self.extra << 2) + 4 )
 	self.isBranch = True
 	self.sources = Set([ self.rs, self.rt ])
+
     def __str__(self):
 	out = "0x%08x: %10s %s, %s, 0x%08x" % (self.address, mips.opStrings[self.opCode],
 					       mips.registerNames[self.rs],
@@ -842,9 +906,15 @@ class Nop(Instruction):
     """e.g., break"""
     def run(self):
 	return True
+
     def compile(self):
 	if config.debug:
 	    self.emit("nop")
+
+    def maxOperandStackHeight(self):
+        if config.debug:
+            return 1
+        return 0
 
 
 class Unimplemented(Instruction):

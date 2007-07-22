@@ -55,8 +55,9 @@ optimize-colocate-functions.""",
 		  dest="optimize_all")
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                   help="be verbose")
-parser.add_option("--operand-stack-limit", default=25,
-                  help="""Set the limit of the operand stack for generated methods. Default is 10""",
+parser.add_option("--operand-stack-limit", default=None,
+                  help="""Set the limit of the operand stack for generated methods. Default is
+to set the limit according to the actual used stack size (usually between 4 and 11)""",
 		  dest="operandStackLimit", metavar="NR")
 
 
@@ -107,7 +108,8 @@ config.traceFunctionCalls = options.traceFunctionCalls
 config.verbose = options.verbose
 config.outFilename = options.outfile
 
-config.operandStackLimit = int(options.operandStackLimit)
+if options.operandStackLimit:
+    config.operandStackLimit = int(options.operandStackLimit)
 
 if options.traceFunctions:
     config.traceFunctions = options.traceFunctions.split(",")

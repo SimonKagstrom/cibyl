@@ -227,7 +227,20 @@ class JavaMethod(CodeBlock):
 	static class-variable and is assigned after calls.
 	"""
 	self.controller.emit(".method %s static %s" % (self.methodAccess, self.getJavaMethodName()) )
-	self.controller.emit(".limit stack %d" % (config.operandStackLimit))
+        maxOperandStack = 0
+        if not config.operandStackLimit:
+            for insn in self.instructions:
+                operandStackSize = insn.maxOperandStackHeight()
+                if insn.delayed:
+                    operandStackSize = operandStackSize + insn.delayed.maxOperandStackHeight()
+                if insn.prefix:
+                    operandStackSize = operandStackSize + insn.prefix.maxOperandStackHeight()
+
+                if operandStackSize > maxOperandStack:
+                    maxOperandStack = operandStackSize
+            self.controller.emit(".limit stack %d" % (maxOperandStack))
+        else:
+            self.controller.emit(".limit stack %d" % (config.operandStackLimit))
 	self.controller.emit(".limit locals %d" % self.getNumberOfLocals())
 
 	# Generate a register mapping for this method and the registers to pass to the method
@@ -400,7 +413,10 @@ class GlobalJumptabMethod(CodeBlock):
 
     def compile(self):
 	self.controller.emit(".method public static %s" % (self.name))
-	self.controller.emit(".limit stack %d" % (config.operandStackLimit))
+        if not config.operandStackLimit:
+            self.controller.emit(".limit stack 14")
+        else:
+            self.controller.emit(".limit stack %d" % (config.operandStackLimit))
 	self.controller.emit(".limit locals 8")
 
 	# This is the register allocation for the global jumptab

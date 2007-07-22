@@ -1,4 +1,8 @@
 Cibyl (11)
+	* The size of the operand stack is now dynamically set depending
+	on the instructions used by the recompiled method. An option has
+	also been added to allow manual setting of this size.
+
 	* The peephole optimizer has been improved to catch a few more
 	cases
 
