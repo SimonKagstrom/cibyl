@@ -26,6 +26,8 @@ inlineBuiltinsFunctions = []
 
 colocateFunctions = []
 
+operandStackLimit = 10
+
 debug = False
 tracing = False
 traceFunctions = None

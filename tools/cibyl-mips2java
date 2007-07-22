@@ -49,6 +49,17 @@ parser.add_option("-o", "--out-filename",
 parser.add_option("-g", "--debug", action="store_true", default=False,
 		  help="""Turn on generation of debugging information.""",
 		  dest="debug")
+parser.add_option("-O", "--optimize-all", action="store_true", default=False,
+                  help="""Enable all optimizations above except optimize-inline-all-builtins and
+optimize-colocate-functions.""",
+		  dest="optimize_all")
+parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                  help="be verbose")
+parser.add_option("--operand-stack-limit", default=25,
+                  help="""Set the limit of the operand stack for generated methods. Default is 10""",
+		  dest="operandStackLimit", metavar="NR")
+
+
 parser.add_option("--optimize-memory-registers", action="store_true", default=False,
 		  help="""Turn on the memory register optimization. This improves performance of
 frequent accesses to the same register in a basic block.""",
@@ -78,12 +89,6 @@ a function. The number of arguments passed to leaf functions can also
 be reduced. This reduces the size of the executable and can provide
 performance advantages for frequently called short functions.""",
 		  dest="optimize_register_scheduling")
-parser.add_option("-O", "--optimize-all", action="store_true", default=False,
-                  help="""Enable all optimizations above except optimize-inline-all-builtins and
-optimize-colocate-functions.""",
-		  dest="optimize_all")
-parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
-                  help="be verbose")
 
 (options, args) = parser.parse_args()
 if len(args) != 1:
@@ -102,6 +107,8 @@ config.traceFunctionCalls = options.traceFunctionCalls
 config.verbose = options.verbose
 config.outFilename = options.outfile
 
+config.operandStackLimit = int(options.operandStackLimit)
+
 if options.traceFunctions:
     config.traceFunctions = options.traceFunctions.split(",")
 
@@ -115,7 +122,6 @@ if options.optimize_all:
     config.doMultOptimization = True
     config.doMemoryRegisterOptimization = True
     config.doRegisterScheduling = True
-    config.doOptimizeIndirectCalls = True
 
 # Read it all
 controller = Controller(infile, syscallDirectories)

@@ -227,7 +227,7 @@ class JavaMethod(CodeBlock):
 	static class-variable and is assigned after calls.
 	"""
 	self.controller.emit(".method %s static %s" % (self.methodAccess, self.getJavaMethodName()) )
-	self.controller.emit(".limit stack 100")
+	self.controller.emit(".limit stack %d" % (config.operandStackLimit))
 	self.controller.emit(".limit locals %d" % self.getNumberOfLocals())
 
 	# Generate a register mapping for this method and the registers to pass to the method
@@ -400,7 +400,7 @@ class GlobalJumptabMethod(CodeBlock):
 
     def compile(self):
 	self.controller.emit(".method public static %s" % (self.name))
-	self.controller.emit(".limit stack 100")
+	self.controller.emit(".limit stack %d" % (config.operandStackLimit))
 	self.controller.emit(".limit locals 8")
 
 	# This is the register allocation for the global jumptab
