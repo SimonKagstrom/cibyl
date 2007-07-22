@@ -60,7 +60,7 @@ Cibyl (11)
 	* Bug fix in the syscall definitions: Clobber v0 (thanks to Ehud
 	Shabtai for reporting this!)
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sun Jul 22 13:40:07 CEST 2007
 
 Cibyl (10)
 	* Fixed build dependency in the s9 example so that it builds
