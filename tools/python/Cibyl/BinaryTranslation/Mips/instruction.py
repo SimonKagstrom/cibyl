@@ -108,6 +108,11 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
     def setJavaMethod(self, method):
 	"Define which java method this instruction is in"
 	self.javaMethod = method
+        if self.prefix:
+            self.prefix.setJavaMethod(method)
+        if self.delayed:
+            self.delayed.setJavaMethod(method)
+
 
     def getJavaMethod(self):
 	"Return which java method this instruction is in"
@@ -497,7 +502,7 @@ class Lbu(LoadXX):
 class Lw(LoadXX):
     """Read a word from memory."""
     def compile(self):
-	if self.rt == mips.R_RA:
+	if self.rt == mips.R_RA and not self.getJavaMethod().hasMultipleFunctions():
 	    if not config.debug:
 		if config.verbose: print "Skipping lw to RA", self
 		return None
@@ -511,7 +516,7 @@ class Lw(LoadXX):
 class Sw(StoreXX):
     """Store a word to memory."""
     def compile(self):
-	if self.rt == mips.R_RA:
+	if self.rt == mips.R_RA and not self.getJavaMethod().hasMultipleFunctions():
 	    if not config.debug:
 		if config.verbose: print "Skipping sw of RA", self
 		return None
@@ -672,35 +677,40 @@ class Jal(BranchInstruction):
 	if self.delayed:
 	    self.delayed.compile()
 	otherMethod = self.controller.lookupJavaMethod(self.dstAddress)
+        ownMethod = self.getJavaMethod()
+        otherFunction = otherMethod.getFunction(self.dstAddress)
+        ownFunction = self.getFunction()
 
         if self.builtin and otherMethod.name in builtins.alwaysInline or self.getFunction().name in config.inlineBuiltinsFunctions:
             return self.builtin.compile()
 
-	for reg in otherMethod.getRegistersToPass():
-            if reg == mips.R_FNA:
-                self.pushConst(self.dstAddress)
-            else:
-                self.pushRegister(reg)
-	# Write RA if debug is enabled
-	if config.debug:
-	    self.pushConst(self.address + 8) # Skip the delayed instruction
+        if otherMethod == ownMethod and ownMethod.hasMultipleFunctions():
+            idx = ownMethod.addReturnAddress(self.address + 8)
+            self.pushConst( idx )
 	    self.popToRegister(mips.R_RA)
 
-        otherMethod.invoke(self.dstAddress)
-	if otherMethod.clobbersReg(mips.R_V1):
-	    self.getstatic("CRunTime/saved_v1 I")
-	    self.popToRegister(mips.R_V1)
+            self.goto(self.dstAddress)
+        else:
+            for reg in otherMethod.getRegistersToPass():
+                if reg == mips.R_FNA:
+                    self.pushConst( otherFunction.getIndex() )
+                else:
+                    self.pushRegister(reg)
+            # Write RA if debug is enabled
+            if config.debug:
+                self.pushConst(self.address + 8) # Skip the delayed instruction
+                self.popToRegister(mips.R_RA)
 
-	if otherMethod.getJavaReturnType() == "I":
-	    self.popToRegister(mips.R_V0)
+            otherMethod.invoke(self.dstAddress)
+            if otherMethod.clobbersReg(mips.R_V1):
+                self.getstatic("CRunTime/saved_v1 I")
+                self.popToRegister(mips.R_V1)
 
-    def compileJump(self):
-        "Compile for the case where the destination function is in the same java method"
-	if self.delayed:
-	    self.delayed.compile()
-        self.goto(self.dstAddress)
+            if otherMethod.getJavaReturnType() == "I":
+                self.popToRegister(mips.R_V0)
 
     def fixup(self):
+        self.controller.addLabel(self.address + 8, inJumpTab = False)
 	self.controller.addLabel(self.dstAddress, inJumpTab = True)
 	self.isBranch = True
 	self.destinations = Set([ mips.R_RA ])
@@ -763,11 +773,14 @@ class Jalr(BranchInstruction):
 
 class Jr(BranchInstruction):
     """Jump to a register destination."""
-    def compile(self):
+    def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
+	BranchInstruction.__init__(self, controller, address, format, opCode, rd, rs, rt, extra)
 	if self.rs == mips.R_RA:
 	    # Mark this as a return instruction
 	    self.isReturnInstruction = True
 
+    def compile(self):
+	if self.rs == mips.R_RA:
 	    if self.delayed:
 		self.delayed.compile()
 	    self.goto("__CIBYL_function_return")
