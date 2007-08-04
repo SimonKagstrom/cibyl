@@ -60,6 +60,13 @@ class Function(CodeBlock):
 		out.append(bb)
 	return out
 
+    def setJavaMethod(self, method):
+	"Define which java method this instruction is in"
+	self.javaMethod = method
+
+    def getJavaMethod(self):
+	"Return which java method this instruction is in"
+	return self.javaMethod
 
     def compile(self):
 	"Compile this basic block to Java assembly"
