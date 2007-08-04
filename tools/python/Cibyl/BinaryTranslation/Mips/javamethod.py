@@ -31,6 +31,7 @@ class JavaMethod(CodeBlock):
         self.exceptionHandlers = []
 
         for fn in self.functions:
+            fn.setJavaMethod(self)
             for key, item in fn.labels.iteritems():
                 assert(not self.labels.has_key(key))
                 self.labels[key] = item
@@ -91,6 +92,9 @@ class JavaMethod(CodeBlock):
 	if mips.R_SP in self.argumentRegisters:
 	    self.argumentRegisters.remove(mips.R_SP)
 	    self.argumentRegisters = [mips.R_SP] + self.argumentRegisters
+        # And add the function address argument last if we have multiple functions / method
+        if self.hasMultipleFunctions():
+            self.argumentRegisters = self.argumentRegisters + [mips.R_FNA]
 
 	# Perform skip stack store optimization. We actually always do
 	# this since we that way avoid zeroing registers unecessary
@@ -131,7 +135,10 @@ class JavaMethod(CodeBlock):
     def getRegistersToPass(self):
 	"Get the registers to pass to this function"
 	if not config.doRegisterScheduling:
-	    return [mips.R_SP, mips.R_A0, mips.R_A1, mips.R_A2, mips.R_A3]
+            out = [mips.R_SP, mips.R_A0, mips.R_A1, mips.R_A2, mips.R_A3]
+            if self.hasMultipleFunctions():
+                return out + [mips.R_FNA]
+	    return out
 	return self.argumentRegisters
 
     def doSkipStackStoreOptimization(self):
@@ -267,6 +274,13 @@ class JavaMethod(CodeBlock):
 	    self.bc.invokestatic("CRunTime/emitFunctionEnterTrace(Ljava/lang/String;)V")
 
 	self.controller.emit("METHOD_START:")
+        if self.hasMultipleFunctions():
+            switchTuples = []
+            for fn in self.functions:
+                switchTuples.append( (fn.address, "L_%x" % fn.address) )
+            self.rh.pushRegister(mips.R_FNA)
+            self.bc.lookupswitch(switchTuples, "__CIBYL_function_return")
+
 	# Compile this function
         for fn in self.functions:
             fn.compile()
@@ -316,13 +330,13 @@ class JavaMethod(CodeBlock):
 
 
 class GlobalJumptabMethod(CodeBlock):
-    def __init__(self, controller, methods):
+    def __init__(self, controller, functions):
 	self.controller = controller
 	self.name = "__CIBYL_global_jumptab(IIIIII)I"
 
 	# Put all methods which have lo16/hi16 or 32-bit relocations or are within
         # the constructors/destructors sections
-        self.methods = self.cleanupMethods(methods)
+        self.functions = self.cleanupMethods(functions)
 
 	self.bc = bytecode.ByteCodeGenerator(self.controller)
 	self.rh = register.RegisterHandler(self.controller, self.bc)
@@ -403,8 +417,8 @@ class GlobalJumptabMethod(CodeBlock):
 
     def generateLookupTable(self):
 	out = []
-	for method in self.methods:
-	    cur = (method.address, "lab_" + method.name)
+	for fn in self.functions:
+	    cur = (fn.address, "lab_" + fn.name)
 	    out.append(cur)
 	return out
 
@@ -439,11 +453,15 @@ class GlobalJumptabMethod(CodeBlock):
 	lookuptab = self.generateLookupTable()
 	self.bc.lookupswitch(lookuptab, "error")
 
-	for method in self.methods:
-	    self.controller.emit("lab_" + method.name + ":")
+	for fn in self.functions:
+            method = fn.getJavaMethod()
+	    self.controller.emit("lab_" + fn.name + ":")
 	    for r in method.getRegistersToPass():
-		self.bc.iload( reg2local[r])
-            # Invoke the method. FIXME: This must be fixed to handle multi-function methods
+                if r == mips.R_FNA:
+                    self.bc.pushConst(fn.address)
+                else:
+                    self.bc.iload( reg2local[r] )
+            # Invoke the method.
             method.invoke(0)
 	    if method.getJavaReturnType() == "I":
 		self.bc.istore(7)
