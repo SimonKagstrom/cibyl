@@ -1,4 +1,7 @@
 Cibyl (12)
+	* Fixed a bug where the first basic block of a function was by
+	mistake made empty (this nullified the skip-stack-stores
+	optimization). The bug fix will make generated code slightly smaller.
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
 
