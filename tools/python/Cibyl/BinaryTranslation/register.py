@@ -10,6 +10,7 @@
 ##
 ######################################################################
 from Cibyl.BinaryTranslation.Mips import mips
+from Cibyl import config
 from sets import Set
 
 reg2local = {
@@ -63,6 +64,10 @@ staticRegs = {
 }
 
 def regIsStatic(reg):
+    # Special-case for multi-function-methods (need to store RA for
+    # internal consumption)
+    if not config.debug and reg == mips.R_RA:
+        return False
     return staticRegs.has_key(reg)
 
 def sortedDictValues(indict):
@@ -81,8 +86,9 @@ def sortedDictValues(indict):
 	indict.pop(k)
     return out
 
-def generateRegisterMapping(usedRegisters, argumentRegisters, registerUseCount):
+def generateRegisterMapping(functions, usedRegisters, argumentRegisters, registerUseCount):
     out = {}
+    mapping = {}
     count = 0
 
     usedRegisters = Set(usedRegisters)
@@ -91,17 +97,33 @@ def generateRegisterMapping(usedRegisters, argumentRegisters, registerUseCount):
 
     # First assign the arguments
     for reg in argumentRegisters:
-	out[ reg ] = count
+	mapping[ reg ] = count
 	count = count + 1
 	usedRegisters.discard(reg)
 
-    # Then the other registers
+    # Discard some registers
     for reg in sortedDictValues(registerUseCount):
-	if reg in usedRegisters and not reg == mips.R_ZERO and not regIsStatic(reg):
-	    out[reg] = count
-	    count = count + 1
+        if reg == mips.R_ZERO or regIsStatic(reg):
+            usedRegisters.discard(reg)
 
-    return out
+    # Then the other registers, sans caller saved registers
+    for reg in sortedDictValues(registerUseCount):
+	if reg in usedRegisters and not reg in mips.callerSavedRegisters:
+	    mapping[reg] = count
+	    count = count + 1
+            usedRegisters.discard(reg)
+
+    # Left with the caller-saved registers. We will now go through the
+    # functions and assign the callersaved registers to different java
+    # local variables (to allow local calling)
+    for fn in functions:
+        cur = mapping.copy()
+        for reg in sortedDictValues(registerUseCount):
+            if reg in usedRegisters:
+                cur[reg] = count
+                count = count + 1
+        out[fn.address] = cur
+    return out, count+1
 
 
 class RegisterHandler:
