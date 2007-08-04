@@ -119,6 +119,8 @@ if options.inlineBuiltinFunctions:
 
 if options.colocateFunctions:
     config.colocateFunctions = options.colocateFunctions.split(",")
+    # Depends on register scheduling to pass the function address
+    config.doRegisterScheduling = True
 
 if options.optimize_all:
     config.doMultOptimization = True
