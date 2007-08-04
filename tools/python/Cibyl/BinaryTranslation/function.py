@@ -27,7 +27,7 @@ class Function(CodeBlock):
 	tmp = []
 	for insn in self.instructions:
 	    tmp.append(insn)
-	    if insn.isBranch or insn.isBranchDestination:
+	    if insn.isBranch or insn.isBranchDestination and not insn.address == self.address:
 		# Remove the last instruction if this is a branch -
 		# but not for the function entry point. The reason is
 		# that some functions might start with a branch
