@@ -677,7 +677,10 @@ class Jal(BranchInstruction):
             return self.builtin.compile()
 
 	for reg in otherMethod.getRegistersToPass():
-	    self.pushRegister(reg)
+            if reg == mips.R_FNA:
+                self.pushConst(self.dstAddress)
+            else:
+                self.pushRegister(reg)
 	# Write RA if debug is enabled
 	if config.debug:
 	    self.pushConst(self.address + 8) # Skip the delayed instruction
