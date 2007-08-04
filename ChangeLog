@@ -1,4 +1,7 @@
 Cibyl (12)
+	* Moved the stackStore optimization to function.py (from
+ 	javamethod.py) since it really works on functions and not methods
+
 	* Fixed a bug where the first basic block of a function was by
 	mistake made empty (this nullified the skip-stack-stores
 	optimization). The bug fix will make generated code slightly smaller.

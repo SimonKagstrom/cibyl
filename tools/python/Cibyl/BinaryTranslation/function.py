@@ -12,6 +12,9 @@
 from sets import Set
 from Cibyl.BinaryTranslation.codeblock import CodeBlock
 from Cibyl.BinaryTranslation.basicblock import BasicBlock
+from Cibyl import config
+import Mips.instruction as instruction
+import Mips.mips as mips
 
 class Function(CodeBlock):
     """Container class for functions"""
@@ -49,6 +52,10 @@ class Function(CodeBlock):
 	    if tmp != []:
 		self.basicBlocks.append(BasicBlock(self.controller, tmp, self.labels, trace))
 
+	# Perform skip stack store optimization. We actually always do
+	# this since we that way avoid zeroing registers unecessary
+	if not config.debug:
+	    self.doSkipStackStoreOptimization()
 
     def isLeaf(self):
 	return self.isLeafFunction
@@ -67,6 +74,36 @@ class Function(CodeBlock):
     def getJavaMethod(self):
 	"Return which java method this instruction is in"
 	return self.javaMethod
+
+    def doSkipStackStoreOptimization(self):
+	"""Optimization to skip the stack saving and restoring since
+	these are not actually needed with Cibyl (registers in local
+	java variables)"""
+
+	def instructionIsStackStore(insn):
+	    return isinstance(insn, instruction.Sw) and insn.rt in mips.callerSavedRegisters and insn.rs == mips.R_SP
+
+	def instructionIsStackLoad(insn):
+	    return isinstance(insn, instruction.Lw) and insn.rt in mips.callerSavedRegisters and insn.rs == mips.R_SP
+
+        for insn in self.basicBlocks[0].instructions:
+            if instructionIsStackStore(insn):
+                if config.verbose: print "Removing", insn
+                insn.nullify()
+
+        returnBasicBlocks = []
+        returnBasicBlocks = returnBasicBlocks + self.getReturnBasicBlocks()
+	for bb in returnBasicBlocks:
+	    for insn in bb.instructions:
+		# Validate that there is no use of the saved registers
+		for dst in self.destinationRegisters:
+		    if dst in mips.callerSavedRegisters and not instructionIsStackLoad(insn):
+			return
+
+	    for insn in bb.instructions:
+		if instructionIsStackLoad(insn):
+		    if config.verbose: print "Removing", insn
+		    insn.nullify()
 
     def compile(self):
 	"Compile this basic block to Java assembly"

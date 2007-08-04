@@ -96,11 +96,6 @@ class JavaMethod(CodeBlock):
         if self.hasMultipleFunctions():
             self.argumentRegisters = self.argumentRegisters + [mips.R_FNA]
 
-	# Perform skip stack store optimization. We actually always do
-	# this since we that way avoid zeroing registers unecessary
-	if not config.debug:
-	    self.doSkipStackStoreOptimization()
-
 	if config.doMemoryRegisterOptimization:
             for fn in self.functions:
                 for bb in fn.basicBlocks:
@@ -140,38 +135,6 @@ class JavaMethod(CodeBlock):
                 return out + [mips.R_FNA]
 	    return out
 	return self.argumentRegisters
-
-    def doSkipStackStoreOptimization(self):
-	"""Optimization to skip the stack saving and restoring since
-	these are not actually needed with Cibyl (registers in local
-	java variables)"""
-
-	def instructionIsStackStore(insn):
-	    return isinstance(insn, instruction.Sw) and insn.rt in mips.callerSavedRegisters and insn.rs == mips.R_SP
-
-	def instructionIsStackLoad(insn):
-	    return isinstance(insn, instruction.Lw) and insn.rt in mips.callerSavedRegisters and insn.rs == mips.R_SP
-
-        for fn in self.functions:
-            for insn in fn.basicBlocks[0].instructions:
-                if instructionIsStackStore(insn):
-                    if config.verbose: print "Removing", insn
-                    insn.nullify()
-
-        returnBasicBlocks = []
-        for fn in self.functions:
-            returnBasicBlocks = returnBasicBlocks + fn.getReturnBasicBlocks()
-	for bb in returnBasicBlocks:
-	    for insn in bb.instructions:
-		# Validate that there is no use of the saved registers
-		for dst in self.destinationRegisters:
-		    if dst in mips.callerSavedRegisters and not instructionIsStackLoad(insn):
-			return
-
-	    for insn in bb.instructions:
-		if instructionIsStackLoad(insn):
-		    if config.verbose: print "Removing", insn
-		    insn.nullify()
 
     def clobbersReg(self, reg):
 	return reg in self.destinationRegisters
