@@ -23,8 +23,9 @@ class Function(CodeBlock):
 	self.name = name
 	self.basicBlocks = []
 
-	# Assume this is a leaf function
+	# Assume this is a leaf function, but non-recursive
 	self.isLeafFunction = True
+        self.isRecursive = False
 
 	# Create basic blocks and check leafness
 	tmp = []
@@ -46,16 +47,15 @@ class Function(CodeBlock):
 
 	    if insn.isFunctionCall:
 		self.isLeafFunction = False
+
+            # Is this a recursive function call (only Jal is important)
+	    if isinstance(insn, instruction.Jal) and insn.dstAddress == self.address:
+		self.isRecursive = True
             insn.setFunction(self)
 	else:
 	    # Last one
 	    if tmp != []:
 		self.basicBlocks.append(BasicBlock(self.controller, tmp, self.labels, trace))
-
-	# Perform skip stack store optimization. We actually always do
-	# this since we that way avoid zeroing registers unecessary
-	if not config.debug:
-	    self.doSkipStackStoreOptimization()
 
     def isLeaf(self):
 	return self.isLeafFunction
@@ -111,6 +111,15 @@ class Function(CodeBlock):
 		if instructionIsStackLoad(insn):
                     if config.verbose: print "Removing", insn
 		    insn.nullify()
+
+    def fixup(self):
+	# Perform skip stack store optimization. This optimization
+	# should not be done if this is a recursive function and it is
+	# contained in a multiple-functions method since the MIPS
+	# registers are not automatically saved then
+        if not config.debug and not (self.javaMethod.hasMultipleFunctions() and self.isRecursive):
+	    self.doSkipStackStoreOptimization()
+
 
     def compile(self):
 	"Compile this basic block to Java assembly"
