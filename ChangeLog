@@ -1,10 +1,17 @@
 Cibyl (12)
+	* Implemented the --optimize-colocate-functions=FNs option, which
+	colocates C functions into one Java method. This can significantly
+	improve performance if you can place a hot callchain in a single
+	Java method
+
 	* Moved the stackStore optimization to function.py (from
  	javamethod.py) since it really works on functions and not methods
+	and also call it from fixup()
 
 	* Fixed a bug where the first basic block of a function was by
 	mistake made empty (this nullified the skip-stack-stores
-	optimization). The bug fix will make generated code slightly smaller.
+	optimization), and also a problem with the last basic block. The
+	bug fix will make generated code slightly smaller.
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
 
