@@ -29,6 +29,7 @@ class JavaMethod(CodeBlock):
         self.labels = {}
         self.instructions = []
         self.exceptionHandlers = []
+        self.returnAddresses = {}
 
         for fn in self.functions:
             fn.setJavaMethod(self)
@@ -66,6 +67,7 @@ class JavaMethod(CodeBlock):
 	self.cleanupRegs = Set()
 
 	# For non-leafs, we always pass all registers
+        i = 0
         for fn in self.functions:
             if not fn.isLeaf() or fn.address == self.controller.elf.getEntryPoint():
                 self.addSourceRegister(mips.R_SP)
@@ -75,13 +77,10 @@ class JavaMethod(CodeBlock):
                 self.addSourceRegister(mips.R_A3)
                 self.addDestinationRegister(mips.R_V0)
                 self.addDestinationRegister(mips.R_V1)
+            fn.setIndex(i)
+            i = i + 1
 
 	for insn in self.instructions:
-            # If the destination is within the same method, call it
-            # with a goto, but not if it is a recursive function call
-            if isinstance(insn, instruction.Jal) and \
-            insn.dstAddress in map(lambda fn : fn.address and fn.address != insn.dstAddress, self.functions):
-                insn.compile = insn.compileJump
 	    insn.setJavaMethod(self)
 
 	self.argumentRegisters = [mips.R_SP, mips.R_A0, mips.R_A1, mips.R_A2, mips.R_A3]
@@ -116,6 +115,12 @@ class JavaMethod(CodeBlock):
 	else:
 	    return "V"
 
+    def getFunction(self, address):
+        for fn in self.functions:
+            if fn.address == address:
+                return fn
+        abort("No such function")
+
     def hasMultipleFunctions(self):
         return len(self.functions) > 1
 
@@ -123,9 +128,17 @@ class JavaMethod(CodeBlock):
         "Invoke this method (e.g., through a JAL instruction)"
         self.bc.invokestatic( "CompiledProgram/" + self.getJavaMethodName() )
 
+    def addReturnAddress(self, address):
+        try:
+            return self.returnAddresses[address]
+        except:
+            curIdx = len(self.returnAddresses)
+            self.returnAddresses[address] = curIdx
+            return self.returnAddresses[address]
+
     def addExceptionHandler(self, startAddress, endAddress):
         self.exceptionHandlers.append( (startAddress, endAddress) )
-        return "EXH_%x_to_%x" % (startAddress, endAddress)
+        return "L_EXH_%x_to_%x" % (startAddress, endAddress)
 
     def getRegistersToPass(self):
 	"Get the registers to pass to this function"
@@ -150,6 +163,12 @@ class JavaMethod(CodeBlock):
 	out = []
 	for label in self.labels.values():
 	    # Don't include the actual function address
+            found = False
+            for fn in self.functions:
+                if label.address == fn.address:
+                    found = True
+            if found:
+                continue
 	    if label.inJumpTab and label.address > self.address and label.address < self.address + self.size:
 		cur = (label.address, str(label))
 		out.append(cur)
@@ -159,6 +178,9 @@ class JavaMethod(CodeBlock):
 	"""This method constructs a list of clobbered registers
 	(depending on the functions this function calls) and also adds
 	registers to zero in the function."""
+        for fn in self.functions:
+            fn.fixup()
+
 	# Add v1 to the list of clobbered registers if the destination
 	# method clobbers V1
 	for insn in self.instructions:
@@ -185,6 +207,8 @@ class JavaMethod(CodeBlock):
                             self.cleanupRegs.add(r)
                     elif (r not in self.argumentRegisters + [mips.R_HI, mips.R_LO, mips.R_ZERO, mips.R_RA]) and not bb0.registerWrittenToBefore(insn, r):
                         self.cleanupRegs.add(r)
+        if self.hasMultipleFunctions():
+            self.cleanupRegs.add(mips.R_RA)
 
 
     def compile(self):
@@ -211,26 +235,38 @@ class JavaMethod(CodeBlock):
             self.controller.emit(".limit stack %d" % (maxOperandStack))
         else:
             self.controller.emit(".limit stack %d" % (config.operandStackLimit))
-	self.controller.emit(".limit locals %d" % self.getNumberOfLocals())
 
 	# Generate a register mapping for this method and the registers to pass to the method
+        registerMapping = { self.functions[0].address : register.reg2local }
+        maxLocals = len(register.reg2local)
 	if config.doRegisterScheduling:
-	    registerMapping = register.generateRegisterMapping(self.usedRegisters, self.argumentRegisters, self.registerUseCount)
+	    registerMapping, maxLocals = register.generateRegisterMapping(self.functions, self.usedRegisters,
+                                                                          self.argumentRegisters, self.registerUseCount)
+            # Default to the first (doesn't matter which)
+            register.reg2local = registerMapping[ self.functions[0].address ]
+        self.controller.emit(".limit locals %d" % maxLocals)
 
-	    register.reg2local = registerMapping
-            if config.debug:
-                for reg, local in registerMapping.iteritems():
-                    self.controller.emit(".var %2d is %s I from METHOD_START to METHOD_END" % (local, mips.registerNames[reg]))
-	else:
-            if config.debug:
-                for reg, local in register.reg2local.iteritems():
+        if config.debug:
+            # Not really needed - if we have config.debug, we will
+            # only have one function per java method
+            for fn in self.functions:
+                for reg, local in registerMapping[fn.address].iteritems():
                     if (reg not in self.usedRegisters and reg not in self.argumentRegisters) or reg in register.staticRegs:
                         continue
                     self.controller.emit(".var %2d is %s I from METHOD_START to METHOD_END" % (local, mips.registerNames[reg]))
 
 	for reg in self.cleanupRegs:
-	    self.bc.pushConst(0)
-	    self.rh.popToRegister(reg)
+            localsToZero = Set()
+            # Add all possible mappings to zero
+            for fn in self.functions:
+                mapping = registerMapping[fn.address]
+                localsToZero.add(mapping[reg])
+            for local in localsToZero:
+                if reg == mips.R_RA:
+                    self.bc.pushConst(-1)
+                else:
+                    self.bc.pushConst(0)
+                self.bc.istore(local)
 
 	if config.traceFunctionCalls:
 	    self.bc.ldc("0x%08x: %s" % (self.address, self.name))
@@ -240,12 +276,13 @@ class JavaMethod(CodeBlock):
         if self.hasMultipleFunctions():
             switchTuples = []
             for fn in self.functions:
-                switchTuples.append( (fn.address, "L_%x" % fn.address) )
+                switchTuples.append( (fn.getIndex(), "L_%x" % fn.address) )
             self.rh.pushRegister(mips.R_FNA)
-            self.bc.lookupswitch(switchTuples, "__CIBYL_function_return")
+            self.bc.tableswitch(switchTuples, "__CIBYL_function_return")
 
 	# Compile this function
         for fn in self.functions:
+            register.reg2local = registerMapping[ fn.address ]
             fn.compile()
 
 	# Emit the local jumptable
@@ -257,7 +294,7 @@ class JavaMethod(CodeBlock):
         # Handle try/catch pairs
         for eh in self.exceptionHandlers:
             start, end = eh
-            self.bc.emit("EXH_%x_to_%x:" % (start, end))
+            self.bc.emit("L_EXH_%x_to_%x:" % (start, end))
             # Register the object
             self.bc.invokestatic("CRunTime/registerObject(Ljava/lang/Object;)I")
 
@@ -278,6 +315,15 @@ class JavaMethod(CodeBlock):
 	if config.traceFunctionCalls:
 	    self.bc.ldc("")
 	    self.bc.invokestatic("CRunTime/emitFunctionExitTrace(Ljava/lang/String;)V")
+
+        if self.hasMultipleFunctions():
+            self.rh.pushRegister(mips.R_RA)
+            table = []
+            for address, key in self.returnAddresses.iteritems():
+                table.append( (key, str(self.labels[address])) )
+            self.bc.tableswitch(table, "__CIBYL_non_local_return")
+            self.controller.emit("__CIBYL_non_local_return:")
+
 	if self.clobbersReg(mips.R_V1):
 	    self.rh.pushRegister(mips.R_V1)
 	    self.bc.putstatic("CRunTime/saved_v1 I")
@@ -421,7 +467,7 @@ class GlobalJumptabMethod(CodeBlock):
 	    self.controller.emit("lab_" + fn.name + ":")
 	    for r in method.getRegistersToPass():
                 if r == mips.R_FNA:
-                    self.bc.pushConst(fn.address)
+                    self.bc.pushConst( fn.getIndex() )
                 else:
                     self.bc.iload( reg2local[r] )
             # Invoke the method.
