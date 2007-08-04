@@ -67,6 +67,13 @@ class Function(CodeBlock):
 		out.append(bb)
 	return out
 
+    def setIndex(self, index):
+        "Set the index of this function (within a multi-function Java method)"
+        self.index = index
+
+    def getIndex(self):
+        return self.index
+
     def setJavaMethod(self, method):
 	"Define which java method this instruction is in"
 	self.javaMethod = method
@@ -98,11 +105,11 @@ class Function(CodeBlock):
 		# Validate that there is no use of the saved registers
 		for dst in self.destinationRegisters:
 		    if dst in mips.callerSavedRegisters and not instructionIsStackLoad(insn):
-			return
+			continue
 
 	    for insn in bb.instructions:
 		if instructionIsStackLoad(insn):
-		    if config.verbose: print "Removing", insn
+                    if config.verbose: print "Removing", insn
 		    insn.nullify()
 
     def compile(self):
