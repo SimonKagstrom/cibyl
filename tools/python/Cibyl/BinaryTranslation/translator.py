@@ -124,7 +124,7 @@ class Controller(codeblock.CodeBlock):
 		if isinstance(insn, Syscall):
 		    self.markSyscallUsed( self.addressesToName[insn.extra] )
 	    self.javaMethods.append(javamethod.JavaMethod(self, [fn]))
-	jumptab = javamethod.GlobalJumptabMethod(self, self.javaMethods[:])
+	jumptab = javamethod.GlobalJumptabMethod(self, colocateFunctions + otherFunctions)
 	self.javaMethods.append(jumptab)
 
 	if config.doRelocationOptimization:
