@@ -179,6 +179,13 @@ class Controller(codeblock.CodeBlock):
                     return method
 	return None
 
+    def lookupFunction(self, address):
+	"Return the java method for a given address"
+	for fn in self.functions:
+            if address in (fn.address, fn.address + fn.size - 1):
+                return fn
+	return None
+
     def addAlignedSection(self, out, sectionName, alignment):
 	section = self.elf.getSectionContents(sectionName)
 	addr = len(out)

@@ -345,22 +345,22 @@ class GlobalJumptabMethod(CodeBlock):
 
 	# Put all methods which have lo16/hi16 or 32-bit relocations or are within
         # the constructors/destructors sections
-        self.functions = self.cleanupMethods(functions)
+        self.functions = self.cleanupFunctions(functions)
 
 	self.bc = bytecode.ByteCodeGenerator(self.controller)
 	self.rh = register.RegisterHandler(self.controller, self.bc)
 
 	CodeBlock.__init__(self, self.controller, [], [], False)
 
-    def cleanupMethods(self, methods):
+    def cleanupFunctions(self, functions):
         if not config.doOptimizeIndirectCalls:
-            return methods
+            return functions
 
         out = []
 
         # Lookup relocations to the text segment which are split
         # between instructions, i.e., things like lui/addiu
-        # pairs. This catches the case when there is a static method
+        # pairs. This catches the case when there is a static function
         # which is called through a function pointer
         textRelocs = self.controller.elf.getRelocationsBySection(".text")
         textRelocs = [ rel for rel in textRelocs if rel.value == self.controller.elf.getSectionAddress(".text") and rel.type in ("R_MIPS_HI16", "R_MIPS_LO16") ]
@@ -370,18 +370,18 @@ class GlobalJumptabMethod(CodeBlock):
         for cur in textRelocs:
             bb = self.controller.getInstruction(cur.offset).getBasicBlock()
             if curBasicBlock != None and curBasicBlock.address != bb.address:
-                relocMethods = self.getMethodsInText(relocsToCheck)
-                for method in relocMethods:
-                    if method not in out:
-                        out.append(method)
+                relocFunctions = self.getFunctionsInText(relocsToCheck)
+                for function in relocFunctions:
+                    if function not in out:
+                        out.append(function)
                 curBasicBlock = bb
                 relocsToCheck = []
             relocsToCheck.append(cur)
         else:
-            relocMethods = self.getMethodsInText(relocsToCheck)
-            for method in relocMethods:
-                if method not in out:
-                    out.append(method)
+            relocFunctions = self.getFunctionsInText(relocsToCheck)
+            for function in relocFunctions:
+                if function not in out:
+                    out.append(function)
 
         # Lookup relocations in the data segment
         dataSection = self.controller.elf.getSectionContents(".data") + self.controller.elf.getSectionContents(".rodata")
@@ -389,25 +389,24 @@ class GlobalJumptabMethod(CodeBlock):
             # Unpack this word
 	    data = dataSection[i : i + 4]
 	    address = struct.unpack(">L", data)[0]
-            method = self.controller.lookupJavaMethod(address)
-            if method and method not in out:
-                out.append(method)
+            function = self.controller.lookupFunction(address)
+            if function and function not in out:
+                out.append(function)
 
         # Get all the direct relocations
-        for method in methods:
-            for fn in method.functions:
-                relocs = self.controller.elf.getRelocationsByTargetAddress(fn.address)
-                for r in relocs:
-                    if r.type in ("R_MIPS_HI16", "R_MIPS_LO16", "R_MIPS_32"):
-                        if method in out:
-                            continue
-                        out.append(method)
-                if self.controller.elf.isConstructor(fn.address) or self.controller.elf.isDestructor(fn.address):
-                    if method not in out:
-                        out.append(method)
+        for function in functions:
+            relocs = self.controller.elf.getRelocationsByTargetAddress(function.address)
+            for r in relocs:
+                if r.type in ("R_MIPS_HI16", "R_MIPS_LO16", "R_MIPS_32"):
+                    if function in out:
+                        continue
+                    out.append(function)
+            if self.controller.elf.isConstructor(function.address) or self.controller.elf.isDestructor(function.address):
+                if function not in out:
+                    out.append(function)
         return out
 
-    def getMethodsInText(self, relocsToCheck):
+    def getFunctionsInText(self, relocsToCheck):
         out = []
         # Try to combine all low and high parts
         for r in [ rel for rel in relocsToCheck if rel.type == "R_MIPS_HI16" ]:
@@ -415,11 +414,11 @@ class GlobalJumptabMethod(CodeBlock):
                 insn_high = self.controller.getInstruction(r.offset)
                 insn_low = self.controller.getInstruction(s.offset)
                 address = ((insn_high.extra & 0xffff) << 16) + insn_low.extra
-                method = self.controller.lookupJavaMethod(address)
-                if method:
-                    if config.verbose: print "found", method.name
-                    if method not in out:
-                        out.append(method)
+                fn = self.controller.lookupFunction(address)
+                if fn:
+                    if config.verbose: print "found", fn.name
+                    if fn not in out:
+                        out.append(fn)
                 elif config.verbose: print "Didn't find for %x" % (address)
         return out
 
