@@ -11,14 +11,17 @@
  ********************************************************************/
 #ifndef __JAVA_LANG_H__
 #define __JAVA_LANG_H__
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
 #include <cibyl.h>
 #include <stdint.h>
+#include "io.h"
 
 typedef int NOPH_Object_t;
+typedef int NOPH_Class_t;
 typedef int NOPH_String_t;
 typedef int NOPH_Throwable_t;
 
@@ -40,6 +43,17 @@ void NOPH_Thread_sleep(int ms); /* Throws */
 void NOPH_Throwable_printStackTrace(NOPH_Throwable_t th);
 NOPH_String_t NOPH_Throwable_getMessage(NOPH_Throwable_t th);
 NOPH_String_t NOPH_Throwable_toString(NOPH_Throwable_t th);
+
+/* Exception */
+NOPH_Exception_t NOPH_Exception_new(void);
+NOPH_Exception_t NOPH_Exception_new_string(char* s);
+
+/* Object */
+NOPH_Class_t NOPH_Object_getClass(NOPH_Object_t obj);
+
+/* Class */
+NOPH_InputStream_t NOPH_Class_getResourceAsStream(NOPH_Class_t obj, char* name); /* Throws */
+NOPH_String_t NOPH_Class_getName(NOPH_Class_t obj);
 
 #if defined(__cplusplus)
 }
