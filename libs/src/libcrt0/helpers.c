@@ -46,3 +46,7 @@ void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), void *a
 void __NOPH_catch(void)
 {
 }
+
+void __NOPH_throw(NOPH_Exception_t ex)
+{
+}
