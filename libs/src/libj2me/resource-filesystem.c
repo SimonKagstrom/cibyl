@@ -8,7 +8,7 @@
 typedef struct
 {
   NOPH_InputStream_t is;
-  long fp;
+  long is_fp;
   int eof;
 } resource_file_t;
 
@@ -27,7 +27,7 @@ static int open(FILE *fp, const char *path,
   resource_file_t *p = (resource_file_t *)fp->priv;
   int error;
 
-  p->fp = 0;
+  p->is_fp = 0;
   p->eof = 0;
 
   /* Try to open the resource stream. They are always read-only, so
@@ -64,11 +64,11 @@ static int seek(FILE *fp, long offset, int whence)
   switch (whence)
     {
     case SEEK_SET:
-      p->fp = 0;
+      p->is_fp = 0;
       NOPH_InputStream_reset(p->is);
       break;
     case SEEK_END:
-      p->fp = 0;
+      p->is_fp = 0;
       avail = NOPH_InputStream_available(p->is);
       skip = avail - offset;
       NOPH_InputStream_reset(p->is);
@@ -80,7 +80,7 @@ static int seek(FILE *fp, long offset, int whence)
     }
   NOPH_try(exception_handler, (void*)&error)
     {
-      p->fp += NOPH_InputStream_skip(p->is, skip);
+      p->is_fp += NOPH_InputStream_skip(p->is, skip);
     } NOPH_catch();
   if (error)
     return -1;
@@ -92,13 +92,13 @@ static long tell(FILE *fp)
 {
   resource_file_t *p = (resource_file_t *)fp->priv;
 
-  return p->fp;
+  return p->is_fp;
 }
 
 static size_t read(FILE *fp, void *ptr, size_t in_size)
 {
   resource_file_t *p = (resource_file_t *)fp->priv;
-  long before = p->fp;
+  long before = p->is_fp;
 
   /* Cached file reading - read into a temporary buffer */
   while (in_size > 0)
@@ -111,7 +111,7 @@ static size_t read(FILE *fp, void *ptr, size_t in_size)
           size_t size = min(in_size, 8192);
 
           n = NOPH_InputStream_read_into(p->is, ptr, size);
-          p->fp += n;
+          p->is_fp += n;
           in_size -= n;
           ptr += n;
         } NOPH_catch();
@@ -122,7 +122,7 @@ static size_t read(FILE *fp, void *ptr, size_t in_size)
         }
     }
 
-  return p->fp - before;
+  return p->is_fp - before;
 }
 
 static size_t write(FILE *fp, const void *ptr, size_t in_size)
