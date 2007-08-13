@@ -35,7 +35,7 @@ static void exception_handler(NOPH_Exception_t ex, void *arg)
 static void close_write(FILE *fp)
 {
   record_store_file_t *p = (record_store_file_t *)fp->priv;
-  void *data = NOPH_memoryFile_getDataPtr(p->memfs_fp);
+  void *data = NOPH_MemoryFile_getDataPtr(p->memfs_fp);
   long size = ftell(p->memfs_fp);
 
   /* Update this record - this can very well throw an exception */
@@ -126,7 +126,7 @@ static int open(FILE *fp, const char *path,
     }
 
   /* Create the memory file */
-  p->memfs_fp = NOPH_memoryFile_open(data, rs_size, 1);
+  p->memfs_fp = NOPH_MemoryFile_open(data, rs_size, 1);
 
   if (mode == APPEND)
     fseek(p->memfs_fp, 0, SEEK_END);
