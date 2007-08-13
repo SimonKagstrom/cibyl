@@ -15,15 +15,21 @@
 #include <assert.h>
 #include <ctype.h>
 
+#include <java/io.h>
 #include <cibyl.h>
 
-FILE *stdin;
+FILE *stdin; /* Does not exist in MIDP */
 FILE *stdout;
 FILE *stderr;
 
 static void __attribute__((constructor)) setup_ansi_support(void)
 {
-  __setup_io((void*)&stdin, (void*)&stdout, (void*)&stderr);
+  NOPH_OutputStream_t os_stdout;
+  NOPH_OutputStream_t os_stderr;
+
+  __setup_io((void*)&os_stdout, (void*)&os_stderr);
+  stdout = NOPH_OutputStream_createFILE(os_stdout);
+  stderr = NOPH_OutputStream_createFILE(os_stderr);
 }
 
 
