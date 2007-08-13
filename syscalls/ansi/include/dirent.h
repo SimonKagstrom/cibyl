@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include <stdio.h>
 #include <java/util.h>
 #include <javax/microedition/io.h>
 
