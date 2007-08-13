@@ -93,6 +93,8 @@ int printf(const char *fmt, ...)
     if ( r > 0 )
 	fputs(outbuf, stdout);
 
+    fflush(stdout);
+
     return r;
 }
 
@@ -117,6 +119,8 @@ int vprintf(const char *fmt, va_list ap)
      */
     if ( r > 0 )
 	fputs(outbuf, stdout);
+
+    fflush(stdout);
 
     return r;
 }
