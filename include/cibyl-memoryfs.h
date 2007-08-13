@@ -25,7 +25,19 @@
  *
  * @return a pointer to the file object
  */
-FILE *NOPH_memoryFile_open(void *ptr, size_t size, int allocate);
+FILE *NOPH_MemoryFile_open(void *ptr, size_t size, int allocate);
+
+/**
+ * Open a memory file indirectly. This will open a regular file with
+ * the standard fopen, read in all of it into memory and create a
+ * memory file from the allocated memory.
+ *
+ * @param name the name of the file to open (passed to fopen)
+ * @param mode the open mode (pass to fopen)
+ *
+ * @return a pointer the opened memory file or NULL if the open failed
+ */
+FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *mode);
 
 /**
  * Return the pointer to the beginning of the data in the file
@@ -34,6 +46,6 @@ FILE *NOPH_memoryFile_open(void *ptr, size_t size, int allocate);
  *
  * @return a pointer to the start of data
  */
-void *NOPH_memoryFile_getDataPtr(FILE *fp);
+void *NOPH_MemoryFile_getDataPtr(FILE *fp);
 
 #endif /* !__CIBYL_MEMORYFS_H__ */
