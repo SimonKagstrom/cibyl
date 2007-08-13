@@ -133,6 +133,12 @@ class ByteCodeGenerator:
     def emit_return(self):
 	self.emit('return')
 
+    def checkcast(self, javaClass):
+	self.emit('checkcast %s' % (javaClass))
+
+    def athrow(self):
+	self.emit('athrow')
+
     def lookupswitch(self, table, default):
 	self.emit("lookupswitch")
 	table.sort()
