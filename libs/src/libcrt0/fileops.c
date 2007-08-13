@@ -160,25 +160,27 @@ void rewind(FILE *fp)
   fp->ops->seek(fp, 0L, SEEK_SET);
 }
 
-void clearerr(FILE* stream)
+void clearerr(FILE* fp)
 {
 }
 
-int ferror(FILE* stream)
-{
-  return 0;
-}
-
-int fflush(FILE* stream)
+int ferror(FILE* fp)
 {
   return 0;
 }
 
-int fgetc(FILE* stream)
+int fflush(FILE* fp)
+{
+  if (fp == NULL)
+    return 0;
+  return fp->ops->flush(fp);
+}
+
+int fgetc(FILE* fp)
 {
   char out;
 
-  if (fread(&out, 1, 1, stream) < 0)
+  if (fread(&out, 1, 1, fp) < 0)
     {
       /* FIXME: Do some error handling here */
     }
@@ -186,14 +188,14 @@ int fgetc(FILE* stream)
   return out;
 }
 
-char* fgets(char* s, int size, FILE* stream)
+char* fgets(char* s, int size, FILE* fp)
 {
   char *out = s;
   int c;
 
   do
     {
-      c = fgetc(stream);
+      c = fgetc(fp);
       *s = c;
       s++;
     } while (c != '\0');
@@ -201,9 +203,9 @@ char* fgets(char* s, int size, FILE* stream)
   return out;
 }
 
-int fputc(int c, FILE* stream)
+int fputc(int c, FILE* fp)
 {
-  if (fwrite(&c, 1, 1, stream) < 0)
+  if (fwrite(&c, 1, 1, fp) < 0)
     {
       /* FIXME: Do some error handling here */
     }
@@ -211,14 +213,14 @@ int fputc(int c, FILE* stream)
   return c;
 }
 
-int __fputs(const char* ptr, FILE* stream)
+int __fputs(const char* ptr, FILE* fp)
 {
   char *p;
   int n = 0;
 
   for (p = (char*)ptr; *p; p++, n++)
     {
-      if (fwrite(p, 1, 1, stream) < 0)
+      if (fwrite(p, 1, 1, fp) < 0)
         return EOF;
     }
 
