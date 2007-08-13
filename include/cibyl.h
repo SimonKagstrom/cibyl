@@ -62,6 +62,12 @@ extern void __NOPH_catch(void);
   __NOPH_catch();                    \
 } while(0)
 
+extern void __NOPH_throw(NOPH_Exception_t exception);
+#define NOPH_throw(exception) do { \
+  asm volatile("");                \
+  __NOPH_throw(exception);         \
+} while(0)
+
 /**
  * End a Java exception-catching block, catching a specific class of
  * exceptions. Must be preceeded by a @a NOPH_try.
