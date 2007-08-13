@@ -1,4 +1,11 @@
 Cibyl (12)
+	* New file operations structure, which makes the standard "FILE"
+	stuff much more useful and also the implementation more
+	sane. Almost everything is now implemented in C which is also
+	easier to maintain and has fewer Java special cases among the
+	syscalls. The new structure also allows URI-style passing of
+	options to fopen.
+
 	* Implemented the --optimize-colocate-functions=FNs option, which
 	colocates C functions into one Java method. This can significantly
 	improve performance if you can place a hot callchain in a single
