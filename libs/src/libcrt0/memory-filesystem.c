@@ -101,7 +101,7 @@ static cibyl_fops_t memory_fops =
   .eof = eof,
 };
 
-FILE *NOPH_memoryFileOpen(void *ptr, size_t size, int allocate)
+FILE *NOPH_memoryFile_open(void *ptr, size_t size, int allocate)
 {
   FILE *out;
   memory_file_t *p;
@@ -131,5 +131,38 @@ FILE *NOPH_memoryFileOpen(void *ptr, size_t size, int allocate)
       p->data = ptr;
     }
 
+  return out;
+}
+
+FILE *NOPH_memoryFile_openIndirect(const char *name, const char *mode)
+{
+  FILE *tmp;
+  FILE *out;
+  void *data = NULL;
+  size_t size = 0;
+  size_t n = 0;
+
+  tmp = fopen(name, mode);
+  if (!tmp)
+    return NULL;
+
+  /* Read in all of the file */
+  do
+    {
+      size += 4096;
+      data = realloc(data, size);
+      if (!data)
+        {
+          fclose(tmp);
+          return NULL;
+        }
+      n = fread(data, 1, 4096, tmp);
+    } while(n == 4096);
+  fclose(tmp);
+
+  /* Open the memory file */
+  out = NOPH_memoryFile_open(data, size, 1);
+  if (!out)
+    free(data); /* Should never happen, but OK */
   return out;
 }

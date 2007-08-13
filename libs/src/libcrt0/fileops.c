@@ -1,3 +1,14 @@
+/*********************************************************************
+ *
+ * Copyright (C) 2007,  Simon Kagstrom
+ *
+ * Filename:      fileops.c
+ * Author:        Simon Kagstrom <simon.kagstrom@gmail.com>
+ * Description:   fopen etc impl.
+ *
+ * $Id:$
+ *
+ ********************************************************************/
 #include <stdlib.h>
 #include <assert.h>
 #include <cibyl-fileops.h>
@@ -5,20 +16,20 @@
 typedef struct
 {
   cibyl_fops_t **table;
-  cibyl_fops_t *default;
+  cibyl_fops_t *fallback;
   int n_fops;
 } all_fops_t;
 
 all_fops_t fops;
 
-void cibyl_fops_register(cibyl_fops_t *fop, int default)
+void cibyl_fops_register(cibyl_fops_t *fop, int is_default)
 {
   int idx = fops.n_fops++;
 
   fops.table = (cibyl_fops_t**)realloc(fops.table, sizeof(cibyl_fops_t*) * fops.n_fops);
-  fops.table[idx] = fops;
-  if (default)
-    fops.default = fops;
+  fops.table[idx] = fop;
+  if (is_default)
+    fops.fallback = fop;
   assert(fops.table);
 }
 
@@ -55,15 +66,23 @@ void cibyl_file_free(FILE *fp)
   free(fp);
 }
 
-FILE *fopen(const char *path, const char *mode)
+FILE *fopen(const char *path, const char *in_mode)
 {
   FILE *out = NULL;
+  cibyl_fops_open_mode_t mode = READ;
   int i;
+
+  if (strchr(in_mode, 'w') != NULL)
+    mode = WRITE;
+  if (strchr(in_mode, 'a') != NULL)
+    mode = APPEND;
+  if (strstr(in_mode, "a+") != NULL)
+    mode = APPEND;
 
   for (i = 0; i < fops.n_fops; i++)
     {
       cibyl_fops_t *cur = fops.table[i];
-      char *uri = cur->uri;
+      const char *uri = cur->uri;
       int len = uri ? strlen(uri) : -1;
 
       if (uri && strncmp(uri, path, len) == 0)
@@ -82,11 +101,11 @@ FILE *fopen(const char *path, const char *mode)
     }
 
   /* Found nothing, return the default */
-  if (fops.default)
+  if (fops.fallback)
     {
-      if ( !(out = cibyl_file_alloc(fops.default)) )
+      if ( !(out = cibyl_file_alloc(fops.fallback)) )
 	return NULL;
-      if (fops.default->open(out, path, mode) < 0)
+      if (fops.fallback->open(out, path, mode) < 0)
 	{
 	  free(out);
 	  return NULL;
@@ -101,7 +120,7 @@ int fclose(FILE *fp)
 {
   int out = fp->ops->close(fp);
 
-  ciby_file_free(fp);
+  cibyl_file_free(fp);
   return out;
 }
 
@@ -139,4 +158,69 @@ long ftell(FILE *fp)
 void rewind(FILE *fp)
 {
   fp->ops->seek(fp, 0L, SEEK_SET);
+}
+
+void clearerr(FILE* stream)
+{
+}
+
+int ferror(FILE* stream)
+{
+  return 0;
+}
+
+int fflush(FILE* stream)
+{
+  return 0;
+}
+
+int fgetc(FILE* stream)
+{
+  char out;
+
+  if (fread(&out, 1, 1, stream) < 0)
+    {
+      /* FIXME: Do some error handling here */
+    }
+
+  return out;
+}
+
+char* fgets(char* s, int size, FILE* stream)
+{
+  char *out = s;
+  int c;
+
+  do
+    {
+      c = fgetc(stream);
+      *s = c;
+      s++;
+    } while (c != '\0');
+
+  return out;
+}
+
+int fputc(int c, FILE* stream)
+{
+  if (fwrite(&c, 1, 1, stream) < 0)
+    {
+      /* FIXME: Do some error handling here */
+    }
+
+  return c;
+}
+
+int __fputs(const char* ptr, FILE* stream)
+{
+  char *p;
+  int n = 0;
+
+  for (p = (char*)ptr; *p; p++, n++)
+    {
+      if (fwrite(p, 1, 1, stream) < 0)
+        return EOF;
+    }
+
+  return n;
 }

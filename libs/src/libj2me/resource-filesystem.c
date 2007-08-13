@@ -1,10 +1,14 @@
 #include <cibyl-fileops.h>
-#include <java/lang/io.h>
+#include <javax/microedition/lcdui/game.h>
+#include <java/io.h>
+#include <java/lang.h>
+
+#define min(x,y) ( (x) < (y) ? (x) : (y) )
 
 typedef struct
 {
   NOPH_InputStream_t is;
-  off_t fp;
+  long fp;
   int eof;
 } resource_file_t;
 
@@ -31,7 +35,7 @@ static int open(FILE *fp, const char *path,
    */
   NOPH_try(exception_handler, (void*)&error)
     {
-      p->is = NOPH_Class_getResourceAsStream(gc, path);
+      p->is = NOPH_Class_getResourceAsStream(gc, (char*)path);
     } NOPH_catch();
   if (error)
     return -1;
@@ -39,15 +43,17 @@ static int open(FILE *fp, const char *path,
   return 0;
 }
 
-static void close(FILE *fp)
+static int close(FILE *fp)
 {
   resource_file_t *p = (resource_file_t *)fp->priv;
 
   NOPH_InputStream_close(p->is);
+
+  return 0;
 }
 
 
-static int seek(FILE *p, long offset, int whence)
+static int seek(FILE *fp, long offset, int whence)
 {
   resource_file_t *p = (resource_file_t *)fp->priv;
   int skip = offset;
@@ -82,16 +88,17 @@ static int seek(FILE *p, long offset, int whence)
   return 0;
 }
 
-static int tell(FILE *p)
+static long tell(FILE *fp)
 {
   resource_file_t *p = (resource_file_t *)fp->priv;
 
   return p->fp;
 }
 
-static size_t read(FILE *p, void *ptr, size_t in_size)
+static size_t read(FILE *fp, void *ptr, size_t in_size)
 {
   resource_file_t *p = (resource_file_t *)fp->priv;
+  long before = p->fp;
 
   /* Cached file reading - read into a temporary buffer */
   while (in_size > 0)
@@ -115,10 +122,10 @@ static size_t read(FILE *p, void *ptr, size_t in_size)
         }
     }
 
-  return size;
+  return p->fp - before;
 }
 
-static size_t write(FILE *fp, void *ptr, size_t in_size)
+static size_t write(FILE *fp, const void *ptr, size_t in_size)
 {
   /* FIXME: Should we throw something? */
   return 0;
@@ -133,7 +140,7 @@ static int eof(FILE *fp)
 
 
 /* The fops structure for resource files */
-static cibyl_fops_t memory_fops =
+static cibyl_fops_t resource_fops =
 {
   .uri = "resource://",
   .priv_data_size = sizeof(resource_file_t),

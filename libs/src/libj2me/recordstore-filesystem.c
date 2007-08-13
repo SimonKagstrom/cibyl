@@ -9,8 +9,12 @@
  * $Id:$
  *
  ********************************************************************/
+#include <cibyl-fileops.h>
 #include <cibyl-memoryfs.h>
 #include <javax/microedition/io.h>
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
 
 typedef struct
 {
@@ -35,7 +39,7 @@ static void close_write(FILE *fp)
   long size = ftell(p->memfs_fp);
 
   /* Update this record - this can very well throw an exception */
-  NOPH_RecordStore_setRecord(p->rs, p->id, data, size);
+  NOPH_RecordStore_setRecord(p->rs, p->id, data, 0, size);
 }
 
 static void close_read(FILE *fp)
@@ -50,7 +54,7 @@ static void *get_record(NOPH_RecordStore_t rs, int id)
 
   NOPH_try(exception_handler, (void*)&error)
     {
-      rs_size = NOPH_RecordStore_getRecordSize(rs, id);
+      int rs_size = NOPH_RecordStore_getRecordSize(rs, id);
 
       data = malloc(rs_size);
       if (!data)
@@ -72,7 +76,7 @@ static int open(FILE *fp, const char *path,
                 cibyl_fops_open_mode_t mode)
 {
   record_store_file_t *p = (record_store_file_t *)fp->priv;
-  char *record_number = strchr(path, ":");
+  char *record_number = strchr(path, ':');
   char *store_name;
   void *data = NULL;
   int rs_size = 8192; /* assume mode == TRUNCATE */
@@ -82,7 +86,7 @@ static int open(FILE *fp, const char *path,
     return -1;
 
   store_name = strdup(path);
-  *strchr(store_name, ":") = '\0'; /* MUST exist because of above */
+  *strchr(store_name, ':') = '\0'; /* MUST exist because of above */
 
   /* Open the store and set the id */
   NOPH_try(exception_handler, (void*)&error)
@@ -122,7 +126,7 @@ static int open(FILE *fp, const char *path,
     }
 
   /* Create the memory file */
-  p->memfs_fp = NOPH_memoryFileOpen(data, rs_size, 1);
+  p->memfs_fp = NOPH_memoryFile_open(data, rs_size, 1);
 
   if (mode == APPEND)
     fseek(p->memfs_fp, 0, SEEK_END);
@@ -130,7 +134,7 @@ static int open(FILE *fp, const char *path,
   return 0;
 }
 
-static void close(FILE *fp)
+static int close(FILE *fp)
 {
   record_store_file_t *p = (record_store_file_t *)fp->priv;
 
@@ -139,31 +143,33 @@ static void close(FILE *fp)
   /* Will free memory used by the memfs */
   fclose(p->memfs_fp);
   NOPH_RecordStore_closeRecordStore(p->rs);
+
+  return 0;
 }
 
 /* All these are basically "inherited" from the memory file system */
-static int seek(FILE *p, long offset, int whence)
+static int seek(FILE *fp, long offset, int whence)
 {
   record_store_file_t *p = (record_store_file_t *)fp->priv;
 
   return fseek(p->memfs_fp, offset, whence);
 }
 
-static int tell(FILE *p)
+static long tell(FILE *fp)
 {
   record_store_file_t *p = (record_store_file_t *)fp->priv;
 
   return ftell(p->memfs_fp);
 }
 
-static size_t read(FILE *p, void *ptr, size_t in_size)
+static size_t read(FILE *fp, void *ptr, size_t in_size)
 {
   record_store_file_t *p = (record_store_file_t *)fp->priv;
 
   return fread(ptr, in_size, 1, p->memfs_fp);
 }
 
-static size_t write(FILE *fp, void *ptr, size_t in_size)
+static size_t write(FILE *fp, const void *ptr, size_t in_size)
 {
   record_store_file_t *p = (record_store_file_t *)fp->priv;
 
@@ -182,7 +188,7 @@ static int eof(FILE *fp)
 static cibyl_fops_t record_store_fops =
 {
   .uri = "recordstore://",
-  .priv_data_size = sizeof(record_store_t),
+  .priv_data_size = sizeof(record_store_file_t),
   .open = open,
   .close = close,
   .read = read,
