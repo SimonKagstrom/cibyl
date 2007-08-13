@@ -33,7 +33,13 @@ int __putchar(int c); /* Not generated */
 # define EOF (-1)
 #endif
 
-typedef int FILE;
+struct s_cibyl_fops;
+
+typedef struct
+{
+  struct s_cibyl_fops *ops;
+  void *priv;
+} FILE;
 
 #define EOF (-1)
 
@@ -41,29 +47,30 @@ extern FILE *stdin;
 extern FILE *stdout;
 extern FILE *stderr;
 
-FILE* fopen(const char* path, const char* mode); /* Not generated */
-int fclose(FILE* fp); /* Not generated */
+extern FILE* fopen(const char* path, const char* mode); /* Not generated */
+extern int fclose(FILE* fp); /* Not generated */
 
-void clearerr(FILE* stream); /* Not generated */
-int feof(FILE* stream); /* Not generated */
-int ferror(FILE* stream); /* Not generated */
+extern void clearerr(FILE* stream); /* Not generated */
+extern int feof(FILE* stream); /* Not generated */
+extern int ferror(FILE* stream); /* Not generated */
 
 /* This is not in ANSI C but a convenient way of finding out how large
  * the file is. It returns DataInputStream.available().
  */
-int favail(FILE* stream); /* Not generated */
+extern int favail(FILE* stream); /* Not generated */
 
-int fseek(FILE* stream, long offset, int whence); /* Not generated */
-int fflush(FILE* stream); /* Not generated */
+extern int fseek(FILE* stream, long offset, int whence); /* Not generated */
+extern long ftell(FILE *stream);
+extern int fflush(FILE* stream); /* Not generated */
 
-int fgetc(FILE* stream); /* Not generated */
-char* fgets(char* s, int size, FILE* stream); /* Not generated */
-int fputc(int c, FILE* stream); /* Not generated */
+extern int fgetc(FILE* stream); /* Not generated */
+extern char* fgets(char* s, int size, FILE* stream); /* Not generated */
+extern int fputc(int c, FILE* stream); /* Not generated */
 #define fputs __fputs
-int __fputs(const char* ptr, FILE* stream); /* Not generated */
+extern int __fputs(const char* ptr, FILE* stream); /* Not generated */
 
-size_t fread(void* ptr, size_t size, size_t nmemb, FILE* stream); /* Not generated */
-size_t fwrite(const void* ptr, size_t size, size_t nmemb, FILE* stream); /* Not generated */
+extern size_t fread(void* ptr, size_t size, size_t nmemb, FILE* stream); /* Not generated */
+extern size_t fwrite(const void* ptr, size_t size, size_t nmemb, FILE* stream); /* Not generated */
 
 extern int vsnprintf(char* str, unsigned int size, const char* format, va_list ap);
 #define vsprintf(str, fmt, ap) snprintf(str, 0xfffffff, fmt, ap)
@@ -74,8 +81,7 @@ extern int snprintf(char *buf, size_t n, const char *fmt, ...);
 extern int fprintf(FILE *fp, const char* fmt, ...);
 extern int printf(const char* fmt, ...);
 
-void __setup_io(FILE* addr_stdin, FILE* addr_stdout, FILE* addr_stderr); /* Not generated */
-
+void __setup_io(void* addr_stdout, void* addr_stderr); /* Not generated */
 
 /* Does not apply for us yet */
 #define setbuf(stream, buf)
