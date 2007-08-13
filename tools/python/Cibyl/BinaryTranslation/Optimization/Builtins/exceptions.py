@@ -51,9 +51,20 @@ class Catch(ExceptionBuiltinBase):
         # entries on the stack
         return 18
 
+class Throw(BuiltinBase):
+    def compile(self):
+        self.rh.pushRegister(mips.R_A0)
+        self.bc.invokestatic("CRunTime/getRegisteredObject(I)Ljava/lang/Object;")
+        self.bc.checkcast("java/lang/Throwable")
+        self.bc.athrow()
+
+    def maxOperandStackHeight(self):
+        return 1
+
 def match(controller, instruction, name):
     names = {
 	"__NOPH_try": Try,
+	"__NOPH_throw": Throw,
 	"__NOPH_catch": Catch,
 	}
     try:
@@ -64,4 +75,5 @@ def match(controller, instruction, name):
 
 builtins.alwaysInline.append("__NOPH_try")
 builtins.alwaysInline.append("__NOPH_catch")
+builtins.alwaysInline.append("__NOPH_throw")
 builtins.addBuiltin(match)
