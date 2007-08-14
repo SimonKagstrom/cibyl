@@ -198,7 +198,6 @@ static int eof(FILE *fp)
 
 static cibyl_fops_t record_store_fops =
 {
-  .uri = "recordstore://",
   .priv_data_size = sizeof(record_store_file_t),
   .open = open,
   .close = close,
@@ -212,5 +211,5 @@ static cibyl_fops_t record_store_fops =
 
 static void __attribute__((constructor))register_fs(void)
 {
-  cibyl_fops_register(&record_store_fops, 0);
+  cibyl_fops_register("recordstore://", &record_store_fops, 0);
 }
