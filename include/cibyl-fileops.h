@@ -15,19 +15,22 @@
 
 typedef enum
 {
-  READ,     /* "r"  */
-  WRITE,    /* "w"  */
-  APPEND,   /* "a"  */
-  TRUNCATE, /* "w+" */
+  READ,          /* "r"  */
+  READ_WRITE,    /* "r+"  */
+  WRITE,         /* "w"  */
+  APPEND,        /* "a"  */
+  READ_APPEND,   /* "a+"  */
+  READ_TRUNCATE, /* "w+" */
 } cibyl_fops_open_mode_t;
 
 typedef struct s_cibyl_fops
 {
   const char *uri;  /* The uri used to identify this mode */
   const size_t priv_data_size;
+  int keep_uri;
 
   /* Open a file, return -1 if failed */
-  int (*open)(FILE *fp, const char *path, cibyl_fops_open_mode_t mode);
+  FILE *(*open)(const char *path, cibyl_fops_open_mode_t mode);
   int (*close)(FILE *fp);  /* Close the file  */
 
   size_t (*read)(FILE *fp, void *dst, size_t amount);  /* Read from the file  */
@@ -65,5 +68,14 @@ void cibyl_unregister_fops(cibyl_fops_t *fops);
  * @return a pointer to the new file
  */
 FILE *cibyl_file_alloc(cibyl_fops_t *fop);
+
+/**
+ * Allocate a FILE structure
+ *
+ * @param fp the FILE structure to free
+ *
+ * @throws NOPH_OutOfMemoryException if memory is out
+ */
+void cibyl_file_free(FILE *fp);
 
 #endif /* !__CIBYL_FILEOPS_H__ */
