@@ -17,6 +17,7 @@ extern "C" {
 #endif
 
 #include <cibyl.h>
+#include <cibyl-fileops.h>
 #include <stdio.h>
 
 typedef int NOPH_InputStream_t;
@@ -29,7 +30,7 @@ typedef int NOPH_EOFException_t;
 /* Input stream stuff */
 int NOPH_InputStream_available(NOPH_InputStream_t is); /* Throws */
 int NOPH_InputStream_read(NOPH_InputStream_t is); /* Throws */
-int NOPH_InputStream_read_into(NOPH_InputStream_t is, char* vec, int size); /* Not generated */
+int NOPH_InputStream_read_into(NOPH_InputStream_t is, char* vec, int size, int* eof_ptr); /* Not generated */
 void NOPH_InputStream_reset(NOPH_InputStream_t is); /* Throws */
 void NOPH_InputStream_mark(NOPH_InputStream_t is, int readLimit);
 void NOPH_InputStream_markSupported(NOPH_InputStream_t is); /* Throws */
@@ -44,18 +45,44 @@ void NOPH_OutputStream_writeShort(NOPH_OutputStream_t os, short i); /* Throws */
 void NOPH_OutputStream_flush(NOPH_OutputStream_t os); /* Throws */
 void NOPH_OutputStream_close(NOPH_OutputStream_t os); /* Throws */
 
+/* EOFException */
+NOPH_EOFException_t NOPH_EOFException_new(void);
+NOPH_EOFException_t NOPH_EOFException_new_string(char* s);
+
+/* --- Non-Java functionality --- */
+/* For "inheriting" input and output file systems */
+extern cibyl_fops_t NOPH_InputStream_fops;
+extern cibyl_fops_t NOPH_OutputStream_fops;
+
+typedef struct
+{
+  NOPH_InputStream_t is;
+  long is_fp;
+  int eof;
+} NOPH_InputStream_file_t;
+
+typedef struct
+{
+  NOPH_OutputStream_t os;
+} NOPH_OutputStream_file_t;
+
 /**
  * Create a ANSI C file from an OutputStream. The resulting FILE is
  * write-only and does not support fseek, feof etc.
  *
  * @param os the output stream to use as base
- * @return a pointer to the new output stream
+ * @return a pointer to the new FILE output stream
  */
 extern FILE *NOPH_OutputStream_createFILE(NOPH_OutputStream_t os);
 
-/* EOFException */
-NOPH_EOFException_t NOPH_EOFException_new(void);
-NOPH_EOFException_t NOPH_EOFException_new_string(char* s);
+/**
+ * Create a ANSI C file from an InputStream. The resulting FILE is
+ * read-only and supports normal operations such as fseek, feof etc.
+ *
+ * @param os the input stream to use as base
+ * @return a pointer to the new FILE input stream
+ */
+extern FILE *NOPH_InputStream_createFILE(NOPH_InputStream_t os);
 
 #if defined(__cplusplus)
 }
