@@ -13,6 +13,11 @@
 #define __CIBYL_FILEOPS_H__
 #include <stdio.h>
 
+/**
+ * @file cibyl-fileops.h Describes Cibyl "filesystems" (implementations
+ * of the ANSI C file operations)
+ */
+
 typedef enum
 {
   READ,          /* "r"  */
@@ -50,21 +55,22 @@ typedef struct s_cibyl_fops
  * @param is_default boolean value to tell if this should be the
  *        default filesystem (i.e., fallback if no URI match)
  */
-void cibyl_register_fops(cibyl_fops_t *fops, int is_default);
+void cibyl_fops_register(cibyl_fops_t *fops, int is_default);
 
 /**
  * Deregister a "filesystem"
  *
  * @param fops the filesystem to deregister
  */
-void cibyl_unregister_fops(cibyl_fops_t *fops);
+void cibyl_fops_unregister(cibyl_fops_t *fops);
 
 /**
  * Allocate a new FILE structure and set it up for @a fop
  *
  * @param fop the fop to associate with the file
  *
- * @throws NOPH_OutOfMemoryException if memory is up
+ * @throws NOPH_OutOfMemoryException_t if memory is up
+ *
  * @return a pointer to the new file
  */
 FILE *cibyl_file_alloc(cibyl_fops_t *fop);
@@ -73,9 +79,19 @@ FILE *cibyl_file_alloc(cibyl_fops_t *fop);
  * Allocate a FILE structure
  *
  * @param fp the FILE structure to free
- *
- * @throws NOPH_OutOfMemoryException if memory is out
  */
 void cibyl_file_free(FILE *fp);
+
+/**
+ * Return the @a cibyl_fops_open_mode_t mode for a given fopen-style
+ * mode
+ *
+ * @param mode the mode to convert
+ *
+ * @return the converted mode
+ *
+ * @throws NOPH_Exception_t if the mode cannot be converted
+ */
+cibyl_fops_open_mode_t cibyl_file_get_mode(const char *mode);
 
 #endif /* !__CIBYL_FILEOPS_H__ */
