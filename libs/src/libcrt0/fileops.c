@@ -74,7 +74,7 @@ typedef struct
   cibyl_fops_open_mode_t mode;
 } mode_t;
 
-mode_t mode_mapping[] =
+static mode_t mode_mapping[] =
 {
   {"r" , READ},
   {"r+", READ_WRITE},
@@ -85,9 +85,8 @@ mode_t mode_mapping[] =
   {NULL, READ}
 };
 
-FILE *fopen(const char *path, const char *in_mode)
+cibyl_fops_open_mode_t cibyl_file_get_mode(const char *in_mode)
 {
-  FILE *out = NULL;
   mode_t *m = NULL;
   int i;
 
@@ -100,6 +99,17 @@ FILE *fopen(const char *path, const char *in_mode)
   if (!m)
     NOPH_throw(NOPH_Exception_new_string("Unsupported mode for fopen"));
 
+  return m->mode;
+}
+
+FILE *fopen(const char *path, const char *in_mode)
+{
+  cibyl_fops_open_mode_t mode;
+  FILE *out = NULL;
+  int i;
+
+  mode = cibyl_file_get_mode(in_mode);
+
   for (i = 0; i < fops.n_fops; i++)
     {
       cibyl_fops_t *cur = fops.table[i];
@@ -111,7 +121,7 @@ FILE *fopen(const char *path, const char *in_mode)
 	  /* URI match! */
           if (cur->keep_uri)
             len = 0;
-	  if ( !(out = cur->open(path + len, m->mode)) )
+	  if ( !(out = cur->open(path + len, mode)) )
             return NULL;
           return out;
 	}
@@ -120,7 +130,7 @@ FILE *fopen(const char *path, const char *in_mode)
   /* Found nothing, return the default */
   if (fops.fallback)
     {
-      if ( !(out = fops.fallback->open(path, m->mode)) )
+      if ( !(out = fops.fallback->open(path, mode)) )
         return NULL;
     }
 
@@ -179,6 +189,11 @@ void clearerr(FILE* fp)
 int ferror(FILE* fp)
 {
   return 0;
+}
+
+int feof(FILE *fp)
+{
+  return fp->ops->eof(fp);
 }
 
 int fflush(FILE* fp)
