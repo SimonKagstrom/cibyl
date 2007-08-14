@@ -1,15 +1,21 @@
+#include <string.h>
+#include <stdlib.h>
+
 #include <cibyl-fileops.h>
 #include <cibyl-memoryfs.h>
+
+#define min(x,y) ( (x) < (y) ? (x) : (y) )
+#define max(x,y) ( (x) > (y) ? (x) : (y) )
 
 typedef struct
 {
   void *data;
   size_t data_size;
-  off_t fp;
+  long fp;
   int allocate;
 } memory_file_t;
 
-static int seek(FILE *p, long offset, int whence)
+static int seek(FILE *fp, long offset, int whence)
 {
   memory_file_t *p = (memory_file_t*)fp->priv;
   int old = p->fp;
@@ -35,13 +41,13 @@ static int seek(FILE *p, long offset, int whence)
   return 0;
 }
 
-static int tell(FILE *p)
+static long tell(FILE *fp)
 {
   memory_file_t *p = (memory_file_t*)fp->priv;
   return p->fp;
 }
 
-static size_t read(FILE *p, void *ptr, size_t in_size)
+static size_t read(FILE *fp, void *ptr, size_t in_size)
 {
   memory_file_t *p = (memory_file_t*)fp->priv;
   size_t size = min(in_size, p->data_size - p->fp);
@@ -53,10 +59,11 @@ static size_t read(FILE *p, void *ptr, size_t in_size)
   return size;
 }
 
-static size_t write(FILE *fp, void *ptr, size_t in_size)
+static size_t write(FILE *fp, const void *ptr, size_t in_size)
 {
   memory_file_t *p = (memory_file_t*)fp->priv;
   size_t new_size = max(p->fp + in_size, p->data_size);
+  long old = p->fp;
 
   if (new_size > p->data_size)
     {
@@ -69,16 +76,18 @@ static size_t write(FILE *fp, void *ptr, size_t in_size)
     memcpy( p->data + p->fp, ptr, in_size );
   p->fp = p->fp + in_size;
 
-  return cnt;
+  return p->fp - old;
 }
 
-static void close(FILE *fp)
+static int close(FILE *fp)
 {
   memory_file_t *p = (memory_file_t*)fp->priv;
 
   /* If this is allocated data, free it on closing */
   if (p->allocate)
     free(p->data);
+
+  return 0;
 }
 
 static int eof(FILE *fp)
@@ -91,7 +100,7 @@ static int eof(FILE *fp)
 static cibyl_fops_t memory_fops =
 {
   .uri = NULL,  /* Not applicable */
-  .priv_data_size = sizeof(mem_file_t),
+  .priv_data_size = sizeof(memory_file_t),
   .open = NULL, /* Not applicable */
   .close = close,
   .read = read,
@@ -100,6 +109,13 @@ static cibyl_fops_t memory_fops =
   .tell = tell,
   .eof = eof,
 };
+
+void *NOPH_MemoryFile_getDataPtr(FILE *fp)
+{
+  memory_file_t *p = (memory_file_t*)fp->priv;
+
+  return p->data;
+}
 
 FILE *NOPH_MemoryFile_open(void *ptr, size_t size, int allocate)
 {
@@ -161,7 +177,7 @@ FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *mode)
   fclose(tmp);
 
   /* Open the memory file */
-  out = NOPH_memoryFile_open(data, size, 1);
+  out = NOPH_MemoryFile_open(data, size, 1);
   if (!out)
     free(data); /* Should never happen, but OK */
   return out;
