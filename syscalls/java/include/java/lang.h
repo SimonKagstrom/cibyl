@@ -31,7 +31,7 @@ void NOPH_String_toCharPtr(NOPH_String_t obj, char* addr, int maxlen); /* Not ge
 
 /* Should return a 64-bit value - we get wraparound problems otherwise! */
 void __NOPH_System_currentTimeMillis(int64_t* p); /* Not generated */
-static inline int64_t NOPH_System_currentTimeMillis()
+static inline int64_t NOPH_System_currentTimeMillis(void)
 {
   int64_t out;
   __NOPH_System_currentTimeMillis(&out);
