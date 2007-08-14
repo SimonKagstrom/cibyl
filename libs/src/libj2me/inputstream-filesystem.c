@@ -78,21 +78,12 @@ static size_t read(FILE *fp, void *ptr, size_t in_size)
     {
       int n;
       int error;
+      size_t size = min(in_size, 8192);
 
-      NOPH_try(exception_handler, (void*)&error)
-        {
-          size_t size = min(in_size, 8192);
-
-          n = NOPH_InputStream_read_into(p->is, ptr, size, &p->eof);
-          p->is_fp += n;
-          in_size -= n;
-          ptr += n;
-        } NOPH_catch();
-      if (error)
-        {
-          p->eof = 1;
-          break;
-        }
+      n = NOPH_InputStream_read_into(p->is, ptr, size, &p->eof);
+      p->is_fp += n;
+      in_size -= n;
+      ptr += n;
     }
 
   return p->is_fp - before;
@@ -115,7 +106,6 @@ static int eof(FILE *fp)
 /* The fops structure for resource files */
 cibyl_fops_t NOPH_InputStream_fops =
 {
-  .uri = NULL,
   .priv_data_size = sizeof(NOPH_InputStream_file_t),
   .open = NULL,
   .close = close,
