@@ -11,7 +11,7 @@
 ######################################################################
 SUBDIRS =
 OBJS    = ansi.o smalloc.o printf.o vsnprintf.o string.o dirent.o \
-          stdlib.o outputstream-filesystem.o
+          stdlib.o
 ALL_TARGETS=install
 EXTRA_CLEAN=libc.a
 

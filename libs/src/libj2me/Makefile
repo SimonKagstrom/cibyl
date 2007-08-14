@@ -11,7 +11,8 @@
 ######################################################################
 SUBDIRS =
 OBJS    = resource-filesystem.o recordstore-filesystem.o \
-          inputstream-filesystem.o connector-filesystem.o
+          inputstream-filesystem.o connector-filesystem.o \
+          outputstream-filesystem.o
 ALL_TARGETS=install
 EXTRA_CLEAN=libj2me.a
 
