@@ -12,14 +12,6 @@ typedef struct
   NOPH_InputStream_file_t is_file;
 } resource_file_t;
 
-static void exception_handler(NOPH_Exception_t ex, void *arg)
-{
-  int *p = (int*)arg;
-  *p = 1;
-
-  NOPH_delete(ex);
-}
-
 static FILE *open(const char *path,
                   cibyl_fops_open_mode_t mode)
 {
@@ -31,7 +23,7 @@ static FILE *open(const char *path,
   /* Try to open the resource stream. They are always read-only, so
    * just ignore the mode
    */
-  NOPH_try(exception_handler, (void*)&error)
+  NOPH_try(NOPH_setter_exception_handler, (void*)&error)
     {
       NOPH_GameCanvas_t gc = NOPH_GameCanvas_get();
       NOPH_Class_t cl = NOPH_Object_getClass(gc);
@@ -53,7 +45,6 @@ static FILE *open(const char *path,
 /* The fops structure for resource files */
 static cibyl_fops_t resource_fops =
 {
-  .uri = "resource://",
   .priv_data_size = sizeof(resource_file_t),
   .open  = open,
   .close = NULL, /* Set below */
@@ -74,5 +65,5 @@ static void __attribute__((constructor))register_fs(void)
   resource_fops.eof   = NOPH_InputStream_fops.eof;
   resource_fops.flush = NOPH_InputStream_fops.flush;
 
-  cibyl_fops_register(&resource_fops, 1);
+  cibyl_fops_register("resource://", &resource_fops, 1);
 }
