@@ -19,7 +19,7 @@ OBJS    = main.o run-tests.o console.o \
           tests/varargs.o tests/libm.o tests/memory.o tests/java-exceptions.o \
 	  tests/unsigned-int.o tests/file-operations.o tests/jr.o tests/jr_test.o \
           tests/relocation.o
-LDLIBS  = -lc -lm -lsoftfloat -lj2me
+LDLIBS  = -lc -lm -lsoftfloat -lj2me -ljsr075
 
 # The compilation options, set to e.g., -O to run all optimizations
 CIBYL_MIPS2JAVA_OPTS ?=
