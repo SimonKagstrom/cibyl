@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <cibyl.h>
 
+#include <java/lang.h>
+
 extern unsigned long __ctors_begin;
 extern unsigned long __ctors_end;
 extern unsigned long __dtors_begin;
@@ -36,6 +38,15 @@ void crt0_run_global_constructors(void)
 void crt0_run_global_destructors(void)
 {
   run_list(&__dtors_begin, &__dtors_end);
+}
+
+/* This is a quite common case for an exception handler */
+void NOPH_setter_exception_handler(NOPH_Exception_t ex, void *arg)
+{
+  int *p = (int*)arg;
+  *p = 1;
+
+  NOPH_delete(ex);
 }
 
 /* Dummy functions - handled by builtins always */
