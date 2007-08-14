@@ -212,5 +212,5 @@ static cibyl_fops_t record_store_fops =
 
 static void __attribute__((constructor))register_fs(void)
 {
-  cibyl_register_fops(&record_store_fops, 1);
+  cibyl_fops_register(&record_store_fops, 0);
 }
