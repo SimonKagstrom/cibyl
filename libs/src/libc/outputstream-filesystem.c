@@ -2,14 +2,9 @@
 #include <java/io.h>
 #include <java/lang.h>
 
-typedef struct
-{
-  NOPH_OutputStream_t os;
-} outputstream_file_t;
-
 static int close(FILE *fp)
 {
-  outputstream_file_t *p = (outputstream_file_t *)fp->priv;
+  NOPH_OutputStream_file_t *p = (NOPH_OutputStream_file_t *)fp->priv;
 
   NOPH_OutputStream_close(p->os);
 
@@ -18,7 +13,7 @@ static int close(FILE *fp)
 
 static size_t write(FILE *fp, const void *ptr, size_t in_size)
 {
-  outputstream_file_t *p = (outputstream_file_t *)fp->priv;
+  NOPH_OutputStream_file_t *p = (NOPH_OutputStream_file_t *)fp->priv;
   char *s;
   int n = 0;
 
@@ -30,7 +25,7 @@ static size_t write(FILE *fp, const void *ptr, size_t in_size)
 
 static int flush(FILE* fp)
 {
-  outputstream_file_t *p = (outputstream_file_t *)fp->priv;
+  NOPH_OutputStream_file_t *p = (NOPH_OutputStream_file_t *)fp->priv;
 
   NOPH_OutputStream_flush(p->os);
 
@@ -38,10 +33,10 @@ static int flush(FILE* fp)
 }
 
 /* The fops structure for resource files */
-static cibyl_fops_t resource_fops =
+cibyl_fops_t NOPH_OutputStream_fops =
 {
   .uri = NULL,
-  .priv_data_size = sizeof(outputstream_file_t),
+  .priv_data_size = sizeof(NOPH_OutputStream_file_t),
   .open = NULL,
   .close = close,
   .read = NULL,
@@ -55,11 +50,11 @@ static cibyl_fops_t resource_fops =
 FILE *NOPH_OutputStream_createFILE(NOPH_OutputStream_t os)
 {
   FILE *out;
-  outputstream_file_t *p;
+  NOPH_OutputStream_file_t *p;
 
   /* Get a new FILE object */
-  out = cibyl_file_alloc(&resource_fops);
-  p = (outputstream_file_t*)out->priv;
+  out = cibyl_file_alloc(&NOPH_OutputStream_fops);
+  p = (NOPH_OutputStream_file_t*)out->priv;
 
   p->os = os;
 
