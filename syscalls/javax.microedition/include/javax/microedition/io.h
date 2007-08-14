@@ -39,8 +39,12 @@ typedef int NOPH_RecordStore_t;
 
 /* Connector */
 NOPH_DataInputStream_t NOPH_Connector_openDataInputStream(const char* name); /* Throws */
-NOPH_FileConnection_t NOPH_Connector_openFileConnection(const char* name); /* Not generated */
 NOPH_FileConnection_t NOPH_Connector_openFileConnection_mode(const char* name, int mode); /* Not generated */
+
+static inline NOPH_FileConnection_t NOPH_Connector_openFileConnection(const char* name)
+{
+  NOPH_Connector_openFileconnection_mode(name, NOPH_Connector_READ);
+}
 
 /* FileConnection (JSR-075) */
 NOPH_InputStream_t NOPH_FileConnection_openInputStream(NOPH_FileConnection_t fc); /* Throws */
