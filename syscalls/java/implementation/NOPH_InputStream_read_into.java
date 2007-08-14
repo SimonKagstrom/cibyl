@@ -1,7 +1,7 @@
 /* From the optimized fread by Ehud Shabtai */
 public static final int NOPH_InputStream_read_into(int obj, int ptr, int size, int eof_addr) throws Exception
 {
-  InputStream is = (InputStream)CRunTime.objectRepository[__obj];
+  InputStream is = (InputStream)CRunTime.objectRepository[obj];
   int count = 0;
 
   byte[] buff = new byte[size];
@@ -9,12 +9,13 @@ public static final int NOPH_InputStream_read_into(int obj, int ptr, int size, i
   try {
     int r = is.read(buff);
     if (r < 0) throw new EOFException();
-    if (r > 0) CRunTime.memcpy(ptr, buff, 0, r);
-    buff = null;
+    CRunTime.memcpy(ptr, buff, 0, r);
+    count += r;
   }
-  catch(EOFException) {
-    CRunTime.memoryWriteWord( addr_stdout, 1 );
+  catch(EOFException e) {
+    CRunTime.memoryWriteWord( eof_addr, 1 );
   }
+  buff = null;
 
-  return r;
+  return count;
 }
