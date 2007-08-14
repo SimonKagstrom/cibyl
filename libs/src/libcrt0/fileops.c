@@ -13,6 +13,8 @@
 #include <assert.h>
 #include <cibyl-fileops.h>
 
+#include <java/lang.h>
+
 typedef struct
 {
   cibyl_fops_t **table;
@@ -66,18 +68,37 @@ void cibyl_file_free(FILE *fp)
   free(fp);
 }
 
+typedef struct
+{
+  const char *str;
+  cibyl_fops_open_mode_t mode;
+} mode_t;
+
+mode_t mode_mapping[] =
+{
+  {"r" , READ},
+  {"r+", READ_WRITE},
+  {"w" , WRITE},
+  {"a" , APPEND},
+  {"a+", READ_APPEND},
+  {"w+", READ_TRUNCATE},
+  {NULL, READ}
+};
+
 FILE *fopen(const char *path, const char *in_mode)
 {
   FILE *out = NULL;
-  cibyl_fops_open_mode_t mode = READ;
+  mode_t *m = NULL;
   int i;
 
-  if (strchr(in_mode, 'w') != NULL)
-    mode = WRITE;
-  if (strchr(in_mode, 'a') != NULL)
-    mode = APPEND;
-  if (strstr(in_mode, "a+") != NULL)
-    mode = APPEND;
+  /* Lookup the mode among the mode strings */
+  for (i = 0; i < sizeof(mode_mapping) / sizeof(mode_t); i++)
+    {
+      if (strcmp(in_mode, mode_mapping[i].str) == 0)
+        m = &mode_mapping[i];
+    }
+  if (!m)
+    NOPH_throw(NOPH_Exception_new_string("Unsupported mode for fopen"));
 
   for (i = 0; i < fops.n_fops; i++)
     {
@@ -88,28 +109,19 @@ FILE *fopen(const char *path, const char *in_mode)
       if (uri && strncmp(uri, path, len) == 0)
 	{
 	  /* URI match! */
-	  if ( !(out = cibyl_file_alloc(cur)) )
-	    return NULL;
-
-	  if (cur->open(out, path + len, mode) < 0)
-	    {
-	      free(out);
-	      return NULL;
-	    }
-	    return out;
+          if (cur->keep_uri)
+            len = 0;
+	  if ( !(out = cur->open(path + len, m->mode)) )
+            return NULL;
+          return out;
 	}
     }
 
   /* Found nothing, return the default */
   if (fops.fallback)
     {
-      if ( !(out = cibyl_file_alloc(fops.fallback)) )
-	return NULL;
-      if (fops.fallback->open(out, path, mode) < 0)
-	{
-	  free(out);
-	  return NULL;
-	}
+      if ( !(out = fops.fallback->open(path, m->mode)) )
+        return NULL;
     }
 
   return out;
@@ -221,7 +233,7 @@ int __fputs(const char* ptr, FILE* fp)
   for (p = (char*)ptr; *p; p++, n++)
     {
       if (fwrite(p, 1, 1, fp) < 0)
-        return EOF;
+	return EOF;
     }
 
   return n;
