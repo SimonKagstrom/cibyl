@@ -1,4 +1,9 @@
 Cibyl (12)
+	* Added generation of Doxygen documentation (run make clean first)
+
+	* Bug fix in the global jump table generation: Static functions
+	incorrectly called the same label if they have the same name
+
 	* Implemented NOPH_throw which allows throwing of Java exceptions
 	from C.
 
