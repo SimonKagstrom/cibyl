@@ -182,14 +182,4 @@ void exceptions_run(void)
     FAIL("opening %s should not throw an exception\n", s);
   else
     PASS("opening %s did not throw an exception\n", s);
-
-  s = "bttp://spel.bth.se/~ska/index.html"; /* hopefully never a protocol :-) */
-  NOPH_try(handler_file_io, (void*)&threw_exception) {
-    NOPH_Connector_openDataInputStream(s);
-    threw_exception = 0;
-  } NOPH_catch();
-  if (!threw_exception)
-    FAIL("opening %s should throw an exception\n", s);
-  else
-    PASS("opening %s threw an exception\n", s);
 }
