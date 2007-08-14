@@ -5,6 +5,8 @@
 
 #define min(x,y) ( (x) < (y) ? (x) : (y) )
 
+static cibyl_fops_t resource_fops;
+
 typedef struct
 {
   NOPH_InputStream_t is;
@@ -20,27 +22,32 @@ static void exception_handler(NOPH_Exception_t ex, void *arg)
   NOPH_delete(ex);
 }
 
-static int open(FILE *fp, const char *path,
-                cibyl_fops_open_mode_t mode)
+static FILE *open(const char *path,
+                  cibyl_fops_open_mode_t mode)
 {
+  FILE *fp;
   NOPH_GameCanvas_t gc = NOPH_GameCanvas_get();
-  resource_file_t *p = (resource_file_t *)fp->priv;
+  NOPH_InputStream_t is;
+  resource_file_t *p;
   int error;
-
-  p->is_fp = 0;
-  p->eof = 0;
 
   /* Try to open the resource stream. They are always read-only, so
    * just ignore the mode
    */
   NOPH_try(exception_handler, (void*)&error)
     {
-      p->is = NOPH_Class_getResourceAsStream(gc, (char*)path);
+      is = NOPH_Class_getResourceAsStream(gc, (char*)path);
     } NOPH_catch();
   if (error)
-    return -1;
+    return NULL;
 
-  return 0;
+  fp = cibyl_file_alloc(&resource_fops);
+  p = (resource_file_t *)fp->priv;
+  p->is_fp = 0;
+  p->eof = 0;
+  p->is = is;
+
+  return fp;
 }
 
 static int close(FILE *fp)
@@ -110,7 +117,7 @@ static size_t read(FILE *fp, void *ptr, size_t in_size)
         {
           size_t size = min(in_size, 8192);
 
-          n = NOPH_InputStream_read_into(p->is, ptr, size);
+          n = NOPH_InputStream_read_into(p->is, ptr, size, &p->eof);
           p->is_fp += n;
           in_size -= n;
           ptr += n;
