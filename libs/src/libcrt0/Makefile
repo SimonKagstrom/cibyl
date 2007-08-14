@@ -10,7 +10,7 @@
 ##
 ######################################################################
 SUBDIRS =
-OBJS    = helpers.o fileops.o
+OBJS    = helpers.o fileops.o memory-filesystem.o
 ALL_TARGETS=install
 EXTRA_CLEAN=libcrt0.a
 
