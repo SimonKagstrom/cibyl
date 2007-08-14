@@ -1,4 +1,7 @@
 Cibyl (12)
+	* Implemented NOPH_throw which allows throwing of Java exceptions
+	from C.
+
 	* New file operations structure, which makes the standard "FILE"
 	stuff much more useful and also the implementation more
 	sane. Almost everything is now implemented in C which is also
