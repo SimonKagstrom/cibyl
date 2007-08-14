@@ -426,7 +426,7 @@ class GlobalJumptabMethod(CodeBlock):
     def generateLookupTable(self):
 	out = []
 	for fn in self.functions:
-	    cur = (fn.address, "lab_" + fn.name)
+	    cur = (fn.address, "lab_%s_%x" % (fn.name, fn.address))
 	    out.append(cur)
 	return out
 
@@ -463,7 +463,7 @@ class GlobalJumptabMethod(CodeBlock):
 
 	for fn in self.functions:
             method = fn.getJavaMethod()
-	    self.controller.emit("lab_" + fn.name + ":")
+	    self.controller.emit("lab_%s_%x:" % (fn.name, fn.address))
 	    for r in method.getRegistersToPass():
                 if r == mips.R_FNA:
                     self.bc.pushConst( fn.getIndex() )
