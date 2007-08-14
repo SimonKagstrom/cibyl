@@ -18,18 +18,39 @@
 typedef struct
 {
   cibyl_fops_t **table;
-  cibyl_fops_t *fallback;
+  const char   **uris;
+  cibyl_fops_t  *fallback;
   int n_fops;
 } all_fops_t;
 
 all_fops_t fops;
 
-void cibyl_fops_register(cibyl_fops_t *fop, int is_default)
+void cibyl_fops_register(const char *uri, cibyl_fops_t *fop, int is_default)
 {
-  int idx = fops.n_fops++;
+  int idx = -1;
+  int i;
 
-  fops.table = (cibyl_fops_t**)realloc(fops.table, sizeof(cibyl_fops_t*) * fops.n_fops);
+  for (i = 0; i < fops.n_fops; i++)
+    {
+      if ( strcmp(uri, fops.uris[i]) == 0 &&
+           fop->priority > fops.table[i]->priority)
+        {
+          /* Replace the current one if the uris match and the
+           *  priority is above the old one */
+          idx = i;
+          break;
+        }
+    }
+
+  if (idx == -1)
+    {
+      /* Not found, make space for it */
+      idx = fops.n_fops++;
+      fops.table = (cibyl_fops_t**)realloc(fops.table, sizeof(cibyl_fops_t*) * fops.n_fops);
+      fops.uris = (const char**)realloc(fops.uris, sizeof(char*) * fops.n_fops);
+    }
   fops.table[idx] = fop;
+  fops.uris[idx] = uri;
   if (is_default)
     fops.fallback = fop;
   assert(fops.table);
@@ -48,7 +69,7 @@ void cibyl_fops_unregister(cibyl_fops_t *fop)
 	  return;
 	}
     }
-  assert(0 && "fop has not been registered but is unregistered");
+  /* Can happen */
 }
 
 FILE *cibyl_file_alloc(cibyl_fops_t *fop)
@@ -113,7 +134,7 @@ FILE *fopen(const char *path, const char *in_mode)
   for (i = 0; i < fops.n_fops; i++)
     {
       cibyl_fops_t *cur = fops.table[i];
-      const char *uri = cur->uri;
+      const char *uri = fops.uris[i];
       int len = uri ? strlen(uri) : -1;
 
       if (uri && strncmp(uri, path, len) == 0)
