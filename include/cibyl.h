@@ -79,6 +79,31 @@ extern void __NOPH_throw(NOPH_Exception_t exception);
  */
 #define NOPH_catch_exception(exceptionClass) NOPH_catch()
 
+/**
+ * Standard exception handler that sets the argument to 1 if an
+ * exception occurred. This should be passed to @a NOPH_try, and the
+ * argument is a typecasted int pointer. Example:
+ *
+ * <pre>
+ * int error = 0;
+ *
+ * NOPH_try(NOPH_setter_exception_handler, &error) {
+ * ...
+ * } NOPH_catch()
+ * if (error)
+ *    printf("An exception occurred - do something here!");
+ * </pre>
+ *
+ * @param the exception (passed automatically)
+ * @param the exception argument (passed automatically). This is typecast
+ *        to an int pointer
+ *
+ * @see NOPH_try, NOPH_catch
+ *
+ */
+void NOPH_setter_exception_handler(NOPH_Exception_t ex, void *arg);
+
+
 #endif /* __ASSEMBLER__ */
 
 #endif /* !__CIBYL_H__ */
