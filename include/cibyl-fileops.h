@@ -30,9 +30,9 @@ typedef enum
 
 typedef struct s_cibyl_fops
 {
-  const char *uri;  /* The uri used to identify this mode */
   const size_t priv_data_size;
   int keep_uri;
+  int priority;
 
   /* Open a file, return -1 if failed */
   FILE *(*open)(const char *path, cibyl_fops_open_mode_t mode);
@@ -51,11 +51,12 @@ typedef struct s_cibyl_fops
 /**
  * Register a new "filesystem" with Cibyl.
  *
+ * @param uri the URI to register the filesystem with. Must not be free'd
  * @param fops the file operations structure to register
  * @param is_default boolean value to tell if this should be the
  *        default filesystem (i.e., fallback if no URI match)
  */
-void cibyl_fops_register(cibyl_fops_t *fops, int is_default);
+void cibyl_fops_register(const char *uri, cibyl_fops_t *fop, int is_default);
 
 /**
  * Deregister a "filesystem"
