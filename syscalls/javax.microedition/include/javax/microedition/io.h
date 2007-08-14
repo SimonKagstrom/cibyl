@@ -43,7 +43,7 @@ NOPH_FileConnection_t NOPH_Connector_openFileConnection_mode(const char* name, i
 
 static inline NOPH_FileConnection_t NOPH_Connector_openFileConnection(const char* name)
 {
-  NOPH_Connector_openFileConnection_mode(name, NOPH_Connector_READ);
+  return NOPH_Connector_openFileConnection_mode(name, NOPH_Connector_READ);
 }
 
 /* FileConnection (JSR-075) */
