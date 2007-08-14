@@ -27,7 +27,7 @@ ASOPTS   = -G0 -Wall -Wa,--no-warn -g -mips1 -mno-check-zero-division -mno-abica
 COPTS    = -G0 -DCIBYL=1 -g -msoft-float -fno-optimize-sibling-calls -nostdinc -Wall -Wa,--no-warn -mips1 -mno-check-zero-division -Os -fno-pic -mno-abicalls $(INCLUDES) $(CFLAGS) $(DEFINES)
 LDLIBS  ?=
 LDOPTS_DEBUG = -L$(CIBYL_BASE)/libs/lib/ -EB -nostdlib -T$(CIBYL_BASE)/build/linker.lds
-LDOPTS   = $(LDOPTS_DEBUG) --emit-relocs
+LDOPTS   = $(LDOPTS_DEBUG) --emit-relocs --whole-archive
 
 # User controllable
 CIBYL_SYSCALL_DIR    ?= $(CIBYL_BASE)/syscalls
