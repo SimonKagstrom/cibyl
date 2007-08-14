@@ -16,6 +16,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
+static cibyl_fops_t record_store_fops;
+
 typedef struct
 {
   FILE *memfs_fp;
@@ -72,10 +74,11 @@ static void *get_record(NOPH_RecordStore_t rs, int id)
  *
  * (the recordstore:// part is removed by fopen)
  */
-static int open(FILE *fp, const char *path,
-                cibyl_fops_open_mode_t mode)
+static FILE *open(const char *path,
+                  cibyl_fops_open_mode_t mode)
 {
-  record_store_file_t *p = (record_store_file_t *)fp->priv;
+  FILE *fp;
+  record_store_file_t *p;
   char *record_number = strchr(path, ':');
   char *store_name;
   void *data = NULL;
@@ -83,10 +86,14 @@ static int open(FILE *fp, const char *path,
   int error;
 
   if (!record_number)
-    return -1;
+    return NULL;
 
   store_name = strdup(path);
   *strchr(store_name, ':') = '\0'; /* MUST exist because of above */
+
+  if ( !(fp = cibyl_file_alloc(&record_store_fops)) )
+    return NULL;
+  p = (record_store_file_t *)fp->priv;
 
   /* Open the store and set the id */
   NOPH_try(exception_handler, (void*)&error)
@@ -97,7 +104,8 @@ static int open(FILE *fp, const char *path,
   if (error)
     {
       free(store_name);
-      return -1;
+      cibyl_file_free(fp);
+      return NULL;
     }
   p->id = atoi(record_number + 1);
   p->close_helper = close_write; /* assume write */
@@ -105,24 +113,24 @@ static int open(FILE *fp, const char *path,
 
   switch (mode)
     {
-    case TRUNCATE:
+    case READ_TRUNCATE:
       /* Just allocate space without reading anything */
       break;
     case WRITE:
-    case APPEND:
+    case READ_APPEND:
       /* Write or append - read into a buffer */
       if ( !(data = get_record(p->rs, p->id)) )
-        return -1;
+        goto err;
     case READ:
       /* Open and read everything into a buffer */
       if ( !(data = get_record(p->rs, p->id)) )
-        return -1;
+        goto err;
       /* Do not update on close */
       p->close_helper = close_read;
       break;
     default:
       assert(0 && "Invalid mode");
-      return -1;
+      return NULL;
     }
 
   /* Create the memory file */
@@ -131,7 +139,10 @@ static int open(FILE *fp, const char *path,
   if (mode == APPEND)
     fseek(p->memfs_fp, 0, SEEK_END);
 
-  return 0;
+  return fp;
+ err:
+  free(fp);
+  return NULL;
 }
 
 static int close(FILE *fp)
@@ -196,6 +207,7 @@ static cibyl_fops_t record_store_fops =
   .seek = seek,
   .tell = tell,
   .eof = eof,
+  .flush = NULL,
 };
 
 static void __attribute__((constructor))register_fs(void)
