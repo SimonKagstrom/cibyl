@@ -25,12 +25,79 @@ static void exception_handler(NOPH_Exception_t ex, void *arg)
   NOPH_delete(ex);
 }
 
+FILE *NOPH_FileConnection_openFILE(const char *path, const char *in_mode)
+{
+  cibyl_fops_open_mode_t mode = cibyl_file_get_mode(in_mode);
+  NOPH_FileConnection_t fc;
+  FILE *fp;
+  connector_file_t *p;
+  int error = 0;
+
+  /* Handle the write case by simply returning a FILE for the output stream */
+  if (mode == WRITE || mode == APPEND || mode == READ_TRUNCATE)
+    {
+      NOPH_OutputStream_t os;
+      FILE *out;
+
+      fc = NOPH_Connector_openFileConnection_mode(path, NOPH_Connector_WRITE);
+      os = NOPH_FileConnection_openDataOutputStream(fc); /* Can throw stuff */
+
+      /* Create and maybe truncate the file */
+      NOPH_try(exception_handler, (void*)&error)
+        {
+          if (!NOPH_FileConnection_exists(fc))
+            NOPH_FileConnection_create(fc);
+          if (mode == READ_TRUNCATE)
+            NOPH_FileConnection_truncate(fc, 0);
+        } NOPH_catch();
+      if (error)
+        {
+          NOPH_OutputStream_close(os);
+          return NULL;
+        }
+      out = NOPH_OutputStream_createFILE(os);
+
+      if (!out)
+        {
+          NOPH_OutputStream_close(os);
+          return NULL;
+        }
+
+      return out;
+    }
+
+  fp = cibyl_file_alloc(&connector_fops);
+  p = (connector_file_t *)fp->priv;
+
+  if (mode != READ)
+    NOPH_throw(NOPH_Exception_new_string("Opening a connector stream with invalid mode"));
+  /* Try to open the connector stream. */
+  NOPH_try(exception_handler, (void*)&error)
+    {
+      fc = NOPH_Connector_openFileConnection_mode(p->path, NOPH_Connector_READ);
+      p->is_file.is = NOPH_FileConnection_openDataInputStream(fc);
+    } NOPH_catch();
+  if (error)
+    {
+      cibyl_file_free(fp);
+      return NULL;
+    }
+
+  p->path = strdup(path);
+  p->is_file.eof = 0;
+  p->is_file.is_fp = 0;
+
+  return fp;
+}
+
 static FILE *open(const char *path,
                   cibyl_fops_open_mode_t mode)
 {
   FILE *fp;
   connector_file_t *p;
-  int error;
+  int error = 0;
+
+  printf("Conn: trying to open %s:%d!\n", path, mode);
 
   /* Handle the write case by simply returning a FILE for the output stream */
   if (mode == WRITE || mode == APPEND)
@@ -84,7 +151,7 @@ static int close(FILE *fp)
 static void reset(FILE *fp)
 {
   connector_file_t *p = (connector_file_t *)fp->priv;
-  int error;
+  int error = 0;
 
   NOPH_try(exception_handler, (void*)&error)
     {
@@ -106,7 +173,7 @@ static int seek(FILE *fp, long offset, int whence)
   connector_file_t *p = (connector_file_t *)fp->priv;
   int skip = offset;
   int avail;
-  int error;
+  int error = 0;
 
   /* Only inputstreams can support seeking */
   switch (whence)
@@ -159,5 +226,6 @@ static void __attribute__((constructor))register_fs(void)
   connector_fops.write = NOPH_InputStream_fops.write;
   connector_fops.tell  = NOPH_InputStream_fops.tell;
   connector_fops.eof   = NOPH_InputStream_fops.eof;
-  cibyl_register_fops(&connector_fops, 1);
+
+  cibyl_fops_register(&connector_fops, 0);
 }
