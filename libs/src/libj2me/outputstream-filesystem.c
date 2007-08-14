@@ -35,7 +35,6 @@ static int flush(FILE* fp)
 /* The fops structure for resource files */
 cibyl_fops_t NOPH_OutputStream_fops =
 {
-  .uri = NULL,
   .priv_data_size = sizeof(NOPH_OutputStream_file_t),
   .open = NULL,
   .close = close,
