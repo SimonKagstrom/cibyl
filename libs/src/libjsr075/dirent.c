@@ -16,19 +16,13 @@
 
 #include <javax/microedition/io.h>
 
-static void handler(NOPH_Exception_t exception, void *arg)
-{
-  *(int*)arg = 1;
-  NOPH_delete(exception);
-}
-
 DIR *opendir(const char *dirname)
 {
   NOPH_FileConnection_t fc;
   int exception = 0;
   DIR *out;
 
-  NOPH_try(handler, &exception) {
+  NOPH_try(NOPH_setter_exception_handler, &exception) {
     fc = NOPH_Connector_openFileConnection(dirname);
     exception = 0;
   } NOPH_catch();
@@ -39,7 +33,7 @@ DIR *opendir(const char *dirname)
     goto clean_1;
 
   out->fc = fc;
-  NOPH_try(handler, &exception) {
+  NOPH_try(NOPH_setter_exception_handler, &exception) {
     out->it = NOPH_FileConnection_list(fc);
     exception = 0;
   } NOPH_catch();
@@ -74,7 +68,7 @@ int readdir_r(DIR *dir, struct dirent *entry,
   if (!NOPH_Enumeration_hasMoreElements(dir->it))
     goto cleanup;
 
-  NOPH_try(handler, &exception) {
+  NOPH_try(NOPH_setter_exception_handler, &exception) {
     cur = NOPH_Enumeration_nextElement(dir->it);
     exception = 0;
   } NOPH_catch();
