@@ -99,7 +99,6 @@ static int eof(FILE *fp)
 
 static cibyl_fops_t memory_fops =
 {
-  .uri = NULL,  /* Not applicable */
   .priv_data_size = sizeof(memory_file_t),
   .open = NULL, /* Not applicable */
   .close = close,
