@@ -31,8 +31,9 @@ typedef int NOPH_RecordStore_t;
 /* Network and file stuff */
 NOPH_DataInputStream_t NOPH_Connector_openDataInputStream(const char* name); /* Throws */
 NOPH_FileConnection_t NOPH_Connector_openFileConnection(const char* name); /* Not generated */
-FILE* NOPH_Connector_openFILEInputStream(const char* name); /* Not generated */
-FILE* NOPH_Connector_openFILEOutputStream(const char* name); /* Not generated */
+
+NOPH_DataInputStream_t NOPH_FileConnection_openDataInputStream(NOPH_FileConnection_t fc); /* Throws */
+NOPH_InputStream_t NOPH_FileConnection_openInputStream(NOPH_FileConnection_t fc); /* Throws */
 
 NOPH_DataOutputStream_t NOPH_Connector_openDataOutputStream(const char* name); /* Throws */
 
