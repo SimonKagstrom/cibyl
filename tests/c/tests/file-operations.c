@@ -104,7 +104,7 @@ void file_operations_run(void)
   int exception = 0;
 
   NOPH_try(handler_file_io, (void*)&exception) {
-    fp = NOPH_Connector_openFILEOutputStream(path);
+    fp = fopen(path, "w");
     exception = 0;
   } NOPH_catch();
   if (fp && exception == 0)
@@ -116,10 +116,10 @@ void file_operations_run(void)
       fclose(fp);
     }
   else
-    FAIL("Connector write %s\n", path);
+    FAIL("Connector open write %s\n", path);
 
   NOPH_try(handler_file_io, (void*)&exception) {
-    fp = NOPH_Connector_openFILEInputStream(path);
+    fp = fopen(path, "r");
     exception = 0;
   } NOPH_catch();
   if (fp && exception == 0)
@@ -131,11 +131,11 @@ void file_operations_run(void)
       fclose(fp);
     }
   else
-    FAIL("Connector read %s\n", path);
+    FAIL("Connector open read %s\n", path);
 
   /* Open already tested */
   NOPH_try(handler_file_io, (void*)&exception) {
-    fp = NOPH_Connector_openFILEInputStream(path);
+    fp = fopen(path, "r");
     exception = 0;
   } NOPH_catch();
   if (fp && exception == 0)
@@ -157,7 +157,7 @@ void file_operations_run(void)
       fclose(fp);
     }
   else
-    FAIL("Resource read %s\n", path);
+    FAIL("Resource open %s\n", path);
 
   /* Open already tested */
   fp = fopen(path, "r");
