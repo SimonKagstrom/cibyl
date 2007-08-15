@@ -1,51 +1,6 @@
         private static Random random;
 
 	/* These functions have dependencies and are therefore placed here */
- 	public static final int ferror(int fp)
-	{
-	  CibylFile f = (CibylFile)CRunTime.getRegisteredObject(fp);
-
-	  return f.error;
-	}
-
-	public static final int fputc(int c, int fp)
-	{
-	  CibylFile f = (CibylFile)CRunTime.getRegisteredObject(fp);
-	  int items;
-
-	  f.error = 0;
-
-	  try {
-	    f.outputStream.write(c);
-	  } catch(IOException e) {
-	    f.error = 1;
-	    return -1; /* EOF */
-	  }
-
-	  return c;
-	}
-
-	public static final int fgetc(int fp)
-	{
-	  CibylFile f = (CibylFile)CRunTime.getRegisteredObject(fp);
-	  int s = 0;
-
-	  f.eof = 0;
-	  f.error = 0;
-
-	  try{
-	    int b = f.inputStream.read();
-	    f.offset++;
-
-	    return b;
-	  } catch(IOException e) {
-	    f.error = 1;
-	  }
-
-	  f.eof = 1;
-	  return -1; /* EOF */
-	}
-
 public static final int __strlen(int src)
 {
   int s = src;
