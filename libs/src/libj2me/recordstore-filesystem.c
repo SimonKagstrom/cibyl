@@ -13,7 +13,6 @@
 #include <cibyl-memoryfs.h>
 #include <javax/microedition/io.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 
 static cibyl_fops_t record_store_fops;
@@ -25,14 +24,6 @@ typedef struct
   int id;
   void (*close_helper)(FILE *fp);
 } record_store_file_t;
-
-static void exception_handler(NOPH_Exception_t ex, void *arg)
-{
-  int *p = (int*)arg;
-  *p = 1;
-
-  NOPH_delete(ex);
-}
 
 static void close_write(FILE *fp)
 {
@@ -54,7 +45,7 @@ static void *get_record(NOPH_RecordStore_t rs, int id)
   void *data;
   int error;
 
-  NOPH_try(exception_handler, (void*)&error)
+  NOPH_try(NOPH_setter_exception_handler, (void*)&error)
     {
       int rs_size = NOPH_RecordStore_getRecordSize(rs, id);
 
@@ -96,7 +87,7 @@ static FILE *open(const char *path,
   p = (record_store_file_t *)fp->priv;
 
   /* Open the store and set the id */
-  NOPH_try(exception_handler, (void*)&error)
+  NOPH_try(NOPH_setter_exception_handler, (void*)&error)
     {
       p->rs = NOPH_RecordStore_openRecordStore(store_name,
                                                mode == READ ? 0 : 1);
@@ -129,7 +120,7 @@ static FILE *open(const char *path,
       p->close_helper = close_read;
       break;
     default:
-      assert(0 && "Invalid mode");
+      NOPH_panic("Invalid mode %d", mode);
       return NULL;
     }
 
@@ -187,13 +178,6 @@ static size_t write(FILE *fp, const void *ptr, size_t in_size)
   return fwrite(ptr, in_size, 1, p->memfs_fp);
 }
 
-static int eof(FILE *fp)
-{
-  record_store_file_t *p = (record_store_file_t *)fp->priv;
-
-  return feof(p->memfs_fp);
-}
-
 
 
 static cibyl_fops_t record_store_fops =
@@ -205,7 +189,6 @@ static cibyl_fops_t record_store_fops =
   .write = write,
   .seek = seek,
   .tell = tell,
-  .eof = eof,
   .flush = NULL,
 };
 
