@@ -15,12 +15,12 @@ static size_t write(FILE *fp, const void *ptr, size_t in_size)
 {
   NOPH_OutputStream_file_t *p = (NOPH_OutputStream_file_t *)fp->priv;
   char *s;
-  int n = 0;
 
-  for ( s = (char *)ptr; s < (char*)ptr + in_size; s++, n++ )
+  /* One byte at a time */
+  for ( s = (char *)ptr; s < (char*)ptr + in_size; s++)
     NOPH_OutputStream_write(p->os, *s);
 
-  return n;
+  return s - (char*)ptr;
 }
 
 static int flush(FILE* fp)
@@ -42,7 +42,6 @@ cibyl_fops_t NOPH_OutputStream_fops =
   .write = write,
   .seek = NULL,
   .tell = NULL,
-  .eof = NULL,
   .flush = flush,
 };
 
