@@ -5,14 +5,6 @@
 
 #define min(x,y) ( (x) < (y) ? (x) : (y) )
 
-static void exception_handler(NOPH_Exception_t ex, void *arg)
-{
-  int *p = (int*)arg;
-  *p = 1;
-
-  NOPH_delete(ex);
-}
-
 static int close(FILE *fp)
 {
   NOPH_InputStream_file_t *p = (NOPH_InputStream_file_t *)fp->priv;
@@ -51,7 +43,7 @@ static int seek(FILE *fp, long offset, int whence)
     default:
       break;
     }
-  NOPH_try(exception_handler, (void*)&error)
+  NOPH_try(NOPH_setter_exception_handler, (void*)&error)
     {
       p->is_fp += NOPH_InputStream_skip(p->is, skip);
     } NOPH_catch();
@@ -78,9 +70,10 @@ static size_t read(FILE *fp, void *ptr, size_t in_size)
     {
       int n;
       int error;
-      size_t size = min(in_size, 8192);
+      size_t size = min(in_size, 4096);
 
-      n = NOPH_InputStream_read_into(p->is, ptr, size, &p->eof);
+      /* Read the data into the buffer, potentially setting fp->eof */
+      n = NOPH_InputStream_read_into(p->is, ptr, size, &fp->eof);
       p->is_fp += n;
       in_size -= n;
       ptr += n;
@@ -95,13 +88,6 @@ static size_t write(FILE *fp, const void *ptr, size_t in_size)
   return 0;
 }
 
-static int eof(FILE *fp)
-{
-  NOPH_InputStream_file_t *p = (NOPH_InputStream_file_t *)fp->priv;
-
-  return p->eof;
-}
-
 
 /* The fops structure for resource files */
 cibyl_fops_t NOPH_InputStream_fops =
@@ -113,7 +99,6 @@ cibyl_fops_t NOPH_InputStream_fops =
   .write = write,
   .seek = seek,
   .tell = tell,
-  .eof = eof,
 };
 
 FILE *NOPH_InputStream_createFILE(NOPH_InputStream_t is)
@@ -126,8 +111,6 @@ FILE *NOPH_InputStream_createFILE(NOPH_InputStream_t is)
   p = (NOPH_InputStream_file_t*)out->priv;
 
   p->is = is;
-  p->is_fp = 0;
-  p->eof = 0;
 
   return out;
 }
