@@ -13,6 +13,8 @@ typedef struct
   size_t data_size;
   long fp;
   int allocate;
+  const char *writeback_path;
+  const char *mode;
 } memory_file_t;
 
 static int seek(FILE *fp, long offset, int whence)
@@ -56,6 +58,10 @@ static size_t read(FILE *fp, void *ptr, size_t in_size)
     memcpy( ptr, p->data + p->fp, size );
   p->fp = p->fp + size;
 
+  /* End of file reached? */
+  if (p->fp >= p->data_size)
+    fp->eof = 1;
+
   return size;
 }
 
@@ -65,11 +71,14 @@ static size_t write(FILE *fp, const void *ptr, size_t in_size)
   size_t new_size = max(p->fp + in_size, p->data_size);
   long old = p->fp;
 
+  /* Extend the file size? */
   if (new_size > p->data_size)
     {
       p->data = realloc(p->data, new_size + 4096);
       if (!p->data)
         return -1;
+      p->data_size = new_size;
+      fp->eof = 0;
     }
 
   if (in_size >= 0)
@@ -83,18 +92,25 @@ static int close(FILE *fp)
 {
   memory_file_t *p = (memory_file_t*)fp->priv;
 
+  /* Writeback the file */
+  if (p->writeback_path)
+    {
+      FILE *fp = fopen(p->writeback_path, p->mode);
+
+      free((void*)p->mode);
+      free((void*)p->writeback_path);
+      if (!fp)
+        return -1;
+
+      if (fwrite(p->data, p->data_size, 1, fp) != p->data_size)
+        return -1;
+      fclose(fp);
+    }
   /* If this is allocated data, free it on closing */
   if (p->allocate)
     free(p->data);
 
   return 0;
-}
-
-static int eof(FILE *fp)
-{
-  memory_file_t *p = (memory_file_t*)fp->priv;
-
-  return p->fp == p->data_size - 1;
 }
 
 static cibyl_fops_t memory_fops =
@@ -106,7 +122,6 @@ static cibyl_fops_t memory_fops =
   .write = write,
   .seek = seek,
   .tell = tell,
-  .eof = eof,
 };
 
 void *NOPH_MemoryFile_getDataPtr(FILE *fp)
@@ -149,35 +164,52 @@ FILE *NOPH_MemoryFile_open(void *ptr, size_t size, int allocate)
   return out;
 }
 
-FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *mode)
+FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *in_mode)
 {
+  cibyl_fops_open_mode_t mode = cibyl_file_get_mode(in_mode);
   FILE *tmp;
   FILE *out;
   void *data = NULL;
   size_t size = 0;
-  size_t n = 0;
 
-  tmp = fopen(name, mode);
-  if (!tmp)
-    return NULL;
+  NOPH_panic_if(mode == APPEND || mode == READ_APPEND, "Invalid memory file mode '%s'", in_mode);
 
-  /* Read in all of the file */
-  do
+  /* Read in all of the file in some cases */
+  if (mode == READ || mode == READ_WRITE)
     {
-      size += 4096;
-      data = realloc(data, size);
-      if (!data)
+      size_t n = 0;
+      const size_t bufsize = 4096;
+
+      tmp = fopen(name, "r");
+      if (!tmp)
+        return NULL;
+
+      /* Read in all of the file */
+      do
         {
-          fclose(tmp);
-          return NULL;
-        }
-      n = fread(data, 1, 4096, tmp);
-    } while(n == 4096);
-  fclose(tmp);
+          size += bufsize;
+          data = realloc(data, size);
+          if (!data)
+            {
+              fclose(tmp);
+              return NULL;
+            }
+          n = fread(data, 1, bufsize, tmp);
+        } while(n == bufsize);
+      fclose(tmp);
+    }
 
   /* Open the memory file */
   out = NOPH_MemoryFile_open(data, size, 1);
-  if (!out)
-    free(data); /* Should never happen, but OK */
+
+  if (mode == READ_WRITE || mode == READ_TRUNCATE)
+    {
+      memory_file_t *p = (memory_file_t*)out->priv;
+
+      p->writeback_path = strdup(name);
+      p->mode = strdup(in_mode);
+    }
+
+  NOPH_panic_if(!out, "MemoryFile_open failed!"); /* Should never happen, but OK */
   return out;
 }
