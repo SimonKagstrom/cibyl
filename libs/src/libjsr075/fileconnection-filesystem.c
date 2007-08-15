@@ -85,8 +85,6 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
     }
 
   p->path = strdup(path);
-  p->is_file.eof = 0;
-  p->is_file.is_fp = 0;
   p->fc = fc;
 
   return fp;
@@ -175,10 +173,9 @@ static cibyl_fops_t connector_fops =
   .open  = open,
   .close = close,
   .read  = NULL, /* Set below */
-  .write = NULL, /* Set below */
+  .write = NULL, /* ... */
   .seek  = seek,
-  .tell  = NULL, /* Set below */
-  .eof   = NULL, /* Set below */
+  .tell  = NULL,
 };
 
 static void __attribute__((constructor))register_fs(void)
@@ -187,7 +184,6 @@ static void __attribute__((constructor))register_fs(void)
   connector_fops.read  = NOPH_InputStream_fops.read;
   connector_fops.write = NOPH_InputStream_fops.write;
   connector_fops.tell  = NOPH_InputStream_fops.tell;
-  connector_fops.eof   = NOPH_InputStream_fops.eof;
 
   cibyl_fops_register("file://", &connector_fops, 0);
 }
