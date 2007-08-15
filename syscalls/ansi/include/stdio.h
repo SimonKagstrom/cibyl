@@ -38,6 +38,8 @@ struct s_cibyl_fops;
 typedef struct
 {
   struct s_cibyl_fops *ops;
+  short eof;
+  short error;
   void *priv;
 } FILE;
 
