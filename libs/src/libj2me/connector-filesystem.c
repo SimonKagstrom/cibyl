@@ -56,8 +56,6 @@ static FILE *open(const char *path,
     }
 
   p->path = strdup(path);
-  p->is_file.eof = 0;
-  p->is_file.is_fp = 0;
 
   return fp;
 }
@@ -84,7 +82,6 @@ static cibyl_fops_t connector_fops =
   .write = NULL, /* ... */
   .seek  = NULL,
   .tell  = NULL,
-  .eof   = NULL,
 };
 
 static void __attribute__((constructor))register_fs(void)
@@ -94,7 +91,6 @@ static void __attribute__((constructor))register_fs(void)
   connector_fops.write = NOPH_InputStream_fops.write;
   connector_fops.seek  = NOPH_InputStream_fops.seek;
   connector_fops.tell  = NOPH_InputStream_fops.tell;
-  connector_fops.eof   = NOPH_InputStream_fops.eof;
 
   /* Lots of different types are handle by the connector */
   cibyl_fops_register("file://", &connector_fops, 0); /* Can be overridden by jsr075 */
