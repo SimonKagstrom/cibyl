@@ -6,10 +6,15 @@
 ## Author:        Simon Kagstrom <ska@bth.se>
 ## Description:   Generic Makefile
 ##
-## $Id: Makefile 15373 2007-05-13 07:55:04Z ska $
+## $Id: Makefile 12755 2006-12-14 17:55:01Z ska $
 ##
 ######################################################################
-SUBDIRS = libcrt0 libc libdebug libsoftfloat libm libcibar libs9 libjava \
-          libj2me libjsr075 libstdc++
+SUBDIRS =
+OBJS    = inputstream-filesystem.o outputstream-filesystem.o
+ALL_TARGETS=install
+EXTRA_CLEAN=libjava.a
 
-include $(CIBYL_BASE)/build/Rules-common.mk
+include $(CIBYL_BASE)/build/Rules.mk
+
+install: libjava.a
+	cp $< $(CIBYL_BASE)/libs/lib
