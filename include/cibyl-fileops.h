@@ -43,7 +43,6 @@ typedef struct s_cibyl_fops
 
   int (*seek)(FILE *fp, long offset, int whence);  /* Move the file pointer  */
   long (*tell)(FILE *fp);  /* Return the position of the file pointer (ftell)  */
-  int (*eof)(FILE *fp);  /* is this the end-of-file?  */
 
   int (*flush)(FILE *fp); /* flush the stream */
 } cibyl_fops_t;
@@ -66,7 +65,8 @@ void cibyl_fops_register(const char *uri, cibyl_fops_t *fop, int is_default);
 void cibyl_fops_unregister(cibyl_fops_t *fops);
 
 /**
- * Allocate a new FILE structure and set it up for @a fop
+ * Allocate a new FILE structure and set it up for @a fop. The entire
+ * structure will be zeroed at allocation-time.
  *
  * @param fop the fop to associate with the file
  *
