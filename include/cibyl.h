@@ -103,6 +103,18 @@ extern void __NOPH_throw(NOPH_Exception_t exception);
  */
 void NOPH_setter_exception_handler(NOPH_Exception_t ex, void *arg);
 
+/**
+ * Crash the system on unrecoverable errors.
+ *
+ * @param fmt format string to print if the error happens
+ * @parma ... printf-style arguments to @a fmt
+ */
+void NOPH_panic(const char *fmt, ...);
+
+#define NOPH_panic_if(cond, fmt...) do { \
+  if (cond)                              \
+    NOPH_panic(fmt);                     \
+} while(0)
 
 #endif /* __ASSEMBLER__ */
 
