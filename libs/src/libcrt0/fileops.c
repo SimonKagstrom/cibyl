@@ -49,11 +49,11 @@ void cibyl_fops_register(const char *uri, cibyl_fops_t *fop, int is_default)
       fops.table = (cibyl_fops_t**)realloc(fops.table, sizeof(cibyl_fops_t*) * fops.n_fops);
       fops.uris = (const char**)realloc(fops.uris, sizeof(char*) * fops.n_fops);
     }
+  NOPH_panic_if( !(fops.table && fops.uris), "Memory allocation of fops failed");
   fops.table[idx] = fop;
   fops.uris[idx] = uri;
   if (is_default)
     fops.fallback = fop;
-  assert(fops.table);
 }
 
 void cibyl_fops_unregister(cibyl_fops_t *fop)
@@ -79,8 +79,12 @@ FILE *cibyl_file_alloc(cibyl_fops_t *fop)
   if ( !(out = (FILE*)malloc(sizeof(FILE) + fop->priv_data_size)) )
     return NULL;
 
+  /* Zero everything by default */
+  memset(out, 0, sizeof(FILE) + fop->priv_data_size);
+
   out->ops = fop;
   out->priv = (void*)(out + 1);
+
   return out;
 }
 
@@ -205,16 +209,18 @@ void rewind(FILE *fp)
 
 void clearerr(FILE* fp)
 {
+  fp->error = 0;
+  fp->eof = 0;
 }
 
 int ferror(FILE* fp)
 {
-  return 0;
+  return fp->error;
 }
 
 int feof(FILE *fp)
 {
-  return fp->ops->eof(fp);
+  return fp->eof;
 }
 
 int fflush(FILE* fp)
