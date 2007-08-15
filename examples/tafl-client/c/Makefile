@@ -13,7 +13,7 @@ SUBDIRS =
 INCLUDES=-Iinclude
 TARGET  = program
 OBJS    = main.o gui.o game.o playfield.o utils.o move.o item.o ai.o dir.o j2me-serialization.o
-LDLIBS  = -lc
+LDLIBS  = -lj2me
 
 # The compilation options, set to e.g., -O to run all optimizations
 CIBYL_MIPS2JAVA_OPTS ?=

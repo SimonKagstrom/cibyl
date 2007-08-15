@@ -13,7 +13,7 @@ SUBDIRS =
 TARGET  = program
 SOURCES = src/CRunTime.java src/Main.java src/Syscalls.java
 OBJS    = main.o
-LDLIBS  = -lc
+LDLIBS  =
 
 # The compilation options, set to e.g., -O to run all optimizations
 CIBYL_MIPS2JAVA_OPTS ?=

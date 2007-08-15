@@ -12,7 +12,7 @@
 SUBDIRS =
 TARGET  = program
 OBJS    = main.o
-LDLIBS  = -lc
+LDLIBS  =
 
 # The compilation options, set to e.g., -O to run all optimizations
 CIBYL_MIPS2JAVA_OPTS ?=

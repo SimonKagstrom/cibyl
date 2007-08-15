@@ -13,7 +13,7 @@ SUBDIRS =
 TARGET  = program
 OBJS    = main.o s9_input.o
 INCLUDES=-I../include
-LDLIBS  = -lc -ls9
+LDLIBS  = -ls9
 
 CIBYL_MIPS2JAVA_OPTS ?=-I../include
 

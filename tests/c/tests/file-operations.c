@@ -92,6 +92,7 @@ static int dir_open(const char *dir)
 static void handler_file_io(NOPH_Exception_t exception, void *arg)
 {
   *(int*)arg = 1;
+  NOPH_Throwable_printStackTrace(exception);
   NOPH_delete(exception);
 }
 

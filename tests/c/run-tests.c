@@ -62,13 +62,13 @@ void test_run_all_tests(int run_fileops)
 
   n_fail = 0;
   n_pass = 0;
+
   for (test = all_tests;
        test != &all_tests[sizeof(all_tests) / sizeof(test_run_t)];
        test++)
     {
       test->fn();
     }
-
   if (run_fileops)
     {
       /* Delay these to avoid having to allow file access too often */
