@@ -10,6 +10,7 @@
  *
  ********************************************************************/
 #include <stdio.h>
+#include <stdlib.h>
 #include <cibyl.h>
 
 #include <java/lang.h>
@@ -48,6 +49,26 @@ void NOPH_setter_exception_handler(NOPH_Exception_t ex, void *arg)
 
   NOPH_delete(ex);
 }
+
+void NOPH_panic(const char *fmt, ...)
+{
+  char buf[255];
+  va_list ap;
+
+  /*
+   * Print into buffer.
+   */
+  va_start(ap, fmt);
+  vsnprintf(buf, sizeof(buf), fmt, ap);
+  va_end(ap);
+
+  fprintf(stderr, "PANIC: ");
+  fprintf(stderr, buf);
+  fprintf(stderr, "\n");
+  NOPH_throw(NOPH_Exception_new());
+  exit(1);
+}
+
 
 /* Dummy functions - handled by builtins always */
 void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), void *arg)
