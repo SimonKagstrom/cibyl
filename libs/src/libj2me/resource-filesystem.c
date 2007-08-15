@@ -34,8 +34,6 @@ static FILE *open(const char *path,
 
   fp = cibyl_file_alloc(&resource_fops);
   p = (resource_file_t *)fp->priv;
-  p->is_file.is_fp = 0;
-  p->is_file.eof = 0;
   p->is_file.is = is;
 
   return fp;
@@ -52,7 +50,6 @@ static cibyl_fops_t resource_fops =
   .write = NULL,
   .seek  = NULL,
   .tell  = NULL,
-  .eof   = NULL,
 };
 
 static void __attribute__((constructor))register_fs(void)
@@ -62,7 +59,6 @@ static void __attribute__((constructor))register_fs(void)
   resource_fops.write = NOPH_InputStream_fops.write;
   resource_fops.seek  = NOPH_InputStream_fops.seek;
   resource_fops.tell  = NOPH_InputStream_fops.tell;
-  resource_fops.eof   = NOPH_InputStream_fops.eof;
   resource_fops.flush = NOPH_InputStream_fops.flush;
 
   cibyl_fops_register("resource://", &resource_fops, 1);
