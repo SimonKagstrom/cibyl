@@ -139,7 +139,7 @@ void NOPH_MemoryFile_setup(FILE *out, void *ptr, size_t size, int allocate)
         {
           cibyl_file_free(out);
           /* FIXME: throw an OOM exception here */
-          return NULL;
+          return;
         }
     }
   else
@@ -158,7 +158,7 @@ FILE *NOPH_MemoryFile_open(void *ptr, size_t size, int allocate)
   out = cibyl_file_alloc(&NOPH_Memory_fops);
   p = (NOPH_Memory_file_t*)out->priv;
 
-  NOPH_MemoryFile_setup(ptr, size, allocate);
+  NOPH_MemoryFile_setup(out, ptr, size, allocate);
 
   return out;
 }
