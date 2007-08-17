@@ -13,6 +13,20 @@
 #define __CIBYL_MEMORYFS_H__
 
 #include <stdio.h>
+#include <cibyl-fileops.h>
+
+typedef struct
+{
+  void *data;
+  size_t data_size;
+  long fp;
+  int allocate;
+  const char *writeback_path;
+  const char *mode;
+} NOPH_Memory_file_t;
+
+extern cibyl_fops_t NOPH_Memory_fops;
+
 
 /**
  * Open a new memory file, potentially allocating memory for it
@@ -26,6 +40,20 @@
  * @return a pointer to the file object
  */
 FILE *NOPH_MemoryFile_open(void *ptr, size_t size, int allocate);
+
+/**
+ * Setup a new memory file, potentially allocating memory for it
+ *
+ * @param fp the FILE pointer to setup
+ * @param ptr a pointer to the file data. If NULL is passed, the data
+ *            will be allocated.
+ * @param size the size of the data passed (or the size of the
+ *            allocated data if @ptr is NULL)
+ * @param allocate 1 if this file should be possible to extend
+ *
+ * @throws NOPH_OutOfMemoryException_t if the memory runs out
+ */
+void NOPH_MemoryFile_setup(FILE *fp, void *ptr, size_t size, int allocate);
 
 /**
  * Open a memory file indirectly. This will open a regular file with

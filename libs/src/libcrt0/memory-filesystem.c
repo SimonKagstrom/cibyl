@@ -7,19 +7,9 @@
 #define min(x,y) ( (x) < (y) ? (x) : (y) )
 #define max(x,y) ( (x) > (y) ? (x) : (y) )
 
-typedef struct
-{
-  void *data;
-  size_t data_size;
-  long fp;
-  int allocate;
-  const char *writeback_path;
-  const char *mode;
-} memory_file_t;
-
 static int seek(FILE *fp, long offset, int whence)
 {
-  memory_file_t *p = (memory_file_t*)fp->priv;
+  NOPH_Memory_file_t *p = (NOPH_Memory_file_t*)fp->priv;
   int old = p->fp;
 
   if (whence == SEEK_SET)
@@ -45,13 +35,13 @@ static int seek(FILE *fp, long offset, int whence)
 
 static long tell(FILE *fp)
 {
-  memory_file_t *p = (memory_file_t*)fp->priv;
+  NOPH_Memory_file_t *p = (NOPH_Memory_file_t*)fp->priv;
   return p->fp;
 }
 
 static size_t read(FILE *fp, void *ptr, size_t in_size)
 {
-  memory_file_t *p = (memory_file_t*)fp->priv;
+  NOPH_Memory_file_t *p = (NOPH_Memory_file_t*)fp->priv;
   size_t size = min(in_size, p->data_size - p->fp);
 
   if (size >= 0)
@@ -67,7 +57,7 @@ static size_t read(FILE *fp, void *ptr, size_t in_size)
 
 static size_t write(FILE *fp, const void *ptr, size_t in_size)
 {
-  memory_file_t *p = (memory_file_t*)fp->priv;
+  NOPH_Memory_file_t *p = (NOPH_Memory_file_t*)fp->priv;
   size_t new_size = max(p->fp + in_size, p->data_size);
   long old = p->fp;
 
@@ -90,7 +80,7 @@ static size_t write(FILE *fp, const void *ptr, size_t in_size)
 
 static int close(FILE *fp)
 {
-  memory_file_t *p = (memory_file_t*)fp->priv;
+  NOPH_Memory_file_t *p = (NOPH_Memory_file_t*)fp->priv;
 
   /* Writeback the file */
   if (p->writeback_path)
@@ -113,9 +103,9 @@ static int close(FILE *fp)
   return 0;
 }
 
-static cibyl_fops_t memory_fops =
+cibyl_fops_t NOPH_Memory_fops =
 {
-  .priv_data_size = sizeof(memory_file_t),
+  .priv_data_size = sizeof(NOPH_Memory_file_t),
   .open = NULL, /* Not applicable */
   .close = close,
   .read = read,
@@ -126,19 +116,16 @@ static cibyl_fops_t memory_fops =
 
 void *NOPH_MemoryFile_getDataPtr(FILE *fp)
 {
-  memory_file_t *p = (memory_file_t*)fp->priv;
+  NOPH_Memory_file_t *p = (NOPH_Memory_file_t*)fp->priv;
 
   return p->data;
 }
 
-FILE *NOPH_MemoryFile_open(void *ptr, size_t size, int allocate)
+void NOPH_MemoryFile_setup(FILE *out, void *ptr, size_t size, int allocate)
 {
-  FILE *out;
-  memory_file_t *p;
+  NOPH_Memory_file_t *p;
 
-  /* Get a new FILE object */
-  out = cibyl_file_alloc(&memory_fops);
-  p = (memory_file_t*)out->priv;
+  p = (NOPH_Memory_file_t*)out->priv;
 
   /* Fill in the private part of the FILE object */
   p->fp = 0;
@@ -160,6 +147,18 @@ FILE *NOPH_MemoryFile_open(void *ptr, size_t size, int allocate)
       p->data_size = size;
       p->data = ptr;
     }
+}
+
+FILE *NOPH_MemoryFile_open(void *ptr, size_t size, int allocate)
+{
+  FILE *out;
+  NOPH_Memory_file_t *p;
+
+  /* Get a new FILE object */
+  out = cibyl_file_alloc(&NOPH_Memory_fops);
+  p = (NOPH_Memory_file_t*)out->priv;
+
+  NOPH_MemoryFile_setup(ptr, size, allocate);
 
   return out;
 }
@@ -204,7 +203,7 @@ FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *in_mode)
 
   if (mode == READ_WRITE || mode == READ_TRUNCATE)
     {
-      memory_file_t *p = (memory_file_t*)out->priv;
+      NOPH_Memory_file_t *p = (NOPH_Memory_file_t*)out->priv;
 
       p->writeback_path = strdup(name);
       p->mode = strdup(in_mode);

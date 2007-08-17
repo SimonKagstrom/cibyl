@@ -7,8 +7,6 @@
 #include <java/io.h>
 #include <java/lang.h>
 
-#define min(x,y) ( (x) < (y) ? (x) : (y) )
-
 static cibyl_fops_t connector_fops;
 
 typedef struct

@@ -19,7 +19,7 @@ static cibyl_fops_t record_store_fops;
 
 typedef struct
 {
-  FILE *memfs_fp;
+  NOPH_Memory_file_t memfs;
   NOPH_RecordStore_t rs;
   int id;
   void (*close_helper)(FILE *fp);
@@ -28,8 +28,8 @@ typedef struct
 static void close_write(FILE *fp)
 {
   record_store_file_t *p = (record_store_file_t *)fp->priv;
-  void *data = NOPH_MemoryFile_getDataPtr(p->memfs_fp);
-  long size = ftell(p->memfs_fp);
+  void *data = NOPH_MemoryFile_getDataPtr(fp);
+  long size = ftell(fp);
 
   /* Update this record - this can very well throw an exception */
   NOPH_RecordStore_setRecord(p->rs, p->id, data, 0, size);
@@ -125,10 +125,10 @@ static FILE *open(const char *path,
     }
 
   /* Create the memory file */
-  p->memfs_fp = NOPH_MemoryFile_open(data, rs_size, 1);
+  NOPH_MemoryFile_setup(fp, data, rs_size, 1);
 
   if (mode == APPEND)
-    fseek(p->memfs_fp, 0, SEEK_END);
+    fseek(fp, 0, SEEK_END);
 
   return fp;
  err:
@@ -142,57 +142,33 @@ static int close(FILE *fp)
 
   /* Call the helper to (sometimes) save the record data */
   p->close_helper(fp);
-  /* Will free memory used by the memfs */
-  fclose(p->memfs_fp);
   NOPH_RecordStore_closeRecordStore(p->rs);
+
+  /* Will free memory used by the memfs */
+  fclose(fp);
 
   return 0;
 }
 
-/* All these are basically "inherited" from the memory file system */
-static int seek(FILE *fp, long offset, int whence)
-{
-  record_store_file_t *p = (record_store_file_t *)fp->priv;
-
-  return fseek(p->memfs_fp, offset, whence);
-}
-
-static long tell(FILE *fp)
-{
-  record_store_file_t *p = (record_store_file_t *)fp->priv;
-
-  return ftell(p->memfs_fp);
-}
-
-static size_t read(FILE *fp, void *ptr, size_t in_size)
-{
-  record_store_file_t *p = (record_store_file_t *)fp->priv;
-
-  return fread(ptr, in_size, 1, p->memfs_fp);
-}
-
-static size_t write(FILE *fp, const void *ptr, size_t in_size)
-{
-  record_store_file_t *p = (record_store_file_t *)fp->priv;
-
-  return fwrite(ptr, in_size, 1, p->memfs_fp);
-}
-
-
-
 static cibyl_fops_t record_store_fops =
 {
   .priv_data_size = sizeof(record_store_file_t),
-  .open = open,
+  .open  = open,
   .close = close,
-  .read = read,
-  .write = write,
-  .seek = seek,
-  .tell = tell,
+  .read  = NULL, /* See below*/
+  .write = NULL,
+  .seek  = NULL,
+  .tell  = NULL,
   .flush = NULL,
 };
 
 static void __attribute__((constructor))register_fs(void)
 {
+  record_store_fops.read  = NOPH_Memory_fops.read;
+  record_store_fops.write = NOPH_Memory_fops.write;
+  record_store_fops.tell  = NOPH_Memory_fops.tell;
+  record_store_fops.seek  = NOPH_Memory_fops.seek;
+  record_store_fops.flush = NOPH_Memory_fops.flush;
+
   cibyl_fops_register("recordstore://", &record_store_fops, 0);
 }
