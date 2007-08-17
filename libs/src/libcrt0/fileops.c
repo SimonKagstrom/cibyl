@@ -66,10 +66,8 @@ void cibyl_fops_unregister(cibyl_fops_t *fop)
 	{
 	  fops.table[i] = fops.table[fops.n_fops - 1];
 	  fops.n_fops--;
-	  return;
 	}
     }
-  /* Can happen */
 }
 
 FILE *cibyl_file_alloc(cibyl_fops_t *fop)
