@@ -56,7 +56,7 @@ bool_t NOPH_FileConnection_canWrite(NOPH_FileConnection_t fc); /* Throws */
 bool_t NOPH_FileConnection_canRead(NOPH_FileConnection_t fc); /* Throws */
 bool_t NOPH_FileConnection_isOpen(NOPH_FileConnection_t fc); /* Throws */
 void NOPH_FileConnection_truncate(NOPH_FileConnection_t fc, long byteOffest); /* Throws */
-long NOPH_FileConnection_fileSize(NOPH_FileConnection_t fc); /* Throws */
+int NOPH_FileConnection_fileSize(NOPH_FileConnection_t fc); /* Throws */
 void NOPH_FileConnection_create(NOPH_FileConnection_t fc); /* Throws */
 void NOPH_FileConnection_close(NOPH_FileConnection_t fc); /* Throws */
 NOPH_Enumeration_t NOPH_FileConnection_list(NOPH_FileConnection_t fc); /* Throws */
