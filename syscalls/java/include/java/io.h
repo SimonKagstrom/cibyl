@@ -58,7 +58,6 @@ typedef struct
 {
   NOPH_InputStream_t is;
   long is_fp;
-  int eof;
 } NOPH_InputStream_file_t;
 
 typedef struct
