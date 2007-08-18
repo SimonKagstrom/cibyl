@@ -58,15 +58,89 @@ int test_seek_read(FILE *fp)
   return n;
 }
 
+int test_seek_cur_read(FILE *fp)
+{
+  char buf[4] = {0};
+  int n;
+
+  fseek(fp, 2, SEEK_CUR);
+  n = fread((void*)buf, sizeof(char), 4, fp);
+  if (n != 4)
+    return n;
+  else if (buf[0] != 'K' ||
+	   buf[1] != 'L' ||
+	   buf[2] != 'M' ||
+	   buf[3] != 'N')
+    return -1;
+
+  return n;
+}
+
+int test_seek_end_read(FILE *fp)
+{
+  char buf[4] = {0};
+  int n;
+
+  fseek(fp, 4, SEEK_END);
+  n = fread((void*)buf, sizeof(char), 4, fp);
+  if (n != 4)
+    return n;
+  else if (buf[0] != 'N' ||
+	   buf[1] != 'O' ||
+	   buf[2] != 'P' ||
+	   buf[3] != 'Q')
+    return -1;
+
+  return n;
+}
+
+int test_seek_end_read_end(FILE *fp)
+{
+  char buf[4] = {0};
+  int n;
+
+  fseek(fp, 3, SEEK_END);
+  n = fread((void*)buf, sizeof(char), 4, fp);
+  if (n != 4)
+    return n;
+  else if (buf[0] != 'O' ||
+	   buf[1] != 'P' ||
+	   buf[2] != 'Q')
+    return -1;
+
+  return n;
+}
+
 static void parse_return_val(const char *op, const char *path, int ret, int xret)
 {
   if (ret < 0)
-    FAIL("%s: Incorrect operation %s\n", op, path);
+    FAIL("%s: %s\n", op, path);
   else if (ret != xret)
-    FAIL("%s: %s with incorrect size (%d != %d)\n", op, path, ret, xret);
+    FAIL("%s: %s size (%d != %d)\n", op, path, ret, xret);
   else
     PASS("%s: %s sucessful\n", op, path);
 }
+
+/* Pass an opened file for the test to run */
+void fs_read_test(FILE *fp, const char *op, const char *path)
+{
+  /* Test a plain read */
+  parse_return_val(op, path,
+                   test_read(fp), 4);
+  /* Test a seek from the start and read */
+  parse_return_val(op, path,
+                   test_seek_read(fp), 4);
+  /* Test seek ahead and read */
+  parse_return_val(op, path,
+                   test_seek_cur_read(fp), 4);
+  /* Test seek from the end */
+  parse_return_val(op, path,
+                   test_seek_end_read(fp), 4);
+  /* Test seek from the end and read less than what is left  */
+  parse_return_val(op, path,
+                   test_seek_end_read_end(fp), 3);
+}
+
 
 static int dir_open(const char *dir)
 {
@@ -104,13 +178,11 @@ void file_operations_run(void)
   FILE *fp;
   int exception = 0;
 
-  NOPH_try(handler_file_io, (void*)&exception) {
-    fp = fopen(path, "w");
-    exception = 0;
-  } NOPH_catch();
-  if (fp && exception == 0)
+  fp = fopen(path, "w");
+  exception = 0;
+  if (fp)
     {
-      PASS("Connector write %s\n", path);
+      PASS("Connector open %s\n", path);
 
       parse_return_val("Connector write", path,
 		       test_write(fp), strlen(test_str) );
@@ -119,56 +191,30 @@ void file_operations_run(void)
   else
     FAIL("Connector open write %s\n", path);
 
-  NOPH_try(handler_file_io, (void*)&exception) {
-    fp = fopen(path, "r");
-    exception = 0;
-  } NOPH_catch();
-  if (fp && exception == 0)
+  fp = fopen(path, "r");
+  if (fp)
     {
-      PASS("Connector read %s\n", path);
+      PASS("Connector open %s\n", path);
 
-      parse_return_val("Connector read", path,
-		       test_read(fp), 4 );
+      fs_read_test(fp, "Connector", path);
       fclose(fp);
     }
   else
     FAIL("Connector open read %s\n", path);
 
-  /* Open already tested */
-  NOPH_try(handler_file_io, (void*)&exception) {
-    fp = fopen(path, "r");
-    exception = 0;
-  } NOPH_catch();
-  if (fp && exception == 0)
-    {
-      parse_return_val("Connector read+seek", path,
-		       test_seek_read(fp), 4 );
-      fclose(fp);
-    }
-
-  path = "/b";
+  path = "/b"; /* Resource */
   fp = fopen(path, "r");
   if (fp)
     {
-      fseek(fp, 0, SEEK_SET);
       PASS("Resource read %s\n", path);
 
-      parse_return_val("Resource read", path,
-		       test_read(fp), 4 );
+      fs_read_test(fp, "Resource", path);
       fclose(fp);
     }
   else
     FAIL("Resource open %s\n", path);
 
-  /* Open already tested */
-  fp = fopen(path, "r");
-  if (fp)
-    {
-      parse_return_val("Resource read+seek", path,
-		       test_seek_read(fp), 4 );
-      fclose(fp);
-    }
-
+  /* Test directory stuff */
   if (dir_open(root))
     PASS("Dirlist %s\n", root);
   else
