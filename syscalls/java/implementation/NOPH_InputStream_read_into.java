@@ -13,7 +13,7 @@ public static final int NOPH_InputStream_read_into(int obj, int ptr, int size, i
     count += r;
   }
   catch(EOFException e) {
-    CRunTime.memoryWriteWord( eof_addr, 1 );
+    CRunTime.memoryWriteShort( eof_addr, 1 );
   }
   buff = null;
 
