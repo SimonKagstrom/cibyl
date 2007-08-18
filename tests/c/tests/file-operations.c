@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <javax/microedition/io.h>
+#include <cibyl-memoryfs.h>
 
 static const char *test_str = "ABCDEFGHIJKLMNOPQ";
 
@@ -81,7 +82,7 @@ int test_seek_end_read(FILE *fp)
   char buf[4] = {0};
   int n;
 
-  fseek(fp, 4, SEEK_END);
+  fseek(fp, -4, SEEK_END);
   n = fread((void*)buf, sizeof(char), 4, fp);
   if (n != 4)
     return n;
@@ -99,7 +100,7 @@ int test_seek_end_read_end(FILE *fp)
   char buf[4] = {0};
   int n;
 
-  fseek(fp, 3, SEEK_END);
+  fseek(fp, -3, SEEK_END);
   n = fread((void*)buf, sizeof(char), 4, fp);
   if (n != 4)
     return n;
@@ -209,6 +210,17 @@ void file_operations_run(void)
       PASS("Resource read %s\n", path);
 
       fs_read_test(fp, "Resource", path);
+      fclose(fp);
+    }
+  else
+    FAIL("Resource open %s\n", path);
+
+  fp = NOPH_MemoryFile_openIndirect(path, "r");
+  if (fp)
+    {
+      PASS("MemoryFile read %s\n", path);
+
+      fs_read_test(fp, "MemoryFile", path);
       fclose(fp);
     }
   else
