@@ -177,6 +177,7 @@ FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *in_mode)
   if (mode == READ || mode == READ_WRITE)
     {
       size_t n = 0;
+      size_t file_size = 0;
       const size_t bufsize = 4096;
 
       tmp = fopen(name, "r");
@@ -194,8 +195,10 @@ FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *in_mode)
               return NULL;
             }
           n = fread(data, 1, bufsize, tmp);
+          file_size += n;
         } while(n == bufsize);
       fclose(tmp);
+      size = file_size;
     }
 
   /* Open the memory file */
