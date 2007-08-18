@@ -33,10 +33,10 @@ static int seek(FILE *fp, long offset, int whence)
       NOPH_InputStream_reset(p->is);
       break;
     case SEEK_END:
-      p->is_fp = 0;
       avail = NOPH_InputStream_available(p->is);
-      skip = avail - offset;
+      skip = (avail + p->is_fp) - offset;
       NOPH_InputStream_reset(p->is);
+      p->is_fp = 0;
       break;
     case SEEK_CUR:
       /* Do nothing (fallthrough) */
@@ -77,6 +77,8 @@ static size_t read(FILE *fp, void *ptr, size_t in_size)
       p->is_fp += n;
       in_size -= n;
       ptr += n;
+      if (fp->eof)
+        break;
     }
 
   return p->is_fp - before;
