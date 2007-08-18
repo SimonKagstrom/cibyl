@@ -34,7 +34,7 @@ static int seek(FILE *fp, long offset, int whence)
       break;
     case SEEK_END:
       avail = NOPH_InputStream_available(p->is);
-      skip = (avail + p->is_fp) - offset;
+      skip = (avail + p->is_fp) + offset;
       NOPH_InputStream_reset(p->is);
       p->is_fp = 0;
       break;
