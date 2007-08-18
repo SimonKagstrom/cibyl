@@ -68,9 +68,8 @@ static size_t read(FILE *fp, void *ptr, size_t in_size)
   /* Cached file reading - read into a temporary buffer */
   while (in_size > 0)
     {
-      int n;
-      int error;
       size_t size = min(in_size, 4096);
+      int n;
 
       /* Read the data into the buffer, potentially setting fp->eof */
       n = NOPH_InputStream_read_into(p->is, ptr, size, &fp->eof);
