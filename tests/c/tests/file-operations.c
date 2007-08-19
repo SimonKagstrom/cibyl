@@ -160,7 +160,7 @@ static int dir_open(const char *dir)
        de;
        de = readdir(d))
     {
-      if (strcmp(de->d_name, "a") == 0)
+      if (strcmp(de->d_name, "cibyl_a") == 0)
         ret = 1;
     }
   closedir(d);
@@ -197,13 +197,18 @@ static void one_test_write(FILE *fp, const char *path, const char *name)
     FAIL("%s open write %s\n", name, path);
 }
 
-#define ROOT_PATH "file:///root/"
+extern char *fs_root;
+
 void file_operations_run(void)
 {
-  const char *root = ROOT_PATH;
-  const char *path = ROOT_PATH"/a";
+  char buf[128];
+  char root[128];
+  char *path;
   NOPH_FileConnection_t fc;
   int error = 0;
+
+  snprintf(buf, 128, "file:///%s/cibyl_a", fs_root);
+  path = buf;
 
   one_test_write(fopen(path, "w"), path, "FileConnection");
   one_test_read(fopen(path, "r"), path, "FileConnection");
@@ -227,6 +232,7 @@ void file_operations_run(void)
     PASS("Deleting %s", path);
 
   /* Test directory stuff */
+  snprintf(root, 128, "file:///%s", fs_root);
   if (dir_open(root))
     PASS("Dirlist %s\n", root);
   else
@@ -234,7 +240,7 @@ void file_operations_run(void)
 
 
   /* Delete the file again */
-  path = ROOT_PATH"/a";
+  path = buf;
   error = 0;
   NOPH_try(NOPH_setter_exception_handler, (void*)&error) {
     fc = NOPH_Connector_openFileConnection_mode(path, NOPH_Connector_WRITE);
