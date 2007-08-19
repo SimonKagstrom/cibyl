@@ -13,7 +13,7 @@ SUBDIRS =
 TARGET  = program
 DEFINES = -DVERBOSE=0
 SOURCES = src/CRunTime.java src/Main.java src/Syscalls.java
-INCLUDES=-I. -fno-inline-functions
+INCLUDES=-I. -I../include -fno-inline-functions
 OBJS    = main.o run-tests.o console.o \
           tests/int.o tests/char.o tests/float.o tests/double.o tests/j2me.o \
           tests/varargs.o tests/libm.o tests/memory.o tests/java-exceptions.o \
@@ -22,7 +22,7 @@ OBJS    = main.o run-tests.o console.o \
 LDLIBS  = -lm -lsoftfloat -lj2me -ljsr075
 
 # The compilation options, set to e.g., -O to run all optimizations
-CIBYL_MIPS2JAVA_OPTS ?=
+CIBYL_MIPS2JAVA_OPTS +=-I../include
 
 include $(CIBYL_BASE)/build/Rules.mk
 
