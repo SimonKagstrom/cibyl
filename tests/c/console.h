@@ -18,4 +18,6 @@ void console_redraw(void);
 
 void console_init(void);
 
+void console_finalize(void);
+
 #endif /* !__CONSOLE_H__ */
