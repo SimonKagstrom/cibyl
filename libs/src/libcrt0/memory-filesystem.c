@@ -77,6 +77,8 @@ static size_t write(FILE *fp, const void *ptr, size_t in_size)
       p->allocated_size = new_size + 4096;
       fp->eof = 0;
     }
+  if (new_size > p->data_size)
+    p->data_size = new_size;
 
   if (in_size >= 0)
     memcpy( p->data + p->fp, ptr, in_size );
@@ -92,16 +94,16 @@ static int close(FILE *fp)
   /* Writeback the file */
   if (p->writeback_path)
     {
-      FILE *fp = fopen(p->writeback_path, p->mode);
+      FILE *tmp = fopen(p->writeback_path, p->mode);
 
       free((void*)p->mode);
       free((void*)p->writeback_path);
-      if (!fp)
+      if (!tmp)
         return -1;
 
-      if (fwrite(p->data, p->data_size, 1, fp) != p->data_size)
+      if (fwrite(p->data, p->data_size, 1, tmp) != p->data_size)
         return -1;
-      fclose(fp);
+      fclose(tmp);
     }
   /* If this is allocated data, free it on closing */
   if (p->allocate)
@@ -139,7 +141,9 @@ void NOPH_MemoryFile_setup(FILE *out, void *ptr, size_t size, int allocate)
   p->allocate = allocate;
   if (ptr == NULL)
     {
-      p->data = malloc(p->data_size);
+      p->data = malloc(4096);
+      p->data_size = 0;
+      p->allocated_size = 4096;
       p->allocate = 1;
       if (!p->data)
         {
@@ -149,8 +153,10 @@ void NOPH_MemoryFile_setup(FILE *out, void *ptr, size_t size, int allocate)
         }
     }
   else
-    p->data = ptr;
-  p->data_size = p->allocated_size = size;
+    {
+      p->data = ptr;
+      p->data_size = p->allocated_size = size;
+    }
 }
 
 FILE *NOPH_MemoryFile_open(void *ptr, size_t size, int allocate)
@@ -211,7 +217,7 @@ FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *in_mode)
   /* Open the memory file */
   out = NOPH_MemoryFile_open(data, size, 1);
 
-  if (mode == READ_WRITE || mode == READ_TRUNCATE)
+  if (mode == WRITE || mode == READ_WRITE || mode == READ_TRUNCATE)
     {
       NOPH_Memory_file_t *p = (NOPH_Memory_file_t*)out->priv;
 
