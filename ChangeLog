@@ -1,4 +1,7 @@
 Cibyl (12)
+	* The test application has been improved and extended with many
+	more tests and now also writes the log to disk
+
 	* Added generation of Doxygen documentation (run make clean first)
 
 	* Bug fix in the global jump table generation: Static functions
