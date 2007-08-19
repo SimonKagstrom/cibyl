@@ -62,6 +62,9 @@ void NOPH_FileConnection_delete(NOPH_FileConnection_t fc); /* Throws */
 void NOPH_FileConnection_close(NOPH_FileConnection_t fc); /* Throws */
 NOPH_Enumeration_t NOPH_FileConnection_list(NOPH_FileConnection_t fc); /* Throws */
 
+/* FileSystemRegistry (JSR-075) */
+NOPH_Enumeration_t NOPH_FileSystemRegistry_listRoots(void); /* Throws */
+
 
 NOPH_DataOutputStream_t NOPH_Connector_openDataOutputStream(const char* name); /* Throws */
 
