@@ -11,9 +11,11 @@
  ********************************************************************/
 #include <javax/microedition/lcdui.h>
 #include <javax/microedition/lcdui/game.h>
+#include <cibyl-memoryfs.h>
 #include <java/lang.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 typedef struct
 {
@@ -21,6 +23,7 @@ typedef struct
   int lines;
   int line_height;
   char **buf;
+  FILE *fp;
 } console_t;
 
 static console_t console;
@@ -48,6 +51,7 @@ void console_push(char *str)
     }
   else
     {
+      fputs(str, console.fp);
       strncpy(console.buf[console.head], str, 255);
       console.head = (console.head + 1) % console.lines;
     }
@@ -98,4 +102,11 @@ void console_init(void)
       /* "enough" space for each line */
       console.buf[i] = malloc( sizeof(char) * 255 );
     }
+
+  console.fp = NOPH_MemoryFile_openIndirect("file:///root/cibyl-tests.log", "w");
+}
+
+void console_finalize(void)
+{
+  fclose(console.fp);
 }
