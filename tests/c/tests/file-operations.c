@@ -125,20 +125,24 @@ static void parse_return_val(const char *op, const char *path, int ret, int xret
 /* Pass an opened file for the test to run */
 void fs_read_test(FILE *fp, const char *op, const char *path)
 {
+  char buf[80];
+
+  snprintf(buf, 80, "%s read", op);
+
   /* Test a plain read */
-  parse_return_val(op, path,
+  parse_return_val(buf, path,
                    test_read(fp), 4);
   /* Test a seek from the start and read */
-  parse_return_val(op, path,
+  parse_return_val(buf, path,
                    test_seek_read(fp), 4);
   /* Test seek ahead and read */
-  parse_return_val(op, path,
+  parse_return_val(buf, path,
                    test_seek_cur_read(fp), 4);
   /* Test seek from the end */
-  parse_return_val(op, path,
+  parse_return_val(buf, path,
                    test_seek_end_read(fp), 4);
   /* Test seek from the end and read less than what is left  */
-  parse_return_val(op, path,
+  parse_return_val(buf, path,
                    test_seek_end_read_end(fp), 3);
 }
 
@@ -163,12 +167,34 @@ static int dir_open(const char *dir)
   return ret;
 }
 
-
-static void handler_file_io(NOPH_Exception_t exception, void *arg)
+static void one_test_read(FILE *fp, const char *path, const char *name)
 {
-  *(int*)arg = 1;
-  NOPH_Throwable_printStackTrace(exception);
-  NOPH_delete(exception);
+  if (fp)
+    {
+      PASS("%s open %s\n", name, path);
+
+      fs_read_test(fp, name, path);
+      fclose(fp);
+    }
+  else
+    FAIL("%s open %s\n", name, path);
+}
+
+static void one_test_write(FILE *fp, const char *path, const char *name)
+{
+  if (fp)
+    {
+      char buf[80];
+
+      snprintf(buf, 80, "%s write", name);
+      PASS("%s open %s\n", name, path);
+
+      parse_return_val(buf, path,
+		       test_write(fp), strlen(test_str) );
+      fclose(fp);
+    }
+  else
+    FAIL("%s open write %s\n", name, path);
 }
 
 #define ROOT_PATH "file:///root/"
@@ -176,59 +202,46 @@ void file_operations_run(void)
 {
   const char *root = ROOT_PATH;
   const char *path = ROOT_PATH"/a";
-  FILE *fp;
-  int exception = 0;
+  NOPH_FileConnection_t fc;
+  int error = 0;
 
-  fp = fopen(path, "w");
-  exception = 0;
-  if (fp)
-    {
-      PASS("Connector open %s\n", path);
-
-      parse_return_val("Connector write", path,
-		       test_write(fp), strlen(test_str) );
-      fclose(fp);
-    }
-  else
-    FAIL("Connector open write %s\n", path);
-
-  fp = fopen(path, "r");
-  if (fp)
-    {
-      PASS("Connector open %s\n", path);
-
-      fs_read_test(fp, "Connector", path);
-      fclose(fp);
-    }
-  else
-    FAIL("Connector open read %s\n", path);
+  one_test_write(fopen(path, "w"), path, "FileConnection");
+  one_test_read(fopen(path, "r"), path, "FileConnection");
+  one_test_read(NOPH_MemoryFile_openIndirect(path, "r"), path, "MemoryFile"); /* Memory file for the connector */
 
   path = "/b"; /* Resource */
-  fp = fopen(path, "r");
-  if (fp)
-    {
-      PASS("Resource read %s\n", path);
+  one_test_read(fopen(path, "r"), path, "Resource");
+  one_test_read(NOPH_MemoryFile_openIndirect(path, "r"), path, "MemoryFile"); /* Memory file for resources */
 
-      fs_read_test(fp, "Resource", path);
-      fclose(fp);
-    }
+  path = "recordstore://tjoho:1"; /* Recordstore */
+  one_test_write(fopen(path, "w"), path, "Recordstore");
+  one_test_read(fopen(path, "r"), path, "Recordstore");
+  one_test_read(NOPH_MemoryFile_openIndirect(path, "r"), path, "MemoryFile"); /* Memory file for the recordstore */
+
+  NOPH_try(NOPH_setter_exception_handler, (void*)&error) {
+    NOPH_RecordStore_deleteRecordStore("tjoho");
+  } NOPH_catch();
+  if (error)
+    FAIL("Deleting %s", path);
   else
-    FAIL("Resource open %s\n", path);
-
-  fp = NOPH_MemoryFile_openIndirect(path, "r");
-  if (fp)
-    {
-      PASS("MemoryFile read %s\n", path);
-
-      fs_read_test(fp, "MemoryFile", path);
-      fclose(fp);
-    }
-  else
-    FAIL("Resource open %s\n", path);
+    PASS("Deleting %s", path);
 
   /* Test directory stuff */
   if (dir_open(root))
     PASS("Dirlist %s\n", root);
   else
     FAIL("Dirlist %s\n", root);
+
+
+  /* Delete the file again */
+  path = ROOT_PATH"/a";
+  error = 0;
+  NOPH_try(NOPH_setter_exception_handler, (void*)&error) {
+    fc = NOPH_Connector_openFileConnection_mode(path, NOPH_Connector_WRITE);
+    NOPH_FileConnection_delete(fc);
+  } NOPH_catch();
+  if (error)
+    FAIL("Deleting %s", path);
+  else
+    PASS("Deleting %s", path);
 }
