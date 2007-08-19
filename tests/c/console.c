@@ -11,6 +11,8 @@
  ********************************************************************/
 #include <javax/microedition/lcdui.h>
 #include <javax/microedition/lcdui/game.h>
+#include <javax/microedition/io.h>
+#include <command_mgr.h>
 #include <cibyl-memoryfs.h>
 #include <java/lang.h>
 #include <stdlib.h>
@@ -77,10 +79,57 @@ void console_redraw(void)
   NOPH_GameCanvas_flushGraphics(canvas);
 }
 
+
+static NOPH_List_t fs_list;
+static char roots[15][80];
+char *fs_root = NULL;
+
+static void select_fs_callback(void *unused)
+{
+        int nr = NOPH_List_getSelectedIndex(fs_list);
+
+        fs_root = roots[nr];
+}
+
+static void select_fs_root(void)
+{
+        NOPH_Display_t display = NOPH_Display_getDisplay(NOPH_MIDlet_get());
+        NOPH_Displayable_t cur = NOPH_Display_getCurrent(display);
+        NOPH_CommandMgr_t cm = NOPH_CommandMgr_getInstance();
+        NOPH_Enumeration_t en = NOPH_FileSystemRegistry_listRoots();
+        int i = 0;
+
+        fs_list = NOPH_List_new("Select fs root", NOPH_Choice_IMPLICIT);
+
+        while (NOPH_Enumeration_hasMoreElements(en))
+          {
+            NOPH_Object_t o = NOPH_Enumeration_nextElement(en);
+
+            NOPH_String_toCharPtr(o, roots[i], 80);
+            NOPH_List_append(fs_list, roots[i], 0);
+            NOPH_delete(o);
+            i++;
+          }
+        NOPH_delete(en);
+        NOPH_Display_setCurrent(display, fs_list);
+        NOPH_CommandMgr_setList(cm, fs_list, select_fs_callback, NULL);
+
+        while(fs_root == NULL)
+        {
+                NOPH_Thread_sleep(250);
+        }
+
+        NOPH_Display_setCurrent(display, cur);
+        NOPH_delete(fs_list);
+}
+
 void console_init(void)
 {
+  char buf[256];
   int height;
   int i;
+
+  select_fs_root();
 
   canvas = NOPH_GameCanvas_get();
   graphics = NOPH_GameCanvas_getGraphics(canvas);
@@ -103,7 +152,8 @@ void console_init(void)
       console.buf[i] = malloc( sizeof(char) * 255 );
     }
 
-  console.fp = NOPH_MemoryFile_openIndirect("file:///root/cibyl-tests.log", "w");
+  snprintf(buf, 256, "file:///%s/cibyl-tests.log", fs_root);
+  console.fp = NOPH_MemoryFile_openIndirect(buf, "w");
 }
 
 void console_finalize(void)
