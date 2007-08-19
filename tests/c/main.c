@@ -38,16 +38,15 @@ int main(int argc, char **argv)
 
   console_init();
   do_output = 1;
-#if 0
   for (i = 0; i < 8; i++)
     {
       test_run_all_tests(0);
       NOPH_Thread_sleep(700);
     }
-#endif
   test_run_all_tests(1);
 
   test_output("Version " __DATE__ ", press key to exit");
+  console_finalize();
   while( !NOPH_GameCanvas_getKeyStates(NOPH_GameCanvas_get()) )
     NOPH_Thread_sleep(100);
 
