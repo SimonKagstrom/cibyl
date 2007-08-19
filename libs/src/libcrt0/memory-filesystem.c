@@ -12,14 +12,20 @@ static int seek(FILE *fp, long offset, int whence)
   NOPH_Memory_file_t *p = (NOPH_Memory_file_t*)fp->priv;
   int old = p->fp;
 
-  if (whence == SEEK_SET)
-    p->fp = offset;
-  else if (whence == SEEK_CUR)
-    p->fp = p->fp + offset;
-  else if (whence == SEEK_END)
-    p->fp = p->data_size + offset;
-  else
-    return -1;
+  switch (whence)
+    {
+    case SEEK_SET:
+      p->fp = offset;
+      break;
+    case SEEK_CUR:
+      p->fp = p->fp + offset;
+      break;
+    case SEEK_END:
+      p->fp = p->data_size + offset;
+      break;
+    default:
+      return -1;
+    }
 
   if (p->fp < 0)
     {
@@ -62,12 +68,13 @@ static size_t write(FILE *fp, const void *ptr, size_t in_size)
   long old = p->fp;
 
   /* Extend the file size? */
-  if (new_size > p->data_size)
+  if (new_size > p->allocated_size)
     {
       p->data = realloc(p->data, new_size + 4096);
       if (!p->data)
         return -1;
       p->data_size = new_size;
+      p->allocated_size = new_size + 4096;
       fp->eof = 0;
     }
 
@@ -132,7 +139,6 @@ void NOPH_MemoryFile_setup(FILE *out, void *ptr, size_t size, int allocate)
   p->allocate = allocate;
   if (ptr == NULL)
     {
-      p->data_size = size;
       p->data = malloc(p->data_size);
       p->allocate = 1;
       if (!p->data)
@@ -143,10 +149,8 @@ void NOPH_MemoryFile_setup(FILE *out, void *ptr, size_t size, int allocate)
         }
     }
   else
-    {
-      p->data_size = size;
-      p->data = ptr;
-    }
+    p->data = ptr;
+  p->data_size = p->allocated_size = size;
 }
 
 FILE *NOPH_MemoryFile_open(void *ptr, size_t size, int allocate)
@@ -198,6 +202,9 @@ FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *in_mode)
           file_size += n;
         } while(n == bufsize);
       fclose(tmp);
+      /* Make the size match the file size */
+      if (size != file_size)
+        data = realloc(data, file_size);
       size = file_size;
     }
 
