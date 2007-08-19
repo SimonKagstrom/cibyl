@@ -12,9 +12,15 @@
 SUBDIRS = c
 RESOURCES=res/program.data.bin res/file-which-exists res/b
 TARGET   =src/CompiledProgram.class CibylTest.jar CibylTest.jad
-CIBYL_SYSCALL_SETS ?= resource_manager softfloat
+CIBYL_SYSCALL_SETS ?= resource_manager softfloat command_mgr
 
-CIBYL_GENERATE_JAVA_WRAPPERS_OPTS=-DJSR075
+CIBYL_GENERATE_JAVA_WRAPPERS_OPTS=-DJSR075 -I include -S syscalls
 CIBYL_CLASSPATH=$(WTK_PATH)/lib/jsr75.jar
 
+all: include/ $(SUBDIRS)
+
 include $(CIBYL_BASE)/build/Rules-j2me.mk
+
+include/: FORCE
+	$(CIBYL_BASE)/tools/cibyl-generate-c-header -o $@ syscalls/ command_mgr
+FORCE:
