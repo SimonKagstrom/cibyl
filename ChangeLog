@@ -1,6 +1,9 @@
 Cibyl (12)
+	* The test application can now write to a log file and has the
+	ability to select the file system root
+
 	* The test application has been improved and extended with many
-	more tests and now also writes the log to disk
+	more tests (including performance tests)
 
 	* Added generation of Doxygen documentation (run make clean first)
 
