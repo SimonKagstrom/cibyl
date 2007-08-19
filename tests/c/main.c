@@ -32,6 +32,7 @@ int test_output(const char *fmt, ...)
 void test_run_all_tests(int run_fileops);
 
 int do_output = 0;
+extern char *fs_root;
 int main(int argc, char **argv)
 {
   int i;
@@ -45,6 +46,8 @@ int main(int argc, char **argv)
     }
   test_run_all_tests(1);
 
+  test_output("Please send %s/cibyl-tests.log\n", fs_root);
+  test_output("to simon.kagstrom@gmail.com", fs_root);
   test_output("Version " __DATE__ ", press key to exit");
   console_finalize();
   while( !NOPH_GameCanvas_getKeyStates(NOPH_GameCanvas_get()) )
