@@ -30,9 +30,25 @@ static void close_write(FILE *fp)
   record_store_file_t *p = (record_store_file_t *)fp->priv;
   void *data = NOPH_MemoryFile_getDataPtr(fp);
   long size = ftell(fp);
+  int error = 0;
 
   /* Update this record - this can very well throw an exception */
-  NOPH_RecordStore_setRecord(p->rs, p->id, data, 0, size);
+  NOPH_try(NOPH_setter_exception_handler, (void*)&error)
+    {
+      NOPH_RecordStore_setRecord(p->rs, p->id, data, 0, size);
+    } NOPH_catch();
+  if (error)
+    {
+      char buf[1] = {0};
+      int id = NOPH_RecordStore_addRecord(p->rs, buf, 0, 1);
+
+      if (id > p->id)
+        NOPH_throw(NOPH_Exception_new_string("Non-create error"));
+
+      while (id != p->id)
+        id = NOPH_RecordStore_addRecord(p->rs, buf, 0, 1);
+      NOPH_RecordStore_setRecord(p->rs, p->id, data, 0, size);
+    }
 }
 
 static void close_read(FILE *fp)
@@ -40,16 +56,16 @@ static void close_read(FILE *fp)
   /* Do nothing */
 }
 
-static void *get_record(NOPH_RecordStore_t rs, int id)
+static void *get_record(NOPH_RecordStore_t rs, int id, int *rs_size)
 {
   void *data;
-  int error;
+  int error = 0;
 
   NOPH_try(NOPH_setter_exception_handler, (void*)&error)
     {
-      int rs_size = NOPH_RecordStore_getRecordSize(rs, id);
+      *rs_size = NOPH_RecordStore_getRecordSize(rs, id);
 
-      data = malloc(rs_size);
+      data = malloc(*rs_size);
       if (!data)
         return NULL;
       /* Read the entire record into data */
@@ -73,8 +89,8 @@ static FILE *open(const char *path,
   char *record_number = strchr(path, ':');
   char *store_name;
   void *data = NULL;
-  int rs_size = 8192; /* assume mode == TRUNCATE */
-  int error;
+  int rs_size = 0; /* assume mode == TRUNCATE */
+  int error = 0;
 
   if (!record_number)
     return NULL;
@@ -105,16 +121,17 @@ static FILE *open(const char *path,
   switch (mode)
     {
     case READ_TRUNCATE:
+    case WRITE:
       /* Just allocate space without reading anything */
       break;
-    case WRITE:
     case READ_APPEND:
-      /* Write or append - read into a buffer */
-      if ( !(data = get_record(p->rs, p->id)) )
+      /* Open and read everything into a buffer */
+      if ( !(data = get_record(p->rs, p->id, &rs_size)) )
         goto err;
+      break;
     case READ:
       /* Open and read everything into a buffer */
-      if ( !(data = get_record(p->rs, p->id)) )
+      if ( !(data = get_record(p->rs, p->id, &rs_size)) )
         goto err;
       /* Do not update on close */
       p->close_helper = close_read;
@@ -132,7 +149,7 @@ static FILE *open(const char *path,
 
   return fp;
  err:
-  free(fp);
+  cibyl_file_free(fp);
   return NULL;
 }
 
@@ -144,8 +161,9 @@ static int close(FILE *fp)
   p->close_helper(fp);
   NOPH_RecordStore_closeRecordStore(p->rs);
 
+  NOPH_delete(p->rs);
   /* Will free memory used by the memfs */
-  fclose(fp);
+  NOPH_Memory_fops.close(fp);
 
   return 0;
 }
