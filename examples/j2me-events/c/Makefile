@@ -12,6 +12,6 @@
 SUBDIRS =
 TARGET  = program
 OBJS    = main.o
-LDLIBS  = -lc -ljava
+LDLIBS  =
 
 include $(CIBYL_BASE)/build/Rules.mk
