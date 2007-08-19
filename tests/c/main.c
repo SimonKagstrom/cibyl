@@ -33,6 +33,7 @@ void test_run_all_tests(int run_fileops);
 
 int do_output = 0;
 extern char *fs_root;
+extern int astar_main(int argc, char **argv);
 int main(int argc, char **argv)
 {
   int i;
@@ -45,6 +46,8 @@ int main(int argc, char **argv)
       NOPH_Thread_sleep(700);
     }
   test_run_all_tests(1);
+
+  astar_main(0, NULL);
 
   test_output("Please send %s/cibyl-tests.log\n", fs_root);
   test_output("to simon.kagstrom@gmail.com", fs_root);
