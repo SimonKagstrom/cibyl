@@ -100,8 +100,10 @@ typedef struct
 static mode_t mode_mapping[] =
 {
   {"r" , READ},
+  {"rb", READ},
   {"r+", READ_WRITE},
   {"w" , WRITE},
+  {"wb", WRITE},
   {"a" , APPEND},
   {"a+", READ_APPEND},
   {"w+", READ_TRUNCATE},
