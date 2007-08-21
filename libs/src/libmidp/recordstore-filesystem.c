@@ -176,7 +176,6 @@ static cibyl_fops_t record_store_fops =
   .read  = NULL, /* See below*/
   .write = NULL,
   .seek  = NULL,
-  .tell  = NULL,
   .flush = NULL,
 };
 
@@ -184,7 +183,6 @@ static void __attribute__((constructor))register_fs(void)
 {
   record_store_fops.read  = NOPH_Memory_fops.read;
   record_store_fops.write = NOPH_Memory_fops.write;
-  record_store_fops.tell  = NOPH_Memory_fops.tell;
   record_store_fops.seek  = NOPH_Memory_fops.seek;
   record_store_fops.flush = NOPH_Memory_fops.flush;
 

@@ -85,7 +85,6 @@ static cibyl_fops_t connector_fops =
   .read  = NULL, /* Set below */
   .write = NULL, /* ... */
   .seek  = NULL,
-  .tell  = NULL,
 };
 
 static void __attribute__((constructor))register_fs(void)
@@ -94,7 +93,6 @@ static void __attribute__((constructor))register_fs(void)
   connector_fops.read  = NOPH_InputStream_fops.read;
   connector_fops.write = NOPH_InputStream_fops.write;
   connector_fops.seek  = NOPH_InputStream_fops.seek;
-  connector_fops.tell  = NOPH_InputStream_fops.tell;
 
   /* Lots of different types are handle by the connector */
   cibyl_fops_register("file://", &connector_fops, 0); /* Can be overridden by jsr075 */

@@ -41,7 +41,6 @@ cibyl_fops_t NOPH_OutputStream_fops =
   .read = NULL,
   .write = write,
   .seek = NULL,
-  .tell = NULL,
   .flush = flush,
 };
 

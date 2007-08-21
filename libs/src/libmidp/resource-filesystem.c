@@ -50,7 +50,6 @@ static cibyl_fops_t resource_fops =
   .read  = NULL, /* ... */
   .write = NULL,
   .seek  = NULL,
-  .tell  = NULL,
 };
 
 static void __attribute__((constructor))register_fs(void)
@@ -59,7 +58,6 @@ static void __attribute__((constructor))register_fs(void)
   resource_fops.read  = NOPH_InputStream_fops.read;
   resource_fops.write = NOPH_InputStream_fops.write;
   resource_fops.seek  = NOPH_InputStream_fops.seek;
-  resource_fops.tell  = NOPH_InputStream_fops.tell;
   resource_fops.flush = NOPH_InputStream_fops.flush;
 
   cibyl_fops_register("resource://", &resource_fops, 1);
