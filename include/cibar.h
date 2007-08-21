@@ -40,18 +40,29 @@ typedef struct
   int fp;
 } cibar_file_t;
 
+/**
+ * Open a cibar
+ *
+ * @param f the file to read the cibar from
+  *
+ * @return a pointer to the new cibar
+ */
 cibar_t *cibar_open(FILE *f);
+
+/**
+ * Close the cibar. All files opened from the cibar should be closed
+ * first since all data is freed
+ */
 void cibar_close(cibar_t *p);
 
-/* Works like fseek / fread / fclose / fopen (but these are read-only) */
-int cibar_file_seek(cibar_file_t *p, long offset, int whence);
-int cibar_file_tell(cibar_file_t *p);
-size_t cibar_file_read(cibar_file_t *p, void *ptr, size_t size, size_t nmemb);
-void cibar_file_close(cibar_file_t *p);
-cibar_file_t *cibar_file_open(cibar_t *p, const char *name);
-static inline int cibar_file_eof(cibar_file_t *p)
-{
-  return (p->fp >= p->entry->data_size);
-}
+/**
+ * Open a file in the cibar
+ *
+ * @param p the cibar to open from
+ * @param name the name of the file
+ *
+ * @return a FILE pointer to the cibar
+ */
+FILE *cibar_file_open(cibar_t *p, const char *name);;
 
 #endif /* !__CIBAR_H__ */
