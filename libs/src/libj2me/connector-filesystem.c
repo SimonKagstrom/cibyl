@@ -69,6 +69,12 @@ static int close(FILE *fp)
   return 0;
 }
 
+FILE *NOPH_Connector_openFILE(const char *path, const char *in_mode)
+{
+  return open(path, cibyl_file_get_mode(in_mode));
+}
+
+
 /* The fops structure for connector files */
 static cibyl_fops_t connector_fops =
 {
