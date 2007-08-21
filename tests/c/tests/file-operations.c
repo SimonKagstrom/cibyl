@@ -212,13 +212,13 @@ void file_operations_run(void)
 
   one_test_write(fopen(path, "w"), path, "FileConnection");
   one_test_read(fopen(path, "r"), path, "FileConnection");
-  one_test_read(NOPH_MemoryFile_openIndirect(path, "r"), path, "MemoryFile"); /* Memory file for the connector */
+  one_test_read(NOPH_MemoryFile_openIndirect(path, "r"), path, "MemoryFile"); /* Memory file for the file connection */
 
   path = "/b"; /* Resource */
   one_test_read(fopen(path, "r"), path, "Resource");
   one_test_read(NOPH_MemoryFile_openIndirect(path, "r"), path, "MemoryFile"); /* Memory file for resources */
 
-  path = "recordstore://tjoho:1"; /* Recordstore */
+  path = "recordstore://tjoho:3"; /* Recordstore */
   one_test_write(fopen(path, "w"), path, "Recordstore");
   one_test_read(fopen(path, "r"), path, "Recordstore");
   one_test_read(NOPH_MemoryFile_openIndirect(path, "r"), path, "MemoryFile"); /* Memory file for the recordstore */
