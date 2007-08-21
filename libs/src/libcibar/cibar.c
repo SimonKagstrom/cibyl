@@ -14,96 +14,7 @@
 #include <string.h>
 #include <assert.h>
 #include <cibar.h>
-
-#define min(x,y) ( (x) < (y) ? (x) : (y) )
-#define max(x,y) ( (x) > (y) ? (x) : (y) )
-
-static void increase_refcount(cibar_t *p)
-{
-  p->refcount++;
-}
-
-static void decrease_refcount(cibar_t *p)
-{
-  p->refcount--;
-
-  if (p->refcount <= 0)
-    {
-      free(p->strings);
-      free(p->data);
-      free(p);
-    }
-}
-
-int cibar_file_seek(cibar_file_t *p, long offset, int whence)
-{
-  int old = p->fp;
-
-  if (whence == SEEK_SET)
-    p->fp = offset;
-  else if (whence == SEEK_CUR)
-    p->fp = p->fp + offset;
-  else if (whence == SEEK_END)
-    p->fp = p->entry->data_size + offset;
-  else
-    return -1;
-
-  if (p->fp < 0)
-    {
-      p->fp = old;
-      return -1;
-    }
-
-  if (p->fp >= p->entry->data_size)
-    p->fp = p->entry->data_size;
-
-  return 0;
-}
-
-int cibar_file_tell(cibar_file_t *p)
-{
-  return p->fp;
-}
-
-size_t cibar_file_read(cibar_file_t *p, void *ptr, size_t size, size_t nmemb)
-{
-  size_t cnt = min(size * nmemb, p->entry->data_size - p->fp);
-
-  if (cnt >= 0)
-    memcpy( ptr, p->entry->data + p->fp, cnt );
-  p->fp = p->fp + cnt;
-
-  return cnt / size;
-}
-
-cibar_file_t *cibar_file_open(cibar_t *p, const char *name)
-{
-  int i;
-
-  for (i = 0; i < p->n_files; i++)
-    {
-      if (strlen(p->files[i].name) == strlen(name) &&
-          strcmp(p->files[i].name, name) == 0)
-        {
-          cibar_file_t *out = malloc(sizeof(cibar_file_t));
-
-          increase_refcount(p);
-          out->entry = &p->files[i];
-          out->fp = 0;
-
-          return out;
-        }
-    }
-
-  return NULL;
-}
-
-void cibar_file_close(cibar_file_t *p)
-{
-  decrease_refcount(p->entry->cibar);
-  free(p);
-}
-
+#include <cibyl-memoryfs.h>
 
 typedef struct
 {
@@ -126,7 +37,28 @@ typedef struct
 
 void cibar_close(cibar_t *p)
 {
-  decrease_refcount(p);
+  free(p->strings);
+  free(p->data);
+  free(p);
+}
+
+FILE *cibar_file_open(cibar_t *p, const char *name)
+{
+  int i;
+
+  for (i = 0; i < p->n_files; i++)
+    {
+      if (strlen(p->files[i].name) == strlen(name) &&
+          strcmp(p->files[i].name, name) == 0)
+        {
+          FILE *out = NOPH_MemoryFile_open(p->files[i].data,
+                                           p->files[i].data_size, 0);
+
+          return out;
+        }
+    }
+
+  return NULL;
 }
 
 cibar_t *cibar_open(FILE *f)
@@ -137,6 +69,9 @@ cibar_t *cibar_open(FILE *f)
   cibar_internal_t cb;
   cibar_t *out;
   int i;
+
+  if (!f)
+    return NULL;
 
   /* Read the header */
   fread(&cb, sizeof(cibar_internal_t), 1, f);
