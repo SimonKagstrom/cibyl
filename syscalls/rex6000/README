@@ -1,6 +1,0 @@
-This syscall set defines syscalls for a REX 6000
-(http://en.wikipedia.org/wiki/REX_6000) which I developed a few years
-ago (mostly just a nicer wrapper around the native API).
-
-Don't use this unless you really have to :-)
-

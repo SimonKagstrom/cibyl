@@ -1,4 +1,7 @@
 Cibyl (12)
+	* Removed the rex6000 syscalls - it's not really something useful
+	for public consumption anyway
+
 	* The test application can now write to a log file and has the
 	ability to select the file system root
 

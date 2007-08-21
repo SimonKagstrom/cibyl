@@ -18,7 +18,7 @@ libs/lib:
 
 include/generated: FORCE
 	install -d include/generated
-	$(CIBYL_BASE)/tools/cibyl-generate-c-header -o $@ $(CIBYL_BASE)/syscalls/ softfloat resource_manager rex6000 jmicropolygon
+	$(CIBYL_BASE)/tools/cibyl-generate-c-header -o $@ $(CIBYL_BASE)/syscalls/ softfloat resource_manager jmicropolygon
 
 clean:
 	make -C $(SUBDIRS) clean
