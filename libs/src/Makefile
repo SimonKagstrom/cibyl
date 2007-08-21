@@ -10,6 +10,6 @@
 ##
 ######################################################################
 SUBDIRS = libcrt0 libc libdebug libsoftfloat libm libcibar libs9 libjava \
-          libj2me libjsr075 libstdc++
+          libmidp libjsr075 libstdc++
 
 include $(CIBYL_BASE)/build/Rules-common.mk

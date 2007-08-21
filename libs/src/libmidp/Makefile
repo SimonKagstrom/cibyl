@@ -13,9 +13,9 @@ SUBDIRS =
 OBJS    = resource-filesystem.o recordstore-filesystem.o \
           connector-filesystem.o
 ALL_TARGETS=install
-EXTRA_CLEAN=libj2me.a
+EXTRA_CLEAN=libmidp.a
 
 include $(CIBYL_BASE)/build/Rules.mk
 
-install: libj2me.a
+install: libmidp.a
 	cp $< $(CIBYL_BASE)/libs/lib
