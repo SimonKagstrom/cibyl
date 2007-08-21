@@ -171,17 +171,17 @@ static void one_test_read(FILE *fp, const char *path, const char *name)
 {
   long file_size;
 
-  fseek(fp, 0, SEEK_END);
-  file_size = ftell(fp);
-  fseek(fp, 0, SEEK_SET);
-
-  if (file_size != 17)
-    FAIL("%s file size: %d != 17", name, file_size);
-  else
-    PASS("%s file size: %d == 17", name, file_size);
-
   if (fp)
     {
+      fseek(fp, 0, SEEK_END);
+      file_size = ftell(fp);
+      fseek(fp, 0, SEEK_SET);
+
+      if (file_size != 17)
+        FAIL("%s file size: %d != 17", name, file_size);
+      else
+        PASS("%s file size: %d == 17", name, file_size);
+
       PASS("%s open %s", name, path);
 
       fs_read_test(fp, name, path);
@@ -217,6 +217,7 @@ void file_operations_run(void)
   char *path;
   NOPH_FileConnection_t fc;
   int error = 0;
+  FILE *fp;
 
   snprintf(buf, 128, "file:///%s/cibyl_a", fs_root);
   path = buf;
@@ -233,6 +234,26 @@ void file_operations_run(void)
   one_test_write(fopen(path, "w"), path, "Recordstore");
   one_test_read(fopen(path, "r"), path, "Recordstore");
   one_test_read(NOPH_MemoryFile_openIndirect(path, "r"), path, "MemoryFile"); /* Memory file for the recordstore */
+
+  /* Reads of record stores which should fail */
+  if ( (fp = fopen("recordstore://tjoho:4", "r")) )
+    {
+      fclose(fp);
+      FAIL("Opening non-existent record store %d", 4);
+    }
+  else
+    PASS("Opening non-existent record store %d", 4);
+  if ( (fp = fopen("recordstore://tjoho:2", "r")) )
+    {
+      fclose(fp);
+      FAIL("Opening non-existent record store %d", 2);
+    }
+  else
+    PASS("Opening non-existent record store %d", 2);
+
+  path = "recordstore://tjoho:2"; /* Recordstore, add a new one (previously invalid) */
+  one_test_write(fopen(path, "w+"), path, "Recordstore");
+  one_test_read(fopen(path, "r"), path, "Resource");
 
   NOPH_try(NOPH_setter_exception_handler, (void*)&error) {
     NOPH_RecordStore_deleteRecordStore("tjoho");
