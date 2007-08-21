@@ -17,6 +17,8 @@
 
 static cibyl_fops_t record_store_fops;
 
+#define INVALID_RECORD_MAGIC 0xc1b41c1b4109b4c1ull
+
 typedef struct
 {
   NOPH_Memory_file_t memfs;
@@ -39,14 +41,14 @@ static void close_write(FILE *fp)
     } NOPH_catch();
   if (error)
     {
-      char buf[1] = {0};
-      int id = NOPH_RecordStore_addRecord(p->rs, buf, 0, 1);
+      uint64_t buf = INVALID_RECORD_MAGIC;
+      int id = NOPH_RecordStore_addRecord(p->rs, (char*)&buf, 0, sizeof(uint64_t));
 
       if (id > p->id)
         NOPH_throw(NOPH_Exception_new_string("Non-create error"));
 
       while (id != p->id)
-        id = NOPH_RecordStore_addRecord(p->rs, buf, 0, 1);
+        id = NOPH_RecordStore_addRecord(p->rs, (char*)&buf, 0, sizeof(uint64_t));
       NOPH_RecordStore_setRecord(p->rs, p->id, data, 0, size);
     }
 }
@@ -73,6 +75,14 @@ static void *get_record(NOPH_RecordStore_t rs, int id, int *rs_size)
     } NOPH_catch();
   if (error)
     return NULL;
+
+  /* Was this just an invalid entry? */
+  if (*rs_size == sizeof(uint64_t) && (*(uint64_t*)data) == INVALID_RECORD_MAGIC)
+    {
+      free(data);
+      *rs_size = 0;
+      data = NULL;
+    }
   return data;
 }
 
@@ -125,9 +135,12 @@ static FILE *open(const char *path,
       /* Just allocate space without reading anything */
       break;
     case READ_APPEND:
-      /* Open and read everything into a buffer */
-      if ( !(data = get_record(p->rs, p->id, &rs_size)) )
-        goto err;
+      /* Open and read everything into a buffer. This will either be
+       * NULL if this file has not been created yet or a pointer to
+       * the data. If it hasn't been created, it will be when the file
+       * is closed.
+       */
+      data = get_record(p->rs, p->id, &rs_size);
       break;
     case READ:
       /* Open and read everything into a buffer */
@@ -138,7 +151,7 @@ static FILE *open(const char *path,
       break;
     default:
       NOPH_panic("Invalid mode %d", mode);
-      return NULL;
+      goto err; /* OK, never reached */
     }
 
   /* Create the memory file */
@@ -149,6 +162,8 @@ static FILE *open(const char *path,
 
   return fp;
  err:
+  NOPH_RecordStore_closeRecordStore(p->rs);
+  NOPH_delete(p->rs);
   cibyl_file_free(fp);
   return NULL;
 }
