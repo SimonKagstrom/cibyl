@@ -59,11 +59,6 @@ extern void clearerr(FILE* stream); /* Not generated */
 extern int feof(FILE* stream); /* Not generated */
 extern int ferror(FILE* stream); /* Not generated */
 
-/* This is not in ANSI C but a convenient way of finding out how large
- * the file is. It returns DataInputStream.available().
- */
-extern int favail(FILE* stream); /* Not generated */
-
 extern int fseek(FILE* stream, long offset, int whence); /* Not generated */
 extern long ftell(FILE *stream);
 extern int fflush(FILE* stream); /* Not generated */
