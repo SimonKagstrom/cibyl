@@ -81,6 +81,18 @@ void NOPH_RecordStore_setRecord(NOPH_RecordStore_t rs, int recordId, char* newDa
 int NOPH_RecordStore_getRecord(NOPH_RecordStore_t rs, int recordId, char* buffer, int offset); /* Not generated */
 
 /* -- Non-java functionality -- */
+
+/**
+ * Create a ANSI C file from a Connector. This is a convenience
+ * method
+ *
+ * @param name the name of the file to open
+ * @param mode the mode to open the file in
+ *
+ * @return a pointer to the new FILE input stream
+ */
+extern FILE *NOPH_Connector_openFILE(const char *path, const char *in_mode);
+
 /**
  * Create a ANSI C file from a FileConnection. This is a convenience
  * method to use instead of creating a file connection, opening a
