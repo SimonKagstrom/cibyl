@@ -35,6 +35,7 @@ static FILE *open(const char *path,
   fp = cibyl_file_alloc(&resource_fops);
   p = (resource_file_t *)fp->priv;
   p->is_file.is = is;
+  fp->file_size = NOPH_InputStream_available(is);
 
   return fp;
 }

@@ -169,15 +169,26 @@ static int dir_open(const char *dir)
 
 static void one_test_read(FILE *fp, const char *path, const char *name)
 {
+  long file_size;
+
+  fseek(fp, 0, SEEK_END);
+  file_size = ftell(fp);
+  fseek(fp, 0, SEEK_SET);
+
+  if (file_size != 17)
+    FAIL("%s file size: %d != 17", name, file_size);
+  else
+    PASS("%s file size: %d == 17", name, file_size);
+
   if (fp)
     {
-      PASS("%s open %s\n", name, path);
+      PASS("%s open %s", name, path);
 
       fs_read_test(fp, name, path);
       fclose(fp);
     }
   else
-    FAIL("%s open %s\n", name, path);
+    FAIL("%s open %s", name, path);
 }
 
 static void one_test_write(FILE *fp, const char *path, const char *name)

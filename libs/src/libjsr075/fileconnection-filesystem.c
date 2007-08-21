@@ -84,6 +84,7 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
 
   p->path = strdup(path);
   p->fc = fc;
+  fp->file_size = NOPH_FileConnection_fileSize(fc);
 
   return fp;
 }
@@ -126,39 +127,21 @@ static void reset(FILE *fp)
   p->is_file.is = NOPH_FileConnection_openInputStream(p->fc);
 }
 
-static int seek(FILE *fp, long offset, int whence)
+static void seek(FILE *fp, long offset)
 {
   fileconnection_file_t *p = (fileconnection_file_t *)fp->priv;
   int skip = offset;
-  int avail;
-  int error = 0;
+  int real_skip;
 
-  /* Only inputstreams can support seeking */
-  switch (whence)
+  if (offset < 0)
     {
-    case SEEK_SET:
-      p->is_file.is_fp = 0;
       reset(fp);
-      break;
-    case SEEK_END:
-      p->is_file.is_fp = 0;
-      avail = NOPH_FileConnection_fileSize(p->fc);
-      skip = avail + offset;
-      reset(fp);
-      break;
-    case SEEK_CUR:
-      /* Do nothing (fallthrough) */
-    default:
-      break;
+      skip = fp->vfptr;
     }
-  NOPH_try(NOPH_setter_exception_handler, (void*)&error)
-    {
-      p->is_file.is_fp += NOPH_InputStream_skip(p->is_file.is, skip);
-    } NOPH_catch();
-  if (error)
-    return -1;
+  real_skip = NOPH_InputStream_skip(p->is_file.is, skip); /* Might throw */
 
-  return 0;
+  if (real_skip != skip)
+    NOPH_throw(NOPH_Exception_new());
 }
 
 
@@ -173,7 +156,6 @@ static cibyl_fops_t connector_fops =
   .read  = NULL, /* Set below */
   .write = NULL, /* ... */
   .seek  = seek,
-  .tell  = NULL,
 };
 
 static void __attribute__((constructor))register_fs(void)
@@ -181,7 +163,6 @@ static void __attribute__((constructor))register_fs(void)
   /* By default uses the same implementations as input streams */
   connector_fops.read  = NOPH_InputStream_fops.read;
   connector_fops.write = NOPH_InputStream_fops.write;
-  connector_fops.tell  = NOPH_InputStream_fops.tell;
 
   cibyl_fops_register("file://", &connector_fops, 0);
 }

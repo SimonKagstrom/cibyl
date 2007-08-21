@@ -15,55 +15,27 @@ static int close(FILE *fp)
 }
 
 
-static int seek(FILE *fp, long offset, int whence)
+static void seek(FILE *fp, long offset)
 {
   NOPH_InputStream_file_t *p = (NOPH_InputStream_file_t *)fp->priv;
-  int skip = offset;
-  int avail;
-  int error;
+  long skip = offset;
+  int real_skip;
 
-  /* On input streams in general we assume all these can be
-   * supported. Otherwise this function should be reimplemented in an
-   * "inheriting" class
-   */
-  switch (whence)
+  if (offset < 0)
     {
-    case SEEK_SET:
-      p->is_fp = 0;
       NOPH_InputStream_reset(p->is);
-      break;
-    case SEEK_END:
-      avail = NOPH_InputStream_available(p->is);
-      skip = (avail + p->is_fp) + offset;
-      NOPH_InputStream_reset(p->is);
-      p->is_fp = 0;
-      break;
-    case SEEK_CUR:
-      /* Do nothing (fallthrough) */
-    default:
-      break;
+      skip = fp->vfptr;
     }
-  NOPH_try(NOPH_setter_exception_handler, (void*)&error)
-    {
-      p->is_fp += NOPH_InputStream_skip(p->is, skip);
-    } NOPH_catch();
-  if (error)
-    return -1;
+  real_skip = NOPH_InputStream_skip(p->is, skip); /* Might throw */
 
-  return 0;
-}
-
-static long tell(FILE *fp)
-{
-  NOPH_InputStream_file_t *p = (NOPH_InputStream_file_t *)fp->priv;
-
-  return p->is_fp;
+  if (real_skip != skip)
+    NOPH_throw(NOPH_Exception_new());
 }
 
 static size_t read(FILE *fp, void *ptr, size_t in_size)
 {
   NOPH_InputStream_file_t *p = (NOPH_InputStream_file_t *)fp->priv;
-  long before = p->is_fp;
+  size_t count = 0;
 
   /* Cached file reading - read into a temporary buffer */
   while (in_size > 0)
@@ -73,14 +45,14 @@ static size_t read(FILE *fp, void *ptr, size_t in_size)
 
       /* Read the data into the buffer, potentially setting fp->eof */
       n = NOPH_InputStream_read_into(p->is, ptr, size, &fp->eof);
-      p->is_fp += n;
+      count += n;
       in_size -= n;
       ptr += n;
       if (fp->eof)
         break;
     }
 
-  return p->is_fp - before;
+  return count;
 }
 
 static size_t write(FILE *fp, const void *ptr, size_t in_size)
@@ -99,7 +71,6 @@ cibyl_fops_t NOPH_InputStream_fops =
   .read = read,
   .write = write,
   .seek = seek,
-  .tell = tell,
 };
 
 FILE *NOPH_InputStream_createFILE(NOPH_InputStream_t is)
@@ -112,6 +83,7 @@ FILE *NOPH_InputStream_createFILE(NOPH_InputStream_t is)
   p = (NOPH_InputStream_file_t*)out->priv;
 
   p->is = is;
+  out->file_size = NOPH_InputStream_available(is);
 
   return out;
 }

@@ -38,9 +38,12 @@ struct s_cibyl_fops;
 typedef struct
 {
   struct s_cibyl_fops *ops;
-  short eof;
-  short error;
-  void *priv;
+  short   eof;   /* eof status */
+  short   error;
+  long    fptr;  /* Real file pointer */
+  long    vfptr; /* Virtual file pointer */
+  size_t  file_size;
+  void   *priv;  /* Filesystem private stuff */
 } FILE;
 
 #define EOF (-1)

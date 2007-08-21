@@ -173,36 +173,74 @@ int fclose(FILE *fp)
 size_t fread(void *ptr, size_t in_size, size_t nmemb, FILE *fp)
 {
   size_t size = in_size * nmemb;
+  size_t ret;
 
   if (size == 0)
     return 0;
 
-  return fp->ops->read(fp, ptr, size) / in_size;
+  /* Do we need to seek? */
+  if (fp->fptr != fp->vfptr)
+    {
+      fp->ops->seek(fp, fp->vfptr - fp->fptr);
+      fp->fptr = fp->vfptr;
+    }
+
+  /* Read and update the file pointers */
+  ret = fp->ops->read(fp, ptr, size);
+  fp->fptr += ret;
+  fp->vfptr = fp->fptr;
+
+  return ret / in_size;
 }
 
 size_t fwrite(const void *ptr, size_t in_size, size_t nmemb, FILE *fp)
 {
   size_t size = in_size * nmemb;
+  size_t ret;
 
   if (size == 0)
     return 0;
 
-  return fp->ops->write(fp, ptr, size) / in_size;
+  ret = fp->ops->write(fp, ptr, size) / in_size;
+
+  fp->fptr += ret;
+  fp->vfptr = fp->fptr;
+  return ret;
 }
 
 int fseek(FILE *fp, long offset, int whence)
 {
-  return fp->ops->seek(fp, offset, whence);
+  long skip = offset;
+
+  switch (whence)
+    {
+    case SEEK_SET:
+      fp->vfptr = 0; /* skip == offset */
+      break;
+    case SEEK_END:
+      fp->vfptr = 0;
+      skip = fp->file_size + offset;
+      break;
+    case SEEK_CUR:
+      /* Do nothing */
+      break;
+    default:
+      NOPH_throw(NOPH_Exception_new_string("Invalid seek mode"));
+    }
+
+  fp->vfptr += skip;
+
+  return 0;
 }
 
 long ftell(FILE *fp)
 {
-  return fp->ops->tell(fp);
+  return fp->vfptr;
 }
 
 void rewind(FILE *fp)
 {
-  fp->ops->seek(fp, 0L, SEEK_SET);
+  fseek(fp, 0L, SEEK_SET);
 }
 
 void clearerr(FILE* fp)

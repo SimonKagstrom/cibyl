@@ -18,9 +18,7 @@
 typedef struct
 {
   void *data;
-  size_t data_size;
   size_t allocated_size;
-  long fp;
   int allocate;
   const char *writeback_path;
   const char *mode;

@@ -41,7 +41,7 @@ typedef struct s_cibyl_fops
   size_t (*read)(FILE *fp, void *dst, size_t amount);  /* Read from the file  */
   size_t (*write)(FILE *fp, const void *src, size_t amount);  /* Write to the file  */
 
-  int (*seek)(FILE *fp, long offset, int whence);  /* Move the file pointer  */
+  void (*seek)(FILE *fp, long offset);  /* Move the file pointer relative to the current position  */
   long (*tell)(FILE *fp);  /* Return the position of the file pointer (ftell)  */
 
   int (*flush)(FILE *fp); /* flush the stream */

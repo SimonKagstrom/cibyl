@@ -57,7 +57,6 @@ extern cibyl_fops_t NOPH_OutputStream_fops;
 typedef struct
 {
   NOPH_InputStream_t is;
-  long is_fp;
 } NOPH_InputStream_file_t;
 
 typedef struct
