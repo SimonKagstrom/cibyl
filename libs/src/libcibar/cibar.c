@@ -102,7 +102,6 @@ cibar_t *cibar_open(FILE *f)
     goto error_4;
 
   /* Fill in the out stucture */
-  out->refcount = 1;
   out->n_files = cb.n_file_entries;
   out->strings = strings;
   out->data = data;

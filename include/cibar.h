@@ -29,7 +29,6 @@ typedef struct s_cibar
   int           n_files;
   uint8_t      *data;
   char         *strings;
-  int           refcount;
 
   cibar_file_entry_t files[];
 } cibar_t;
