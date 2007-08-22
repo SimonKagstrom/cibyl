@@ -288,9 +288,11 @@ char* fgets(char* s, int size, FILE* fp)
   do
     {
       c = fgetc(fp);
+      if (feof(fp))
+        return out;
       *s = c;
       s++;
-    } while (c != '\0');
+    } while (c != '\0' && c != '\n');
 
   return out;
 }
