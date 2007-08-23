@@ -20,20 +20,29 @@ typedef struct
   cibyl_fops_t **table;
   const char   **uris;
   cibyl_fops_t  *fallback;
-  int n_fops;
+  int n_ops;
 } all_fops_t;
 
-all_fops_t fops;
+typedef struct
+{
+  cibyl_dops_t **table;
+  const char   **uris;
+  cibyl_dops_t  *fallback;
+  int n_ops;
+} all_dops_t;
 
-void cibyl_fops_register(const char *uri, cibyl_fops_t *fop, int is_default)
+all_fops_t fops;
+all_dops_t dops;
+
+static void register_op(all_fops_t *f, const char *uri, cibyl_fops_t *fop, int is_default)
 {
   int idx = -1;
   int i;
 
-  for (i = 0; i < fops.n_fops; i++)
+  for (i = 0; i < f->n_ops; i++)
     {
-      if ( strcmp(uri, fops.uris[i]) == 0 &&
-           fop->priority > fops.table[i]->priority)
+      if ( strcmp(uri, f->uris[i]) == 0 &&
+           fop->priority > f->table[i]->priority)
         {
           /* Replace the current one if the uris match and the
            *  priority is above the old one */
@@ -45,30 +54,30 @@ void cibyl_fops_register(const char *uri, cibyl_fops_t *fop, int is_default)
   if (idx == -1)
     {
       /* Not found, make space for it */
-      idx = fops.n_fops++;
-      fops.table = (cibyl_fops_t**)realloc(fops.table, sizeof(cibyl_fops_t*) * fops.n_fops);
-      fops.uris = (const char**)realloc(fops.uris, sizeof(char*) * fops.n_fops);
+      idx = f->n_ops++;
+      f->table = (cibyl_fops_t**)realloc(f->table, sizeof(cibyl_fops_t*) * f->n_ops);
+      f->uris = (const char**)realloc(f->uris, sizeof(char*) * f->n_ops);
     }
-  NOPH_panic_if( !(fops.table && fops.uris), "Memory allocation of fops failed");
-  fops.table[idx] = fop;
-  fops.uris[idx] = uri;
+  NOPH_panic_if( !(f->table && f->uris), "Memory allocation of fops failed");
+  f->table[idx] = fop;
+  f->uris[idx] = uri;
   if (is_default)
-    fops.fallback = fop;
+    f->fallback = fop;
 }
 
-void cibyl_fops_unregister(cibyl_fops_t *fop)
+
+void cibyl_fops_register(const char *uri, cibyl_fops_t *fop, int is_default)
 {
-  int i;
-
-  for (i = 0; i < fops.n_fops; i++)
-    {
-      if (fop == fops.table[i])
-	{
-	  fops.table[i] = fops.table[fops.n_fops - 1];
-	  fops.n_fops--;
-	}
-    }
+  register_op(&fops, uri, fop, is_default);
 }
+
+void cibyl_dops_register(const char *uri, cibyl_dops_t *dop, int is_default)
+{
+  /* OK. Pretty ugly, but what the heck... */
+  register_op((void*)&dops,
+              uri, (cibyl_fops_t*)dop, is_default);
+}
+
 
 FILE *cibyl_file_alloc(cibyl_fops_t *fop)
 {
@@ -127,6 +136,27 @@ cibyl_fops_open_mode_t cibyl_file_get_mode(const char *in_mode)
   return m->mode;
 }
 
+DIR *cibyl_dir_alloc(cibyl_dops_t *dop)
+{
+  DIR *out;
+
+  if ( !(out = (DIR*)malloc(sizeof(DIR) + dop->priv_data_size)) )
+    return NULL;
+  memset(out, 0, sizeof(DIR) + dop->priv_data_size);
+
+  out->ops = dop;
+  out->priv = (void*)(out + 1);
+
+  return out;
+}
+
+void cibyl_dir_free(DIR *dir)
+{
+  free(dir);
+}
+
+/* ----- */
+
 FILE *fopen(const char *path, const char *in_mode)
 {
   cibyl_fops_open_mode_t mode;
@@ -135,7 +165,7 @@ FILE *fopen(const char *path, const char *in_mode)
 
   mode = cibyl_file_get_mode(in_mode);
 
-  for (i = 0; i < fops.n_fops; i++)
+  for (i = 0; i < fops.n_ops; i++)
     {
       cibyl_fops_t *cur = fops.table[i];
       const char *uri = fops.uris[i];
@@ -319,4 +349,55 @@ int __fputs(const char* ptr, FILE* fp)
     }
 
   return n;
+}
+
+DIR *opendir(const char *dirname)
+{
+  int i;
+
+  for (i = 0; i < dops.n_ops; i++)
+    {
+      cibyl_dops_t *cur = dops.table[i];
+      const char *uri = dops.uris[i];
+      int len = strlen(uri);
+
+      if (cur->keep_uri)
+        len = 0;
+
+      if (strncmp(uri, dirname, len) == 0)
+        return cur->opendir(dirname + len);
+    }
+
+  /* Found nothing, return the default */
+  if (dops.fallback)
+    return dops.fallback->opendir(dirname);
+
+  return NULL;
+}
+
+int closedir(DIR *dir)
+{
+  return dir->ops->closedir(dir);
+}
+
+int readdir_r(DIR *dir, struct dirent *entry,
+              struct dirent **result)
+{
+  int out;
+
+  *result = entry;
+  if ( (out = dir->ops->readdir(dir, entry)) != 0)
+    *result = NULL;
+  return out;
+}
+
+struct dirent *readdir(DIR *dir)
+{
+  static struct dirent global_dirent;
+  struct dirent *out;
+
+  if ( readdir_r(dir, &global_dirent, &out) != 0 )
+    return NULL;
+
+  return &global_dirent;
 }
