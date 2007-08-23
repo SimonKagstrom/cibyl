@@ -16,8 +16,6 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include <java/util.h>
-#include <javax/microedition/io.h>
 
 struct dirent
 {
@@ -26,10 +24,9 @@ struct dirent
 
 typedef struct
 {
-  NOPH_FileConnection_t fc;
-  NOPH_Enumeration_t it;
+  struct s_cibyl_dops *ops;
+  void   *priv;  /* private stuff */
 } DIR;
-
 
 extern DIR *opendir(const char *name);
 extern int closedir(DIR *dir);
