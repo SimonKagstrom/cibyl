@@ -12,6 +12,7 @@
 #ifndef __CIBYL_FILEOPS_H__
 #define __CIBYL_FILEOPS_H__
 #include <stdio.h>
+#include <dirent.h>
 
 /**
  * @file cibyl-fileops.h Describes Cibyl "filesystems" (implementations
@@ -28,6 +29,9 @@ typedef enum
   READ_TRUNCATE, /* "w+" */
 } cibyl_fops_open_mode_t;
 
+/**
+ * File operations structure
+ */
 typedef struct s_cibyl_fops
 {
   const size_t priv_data_size;
@@ -46,21 +50,38 @@ typedef struct s_cibyl_fops
 } cibyl_fops_t;
 
 /**
+ * Directory operations structure
+ */
+typedef struct s_cibyl_dops
+{
+  const size_t priv_data_size;
+  int keep_uri;
+  int priority;
+
+  DIR *(*opendir)(const char *dirname);
+  int (*readdir)(DIR *dir, struct dirent *entry);
+  int (*closedir)(DIR *dir);
+} cibyl_dops_t;
+
+/**
  * Register a new "filesystem" with Cibyl.
  *
  * @param uri the URI to register the filesystem with. Must not be free'd
- * @param fops the file operations structure to register
+ * @param fop the file operations structure to register
  * @param is_default boolean value to tell if this should be the
  *        default filesystem (i.e., fallback if no URI match)
  */
 void cibyl_fops_register(const char *uri, cibyl_fops_t *fop, int is_default);
 
 /**
- * Deregister a "filesystem"
+ * Register a new "directory handler" with Cibyl.
  *
- * @param fops the filesystem to deregister
+ * @param uri the URI to register the filesystem with. Must not be free'd
+ * @param dop the file operations structure to register
+ * @param is_default boolean value to tell if this should be the
+ *        default filesystem (i.e., fallback if no URI match)
  */
-void cibyl_fops_unregister(cibyl_fops_t *fops);
+void cibyl_dops_register(const char *uri, cibyl_dops_t *dop, int is_default);
 
 /**
  * Allocate a new FILE structure and set it up for @a fop. The entire
@@ -75,11 +96,27 @@ void cibyl_fops_unregister(cibyl_fops_t *fops);
 FILE *cibyl_file_alloc(cibyl_fops_t *fop);
 
 /**
+ * Free a DIR structure
+ *
+ * @param dop the DIR ops
+ *
+ * @return a pointer to the dir
+ */
+DIR *cibyl_dir_alloc(cibyl_dops_t *dop);
+
+/**
  * Allocate a FILE structure
  *
  * @param fp the FILE structure to free
  */
 void cibyl_file_free(FILE *fp);
+
+/**
+ * Free a DIR structure
+ *
+ * @param dir the DIR to free
+ */
+void cibyl_dir_free(DIR *dir);
 
 /**
  * Return the @a cibyl_fops_open_mode_t mode for a given fopen-style
