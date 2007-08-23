@@ -127,3 +127,66 @@ cibar_t *cibar_open(FILE *f)
  error_1:
   return NULL;
 }
+
+/* --- DIRop interface to cibars --- */
+typedef struct
+{
+  cibar_t *cibar;
+  int cur;
+} cibar_dir_t;
+
+static cibyl_dops_t cibar_dops;
+
+static DIR *open_dir(const char *dirname)
+{
+  cibar_t *cibar;
+  cibar_dir_t *p;
+  DIR *out;
+
+  if ( !(cibar = cibar_open(fopen(dirname, "r"))) )
+    return NULL;
+  out = cibyl_dir_alloc(&cibar_dops);
+  p = (cibar_dir_t*)out->priv;
+  p->cibar = cibar;
+
+  return out;
+}
+
+static int close_dir(DIR *dir)
+{
+  cibar_dir_t *p = (cibar_dir_t*)dir->priv;
+
+  cibar_close(p->cibar);
+
+  return 0;
+}
+
+static int read_dir(DIR *dir, struct dirent *entry)
+{
+  cibar_dir_t *p = (cibar_dir_t*)dir->priv;
+
+  if (p->cur >= p->cibar->n_files)
+    return -1;
+
+  /* Copy the name */
+  strncpy(entry->d_name, p->cibar->files[p->cur].name, 256);
+
+  p->cur++;
+  return 0;
+}
+
+/* The dops structure */
+static cibyl_dops_t cibar_dops =
+{
+  .keep_uri = 0,
+  .priv_data_size = sizeof(cibar_dir_t),
+  .opendir  = open_dir,
+  .closedir = close_dir,
+  .readdir  = read_dir,
+};
+
+static void __attribute__((constructor))register_fs(void)
+{
+  /* Register as default */
+  cibyl_dops_register("cibar://", &cibar_dops, 0);
+}
