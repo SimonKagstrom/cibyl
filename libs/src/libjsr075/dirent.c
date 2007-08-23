@@ -16,11 +16,20 @@
 
 #include <javax/microedition/io.h>
 
-DIR *opendir(const char *dirname)
+typedef struct
+{
+  NOPH_FileConnection_t fc;
+  NOPH_Enumeration_t it;
+} fileconnection_dir_t;
+
+static cibyl_dops_t fileconnection_dops;
+
+static DIR *open_dir(const char *dirname)
 {
   NOPH_FileConnection_t fc;
   int exception = 0;
   DIR *out;
+  fileconnection_dir_t *p;
 
   NOPH_try(NOPH_setter_exception_handler, &exception) {
     fc = NOPH_Connector_openFileConnection(dirname);
@@ -29,72 +38,74 @@ DIR *opendir(const char *dirname)
   if (exception)  /* Exception - cannot open */
     return NULL;
 
-  if ( !(out = calloc(1, sizeof(DIR))) )
-    goto clean_1;
+  out = cibyl_dir_alloc(&fileconnection_dops);
+  p = (fileconnection_dir_t*)out->priv;
 
-  out->fc = fc;
+  p->fc = fc;
   NOPH_try(NOPH_setter_exception_handler, &exception) {
-    out->it = NOPH_FileConnection_list(fc);
+    p->it = NOPH_FileConnection_list(fc);
     exception = 0;
   } NOPH_catch();
   if (exception)  /* Exception - cannot open */
-    goto clean_2;
+    goto clean;
 
   return out;
 
- clean_2:
-  free(out);
- clean_1:
+ clean:
+  cibyl_dir_free(out);
   NOPH_FileConnection_close(fc);
 
   return NULL;
 }
 
-int closedir(DIR *dir)
+static int close_dir(DIR *dir)
 {
-  NOPH_delete(dir->it);
-  NOPH_FileConnection_close(dir->fc);
+  fileconnection_dir_t* p = (fileconnection_dir_t*)dir->priv;
+
+  NOPH_FileConnection_close(p->fc);
+  NOPH_delete(p->it);
+  NOPH_delete(p->fc);
 
   return 0;
 }
 
 
-int readdir_r(DIR *dir, struct dirent *entry,
-              struct dirent **result)
+static int read_dir(DIR *dir, struct dirent *entry)
 {
+  fileconnection_dir_t* p = (fileconnection_dir_t*)dir->priv;
   NOPH_Object_t cur;
   int exception = 0;
 
-  if (!NOPH_Enumeration_hasMoreElements(dir->it))
-    goto cleanup;
+  if (!NOPH_Enumeration_hasMoreElements(p->it))
+    return -1;
 
   NOPH_try(NOPH_setter_exception_handler, &exception) {
-    cur = NOPH_Enumeration_nextElement(dir->it);
+    cur = NOPH_Enumeration_nextElement(p->it);
     exception = 0;
   } NOPH_catch();
   if (exception)
-    goto cleanup;
+    return -1;
 
   /* Write the string to the dirent */
   NOPH_String_toCharPtr(cur, entry->d_name, 256);
   NOPH_delete(cur); /* Free the temporary object */
-  *result = entry;
 
   return 0;
- cleanup:
-  NOPH_FileConnection_close(dir->fc);
-  NOPH_delete(dir->it);
-  *result = NULL;
-  return -1;
 }
 
-struct dirent *readdir(DIR *dir)
+
+/* The dops structure */
+static cibyl_dops_t fileconnection_dops =
 {
-  static struct dirent global_dirent;
-  struct dirent *out;
+  .keep_uri = 1,
+  .priv_data_size = sizeof(fileconnection_dir_t),
+  .opendir  = open_dir,
+  .closedir = close_dir,
+  .readdir  = read_dir,
+};
 
-  if ( readdir_r(dir, &global_dirent, &out) != 0 )
-    return NULL;
-
-  return &global_dirent;
+static void __attribute__((constructor))register_fs(void)
+{
+  /* Register as default */
+  cibyl_dops_register("file://", &fileconnection_dops, 1);
 }
