@@ -20,7 +20,12 @@ extern "C" {
 
 time_t time(time_t* t); /* Not generated */
 
-extern int gettimeofday(struct timeval *tv, struct timezone *tz);
+int __gettimeofday(int* tv, int* tz); /* Not generated */
+
+static inline int gettimeofday(struct timeval* tv, struct timezone* tz)
+{
+  return __gettimeofday((int*)tv, (int*)tz);
+}
 
 #if defined(__cplusplus)
 }
