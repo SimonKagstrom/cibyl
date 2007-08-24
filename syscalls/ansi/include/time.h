@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * Copyright (C) 2006,  Blekinge Institute of Technology
+ * Copyright (C) 2006-2007,  Simon Kagstrom
  *
  * Filename:      time.h
  * Author:        Simon Kagstrom <ska@bth.se>
@@ -15,11 +15,12 @@
 extern "C" {
 #endif
 
+#include <sys/time.h>
 #include <cibyl.h>
 
-typedef int time_t;
-
 time_t time(time_t* t); /* Not generated */
+
+extern int gettimeofday(struct timeval *tv, struct timezone *tz);
 
 #if defined(__cplusplus)
 }
