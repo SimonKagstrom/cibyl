@@ -157,6 +157,7 @@ static inline void NOPH_Canvas_registerPointerReleasedCallback(void (*fn)(int x,
 /* Image class */
 NOPH_Image_t NOPH_Image_createImage(NOPH_Image_t src, int x, int y, int width, int height, int transform); /* Not generated */
 NOPH_Image_t NOPH_Image_createImage_string(char* name); /* Throws */
+NOPH_Image_t NOPH_Image_createImage_xy(int width, int height); /* Throws */
 int NOPH_Image_getWidth(NOPH_Image_t image);
 int NOPH_Image_getHeight(NOPH_Image_t image);
 NOPH_Graphics_t NOPH_Image_getGraphics(NOPH_Image_t image);
@@ -200,6 +201,7 @@ bool_t NOPH_Display_vibrate(NOPH_Display_t display, int duration);
 int NOPH_Display_numColors(NOPH_Display_t display);
 int NOPH_Display_numAlphaLevels(NOPH_Display_t display);
 void NOPH_Display_setCurrent(NOPH_Display_t display, NOPH_Displayable_t nextDisplayable);
+void NOPH_Display_setCurrentItem(NOPH_Display_t display, NOPH_Item_t item);
 NOPH_Displayable_t NOPH_Display_getCurrent(NOPH_Display_t display);
 
 void NOPH_Item_setLayout(NOPH_Item_t item, int layout);
