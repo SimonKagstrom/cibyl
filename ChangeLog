@@ -1,4 +1,6 @@
 Cibyl (12)
+	* Extended with various new J2ME syscalls (partially from Ehud)
+
 	* Removed the rex6000 syscalls - it's not really something useful
 	for public consumption anyway
 
