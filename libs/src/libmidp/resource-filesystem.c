@@ -29,7 +29,7 @@ static FILE *open(const char *path,
       NOPH_Class_t cl = NOPH_Object_getClass(gc);
       is = NOPH_Class_getResourceAsStream(cl, (char*)path);
     } NOPH_catch();
-  if (error)
+  if (error || is == 0)
     return NULL;
 
   fp = cibyl_file_alloc(&resource_fops);

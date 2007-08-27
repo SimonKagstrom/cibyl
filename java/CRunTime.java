@@ -162,6 +162,10 @@ public class CRunTime
     int ret = CRunTime.firstFree;
     int i;
 
+    // Invalid object
+    if (obj == null)
+        return 0;
+
     CRunTime.objectRepository[ret] = obj;
     for (i=CRunTime.firstFree; i < CRunTime.objectRepository.length; i++)
       {
