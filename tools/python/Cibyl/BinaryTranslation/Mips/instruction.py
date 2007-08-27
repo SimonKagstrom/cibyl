@@ -681,7 +681,7 @@ class Jal(BranchInstruction):
         otherFunction = otherMethod.getFunction(self.dstAddress)
         ownFunction = self.getFunction()
 
-        if self.builtin and otherMethod.name in builtins.alwaysInline or self.getFunction().name in config.inlineBuiltinsFunctions:
+        if self.builtin and (config.doInlineAllBuiltins or otherFunction.name in builtins.alwaysInline or ownFunction.name in config.inlineBuiltinsFunctions):
             return self.builtin.compile()
 
         if otherMethod == ownMethod and ownMethod.hasMultipleFunctions():
