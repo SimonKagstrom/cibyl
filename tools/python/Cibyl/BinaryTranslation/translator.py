@@ -58,23 +58,22 @@ class Controller(codeblock.CodeBlock):
 	for fn in allFunctions:
 	    self.addSyscall(fn)
 	self.readBinary()
-        if onlyReadSyscalls:
-            return
 
 	# Fixup the jump destinations and other stuff with the instructions
-	for insn in self.instructions:
-	    insn.fixup()
-            self.instructionsByAddress[insn.address] = insn
-	    if insn.delayed:
-                assert(not self.instructionsByAddress.has_key(insn.delayed.address))
-                self.instructionsByAddress[insn.delayed.address] = insn.delayed
-		insn.delayed.fixup()
-	    if insn.prefix:
-                assert(not self.instructionsByAddress.has_key(insn.prefix.address))
-                self.instructionsByAddress[insn.prefix.address] = insn.prefix
-		insn.prefix.fixup()
-	    if insn.address in self.labels:
-		insn.isBranchDestination = True
+        if not onlyReadSyscalls:
+            for insn in self.instructions:
+                insn.fixup()
+                self.instructionsByAddress[insn.address] = insn
+                if insn.delayed:
+                    assert(not self.instructionsByAddress.has_key(insn.delayed.address))
+                    self.instructionsByAddress[insn.delayed.address] = insn.delayed
+                    insn.delayed.fixup()
+                if insn.prefix:
+                    assert(not self.instructionsByAddress.has_key(insn.prefix.address))
+                    self.instructionsByAddress[insn.prefix.address] = insn.prefix
+                    insn.prefix.fixup()
+                if insn.address in self.labels:
+                    insn.isBranchDestination = True
 
 	# Arrange instructions into functions
 	self.functions = []
@@ -111,10 +110,19 @@ class Controller(codeblock.CodeBlock):
 
         # Insert java methods (colocated and normal)
         if colocateFunctions != []:
+            for fn in colocateFunctions:
+                for insn in fn.instructions:
+                    if isinstance(insn, Syscall):
+                        self.markSyscallUsed( self.addressesToName[insn.extra] )
             self.javaMethods.append(javamethod.JavaMethod(self, colocateFunctions))
 
 	for fn in otherFunctions:
+            for insn in fn.instructions:
+                if isinstance(insn, Syscall):
+                    self.markSyscallUsed( self.addressesToName[insn.extra] )
 	    self.javaMethods.append(javamethod.JavaMethod(self, [fn]))
+        if onlyReadSyscalls:
+            return
 	jumptab = javamethod.GlobalJumptabMethod(self, colocateFunctions + otherFunctions)
 	self.javaMethods.append(jumptab)
 
@@ -139,6 +147,10 @@ class Controller(codeblock.CodeBlock):
         return self.instructionsByAddress[address]
 
     def markSyscallUsed(self, name):
+	"Mark syscall nr as used"
+	self.usedSyscalls[name] = True
+
+    def markSyscallUnsed(self, name):
 	"Mark syscall nr as used"
 	self.usedSyscalls[name] = True
 
@@ -239,7 +251,6 @@ class Controller(codeblock.CodeBlock):
 		if (word >> 24) == 0xff:    # Syscall
 		    extra = word & 0x00ffffff
 		    insn = Syscall(self, address, mips.CIBYL_SYSCALL, opCode, 0,0,0, extra)
-		    self.markSyscallUsed( self.addressesToName[extra] )
 		elif (word >> 16) == 0xfefe:  # Register-parameter
 		    extra = word & 0xffff
 		    insn = SyscallRegisterArgument(self, address, mips.CIBYL_REGISTER_ARGUMENT, opCode, 0,0,0, extra)
