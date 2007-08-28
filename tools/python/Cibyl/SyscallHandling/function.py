@@ -233,11 +233,11 @@ class Function:
 
 
 
+# Regexps are nice for things like this :-)
+syscallDefinitionRegexp = re.compile("[ \t]*static inline _syscall([0-9]+)\(([A-Z,a-z,0-9,_,\*]+)[ \t\,]*,([A-Z,a-z,0-9,_]+)[ \t]*([A-Z,a-z,0-9,\*,\,, ,_]*)\); (\/\*[ ]+[A-Z,a-z,_,0-9, ]+[ ]+\*\/)*")
+nrRegexp = re.compile("#define __NR_([a-z,A-Z,0-9,_]+) ([0-9]+) \/\*[ ]+([A-Z,a-z, ,_,0-9,.,-]+)[ ]+\*\/*")
 def functionsFromHeaderDir(dirname):
     "Open the numbers file and read the system call numbers"
-    # Regexps are nice for things like this :-)
-    syscallDefinitionRegexp = re.compile("[ \t]*static inline _syscall([0-9]+)\(([A-Z,a-z,0-9,_,\*]+)[ \t\,]*,([A-Z,a-z,0-9,_]+)[ \t]*([A-Z,a-z,0-9,\*,\,, ,_]*)\); (\/\*[ ]+[A-Z,a-z,_,0-9, ]+[ ]+\*\/)*")
-    nrRegexp = re.compile("#define __NR_([a-z,A-Z,0-9,_]+) ([0-9]+) \/\*[ ]+([A-Z,a-z, ,_,0-9,.,-]+)[ ]+\*\/*")
     out = []
 
     lastNr = 0
@@ -248,10 +248,14 @@ def functionsFromHeaderDir(dirname):
 	    sysc = open(os.path.join(root, cur))
 
 	    for line in sysc:
+                s = line.strip()
+                if not (s.startswith("static inline") or s.startswith("#define")):
+                    continue
 		nrMatch = nrRegexp.match(line)
 		if nrMatch:
 		    lastNr = int(nrMatch.group(2))
 		    syscallSet = nrMatch.group(3)
+                    continue
 
 		fnMatch = syscallDefinitionRegexp.match(line)
 		if fnMatch:

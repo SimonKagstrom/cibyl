@@ -37,7 +37,7 @@ def getSyscallStrings(data):
 
 
 class Controller(codeblock.CodeBlock):
-    def __init__(self, filename, syscallDirectories):
+    def __init__(self, filename, syscallDirectories, onlyReadSyscalls=False):
 	self.filename = filename
 	self.syscallDirectories = syscallDirectories
 	self.tracing = config.tracing
@@ -60,12 +60,12 @@ class Controller(codeblock.CodeBlock):
 	for fn in allFunctions:
 	    self.addSyscall(fn)
 	self.readBinary()
-
-	for insn in self.instructions:
-	    insn.fixup()
+        if onlyReadSyscalls:
+            return
 
 	# Fixup the jump destinations and other stuff with the instructions
 	for insn in self.instructions:
+	    insn.fixup()
             self.instructionsByAddress[insn.address] = insn
 	    if insn.delayed:
                 assert(not self.instructionsByAddress.has_key(insn.delayed.address))
@@ -113,16 +113,9 @@ class Controller(codeblock.CodeBlock):
 
         # Insert java methods (colocated and normal)
         if colocateFunctions != []:
-            for fn in colocateFunctions:
-                for insn in fn.instructions:
-                    if isinstance(insn, Syscall):
-                        self.markSyscallUsed( self.addressesToName[insn.extra] )
             self.javaMethods.append(javamethod.JavaMethod(self, colocateFunctions))
 
 	for fn in otherFunctions:
-	    for insn in fn.instructions:
-		if isinstance(insn, Syscall):
-		    self.markSyscallUsed( self.addressesToName[insn.extra] )
 	    self.javaMethods.append(javamethod.JavaMethod(self, [fn]))
 	jumptab = javamethod.GlobalJumptabMethod(self, colocateFunctions + otherFunctions)
 	self.javaMethods.append(jumptab)
@@ -248,6 +241,7 @@ class Controller(codeblock.CodeBlock):
 		if (word >> 24) == 0xff:    # Syscall
 		    extra = word & 0x00ffffff
 		    insn = Syscall(self, address, mips.CIBYL_SYSCALL, opCode, 0,0,0, extra)
+		    self.markSyscallUsed( self.addressesToName[extra] )
 		elif (word >> 16) == 0xfefe:  # Register-parameter
 		    extra = word & 0xffff
 		    insn = SyscallRegisterArgument(self, address, mips.CIBYL_REGISTER_ARGUMENT, opCode, 0,0,0, extra)
@@ -286,16 +280,16 @@ class Controller(codeblock.CodeBlock):
 		else:
 		    opCode = mips.OP_UNIMP
 
-	    insn = newInstruction(opCode)(self, address, format, opCode, rd, rs, rt, extra)
-	    # If the last instruction has a delay slot, add this to
-	    # it, otherwise add it to the lits of instructions
-	    if delaySlot:
-		delaySlot.addDelayedInstruction(insn)
-		delaySlot = None
-	    else:
-		self.addInstruction(insn)
-	    if insn.opCode in mips.delaySlotInstructions:
-		delaySlot = insn
+            insn = newInstruction(opCode)(self, address, format, opCode, rd, rs, rt, extra)
+            # If the last instruction has a delay slot, add this to
+            # it, otherwise add it to the lits of instructions
+            if delaySlot:
+                delaySlot.addDelayedInstruction(insn)
+                delaySlot = None
+            else:
+                self.addInstruction(insn)
+            if insn.opCode in mips.delaySlotInstructions:
+                delaySlot = insn
 	    i = i + 4
 
     def compile(self):

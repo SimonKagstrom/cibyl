@@ -156,7 +156,7 @@ class SyscallWrapperGenerator(SyscallGenerator):
 	self.syscallSets = generateSyscallSetDependencies(self.dirs, syscallSets)
 	self.functions = functionsFromHeaderDirectories(syscallDirectories)
 
-	self.controller = Controller(program, syscallDirectories)
+	self.controller = Controller(program, syscallDirectories, onlyReadSyscalls=True)
 	self.outdir = outdir
 	self.outfile = open(outdir + "/Syscalls.java", "w")
 	self.defines = defines

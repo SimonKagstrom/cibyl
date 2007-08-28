@@ -1,4 +1,9 @@
 Cibyl (12)
+	* Improved the performance of the syscall generator by only
+	reading in what's needed: The RoadMap syscall defs previously took
+	almost 2.5 minutes on my computer, with the optimizations it
+	finishes in less than 30 seconds.
+
 	* Extended with various new J2ME syscalls (partially from Ehud)
 
 	* Removed the rex6000 syscalls - it's not really something useful

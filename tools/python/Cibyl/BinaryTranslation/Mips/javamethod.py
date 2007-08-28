@@ -80,9 +80,6 @@ class JavaMethod(CodeBlock):
             fn.setIndex(i)
             i = i + 1
 
-	for insn in self.instructions:
-	    insn.setJavaMethod(self)
-
 	self.argumentRegisters = [mips.R_SP, mips.R_A0, mips.R_A1, mips.R_A2, mips.R_A3]
 	if not config.debug:
 	    self.argumentRegisters = list(self.usedRegisters.intersection( [mips.R_SP, mips.R_A0, mips.R_A1, mips.R_A2, mips.R_A3] ))
@@ -184,6 +181,7 @@ class JavaMethod(CodeBlock):
 	# Add v1 to the list of clobbered registers if the destination
 	# method clobbers V1
 	for insn in self.instructions:
+	    insn.setJavaMethod(self)
             if isinstance(insn, instruction.Jal) and insn.dstAddress not in map(lambda fn : fn.address, self.functions):
 		otherMethod = self.controller.lookupJavaMethod(insn.dstAddress)
 		if otherMethod.clobbersReg(mips.R_V1):
