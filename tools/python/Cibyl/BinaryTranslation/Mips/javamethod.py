@@ -164,6 +164,8 @@ class JavaMethod(CodeBlock):
 	"""This method constructs a list of clobbered registers
 	(depending on the functions this function calls) and also adds
 	registers to zero in the function."""
+        # First run the fixup on the functions, which will optimize
+        # away one stack stores
         for fn in self.functions:
             fn.fixup()
 
@@ -203,18 +205,16 @@ class JavaMethod(CodeBlock):
 
 
 	# Somewhat conservative estimate of registers to zero - all
-	# used registers which are not used as destinations in the
-	# first basic block. This _requires_ that the s-register stack
-	# removal optimization is turned on.
+	# used registers which are read before written to in the first
+	# basic block - or are not used there - are placed in the
+	# cleanup list
+        skipRegisters = Set(self.argumentRegisters + mips.memoryAddressRegisters + [mips.R_HI, mips.R_LO, mips.R_ZERO, mips.R_RA])
+        checkRegisters = self.usedRegisters - skipRegisters
         for fn in self.functions:
             bb0 = fn.basicBlocks[0]
-            for insn in bb0.instructions:
-                for r in self.usedRegisters:
-                    if config.debug:
-                        if not register.staticRegs.has_key(r) and r not in self.argumentRegisters + [mips.R_ZERO] + mips.memoryAddressRegisters:
-                            self.cleanupRegs.add(r)
-                    elif (r not in self.argumentRegisters + mips.memoryAddressRegisters + [mips.R_HI, mips.R_LO, mips.R_ZERO, mips.R_RA]) and not bb0.registerWrittenToBefore(insn, r):
-                        self.cleanupRegs.add(r)
+            for r in checkRegisters:
+                if bb0.registerReadBeforeWritten(r):
+                    self.cleanupRegs.add(r)
         if self.hasMultipleFunctions():
             self.cleanupRegs.add(mips.R_RA)
 

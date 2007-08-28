@@ -21,10 +21,13 @@ class BasicBlock(CodeBlock):
 	# block
 	self.isReturnBlock = instructions[-1].isReturnInstruction
 
-    def registerWrittenToBefore(self, instruction, reg):
-        insnsToCheck = self.instructions[ : self.instructions.index(instruction) ]
-        for insn in insnsToCheck:
-            if reg in insn.getDestinationRegisters():
+    def registerReadBeforeWritten(self, reg):
+        for insn in self.instructions:
+            if insn.isDisabled():
+                continue
+            if reg in insn.getSourceRegisters():
                 return True
-        return False
-
+            if reg in insn.getDestinationRegisters():
+                return False
+        # Assume true for unused registers
+        return True

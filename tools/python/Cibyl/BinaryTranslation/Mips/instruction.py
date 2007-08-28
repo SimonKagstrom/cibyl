@@ -712,7 +712,6 @@ class Jal(BranchInstruction):
     def fixup(self):
         self.controller.addLabel(self.address + 8, inJumpTab = False)
 	self.controller.addLabel(self.dstAddress, inJumpTab = True)
-	self.isBranch = True
 	self.destinations = Set([ mips.R_RA ])
 
         otherName = self.controller.elf.getSymbolByAddress(self.dstAddress).name
@@ -757,7 +756,6 @@ class Jalr(BranchInstruction):
 	self.popToRegister(mips.R_V0)
 
     def fixup(self):
-	self.isBranch = True
 	self.sources = Set([ self.rs ])
 	self.destinations = Set([ self.rd ])
 
