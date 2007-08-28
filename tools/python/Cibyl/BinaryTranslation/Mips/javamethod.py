@@ -244,14 +244,16 @@ class JavaMethod(CodeBlock):
             register.reg2local = registerMapping[ self.functions[0].address ]
         self.controller.emit(".limit locals %d" % maxLocals)
 
-        if config.debug:
-            # Not really needed - if we have config.debug, we will
-            # only have one function per java method
-            for fn in self.functions:
-                for reg, local in registerMapping[fn.address].iteritems():
-                    if (reg not in self.usedRegisters and reg not in self.argumentRegisters) or reg in register.staticRegs:
-                        continue
+        # Not really needed - if we have config.debug, we will
+        # only have one function per java method
+        for fn in self.functions:
+            for reg, local in registerMapping[fn.address].iteritems():
+                if (reg not in self.usedRegisters and reg not in self.argumentRegisters) or reg in register.staticRegs:
+                    continue
+                if config.debug:
                     self.controller.emit(".var %2d is %s I from METHOD_START to METHOD_END" % (local, mips.registerNames[reg]))
+                else:
+                    self.controller.emit("; local %2d is register %s" % (local, mips.registerNames[reg]))
 
 	for reg in self.cleanupRegs:
             localsToZero = Set()
