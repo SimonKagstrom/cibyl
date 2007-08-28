@@ -180,6 +180,7 @@ class JavaMethod(CodeBlock):
 
 	# Add v1 to the list of clobbered registers if the destination
 	# method clobbers V1
+        self.maxOperandStack = 0
 	for insn in self.instructions:
 	    insn.setJavaMethod(self)
             if isinstance(insn, instruction.Jal) and insn.dstAddress not in map(lambda fn : fn.address, self.functions):
@@ -191,6 +192,15 @@ class JavaMethod(CodeBlock):
 	    elif isinstance(insn, instruction.Jalr):
 		self.addDestinationRegister(mips.R_V1)
 		self.addDestinationRegister(mips.R_V0)
+            operandStackSize = insn.maxOperandStackHeight()
+            if insn.delayed:
+                operandStackSize = operandStackSize + insn.delayed.maxOperandStackHeight()
+            if insn.prefix:
+                operandStackSize = operandStackSize + insn.prefix.maxOperandStackHeight()
+
+            if operandStackSize > self.maxOperandStack:
+                self.maxOperandStack = operandStackSize
+
 
 	# Somewhat conservative estimate of registers to zero - all
 	# used registers which are not used as destinations in the
@@ -219,18 +229,8 @@ class JavaMethod(CodeBlock):
 	static class-variable and is assigned after calls.
 	"""
 	self.controller.emit(".method %s static %s" % (self.methodAccess, self.getJavaMethodName()) )
-        maxOperandStack = 0
         if not config.operandStackLimit:
-            for insn in self.instructions:
-                operandStackSize = insn.maxOperandStackHeight()
-                if insn.delayed:
-                    operandStackSize = operandStackSize + insn.delayed.maxOperandStackHeight()
-                if insn.prefix:
-                    operandStackSize = operandStackSize + insn.prefix.maxOperandStackHeight()
-
-                if operandStackSize > maxOperandStack:
-                    maxOperandStack = operandStackSize
-            self.controller.emit(".limit stack %d" % (maxOperandStack))
+            self.controller.emit(".limit stack %d" % (self.maxOperandStack))
         else:
             self.controller.emit(".limit stack %d" % (config.operandStackLimit))
 

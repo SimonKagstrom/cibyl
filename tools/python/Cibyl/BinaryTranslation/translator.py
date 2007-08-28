@@ -20,8 +20,6 @@ from Cibyl import config
 
 import Cibyl.SyscallHandling.function, Cibyl.elf
 
-syscallDefinitionRegexp = re.compile("[ \t]*static inline _syscall([0-9]+)\(([A-Z,a-z,0-9,_,\*]+)[ \t\,]*,([A-Z,a-z,0-9,_]+)[ \t]*([A-Z,a-z,0-9,\*,\,, ,_]*)\);")
-
 
 def getSyscallStrings(data):
     """Split the .cibylstrtab section into address : string mappings
