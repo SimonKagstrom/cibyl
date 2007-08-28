@@ -1,4 +1,8 @@
 Cibyl (12)
+	* Optimized the cleanup register generation more (fewer registers
+	are now cleaned). This should now be almost optimal, and the code
+	has actually been made a bit smaller as well
+
 	* Improved the performance of cibyl-generate-java-wrappers by only
 	reading in what's needed: The RoadMap syscall defs previously took
 	almost 2.5 minutes on my computer, with the optimizations it
