@@ -57,7 +57,7 @@ class JavaMethod(CodeBlock):
                 useTracing = True
                 break
 
-	CodeBlock.__init__(self, self.controller, self.instructions, self.labels, useTracing)
+	CodeBlock.__init__(self, self.controller, self.instructions, self.labels, useTracing, setupRegisters=True)
 
 	# Each label and instruction belongs to one java method
 	for lab in self.labels.values():

@@ -16,7 +16,7 @@ from Cibyl.BinaryTranslation import labelmanager
 from Cibyl import config
 
 class CodeBlock:
-    def __init__(self, controller, instructions, labels, trace):
+    def __init__(self, controller, instructions, labels, trace, setupRegisters=False):
 	self.controller = controller
 	self.instructions = instructions
 	self.labels = labels
@@ -32,9 +32,10 @@ class CodeBlock:
 
 	# Iterate over instructions to generate registers to zero at
 	# the start and produce sets of all register use
-	for insn in self.instructions:
-	    self.addDestinationRegisterSet(insn.getDestinationRegisters())
-	    self.addSourceRegisterSet(insn.getSourceRegisters())
+        if setupRegisters:
+            for insn in self.instructions:
+                self.addDestinationRegisterSet(insn.getDestinationRegisters())
+                self.addSourceRegisterSet(insn.getSourceRegisters())
 
 	if len(self.instructions) == 0:
 	    # Should never happen
