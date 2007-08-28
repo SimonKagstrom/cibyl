@@ -92,17 +92,6 @@ class JavaMethod(CodeBlock):
         if self.hasMultipleFunctions():
             self.argumentRegisters = self.argumentRegisters + [mips.R_FNA]
 
-	if config.doMemoryRegisterOptimization:
-            for fn in self.functions:
-                for bb in fn.basicBlocks:
-                    memoryRegisters.run(bb)
-                    self.addDestinationRegisterSet(bb.destinationRegisters)
-                    self.addSourceRegisterSet(bb.sourceRegisters)
-
-	if config.doMultOptimization:
-            for fn in self.functions:
-                mult.run(fn)
-
     def getJavaMethodName(self):
 	return self.name + "(" + 'I'*len(self.getRegistersToPass()) + ")" + self.getJavaReturnType()
 
@@ -178,6 +167,17 @@ class JavaMethod(CodeBlock):
         for fn in self.functions:
             fn.fixup()
 
+	if config.doMemoryRegisterOptimization:
+            for fn in self.functions:
+                for bb in fn.basicBlocks:
+                    memoryRegisters.run(bb)
+                    self.addDestinationRegisterSet(bb.destinationRegisters)
+                    self.addSourceRegisterSet(bb.sourceRegisters)
+
+	if config.doMultOptimization:
+            for fn in self.functions:
+                mult.run(fn)
+
 	# Add v1 to the list of clobbered registers if the destination
 	# method clobbers V1
         self.maxOperandStack = 0
@@ -211,9 +211,9 @@ class JavaMethod(CodeBlock):
             for insn in bb0.instructions:
                 for r in self.usedRegisters:
                     if config.debug:
-                        if not register.staticRegs.has_key(r) and r not in self.argumentRegisters + [mips.R_ZERO]:
+                        if not register.staticRegs.has_key(r) and r not in self.argumentRegisters + [mips.R_ZERO] + mips.memoryAddressRegisters:
                             self.cleanupRegs.add(r)
-                    elif (r not in self.argumentRegisters + [mips.R_HI, mips.R_LO, mips.R_ZERO, mips.R_RA]) and not bb0.registerWrittenToBefore(insn, r):
+                    elif (r not in self.argumentRegisters + mips.memoryAddressRegisters + [mips.R_HI, mips.R_LO, mips.R_ZERO, mips.R_RA]) and not bb0.registerWrittenToBefore(insn, r):
                         self.cleanupRegs.add(r)
         if self.hasMultipleFunctions():
             self.cleanupRegs.add(mips.R_RA)
