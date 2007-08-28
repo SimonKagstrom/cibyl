@@ -2,7 +2,7 @@ Cibyl (12)
 	* Improved the performance of cibyl-generate-java-wrappers by only
 	reading in what's needed: The RoadMap syscall defs previously took
 	almost 2.5 minutes on my computer, with the optimizations it
-	finishes in less than 30 seconds. Also made some smaller
+	finishes in less than 1 minute. Also made some smaller
 	improvements to cibyl-mips2java, which should improve performance
 	by about 10%
 

@@ -9,7 +9,7 @@
 ## $Id: translator.py 14248 2007-03-14 17:13:31Z ska $
 ##
 ######################################################################
-import StringIO, re, sys, struct
+import StringIO, re, sys, struct, bisect
 from sets import Set
 
 from Cibyl.BinaryTranslation import bytecode, register, function, codeblock
@@ -46,6 +46,7 @@ class Controller(codeblock.CodeBlock):
 	self.usedSyscalls = {}
 	self.outclass = "CompiledProgram"
 	self.compileFunctions = True
+        self.prunedRanges = []
 
 	self.optimizer = optimizer.Optimizer()
 	self.registerHandler = register.RegisterHandler(self, bytecode.ByteCodeGenerator(self))
@@ -58,26 +59,29 @@ class Controller(codeblock.CodeBlock):
 	for fn in allFunctions:
 	    self.addSyscall(fn)
 	self.readBinary()
+        if onlyReadSyscalls:
+            return
 
 	# Fixup the jump destinations and other stuff with the instructions
-        if not onlyReadSyscalls:
-            for insn in self.instructions:
-                insn.fixup()
-                self.instructionsByAddress[insn.address] = insn
-                if insn.delayed:
-                    assert(not self.instructionsByAddress.has_key(insn.delayed.address))
-                    self.instructionsByAddress[insn.delayed.address] = insn.delayed
-                    insn.delayed.fixup()
-                if insn.prefix:
-                    assert(not self.instructionsByAddress.has_key(insn.prefix.address))
-                    self.instructionsByAddress[insn.prefix.address] = insn.prefix
-                    insn.prefix.fixup()
-                if insn.address in self.labels:
-                    insn.isBranchDestination = True
+        for insn in self.instructions:
+            insn.fixup()
+            self.instructionsByAddress[insn.address] = insn
+            if insn.delayed:
+                assert(not self.instructionsByAddress.has_key(insn.delayed.address))
+                self.instructionsByAddress[insn.delayed.address] = insn.delayed
+                insn.delayed.fixup()
+            if insn.prefix:
+                assert(not self.instructionsByAddress.has_key(insn.prefix.address))
+                self.instructionsByAddress[insn.prefix.address] = insn.prefix
+                insn.prefix.fixup()
+            if insn.address in self.labels:
+                insn.isBranchDestination = True
 
 	# Arrange instructions into functions
 	self.functions = []
 	for sym in self.elf.getSymbolsByType("tW"):
+            if self.isPruned(sym.address) >= 0:
+                continue
 	    # Add a label for this address and create a new function
 	    self.addLabel(sym.address, inJumpTab = True, name = sym.name, isFunction = True)
 	    insns, labels = self.splitByAddresses(sym.address, sym.address + sym.size)
@@ -88,13 +92,6 @@ class Controller(codeblock.CodeBlock):
 		useTracing = sym.name in config.traceFunctions
 
 	    fn = function.Function(self, sym.name, insns, labels, useTracing)
-
-	    # If this function is unused, remove all references to it
-	    if config.pruneUnusedFunctions and not self.elf.getRelocation(sym.name) and not sym.type in "t" and sym.address != self.elf.getEntryPoint():
-		if config.verbose: print "Pruning ", sym.name
-		for insn in insns:
-		    self.removeLabel(insn.address)
-		continue
 	    self.functions.append(fn)
 
 	self.functions.sort()
@@ -110,19 +107,10 @@ class Controller(codeblock.CodeBlock):
 
         # Insert java methods (colocated and normal)
         if colocateFunctions != []:
-            for fn in colocateFunctions:
-                for insn in fn.instructions:
-                    if isinstance(insn, Syscall):
-                        self.markSyscallUsed( self.addressesToName[insn.extra] )
             self.javaMethods.append(javamethod.JavaMethod(self, colocateFunctions))
 
 	for fn in otherFunctions:
-            for insn in fn.instructions:
-                if isinstance(insn, Syscall):
-                    self.markSyscallUsed( self.addressesToName[insn.extra] )
 	    self.javaMethods.append(javamethod.JavaMethod(self, [fn]))
-        if onlyReadSyscalls:
-            return
 	jumptab = javamethod.GlobalJumptabMethod(self, colocateFunctions + otherFunctions)
 	self.javaMethods.append(jumptab)
 
@@ -199,6 +187,17 @@ class Controller(codeblock.CodeBlock):
 	out = out + section
 	return out
 
+    def addPrunedRange(self, start, end):
+        self.prunedRanges.append( start )
+        self.prunedRanges.append( end - 1 )
+
+    def isPruned(self, address):
+        "Check if address is pruned. Returns the address of the next unpruned instruction"
+        for r in range(0, len(self.prunedRanges), 2):
+            if address in (self.prunedRanges[r], self.prunedRanges[r+1]):
+                return self.prunedRanges[r+1]
+        return -1
+
     def writeDataFile(self, filename):
 	"Output the raw .data/.rodata file"
 	sections = self.addAlignedSection("", ".data", 16)
@@ -229,6 +228,14 @@ class Controller(codeblock.CodeBlock):
 	    if word >= baseAddress and word < baseAddress + len(text):
 		self.addLabel(word, True)
 
+        if config.pruneUnusedFunctions:
+            for sym in self.elf.getSymbolsByType("tW"):
+                # If this function is unused, remove all references to it
+                if not self.elf.getRelocation(sym.name) and not sym.type in "t" and sym.address != self.elf.getEntryPoint():
+                    self.addPrunedRange( sym.address, sym.address + sym.size )
+                    if config.verbose: print "Pruning ", sym.name, "%x..%x" % (sym.address, sym.address+sym.size)
+        self.prunedRanges.sort()
+
 	# Parse the instructions
 	i = 0
 	delaySlot = None
@@ -237,6 +244,11 @@ class Controller(codeblock.CodeBlock):
 	    word = struct.unpack(">L", data)[0]
 
 	    address = i + baseAddress
+
+            pruned = self.isPruned(address)
+            if pruned > 0:
+                i = pruned - baseAddress + 1
+                continue
 
 	    extra = 0
 	    rs = (word >> 21) & 0x1f
@@ -251,6 +263,7 @@ class Controller(codeblock.CodeBlock):
 		if (word >> 24) == 0xff:    # Syscall
 		    extra = word & 0x00ffffff
 		    insn = Syscall(self, address, mips.CIBYL_SYSCALL, opCode, 0,0,0, extra)
+                    self.markSyscallUsed( self.addressesToName[insn.extra] )
 		elif (word >> 16) == 0xfefe:  # Register-parameter
 		    extra = word & 0xffff
 		    insn = SyscallRegisterArgument(self, address, mips.CIBYL_REGISTER_ARGUMENT, opCode, 0,0,0, extra)
