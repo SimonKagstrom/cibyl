@@ -118,8 +118,9 @@ def generateRegisterMapping(functions, usedRegisters, argumentRegisters, registe
     # local variables (to allow local calling)
     for fn in functions:
         cur = mapping.copy()
+        left = Set(fn.usedRegisters).intersection(mips.callerSavedRegisters)
         for reg in sortedDictValues(registerUseCount):
-            if reg in usedRegisters:
+            if reg in left:
                 cur[reg] = count
                 count = count + 1
         out[fn.address] = cur

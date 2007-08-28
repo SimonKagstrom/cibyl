@@ -19,7 +19,7 @@ import Mips.mips as mips
 class Function(CodeBlock):
     """Container class for functions"""
     def __init__(self, controller, name, instructions, labels, trace=False):
-	CodeBlock.__init__(self, controller, instructions, labels, trace)
+	CodeBlock.__init__(self, controller, instructions, labels, trace, setupRegisters = True)
 	self.name = name
 	self.basicBlocks = []
 

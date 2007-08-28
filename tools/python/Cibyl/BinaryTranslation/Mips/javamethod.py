@@ -260,7 +260,8 @@ class JavaMethod(CodeBlock):
             # Add all possible mappings to zero
             for fn in self.functions:
                 mapping = registerMapping[fn.address]
-                localsToZero.add(mapping[reg])
+                if mapping.has_key(reg):
+                    localsToZero.add(mapping[reg])
             for local in localsToZero:
                 if reg == mips.R_RA:
                     self.bc.pushConst(-1)
