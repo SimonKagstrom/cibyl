@@ -15,8 +15,6 @@ from Cibyl.BinaryTranslation.translator import Controller
 from Cibyl import config
 from function import *
 
-config.cpp = os.getenv("CIBYL_CPP", "cpp")
-
 def preprocess(defines, lines):
     s = ""
     for item in defines:

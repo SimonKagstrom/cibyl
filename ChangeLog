@@ -1,4 +1,8 @@
 Cibyl (12)
+	* Added a sanity check to acertain that the environment is setup
+	for Cibyl (and produce a helpful message if not), cleaned up of
+	parts of the code
+
 	* Fixed bug where __negdf2 was misnamed
 
 	* Optimized the cleanup register generation more (fewer registers

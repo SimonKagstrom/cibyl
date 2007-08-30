@@ -129,6 +129,8 @@ if options.optimize_all:
     config.doMemoryRegisterOptimization = True
     config.doRegisterScheduling = True
 
+config.checkEnvironment()
+
 # Read it all
 controller = Controller(infile, syscallDirectories)
 

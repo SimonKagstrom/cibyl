@@ -20,4 +20,4 @@ export JAVA_PATH=/usr/lib/j2sdk1.5-sun/bin/
 #export CIBYL_CPP=cpp
 
 # Some things which might need setting in windows. Thanks to Roelof Berg
-#export jasmin="java -jar c:/cygwin/home/dir/jasmin-2.3/jasmin.jar"
+#export CIBYL_JASMIN="java -jar c:/cygwin/home/dir/jasmin-2.3/jasmin.jar"

@@ -10,10 +10,7 @@
 ##
 ######################################################################
 import re, os, sys, struct
-import tempfile
-
-class config:
-    pass
+import tempfile, config
 
 # From Dissy
 ADR  = "[0-9,a-f,A-F]+"
@@ -23,10 +20,6 @@ symbolRegexp = re.compile("(" + ADR + ")* *(" + ADR + ")* ([A,B,C,D,G,I,N,R,S,T,
 sectionRegexp = re.compile("[ \t]*\[([ ,0-9]+)\]+[ ,\t]+([A-Z,a-z,0-9,_,\.]+)[ ,\t]+([A-Z,_,\.]+)[ ,\t]+("+ADR+")[ ,\t]+("+ADR+")[ ,\t]+("+ADR+")")
 relocationSectionRegexp = re.compile("Relocation section '.rel([\.,A-Z,a-z,0-9,_]+)' at offset")
 relocationRegexp = re.compile("(" + ADR + ")[ \t]+(?:" + ADR + ")[ \t]+([a-z,A-Z,0-9_]+)[ \t]+(" + ADR + ")[ \t]+(" + FN + ")")
-
-config.readelf = os.getenv("CIBYL_READELF", "readelf")
-config.nm = os.getenv("CIBYL_NM", "nm")
-config.objcopy = os.getenv("CIBYL_OBJCOPY", "objcopy")
 
 class Symbol:
     "Container class for symbols"
