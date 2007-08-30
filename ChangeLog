@@ -1,4 +1,6 @@
 Cibyl (12)
+	* Fixed bug where __negdf2 was misnamed
+
 	* Optimized the cleanup register generation more (fewer registers
 	are now cleaned). This should now be almost optimal, and the code
 	has actually been made a bit smaller as well

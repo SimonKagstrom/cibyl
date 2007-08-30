@@ -1,4 +1,4 @@
-public static void __negdf3_helper(int address_res, int address_A)
+public static void __negdf2_helper(int address_res, int address_A)
 {
   double a = Double.longBitsToDouble( CRunTime.memoryReadLong(address_A) );
   double out = -a;
