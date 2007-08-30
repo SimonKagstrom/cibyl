@@ -96,7 +96,6 @@ public class CRunTime
       }
   }
 
-  
   /**
    * TastePhone : Taste your MIDP Phone with this test MIDlet.<br>
    * <br>
