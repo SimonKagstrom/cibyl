@@ -54,6 +54,7 @@ static FILE *open(const char *path,
     }
 
   p->path = strdup(path);
+  /* We cannot get the file size for the connectors */
 
   return fp;
 }
