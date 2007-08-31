@@ -134,6 +134,7 @@ static FILE *open(const char *path,
     case WRITE:
       /* Just allocate space without reading anything */
       break;
+    case READ_WRITE:
     case READ_APPEND:
       /* Open and read everything into a buffer. This will either be
        * NULL if this file has not been created yet or a pointer to

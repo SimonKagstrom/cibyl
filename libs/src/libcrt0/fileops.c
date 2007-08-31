@@ -110,6 +110,7 @@ static mode_t mode_mapping[] =
 {
   {"r" , READ},
   {"rb", READ},
+  {"rw", READ_WRITE},
   {"r+", READ_WRITE},
   {"w" , WRITE},
   {"wb", WRITE},
