@@ -231,7 +231,7 @@ void file_operations_run(void)
   one_test_read(NOPH_MemoryFile_openIndirect(path, "r"), path, "MemoryFile"); /* Memory file for resources */
 
   path = "recordstore://tjoho:3"; /* Recordstore */
-  one_test_write(fopen(path, "w"), path, "Recordstore");
+  one_test_write(fopen(path, "rw"), path, "Recordstore"); /* Try to open a file in read-write mode which does not exist */
   one_test_read(fopen(path, "r"), path, "Recordstore");
   one_test_read(NOPH_MemoryFile_openIndirect(path, "r"), path, "MemoryFile"); /* Memory file for the recordstore */
 
