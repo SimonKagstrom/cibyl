@@ -135,5 +135,4 @@ config.checkEnvironment()
 controller = Controller(infile, syscallDirectories)
 
 controller.compile()
-controller.writeAssemblyFile(options.outfile)
 controller.writeDataFile(options.dataOutfile)

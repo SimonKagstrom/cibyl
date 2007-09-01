@@ -12,7 +12,7 @@
 import StringIO, re, sys, struct, bisect
 from sets import Set
 
-from Cibyl.BinaryTranslation import bytecode, register, function, codeblock
+from Cibyl.BinaryTranslation import bytecode, register, function, codeblock, javaclass
 from Cibyl.BinaryTranslation.Mips.instruction import Instruction, newInstruction, Syscall, SyscallRegisterArgument
 from Cibyl.BinaryTranslation.Mips import mips, optimizer, javamethod
 
@@ -47,6 +47,7 @@ class Controller(codeblock.CodeBlock):
 	self.outclass = "CompiledProgram"
 	self.compileFunctions = True
         self.prunedRanges = []
+        self.javaClasses = []
 
 	self.optimizer = optimizer.Optimizer()
 	self.registerHandler = register.RegisterHandler(self, bytecode.ByteCodeGenerator(self))
@@ -95,7 +96,7 @@ class Controller(codeblock.CodeBlock):
 	    self.functions.append(fn)
 
 	self.functions.sort()
-	self.javaMethods = []
+	javaMethods = []
 
         colocateFunctions = []
         otherFunctions = []
@@ -107,25 +108,17 @@ class Controller(codeblock.CodeBlock):
 
         # Insert java methods (colocated and normal)
         if colocateFunctions != []:
-            self.javaMethods.append(javamethod.JavaMethod(self, colocateFunctions))
+            javaMethods.append(javamethod.JavaMethod(self, colocateFunctions))
 
 	for fn in otherFunctions:
-	    self.javaMethods.append(javamethod.JavaMethod(self, [fn]))
+	    javaMethods.append(javamethod.JavaMethod(self, [fn]))
 	jumptab = javamethod.GlobalJumptabMethod(self, colocateFunctions + otherFunctions)
-	self.javaMethods.append(jumptab)
+	javaMethods.append(jumptab)
 
-	if config.doRelocationOptimization:
-	    c = 0
-	    for label in self.labels.values():
-		if label.inJumpTab:
-		    label.address = c
-		    c = c + 1
-
-	# Finally create the outfile
-	if config.outFilename == None:
-	    self.outfile = sys.stdout
-	else:
-	    self.outfile = StringIO.StringIO()
+        jc = javaclass.JavaClass(self, "CompiledProgram")
+        for method in javaMethods:
+            jc.addMethod(method)
+        self.javaClasses.append(jc)
 
     def getOptimizer(self):
 	"Return the optimizer"
@@ -164,18 +157,19 @@ class Controller(codeblock.CodeBlock):
 
     def lookupJavaMethod(self, address):
 	"Return the java method for a given address"
-	for method in self.javaMethods:
-            for fn in method.functions:
-                if address in (fn.address, fn.address + fn.size - 1):
-                    return method
-	return None
+        for c in self.javaClasses:
+            out = c.lookupJavaMethod(address)
+            if out:
+                return out
+        return None
 
     def lookupFunction(self, address):
-	"Return the java method for a given address"
-	for fn in self.functions:
-            if address in (fn.address, fn.address + fn.size - 1):
-                return fn
-	return None
+	"Return the function for a given address"
+        for c in self.javaClasses:
+            out = c.lookupFunction(address)
+            if out:
+                return out
+        return None
 
     def addAlignedSection(self, out, sectionName, alignment):
 	section = self.elf.getSectionContents(sectionName)
@@ -316,30 +310,19 @@ class Controller(codeblock.CodeBlock):
 
     def compile(self):
 	"Recompile the binary"
-	if config.debug:
-	    self.emit(".source CompiledProgram.j")
-	self.emit(".class public %s" % (self.outclass) )
-	self.emit(".super java/lang/Object")
-        # Initializer
-        self.emit(".method public <init>()V")
-        self.emit("aload_0")
-        self.emit("invokenonvirtual java/lang/Object.<init>()V")
-        self.emit("return")
-        self.emit(".end method")
 
-	for i in range(0,3):
-	    self.emit('')
+        for c in self.javaClasses:
+            c.fixup()
 
-	for method in self.javaMethods:
-	    method.fixup()
-
-	for method in self.javaMethods:
-	    method.fixup()
-
-	for method in self.javaMethods:
-	    method.compile()
-	    for i in range(0,3):
-		self.emit('')
+        for c in self.javaClasses:
+            # Finally create the outfile and write to it
+            if config.outFilename == None:
+                self.outfile = sys.stdout
+            else:
+                self.outfile = StringIO.StringIO()
+            c.compile()
+            self.writeAssemblyFile(config.outFilename)
+            self.outfile.close()
 
     def emit(self, what):
 	"Emit instructions"

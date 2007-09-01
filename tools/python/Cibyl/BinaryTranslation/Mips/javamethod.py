@@ -92,6 +92,9 @@ class JavaMethod(CodeBlock):
         if self.hasMultipleFunctions():
             self.argumentRegisters = self.argumentRegisters + [mips.R_FNA]
 
+    def setJavaClass(self, javaClass):
+        self.javaClass = javaClass
+
     def getJavaMethodName(self):
 	return self.name + "(" + 'I'*len(self.getRegistersToPass()) + ")" + self.getJavaReturnType()
 
@@ -430,6 +433,9 @@ class GlobalJumptabMethod(CodeBlock):
 	    cur = (fn.address, "lab_%s_%x" % (fn.name, fn.address))
 	    out.append(cur)
 	return out
+
+    def setJavaClass(self, javaClass):
+        self.javaClass = javaClass
 
     def fixup(self):
 	pass
