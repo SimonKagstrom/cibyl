@@ -346,15 +346,13 @@ class GlobalJumptabMethod(CodeBlock):
     def __init__(self, controller, functions):
 	self.controller = controller
 	self.name = "__CIBYL_global_jumptab(IIIIII)I"
-
-	# Put all methods which have lo16/hi16 or 32-bit relocations or are within
-        # the constructors/destructors sections
-        self.functions = self.cleanupFunctions(functions)
-
 	self.bc = bytecode.ByteCodeGenerator(self.controller)
 	self.rh = register.RegisterHandler(self.controller, self.bc)
 
 	CodeBlock.__init__(self, self.controller, [], [], False)
+        self.functions = functions
+        self.address = 0
+        self.size = 0
 
     def cleanupFunctions(self, functions):
         if not config.doOptimizeIndirectCalls:
@@ -438,7 +436,9 @@ class GlobalJumptabMethod(CodeBlock):
         self.javaClass = javaClass
 
     def fixup(self):
-	pass
+        # Put all methods which have lo16/hi16 or 32-bit relocations or are within
+        # the constructors/destructors sections
+        self.functions = self.cleanupFunctions(self.functions)
 
     def compile(self):
 	self.controller.emit(".method public static %s" % (self.name))
