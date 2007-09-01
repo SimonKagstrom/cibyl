@@ -37,15 +37,15 @@ parser.add_option("--trace-function-calls", action="store_true", dest="traceFunc
 parser.add_option("--trace-function-instructions", dest="traceFunctions", default=None,
                   help="generate an instruction trace for the FUNCTIONS (comma-separated)",
 		  metavar="FUNCTIONS")
-parser.add_option("-d", "--data-filename",
-                  help="write the data outfile to outfile instead of program.data.bin",
-		  dest="dataOutfile", metavar="FILE", default="program.data.bin")
+parser.add_option("-d", "--out-directory",
+                  help="Write the outfiles to DIRECTORY instad of '.'",
+		  dest="outDirectory", metavar="DIRECTORY", default=".")
 parser.add_option("-I", "--include", action="callback", help="directory to search for header files",
 		  type="str", nargs=1,
 		  callback=includeCallback)
-parser.add_option("-o", "--out-filename",
-                  help="write the assembly output to outfile instead of stdout",
-		  dest="outfile", metavar="FILE")
+parser.add_option("--save-temps", action="store_true", default=False,
+                  help="do not remove temporary files",
+		  dest="saveTemps")
 parser.add_option("-g", "--debug", action="store_true", default=False,
 		  help="""Turn on generation of debugging information.""",
 		  dest="debug")
@@ -103,10 +103,12 @@ config.doInlineAllBuiltins = options.doInlineAllBuiltins
 config.doOptimizeIndirectCalls = options.doOptimizeIndirectCalls
 
 config.debug = options.debug
+config.saveTemps = options.saveTemps
 config.tracing = options.tracing
 config.traceFunctionCalls = options.traceFunctionCalls
 config.verbose = options.verbose
-config.outFilename = options.outfile
+config.outDirectory = options.outDirectory
+config.dataOutFilename = "program.data.bin"
 
 if options.operandStackLimit:
     config.operandStackLimit = int(options.operandStackLimit)
@@ -131,8 +133,6 @@ if options.optimize_all:
 
 config.checkEnvironment()
 
-# Read it all
+# Translate the MIPS file to Java class(es)
 controller = Controller(infile, syscallDirectories)
-
 controller.compile()
-controller.writeDataFile(options.dataOutfile)

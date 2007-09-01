@@ -9,8 +9,11 @@
 ## $Id: translator.py 14248 2007-03-14 17:13:31Z ska $
 ##
 ######################################################################
-import StringIO, re, sys, struct, bisect
+import StringIO, re, sys, struct, bisect, tempfile, os, subprocess, copy
 from sets import Set
+
+if __name__ == "__main__":
+    sys.path.append('%s/../../' % sys.path[0])
 
 from Cibyl.BinaryTranslation import bytecode, register, function, codeblock, javaclass
 from Cibyl.BinaryTranslation.Mips.instruction import Instruction, newInstruction, Syscall, SyscallRegisterArgument
@@ -33,6 +36,26 @@ def getSyscallStrings(data):
 	cur = cur + len(s) + 1
     return addressesToName
 
+class JasminProcess:
+    def __init__(self, name, data):
+        self.fd, self.filename = tempfile.mkstemp(prefix = name + "_", suffix = ".j", dir = config.outDirectory)
+        # Write the data to the tempfile
+        os.write(self.fd, data)
+        os.close(self.fd)
+
+        # Fork jasmin
+        self.process = subprocess.Popen([ config.jasmin, "-d " + config.outDirectory + " " + self.filename ])
+
+    def wait(self):
+        "Wait for the process to complete and clean up after it"
+        try:
+            os.waitpid(self.process.pid, 0)
+        except:
+            # Already terminated
+            pass
+        if not config.saveTemps:
+            os.unlink(self.filename)
+
 
 class Controller(codeblock.CodeBlock):
     def __init__(self, filename, syscallDirectories, onlyReadSyscalls=False):
@@ -44,10 +67,9 @@ class Controller(codeblock.CodeBlock):
 	self.instructionsByAddress = {}
 	self.syscalls = {}
 	self.usedSyscalls = {}
-	self.outclass = "CompiledProgram"
 	self.compileFunctions = True
         self.prunedRanges = []
-        self.javaClasses = []
+        self.jasminProcesses = []
 
 	self.optimizer = optimizer.Optimizer()
 	self.registerHandler = register.RegisterHandler(self, bytecode.ByteCodeGenerator(self))
@@ -60,8 +82,6 @@ class Controller(codeblock.CodeBlock):
 	for fn in allFunctions:
 	    self.addSyscall(fn)
 	self.readBinary()
-        if onlyReadSyscalls:
-            return
 
 	# Fixup the jump destinations and other stuff with the instructions
         for insn in self.instructions:
@@ -112,13 +132,13 @@ class Controller(codeblock.CodeBlock):
 
 	for fn in otherFunctions:
 	    javaMethods.append(javamethod.JavaMethod(self, [fn]))
-	jumptab = javamethod.GlobalJumptabMethod(self, colocateFunctions + otherFunctions)
-	javaMethods.append(jumptab)
+	self.jumptab = javamethod.GlobalJumptabMethod(self, colocateFunctions + otherFunctions)
+	javaMethods.append(self.jumptab)
 
-        jc = javaclass.JavaClass(self, "CompiledProgram")
-        for method in javaMethods:
-            jc.addMethod(method)
-        self.javaClasses.append(jc)
+        self.javaClasses = self.splitMethodsInClasses(javaMethods)
+
+    def getGlobalCallTableMethod(self):
+        return self.jumptab
 
     def getOptimizer(self):
 	"Return the optimizer"
@@ -148,13 +168,6 @@ class Controller(codeblock.CodeBlock):
 	"Check if a named syscall is actually used"
 	return self.usedSyscalls.has_key(name)
 
-    def writeAssemblyFile(self, filename):
-	"Output the Java assembly file"
-	self.outfile.flush()
-	f = open(filename, "w")
-	f.write(self.outfile.getvalue())
-	f.close()
-
     def lookupJavaMethod(self, address):
 	"Return the java method for a given address"
         for c in self.javaClasses:
@@ -170,6 +183,48 @@ class Controller(codeblock.CodeBlock):
             if out:
                 return out
         return None
+
+    def splitMethodsBySize(self, javaMethods):
+        "Split methods into classes by the size of the classes"
+        size = 0
+        out = []
+        curMethods = []
+        name = "Cibyl"
+        for method in javaMethods:
+            size = size + method.getSize()
+            curMethods.append(method)
+            if size > 12000:
+                jc = javaclass.JavaClass(self, name)
+                for m in curMethods:
+                    jc.addMethod(m)
+                out.append(jc)
+                curMethods = []
+                size = 0
+                name = "Cibyl%d" % len(out)
+        if curMethods != []:
+            jc = javaclass.JavaClass(self, name)
+            for m in curMethods:
+                jc.addMethod(m)
+            out.append(jc) # Place the smallest first
+        return out
+
+    def splitMethodsInClasses(self, javaMethods):
+        methodsToSplit = copy.copy(javaMethods)
+        addToPrimary = []
+
+        # Some should always be in the first class
+        for method in methodsToSplit:
+            if method == self.jumptab or method.name == "start":
+                addToPrimary.append(method)
+                del methodsToSplit[ methodsToSplit.index(method) ]
+        # Split the methods
+        out = self.splitMethodsBySize(methodsToSplit)
+        primary = out[0]
+
+        # ... And add to first
+        for method in addToPrimary:
+            primary.addMethod(method)
+        return out
 
     def addAlignedSection(self, out, sectionName, alignment):
 	section = self.elf.getSectionContents(sectionName)
@@ -205,7 +260,10 @@ class Controller(codeblock.CodeBlock):
 	out.close()
 
 
-    # Based on Instruction.java by
+    def forkJasmin(self, name, data):
+        self.jasminProcesses.append(JasminProcess(name, data))
+
+    # Based on Instruction.java from the Topsy OS by
     # George Fankhauser <gfa@acm.org>
     def readBinary(self):
 	"Parse the binary file and create the instructions"
@@ -310,20 +368,34 @@ class Controller(codeblock.CodeBlock):
 
     def compile(self):
 	"Recompile the binary"
-
         for c in self.javaClasses:
             c.fixup()
 
         for c in self.javaClasses:
             # Finally create the outfile and write to it
-            if config.outFilename == None:
-                self.outfile = sys.stdout
-            else:
-                self.outfile = StringIO.StringIO()
+            self.outfile = StringIO.StringIO()
             c.compile()
-            self.writeAssemblyFile(config.outFilename)
+            self.outfile.flush()
+            self.forkJasmin(c.getName(), self.outfile.getvalue())
             self.outfile.close()
+
+        # Wait for the jasmin(s) to terminate and cleanup after them
+        for p in self.jasminProcesses:
+            p.wait()
+
+        self.writeDataFile(config.outDirectory + "/" + config.dataOutFilename)
 
     def emit(self, what):
 	"Emit instructions"
 	self.outfile.write(what + "\n")
+
+
+if __name__ == "__main__":
+    """This example should fork two jasmin processes and compile those
+    to TstA.class and TstB.class and leave no temporary files behind"""
+    d1 = ".class public TstA\n.super java/lang/Object\n"
+    d2 = ".class public TstB\n.super java/lang/Object\n"
+
+    procs = [ JasminProcess("TstA", d1), JasminProcess("TstB", d2) ]
+    for p in procs:
+        p.wait()

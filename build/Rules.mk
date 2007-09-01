@@ -29,11 +29,7 @@ LDLIBS   += -lc -ljava
 LDOPTS_DEBUG = -L$(CIBYL_BASE)/libs/lib/ -EB -nostdlib -T$(CIBYL_BASE)/build/linker.lds
 LDOPTS   = $(LDOPTS_DEBUG) --emit-relocs --whole-archive
 
-# User controllable
-CIBYL_SYSCALL_DIR    ?= $(CIBYL_BASE)/syscalls
-CIBYL_MIPS2JAVA_OPTS ?=
-
-ALL_TARGETS ?= $(TARGET) $(TARGET).debug CompiledProgram.class
+ALL_TARGETS ?= $(TARGET) $(TARGET).debug
 
 all: $(ALL_TARGETS)
 
@@ -42,15 +38,6 @@ $(TARGET).debug: $(OBJS)
 
 $(TARGET): $(OBJS)
 	$(ld) $(LDOPTS) $+ $(CIBYL_BASE)/libs/crt0.o --start-group -lcrt0 $(LDLIBS) --end-group -o $@
-
-CompiledProgram.j: $(TARGET)
-	$(CIBYL_BASE)/tools/cibyl-mips2java $(CIBYL_MIPS2JAVA_OPTS) -o $@ -d $(TARGET).data.bin -I$(CIBYL_BASE)/include/generated $<
-
-CompiledProgram.class: CompiledProgram.j
-	$(jasmin) $<
-
-%.lsym: %
-	mips-lsym-convert -o $@ $<
 
 
 %.a: $(OBJS)

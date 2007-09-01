@@ -10,14 +10,11 @@
 ##
 ######################################################################
 SUBDIRS = c
-RESOURCES=res/program.data.bin
+RESOURCES=
 SOURCES = src/CRunTime.java src/StandaloneMain.java src/Syscalls.java src/CibylConfig.java
-TARGET   =src/CompiledProgram.class
+TARGET   =
 
 CIBYL_SYSCALL_SETS ?= ansi
 JAVA_OPTS=
 
 include $(CIBYL_BASE)/build/Rules-java.mk
-
-res/program.data.bin: c/program.data.bin
-	cp $< $@

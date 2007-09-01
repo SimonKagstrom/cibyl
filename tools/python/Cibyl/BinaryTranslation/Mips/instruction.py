@@ -750,7 +750,7 @@ class Jalr(BranchInstruction):
 	if config.debug:
 	    self.pushConst(self.address + 8) # Skip the delayed instruction
 	    self.popToRegister(mips.R_RA)
-	self.invokestatic("CompiledProgram/__CIBYL_global_jumptab(IIIIII)I")
+        self.controller.getGlobalCallTableMethod().invoke()
 	self.getstatic("CRunTime/saved_v1 I")
 	self.popToRegister(mips.R_V1)
 	self.popToRegister(mips.R_V0)

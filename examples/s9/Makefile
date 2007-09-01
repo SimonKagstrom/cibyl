@@ -11,13 +11,14 @@
 ######################################################################
 SUBDIRS = c
 RESOURCES=res/program.data.bin
-TARGET   =include/ src/CibylConfig.java src/CompiledProgram.class midlet.jar midlet.jad
+TARGET   =include/ src/CibylConfig.java midlet.jar midlet.jad
 
 # This is actually not needed since we include Rules-j2me, but
 # we keep it here to show how new syscall sets are added. Further,
 # ansi is implicitly implied by j2me, so that can be removed as well
 CIBYL_SYSCALL_SETS ?= javax.microedition ansi resource_manager command_mgr
 CIBYL_GENERATE_JAVA_WRAPPERS_OPTS=-S syscalls -I include
+CIBYL_MIPS2JAVA_OPTS +=-Iinclude
 
 all: include
 

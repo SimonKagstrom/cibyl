@@ -40,14 +40,13 @@ class JavaMethod(CodeBlock):
 
             if fn.address == self.controller.elf.getEntryPoint():
                 self.name = "start"
-                self.methodAccess = "public"
             else:
                 sym = self.controller.elf.getSymbolByAddress(fn.address)
                 if sym.localLinkage():
                     self.name = fn.name +  "_%x" % (fn.address)
                 else:
                     self.name = fn.name
-                self.methodAccess = "private"
+            self.methodAccess = "public"
 	self.bc = bytecode.ByteCodeGenerator(self.controller)
 	self.rh = register.RegisterHandler(self.controller, self.bc)
 
@@ -92,6 +91,10 @@ class JavaMethod(CodeBlock):
         if self.hasMultipleFunctions():
             self.argumentRegisters = self.argumentRegisters + [mips.R_FNA]
 
+    def getSize(self):
+        "Approximate the size of this method"
+        return len(self.instructions) * 9
+
     def setJavaClass(self, javaClass):
         self.javaClass = javaClass
 
@@ -113,9 +116,9 @@ class JavaMethod(CodeBlock):
     def hasMultipleFunctions(self):
         return len(self.functions) > 1
 
-    def invoke(self, address):
+    def invoke(self, address=0):
         "Invoke this method (e.g., through a JAL instruction)"
-        self.bc.invokestatic( "CompiledProgram/" + self.getJavaMethodName() )
+        self.bc.invokestatic( self.javaClass.name + "/" + self.getJavaMethodName() )
 
     def addReturnAddress(self, address):
         try:
@@ -310,7 +313,7 @@ class JavaMethod(CodeBlock):
             self.rh.pushRegister(mips.R_EAR)
             self.bc.pushConst(0)
             self.bc.pushConst(0)
-            self.bc.invokestatic("CompiledProgram/__CIBYL_global_jumptab(IIIIII)I")
+            self.controller.getGlobalCallTableMethod().invoke()
             self.bc.pop()
             self.bc.goto( end )
 
@@ -342,10 +345,10 @@ class JavaMethod(CodeBlock):
 	self.controller.emit(".end method")
 
 
-class GlobalJumptabMethod(CodeBlock):
+class GlobalJumptabMethod(JavaMethod):
     def __init__(self, controller, functions):
 	self.controller = controller
-	self.name = "__CIBYL_global_jumptab(IIIIII)I"
+	self.name = "CIBYL_callTable"
 	self.bc = bytecode.ByteCodeGenerator(self.controller)
 	self.rh = register.RegisterHandler(self.controller, self.bc)
 
@@ -426,7 +429,6 @@ class GlobalJumptabMethod(CodeBlock):
                 elif config.verbose: print "Didn't find for %x" % (address)
         return out
 
-
     def generateLookupTable(self):
 	out = []
 	for fn in self.functions:
@@ -434,16 +436,26 @@ class GlobalJumptabMethod(CodeBlock):
 	    out.append(cur)
 	return out
 
-    def setJavaClass(self, javaClass):
-        self.javaClass = javaClass
-
     def fixup(self):
-        # Put all methods which have lo16/hi16 or 32-bit relocations or are within
+	# Put all methods which have lo16/hi16 or 32-bit relocations or are within
         # the constructors/destructors sections
         self.functions = self.cleanupFunctions(self.functions)
 
+    def getJavaMethodName(self):
+	return self.name + "(IIIIII)I"
+
+    def getRegistersToPass(self):
+        return [mips.R_SP, mips.R_A0, mips.R_A1, mips.R_A2, mips.R_A3]
+
+    def getSize(self):
+        "Approximate the size of this method"
+        return len(self.functions) * 10
+
+    def getJavaReturnType(self):
+        return "I"
+
     def compile(self):
-	self.controller.emit(".method public static %s" % (self.name))
+	self.controller.emit(".method public static %s" % (self.getJavaMethodName()))
         if not config.operandStackLimit:
             self.controller.emit(".limit stack 14")
         else:

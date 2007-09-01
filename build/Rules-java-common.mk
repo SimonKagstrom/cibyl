@@ -24,27 +24,25 @@ CIBYL_SYSCALL_SETS   ?= ansi
 res/%: resources/%
 	cp `pwd`/$< `pwd`/$@
 
-# The program text
-res/%.data.bin: c/%.data.bin
-	cp $< $@
-
 src/%: $(CIBYL_BASE)/java/%
 	cp $< $@
+
+res/program.data.bin: tmpclasses/Cibyl.class
+	cp tmpclasses/program.data.bin $@
 
 # Special cases
 src/Syscalls.java: c/program
 	$(CIBYL_BASE)/tools/cibyl-generate-java-wrappers -o `dirname $@` $(CIBYL_GENERATE_JAVA_WRAPPERS_OPTS) -I $(CIBYL_BASE)/include/generated -S $(CIBYL_SYSCALL_DIR) c/program $(CIBYL_SYSCALL_SETS)
 
-src/CompiledProgram.class: c/CompiledProgram.class
-	cp $< $@
-	cp $< tmpclasses/
+tmpclasses/Cibyl.class: c/program
+	$(CIBYL_BASE)/tools/cibyl-mips2java $(CIBYL_MIPS2JAVA_OPTS) -d tmpclasses -I$(CIBYL_BASE)/include/generated $<
 
 classes/.rebuilt: tmpclasses/.rebuilt
 	cp tmpclasses/*.class classes/
 	touch $@
 
 tmpclasses/.rebuilt: $(SOURCES)
-	cd src && $(JAVA_PATH)/javac $(JAVA_OPTS) -d ../tmpclasses/ *.java
+	cd src && $(JAVA_PATH)/javac -classpath ../tmpclasses $(JAVA_OPTS) -d ../tmpclasses/ *.java
 	touch $@
 
 include $(CIBYL_BASE)/build/Rules-common.mk

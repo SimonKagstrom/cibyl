@@ -11,7 +11,7 @@
 ######################################################################
 SUBDIRS = c
 RESOURCES=res/program.data.bin res/player.png res/tiles.png res/ball.png
-TARGET   =src/CompiledProgram.class midlet.jar midlet.jad
+TARGET   =midlet.jar midlet.jad
 CIBYL_SYSCALL_SETS ?= resource_manager
 
 include $(CIBYL_BASE)/build/Rules-j2me.mk

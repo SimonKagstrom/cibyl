@@ -34,11 +34,11 @@ public class StandaloneMain
     }
 
     CRunTime.init(is);
-    CompiledProgram.start(0,
-			  0,
-			  0,
-			  0,
-			  0);
+    Cibyl.start(0,
+                0,
+                0,
+                0,
+                0);
 
     System.err.println("Returned from the C-code (this should not happen)");
   }

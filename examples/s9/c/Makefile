@@ -15,6 +15,4 @@ OBJS    = main.o s9_input.o
 INCLUDES=-I../include
 LDLIBS  = -ls9
 
-CIBYL_MIPS2JAVA_OPTS ?=-I../include
-
 include $(CIBYL_BASE)/build/Rules.mk

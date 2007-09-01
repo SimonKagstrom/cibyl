@@ -17,7 +17,7 @@ JAVA_OPTS ?= -source 1.4 -bootclasspath $(WTK_PATH)/lib/cldcapi11.jar:$(WTK_PATH
 EMULATOR_OPTIONS ?=
 CIBYL_GENERATE_JAVA_WRAPPERS_OPTS ?=
 
-all: $(SUBDIRS) .dirs $(RESOURCES) src/CompiledProgram.class classes/.preverify $(TARGET)
+all: $(SUBDIRS) .dirs $(RESOURCES) classes/.preverify $(TARGET)
 
 %.jad: %.jar
 	cat $@.templ > $@

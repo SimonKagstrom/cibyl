@@ -49,9 +49,9 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
   private void invokeCallback(int which, int a0, int a1)
   {
     if (this.callbacks[which] != 0)
-      CompiledProgram.__CIBYL_global_jumptab(this.callbacks[which],
-					     CRunTime.eventStackPointer,
-					     a0, a1, 0, 0); /* a0 ... a3 */
+      Cibyl.CIBYL_callTable(this.callbacks[which],
+                            CRunTime.eventStackPointer,
+                            a0, a1, 0, 0); /* a0 ... a3 */
   }
 
   /* Callbacks */
@@ -114,14 +114,11 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
 
     try { /* Added */
       /* Start the virtual machine */
-      CompiledProgram.start(0, /* sp, set in crt0.S */
-			    0, /* a0 */
-			    0, /* a1 */
-			    0, /* a2 */
-			    0);/* a3 */
+      Cibyl.start(0, /* sp, set in crt0.S */
+                  0, /* a0 */
+                  0, /* a1 */
+                  0, /* a2 */
+                  0);/* a3 */
     } catch (Exception e) { e.printStackTrace(); }
   }
 }
-
-
-

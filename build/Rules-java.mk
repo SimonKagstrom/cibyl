@@ -17,8 +17,9 @@ EXTRA_CLEAN=tmpclasses/ classes/ res/ src/ $(SOURCES) .dirs .jar_built *~ c/sysc
 CIBYL_SYSCALL_DIR    ?= $(CIBYL_BASE)/syscalls
 CIBYL_SYSCALL_SETS   ?= ansi
 CIBYL_GENERATE_JAVA_WRAPPERS_OPTS += -D NOJ2ME
+CIBYL_MIPS2JAVA_OPTS ?=
 
-all: $(SUBDIRS) .dirs $(RESOURCES) src/CompiledProgram.class classes/.rebuilt $(TARGET)
+all: $(SUBDIRS) .dirs tmpclasses/Cibyl.class res/program.data.bin $(RESOURCES) classes/.rebuilt $(TARGET)
 
 run: all
 	cd tmpclasses && $(JAVA_PATH)/java StandaloneMain ../res/program.data.bin

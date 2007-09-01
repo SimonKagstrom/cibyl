@@ -22,9 +22,6 @@ OBJS    = main.o run-tests.o console.o \
           tests/astar/astar.o tests/astar/prio_queue.o
 LDLIBS  = -lm -lsoftfloat -lmidp -ljsr075
 
-# The compilation options, set to e.g., -O to run all optimizations
-CIBYL_MIPS2JAVA_OPTS +=-I../include
-
 include $(CIBYL_BASE)/build/Rules.mk
 
 program.host: $(patsubst %.o,%.host.o,$(OBJS))

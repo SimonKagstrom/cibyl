@@ -29,6 +29,8 @@ class JavaClass(bytecode.ByteCodeGenerator):
     def lookupJavaMethod(self, address):
 	"Return the java method for a given address"
 	for method in self.methods:
+            if method == self.controller.getGlobalCallTableMethod():
+                continue
             for fn in method.functions:
                 if address in (fn.address, fn.address + fn.size - 1):
                     return method

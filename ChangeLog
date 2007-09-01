@@ -1,9 +1,17 @@
 Cibyl (12)
+	* cibyl-mips2java has the option --save-temps now, to inhibit
+	removing of temporary files generated
+
+	* cibyl-mips2java can now produce multiple classes for the
+	translated code, and will produce classes directly (i.e., invoke
+	jasmin). The options has been changed to reflect this and it is no
+	longer option-compatible with the last release.
+
 	* Added a sanity check to acertain that the environment is setup
 	for Cibyl (and produce a helpful message if not), cleaned up of
 	parts of the code
 
-	* Fixed bug where __negdf2 was misnamed
+	* Fixed bug where __negdf2 was misnamed (thanks to Abhishek Singh)
 
 	* Optimized the cleanup register generation more (fewer registers
 	are now cleaned). This should now be almost optimal, and the code

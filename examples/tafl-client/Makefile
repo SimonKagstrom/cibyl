@@ -12,7 +12,7 @@
 SUBDIRS = c
 RESOURCES=res/program.data.bin res/cursor.png res/white.png res/white-king.png \
           res/black.png res/tiles.png
-TARGET   = src/CompiledProgram.class cibyl-tafl.jar cibyl-tafl.jad
+TARGET   = cibyl-tafl.jar cibyl-tafl.jad
 CIBYL_SYSCALL_SETS ?= resource_manager
 
 include $(CIBYL_BASE)/build/Rules-j2me.mk

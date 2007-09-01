@@ -13,6 +13,7 @@ import os,sys
 
 verbose = False
 outFilename = None
+outDirectory = "."
 pruneUnusedFunctions = True
 doConstantPropagation = False
 doMultOptimization = False
@@ -67,6 +68,11 @@ def checkEnvironment():
              """  Please install a MIPS binutils or binutils-multiarch (recommended if
   possible) and place it in PATH or setup CIBYL_NM, CIBYL_READELF,
   CIBYL_OBJCOPY and CIBYL_CPP in env.sh""")
+
+    if not os.path.isdir(outDirectory):
+        print "The destination " + outDirectory + " is not a directory"
+        nok |= 1
+
     if nok:
         sys.exit(1)
     # Probably nm and cpp is OK if objcopy is fine
