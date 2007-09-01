@@ -7,7 +7,8 @@
 #include <java/io.h>
 #include <java/lang.h>
 
-static cibyl_fops_t connector_fops;
+static cibyl_fops_t fileconnection_input_fops;
+static cibyl_fops_t fileconnection_output_fops;
 
 typedef struct
 {
@@ -15,6 +16,12 @@ typedef struct
   NOPH_FileConnection_t fc;
   char *path;
 } fileconnection_file_t;
+
+typedef struct
+{
+  NOPH_OutputStream_file_t os_file;
+  NOPH_FileConnection_t fc;
+} fileconnection_outputfile_t;
 
 static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
 {
@@ -26,8 +33,8 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
   /* Handle the write case by simply returning a FILE for the output stream */
   if (mode == WRITE || mode == APPEND || mode == READ_TRUNCATE)
     {
-      NOPH_OutputStream_t os;
-      FILE *out;
+      fileconnection_outputfile_t *p;
+      long offset = 0;
 
       fc = NOPH_Connector_openFileConnection_mode(path, NOPH_Connector_READ_WRITE);
 
@@ -38,6 +45,7 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
             NOPH_FileConnection_create(fc);
           if (mode == READ_TRUNCATE)
             NOPH_FileConnection_truncate(fc, 0);
+          error = 0;
         } NOPH_catch();
       if (error)
         {
@@ -45,26 +53,34 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
           return NULL;
         }
 
-      os = NOPH_FileConnection_openDataOutputStream(fc); /* Can throw stuff */
+      fp = cibyl_file_alloc(&fileconnection_output_fops);
+      p = (fileconnection_outputfile_t*)fp->priv;
+      fp->file_size = NOPH_FileConnection_fileSize(fc);
+
+      if (mode == APPEND)
+        offset = fp->file_size;
+      NOPH_try(NOPH_setter_exception_handler, (void*)&error)
+        {
+          p->os_file.os = NOPH_FileConnection_openOutputStream(fc, offset); /* Can throw stuff */
+        } NOPH_catch();
+      if (error)
+        {
+          cibyl_file_free(fp);
+          NOPH_delete(fc);
+          return NULL;
+        }
 
       NOPH_delete(fc);
       if (error)
         {
-          NOPH_OutputStream_close(os);
-          return NULL;
-        }
-      out = NOPH_OutputStream_createFILE(os);
-
-      if (!out)
-        {
-          NOPH_OutputStream_close(os);
+          NOPH_OutputStream_close(p->os_file.os);
           return NULL;
         }
 
-      return out;
+      return fp;
     }
 
-  fp = cibyl_file_alloc(&connector_fops);
+  fp = cibyl_file_alloc(&fileconnection_input_fops);
   p = (fileconnection_file_t *)fp->priv;
 
   if (mode != READ)
@@ -114,6 +130,16 @@ static int close(FILE *fp)
   return 0;
 }
 
+static int close_output(FILE *fp)
+{
+  fileconnection_outputfile_t *p = (fileconnection_outputfile_t *)fp->priv;
+
+  NOPH_OutputStream_close(p->os_file.os);
+  NOPH_delete(p->fc);
+
+  return 0;
+}
+
 static void reset(FILE *fp)
 {
   fileconnection_file_t *p = (fileconnection_file_t *)fp->priv;
@@ -146,7 +172,7 @@ static void seek(FILE *fp, long offset)
 
 
 /* The fops structure for connector files */
-static cibyl_fops_t connector_fops =
+static cibyl_fops_t fileconnection_input_fops =
 {
   .keep_uri = 1,
   .priority = 1, /* Higher priority than connections */
@@ -158,11 +184,25 @@ static cibyl_fops_t connector_fops =
   .seek  = seek,
 };
 
-static void __attribute__((constructor))register_fs(void)
+static cibyl_fops_t fileconnection_output_fops =
+{
+  .keep_uri = 1,
+  .priority = 1, /* Higher priority than connections */
+  .priv_data_size = sizeof(fileconnection_file_t),
+  .open  = open,
+  .close = close_output,
+  .read  = NULL, /* Not applicable */
+  .write = NULL, /* Set below */
+  .seek  = NULL, /* Not applicable */
+};
+
+void __attribute__((constructor))fileconnection_register_fs(void)
 {
   /* By default uses the same implementations as input streams */
-  connector_fops.read  = NOPH_InputStream_fops.read;
-  connector_fops.write = NOPH_InputStream_fops.write;
+  fileconnection_input_fops.read  = NOPH_InputStream_fops.read;
+  fileconnection_input_fops.write = NOPH_InputStream_fops.write;
+  fileconnection_output_fops.write = NOPH_OutputStream_fops.write;
 
-  cibyl_fops_register("file://", &connector_fops, 0);
+  /* Only one need to be registered */
+  cibyl_fops_register("file://", &fileconnection_input_fops, 0);
 }
