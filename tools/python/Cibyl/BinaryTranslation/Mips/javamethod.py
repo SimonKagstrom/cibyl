@@ -370,7 +370,12 @@ class GlobalJumptabMethod(CodeBlock):
         curBasicBlock = None
         relocsToCheck = []
         for cur in textRelocs:
+            if not self.controller.lookupFunction(cur.offset):
+                continue
             bb = self.controller.getInstruction(cur.offset).getBasicBlock()
+            # Was this pruned?
+            if not self.controller.lookupFunction(cur.offset):
+                continue
             if curBasicBlock != None and curBasicBlock.address != bb.address:
                 relocFunctions = self.getFunctionsInText(relocsToCheck)
                 for function in relocFunctions:
