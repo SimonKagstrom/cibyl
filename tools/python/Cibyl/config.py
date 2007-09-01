@@ -17,7 +17,6 @@ pruneUnusedFunctions = True
 doConstantPropagation = False
 doMultOptimization = False
 doMemoryRegisterOptimization = False
-doRelocationOptimization = False
 doRegisterScheduling = False
 doOptimizeIndirectCalls = False
 doInlineAllBuiltins = False
