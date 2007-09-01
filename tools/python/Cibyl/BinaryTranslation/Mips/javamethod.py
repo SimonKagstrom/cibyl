@@ -370,19 +370,15 @@ class GlobalJumptabMethod(CodeBlock):
         curBasicBlock = None
         relocsToCheck = []
         for cur in textRelocs:
-            if not self.controller.lookupFunction(cur.offset):
-                continue
-            bb = self.controller.getInstruction(cur.offset).getBasicBlock()
-            # Was this pruned?
-            if not self.controller.lookupFunction(cur.offset):
-                continue
-            if curBasicBlock != None and curBasicBlock.address != bb.address:
-                relocFunctions = self.getFunctionsInText(relocsToCheck)
-                for function in relocFunctions:
-                    if function not in out:
-                        out.append(function)
-                curBasicBlock = bb
-                relocsToCheck = []
+            if self.controller.lookupFunction(cur.offset):
+                bb = self.controller.getInstruction(cur.offset).getBasicBlock()
+                if curBasicBlock != None and curBasicBlock.address != bb.address:
+                    relocFunctions = self.getFunctionsInText(relocsToCheck)
+                    for function in relocFunctions:
+                        if function not in out:
+                            out.append(function)
+                    curBasicBlock = bb
+                    relocsToCheck = []
             relocsToCheck.append(cur)
         else:
             relocFunctions = self.getFunctionsInText(relocsToCheck)
@@ -404,6 +400,7 @@ class GlobalJumptabMethod(CodeBlock):
         for function in functions:
             relocs = self.controller.elf.getRelocationsByTargetAddress(function.address)
             for r in relocs:
+                # Was this pruned?
                 if r.type in ("R_MIPS_HI16", "R_MIPS_LO16", "R_MIPS_32"):
                     if function in out:
                         continue
