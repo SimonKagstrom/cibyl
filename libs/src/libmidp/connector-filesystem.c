@@ -88,7 +88,7 @@ static cibyl_fops_t connector_fops =
   .seek  = NULL,
 };
 
-static void __attribute__((constructor))register_fs(void)
+static void __attribute__((constructor))connector_register_fs(void)
 {
   /* By default uses the same implementations as input streams */
   connector_fops.read  = NOPH_InputStream_fops.read;

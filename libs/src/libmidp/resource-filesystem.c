@@ -52,7 +52,7 @@ static cibyl_fops_t resource_fops =
   .seek  = NULL,
 };
 
-static void __attribute__((constructor))register_fs(void)
+static void __attribute__((constructor))resource_register_fs(void)
 {
   resource_fops.close = NOPH_InputStream_fops.close;
   resource_fops.read  = NOPH_InputStream_fops.read;

@@ -196,7 +196,7 @@ static cibyl_fops_t fileconnection_output_fops =
   .seek  = NULL, /* Not applicable */
 };
 
-void __attribute__((constructor))fileconnection_register_fs(void)
+static void __attribute__((constructor))fileconnection_register_fs(void)
 {
   /* By default uses the same implementations as input streams */
   fileconnection_input_fops.read  = NOPH_InputStream_fops.read;
