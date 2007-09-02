@@ -193,7 +193,7 @@ class Controller(codeblock.CodeBlock):
         for method in javaMethods:
             size = size + method.getSize()
             curMethods.append(method)
-            if size > 12000:
+            if size > config.classSizeLimit:
                 jc = javaclass.JavaClass(self, name)
                 for m in curMethods:
                     jc.addMethod(m)

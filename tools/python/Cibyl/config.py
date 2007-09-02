@@ -20,13 +20,14 @@ doMultOptimization = False
 doMemoryRegisterOptimization = False
 doRegisterScheduling = False
 doOptimizeIndirectCalls = False
-doInlineAllBuiltins = False
 
+doInlineAllBuiltins = False
 inlineBuiltinsFunctions = []
 
 colocateFunctions = []
 
 operandStackLimit = None
+classSizeLimit = 12000
 
 debug = False
 tracing = False
