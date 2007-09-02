@@ -12,7 +12,6 @@
 import os,sys
 
 verbose = False
-outFilename = None
 outDirectory = "."
 pruneUnusedFunctions = True
 doConstantPropagation = False
@@ -64,6 +63,7 @@ def checkEnvironment():
                   lambda x : x.lower().startswith("jasmin version"),
                   """  Please install a compatible version of jasmin and place it in
   PATH or setup CIBYL_JASMIN in env.sh""")
+    # Probably nm and cpp is OK if objcopy is fine
     nok |= checkOne("%s --help" % (objcopy),
              lambda x : "elf32-tradbigmips" in x,
              """  Please install a MIPS binutils or binutils-multiarch (recommended if
@@ -74,9 +74,16 @@ def checkEnvironment():
         print "The destination " + outDirectory + " is not a directory"
         nok |= 1
 
+    if not os.path.isfile(infile):
+        print "The infile '" + infile + "' is not found (or is not a regular file)"
+        nok |= 1
+
+    if profileFile and not os.path.isfile(profileFile):
+        print "The profile file '" + profileFile + "' is not found (or is not a regular file)"
+        nok |= 1
+
     if nok:
         sys.exit(1)
-    # Probably nm and cpp is OK if objcopy is fine
 
 if __name__ == "__main__":
     checkEnvironment()

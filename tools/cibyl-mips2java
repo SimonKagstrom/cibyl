@@ -69,7 +69,7 @@ limit is passed, a new class will be created.""",
 
 parser.add_option("--optimize-use-profile", default=None,
                   help="""Use profile-based optimization from a J2ME profiler file.""",
-		  dest="useProfile", metavar="PROFILE.prf")
+		  dest="profileFile", metavar="PROFILE.prf")
 parser.add_option("--optimize-memory-registers", action="store_true", default=False,
 		  help="""Turn on the memory register optimization. This improves performance of
 frequent accesses to the same register in a basic block.""",
@@ -119,6 +119,9 @@ config.verbose = options.verbose
 config.outDirectory = options.outDirectory
 config.dataOutFilename = "program.data.bin"
 
+config.infile = infile
+config.profileFile = options.profileFile
+
 # Setup the class size limit
 if options.singleClass:
     config.classSizeLimit = (1<<30) # Practically infinite
@@ -151,5 +154,5 @@ if options.optimize_all:
 config.checkEnvironment()
 
 # Translate the MIPS file to Java class(es)
-controller = Controller(infile, syscallDirectories)
+controller = Controller(config.infile, syscallDirectories)
 controller.compile()
