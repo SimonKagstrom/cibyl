@@ -78,7 +78,11 @@ class Elf:
 	self.relocations = []
 
 	# Read the header
-	f = os.popen("%s --file-header --wide %s" % (config.readelf, self.filename))
+        try:
+            f = os.popen("%s --file-header --wide %s" % (config.readelf, self.filename))
+        except:
+            # Should actually never happen
+            config.abortWithMessage("Failed opening " + self.filename)
 	for line in f:
 	    words = line.split(":")
 	    if len(words) > 1:

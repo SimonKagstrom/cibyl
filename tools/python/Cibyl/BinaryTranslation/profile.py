@@ -36,6 +36,8 @@ class Profile:
                 continue
             # Found a Cibyl method
             self.addEntry(line)
+        if self.entries == {}:
+            raise Exception("No Cibyl profile found")
         self.sortByCount.sort()
         self.sortByCount.reverse()
         self.sortByCycles.sort()

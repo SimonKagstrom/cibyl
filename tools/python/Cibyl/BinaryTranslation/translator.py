@@ -15,7 +15,7 @@ from sets import Set
 if __name__ == "__main__":
     sys.path.append('%s/../../' % sys.path[0])
 
-from Cibyl.BinaryTranslation import bytecode, register, function, codeblock, javaclass
+from Cibyl.BinaryTranslation import bytecode, register, function, codeblock, javaclass, profile
 from Cibyl.BinaryTranslation.Mips.instruction import Instruction, newInstruction, Syscall, SyscallRegisterArgument
 from Cibyl.BinaryTranslation.Mips import mips, optimizer, javamethod
 
@@ -76,6 +76,15 @@ class Controller(codeblock.CodeBlock):
 	self.elf = Cibyl.elf.Elf(self.filename)
 
 	self.addressesToName = getSyscallStrings(self.elf.getSectionContents(".cibylstrtab"))
+
+        if config.profileFile:
+            f = open(config.profileFile)
+            d = f.read()
+            f.close()
+            try:
+                self.profile = profile.Profile(d)
+            except:
+                config.abortWithMessage("Failed loading the profile")
 
 	# Read everything
 	allFunctions = Cibyl.SyscallHandling.function.functionsFromHeaderDirectories(syscallDirectories)
@@ -184,12 +193,14 @@ class Controller(codeblock.CodeBlock):
                 return out
         return None
 
-    def splitMethodsBySize(self, javaMethods):
+    def splitMethodsBySize(self, javaMethods, out = []):
         "Split methods into classes by the size of the classes"
         size = 0
-        out = []
         curMethods = []
-        name = "Cibyl"
+        if out != []:
+            name = "Cibyl%d" % len(out)
+        else:
+            name = "Cibyl"
         for method in javaMethods:
             size = size + method.getSize()
             curMethods.append(method)
@@ -205,8 +216,33 @@ class Controller(codeblock.CodeBlock):
             jc = javaclass.JavaClass(self, name)
             for m in curMethods:
                 jc.addMethod(m)
-            out.append(jc) # Place the smallest first
+            out.append(jc)
         return out
+
+    def splitMethodsByProfile(self, javaMethods):
+        "Split methods into classes by the size of the classes"
+        def nameInMethods(methods, name):
+            for method in methods:
+                for fn in method.functions:
+                    if fn.name == name or "%s_%x" % (fn.name, fn.address) == name:
+                        return method
+            return None
+
+        methods = []
+        name = "Cibyl"
+        for e in self.profile.getEntriesSortedByCallCount():
+            if e.name == "start" or e.name == "CIBYL_callTable":
+                continue
+            method = nameInMethods(javaMethods, e.name)
+            if method:
+                del javaMethods[ javaMethods.index(method) ]
+                methods.append(method)
+            else:
+                if not nameInMethods(methods, e.name):
+                    config.abortWithMessage("The profile contains method " + e.name + " which is not in the ELF file")
+        # Special case for ones with zero calls
+        out = self.splitMethodsBySize(methods)
+        return self.splitMethodsBySize(javaMethods, out)
 
     def splitMethodsInClasses(self, javaMethods):
         methodsToSplit = copy.copy(javaMethods)
@@ -218,7 +254,10 @@ class Controller(codeblock.CodeBlock):
                 addToPrimary.append(method)
                 del methodsToSplit[ methodsToSplit.index(method) ]
         # Split the methods
-        out = self.splitMethodsBySize(methodsToSplit)
+        if config.profileFile:
+            out = self.splitMethodsByProfile(methodsToSplit)
+        else:
+            out = self.splitMethodsBySize(methodsToSplit)
         primary = out[0]
 
         # ... And add to first

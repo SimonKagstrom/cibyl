@@ -33,6 +33,9 @@ tracing = False
 traceFunctions = None
 traceFunctionCalls = False
 
+infile = None
+profileFile = None
+
 def getBasePath():
     base = os.getenv("CIBYL_BASE")
     if base == None:
@@ -57,6 +60,11 @@ def checkOne(cmdline, fn, error_message):
         print
         return 1
     return 0
+
+def abortWithMessage(msg):
+    print
+    print "Error:", msg
+    sys.exit(1)
 
 def checkEnvironment():
     nok = checkOne("%s -version" % (jasmin),
@@ -83,7 +91,7 @@ def checkEnvironment():
         nok |= 1
 
     if nok:
-        sys.exit(1)
+        abortWithMessage("Environment or options incorrect")
 
 if __name__ == "__main__":
     checkEnvironment()
