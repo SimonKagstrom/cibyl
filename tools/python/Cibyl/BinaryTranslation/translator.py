@@ -9,7 +9,7 @@
 ## $Id: translator.py 14248 2007-03-14 17:13:31Z ska $
 ##
 ######################################################################
-import StringIO, re, sys, struct, bisect, tempfile, os, subprocess, copy
+import StringIO, re, sys, struct, bisect, os, subprocess, copy
 from sets import Set
 
 if __name__ == "__main__":
@@ -38,10 +38,11 @@ def getSyscallStrings(data):
 
 class JasminProcess:
     def __init__(self, name, data):
-        self.fd, self.filename = tempfile.mkstemp(prefix = name + "_", suffix = ".j", dir = config.outDirectory)
+        self.filename = config.outDirectory + "/" + name + ".j"
+        fd = open(self.filename, "w")
         # Write the data to the tempfile
-        os.write(self.fd, data)
-        os.close(self.fd)
+        fd.write(data)
+        fd.close()
 
         # Fork jasmin
         self.process = subprocess.Popen([ config.jasmin, "-d " + config.outDirectory + " " + self.filename ])
