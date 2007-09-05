@@ -17,7 +17,6 @@ cxx      ?= mips-linux-gnu-g++
 cpp      ?= mips-linux-gnu-cpp
 ld       ?= mips-linux-gnu-ld
 ar       ?= mips-linux-gnu-ar
-jasmin   ?= jasmin
 
 # -Wa,--no-warn inhibits the "Warning: register value used as expression"
 # from the assembler on syscall arguments. It is not a valid warning for
