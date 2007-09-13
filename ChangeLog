@@ -1,11 +1,28 @@
 Cibyl (12)
+	* Use psyco if available. This improves performance by ~20%.
+
+	* Profile-guided optimization framework has been added. The first
+	enabled optimization is to arrange methods in classes ordered by
+	call-count. This allows methods that are never used (e.g. which
+	would be used in error conditions) to be placed in classes that
+	are never loaded (if supported). The option
+	--optimize-use-profile=PROFILE.prf controls this.
+
 	* cibyl-mips2java has the option --save-temps now, to inhibit
 	removing of temporary files generated
+
+	* cibyl-mips2java will now produce and compile a Java source file
+	for the call table. This can also optionally be split into a
+	hierarchy of functions, which can be used as a workaround for
+	problems on certain SonyEricsson phones. This is enabled with
+	--call-table-hierarchy=NR
 
 	* cibyl-mips2java can now produce multiple classes for the
 	translated code, and will produce classes directly (i.e., invoke
 	jasmin). The options has been changed to reflect this and it is no
-	longer option-compatible with the last release.
+	longer option-compatible with the last release. The option
+	--class-size-limit=NR specifies what size to split at, or
+	--single-class to generate only one class.
 
 	* Added a sanity check to acertain that the environment is setup
 	for Cibyl (and produce a helpful message if not), cleaned up of
