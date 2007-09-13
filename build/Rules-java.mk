@@ -11,7 +11,7 @@
 ######################################################################
 SOURCES   ?= src/StandaloneMain.java src/CRunTime.java src/Syscalls.java src/CibylConfig.java
 GEN_SYSCALL_OPTS ?=
-JAVA_OPTS ?=
+CIBYL_JAVA_OPTS =
 EXTRA_CLEAN=tmpclasses/ classes/ res/ src/ $(SOURCES) .dirs .jar_built *~ c/syscalls.h
 
 CIBYL_SYSCALL_DIR    ?= $(CIBYL_BASE)/syscalls
