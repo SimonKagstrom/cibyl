@@ -42,7 +42,7 @@ classes/.rebuilt: tmpclasses/.rebuilt
 	touch $@
 
 tmpclasses/.rebuilt: $(SOURCES)
-	cd src && $(JAVA_PATH)/javac -classpath ../tmpclasses $(JAVA_OPTS) -d ../tmpclasses/ *.java
+	cd src && $(JAVA_PATH)/javac -classpath ../tmpclasses:$(CIBYL_CLASSPATH) $(CIBYL_JAVA_OPTS) -d ../tmpclasses/ *.java
 	touch $@
 
 include $(CIBYL_BASE)/build/Rules-common.mk
