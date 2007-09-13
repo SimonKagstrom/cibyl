@@ -49,9 +49,9 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
   private void invokeCallback(int which, int a0, int a1)
   {
     if (this.callbacks[which] != 0)
-      Cibyl.CIBYL_callTable(this.callbacks[which],
-                            CRunTime.eventStackPointer,
-                            a0, a1, 0, 0); /* a0 ... a3 */
+      CibylCallTable.call(this.callbacks[which],
+                          CRunTime.eventStackPointer,
+                          a0, a1, 0, 0); /* a0 ... a3 */
   }
 
   /* Callbacks */
