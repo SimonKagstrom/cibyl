@@ -11,6 +11,10 @@ export WTK_PATH=/home/ska/j2me/WTK2.2/
 # This is where you have javac etc installed (could be /usr/bin if appropriate)
 export JAVA_PATH=/usr/lib/j2sdk1.5-sun/bin/
 
+# Describes how to compile with javac
+export CIBYL_JAVAC=$JAVA_PATH/javac
+export CIBYL_JAVA_OPTS="-source 1.4 -bootclasspath $WTK_PATH/lib/cldcapi11.jar:$WTK_PATH/lib/midpapi20.jar"
+
 # If you don't have binutils-multiarch, define these. Thanks to Roelof Berg for
 # pointing this out
 #export CIBYL_READELF=mips-unknown-elf-readelf
