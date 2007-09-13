@@ -9,6 +9,8 @@
 ## $Id: $
 ##
 ######################################################################
+import os, subprocess
+
 from Cibyl.BinaryTranslation import bytecode, register
 from Cibyl import config
 
@@ -48,6 +50,22 @@ class JavaClass(bytecode.ByteCodeGenerator):
         for method in self.methods:
             method.fixup()
 
+    def forkProcess(self, data):
+        class JasminProcess:
+            def __init__(self, name, data):
+                self.filename = config.outDirectory + "/" + name + ".j"
+                fd = open(self.filename, "w")
+                # Write the data to the tempfile
+                fd.write(data)
+                fd.close()
+
+                # Fork jasmin
+                self.process = subprocess.Popen([ config.jasmin,
+                                                  "-d", config.outDirectory,
+                                                  self.filename ])
+        return JasminProcess(self.name, data)
+
+
     def compile(self):
 	if config.debug:
 	    self.emit(".source %s.j" % (self.name))
@@ -67,3 +85,36 @@ class JavaClass(bytecode.ByteCodeGenerator):
             # Add some newlines after the method
             for i in range(0,3):
                 self.emit('')
+
+class JavaClassHighLevel(JavaClass):
+    def forkProcess(self, data):
+        class JavaProcess:
+            def __init__(self, controller, name, data):
+                self.controller = controller
+                self.filename = config.outDirectory + "/" + name + ".java"
+                fd = open(self.filename, "w")
+                # Write the data to the tempfile
+                fd.write(data)
+                fd.close()
+
+                # Wait for all the Jasmin processes to finish
+                for p in self.controller.processes:
+                    "Wait for the process to complete and clean up after it"
+                    try:
+                        os.waitpid(p.process.pid, 0)
+                    except:
+                        pass
+
+                # Fork java
+                self.process = subprocess.Popen([ config.javac, "-d", config.outDirectory,
+                                                  "-classpath", config.outDirectory,
+                                                  self.filename ] + config.javac_opts.split() )
+        return JavaProcess(self.controller, self.name, data)
+
+    def compile(self):
+        self.controller.emit("class %s {" % self.name)
+
+        for method in self.methods:
+            method.compile()
+        self.emit("}")
+
