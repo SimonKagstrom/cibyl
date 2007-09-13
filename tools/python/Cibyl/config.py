@@ -27,6 +27,7 @@ colocateFunctions = []
 
 operandStackLimit = None
 classSizeLimit = 12000
+callTableHierarchy = 1
 
 debug = False
 tracing = False
@@ -44,6 +45,8 @@ def getBasePath():
 
 # setup some of the environment
 jasmin = os.getenv("CIBYL_JASMIN", "jasmin")
+javac = os.getenv("CIBYL_JAVAC", "javac")
+javac_opts = os.getenv("CIBYL_JAVA_OPTS", "")
 readelf = os.getenv("CIBYL_READELF", "readelf")
 nm = os.getenv("CIBYL_NM", "nm")
 objcopy = os.getenv("CIBYL_OBJCOPY", "objcopy")
