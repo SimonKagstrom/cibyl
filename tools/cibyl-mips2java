@@ -13,6 +13,13 @@
 import sys, os, struct, re
 from optparse import OptionParser
 
+try:
+    import psyco
+    psyco.full()
+except:
+    # No psyco
+    pass
+
 sys.path.append('%s/python/' % sys.path[0])
 
 from Cibyl.BinaryTranslation.translator import Controller
@@ -67,6 +74,10 @@ parser.add_option("--class-size-limit", default=None,
 limit is passed, a new class will be created.""",
 		  dest="classSizeLimit", metavar="BYTES")
 
+parser.add_option("--call-table-hierarchy", default=1,
+                  help="""Split the call table in NR hiearchies (workaround a JVM bug on some
+phones). Default is 1 (no hierarchy)""",
+		  dest="callTableHierarchy", metavar="NR")
 parser.add_option("--optimize-use-profile", default=None,
                   help="""Use profile-based optimization from a J2ME profiler file.""",
 		  dest="profileFile", metavar="PROFILE.prf")
@@ -118,6 +129,8 @@ config.traceFunctionCalls = options.traceFunctionCalls
 config.verbose = options.verbose
 config.outDirectory = options.outDirectory
 config.dataOutFilename = "program.data.bin"
+
+config.callTableHierarchy = int(options.callTableHierarchy)
 
 config.infile = infile
 config.profileFile = options.profileFile
