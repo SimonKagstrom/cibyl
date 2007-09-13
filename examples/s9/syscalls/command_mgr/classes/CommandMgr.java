@@ -50,9 +50,9 @@ public class CommandMgr implements CommandListener
     MgrItem item = (MgrItem)commands.get(cmd);
     System.out.println("In commandAction: callback:" + item.callback + " arg:" + item.arg);
     if (item.callback != 0) {
-        Cibyl.CIBYL_callTable(item.callback,
-                              CRunTime.eventStackPointer,
-                              item.arg, 0, 0, 0); /* a0 ... a3 */
+        CibylCallTable.call(item.callback,
+                            CRunTime.eventStackPointer,
+                            item.arg, 0, 0, 0); /* a0 ... a3 */
     }
   }
 }
