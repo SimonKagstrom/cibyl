@@ -16,7 +16,4 @@ OBJS    = main.o
 INCLUDES=-I../include/
 LDLIBS  =
 
-# The compilation options, set to e.g., -O to run all optimizations
-CIBYL_MIPS2JAVA_OPTS ?=-I../include
-
 include $(CIBYL_BASE)/build/Rules.mk
