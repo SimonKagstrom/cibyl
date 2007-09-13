@@ -345,10 +345,10 @@ class JavaMethod(CodeBlock):
 	self.controller.emit(".end method")
 
 
-class GlobalJumptabMethod(JavaMethod):
+class GlobalJavaCallTableMethod(JavaMethod):
     def __init__(self, controller, functions):
 	self.controller = controller
-	self.name = "CIBYL_callTable"
+	self.name = "call"
 	self.bc = bytecode.ByteCodeGenerator(self.controller)
 	self.rh = register.RegisterHandler(self.controller, self.bc)
 
@@ -455,56 +455,57 @@ class GlobalJumptabMethod(JavaMethod):
         return "I"
 
     def compile(self):
-	self.controller.emit(".method public static %s" % (self.getJavaMethodName()))
-        if not config.operandStackLimit:
-            self.controller.emit(".limit stack 14")
-        else:
-            self.controller.emit(".limit stack %d" % (config.operandStackLimit))
-	self.controller.emit(".limit locals 8")
-
-	# This is the register allocation for the global jumptab
-	reg2local = {
-	    mips.namesToRegisters["sp"] : 1,
-	    mips.namesToRegisters["a0"] : 2,
-	    mips.namesToRegisters["a1"] : 3,
-	    mips.namesToRegisters["a2"] : 4,
-	    mips.namesToRegisters["a3"] : 5,
+        reg2local = {
+	    mips.namesToRegisters["sp"] : "sp",
+	    mips.namesToRegisters["a0"] : "a0",
+	    mips.namesToRegisters["a1"] : "a1",
+	    mips.namesToRegisters["a2"] : "a2",
+	    mips.namesToRegisters["a3"] : "a3",
 	}
+        size = (len(self.functions) / config.callTableHierarchy)
 
-	if config.traceFunctionCalls:
-	    self.bc.ldc("0x%08x: %s" % (self.address, self.name))
-	    self.bc.invokestatic("CRunTime/emitFunctionEnterTrace(Ljava/lang/String;)V")
+        self.controller.emit("public static final int %s(int address, int sp, int a0, int a1, int a2, int a3) {" % self.name)
 
-	self.bc.iload(0) # First argument is the method to call
-	self.bc.pushConst(0)
-	self.bc.istore(7)
+        # These *must* be sorted
+        self.functions.sort()
 
-	lookuptab = self.generateLookupTable()
-	self.bc.lookupswitch(lookuptab, "error")
-
-	for fn in self.functions:
-            method = fn.getJavaMethod()
-	    self.controller.emit("lab_%s_%x:" % (fn.name, fn.address))
-	    for r in method.getRegistersToPass():
-                if r == mips.R_FNA:
-                    self.bc.pushConst( fn.getIndex() )
+        if config.callTableHierarchy > 1:
+            for i in range(0, config.callTableHierarchy):
+                first = self.functions[ i * size ]
+                last = self.functions[ (i+1) * size ]
+                if i == config.callTableHierarchy-1:
+                    self.controller.emit("else")
                 else:
-                    self.bc.iload( reg2local[r] )
-            # Invoke the method.
-            method.invoke(0)
-	    if method.getJavaReturnType() == "I":
-		self.bc.istore(7)
-	    self.bc.goto("out")
+                    self.controller.emit("if (address >= 0x%x && address < 0x%x)" % (first.address, last.address))
+                self.controller.emit("  return %s%d(address, sp, a0,a1,a2,a3);" % (self.name, i))
+            self.controller.emit("}")
 
- 	self.controller.emit("error:")
-	self.bc.ldc("CIBYL ERROR: cannot find the address ")
-	self.bc.iload(0)
-	self.bc.invokestatic("CRunTime/abortWithAddress(Ljava/lang/String;I)V")
-
- 	self.controller.emit("out:")
-	if config.traceFunctionCalls:
-	    self.bc.ldc("")
-	    self.bc.invokestatic("CRunTime/emitFunctionExitTrace(Ljava/lang/String;)V")
-	self.bc.iload(7)
-	self.bc.ireturn()
- 	self.controller.emit(".end method")
+        for i in range(0, config.callTableHierarchy):
+            if config.callTableHierarchy > 1:
+                self.controller.emit("private static final int %s%d(int address, int sp, int a0, int a1, int a2, int a3) {" % (self.name, i))
+            self.controller.emit("int v0 = 0;");
+            self.controller.emit("switch(address) {")
+            fns = self.functions[ i*size : (i+1) * size ]
+            if i == config.callTableHierarchy-1:
+                fns = self.functions[ i*size : ]
+            for fn in fns:
+                method = fn.getJavaMethod()
+                self.controller.emit("case 0x%x: " % fn.address)
+                prefix = ""
+                if method.getJavaReturnType() == "I":
+                    prefix = "v0 = "
+                self.controller.emit("%s%s.%s(" % (prefix, method.javaClass.name, method.name)) # method.javaClass.name
+                count = 0
+                for r in method.getRegistersToPass():
+                    count = count + 1
+                    suffix =  ","
+                    if count == len(method.getRegistersToPass()):
+                        suffix = ""
+                    if r == mips.R_FNA:
+                        self.controller.emit(fn.getIndex() + suffix)
+                    else:
+                        self.controller.emit( reg2local[r] + suffix)
+                self.controller.emit("); break;")
+            self.controller.emit("default: break;}")
+            self.controller.emit("return v0;")
+            self.controller.emit("}")
