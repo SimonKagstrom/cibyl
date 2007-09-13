@@ -39,6 +39,7 @@ public class Main extends MIDlet implements CommandListener
 
   public void destroyApp(boolean unconditional)
   {
+      canvas = null;
   }
 
   public void commandAction(Command c, Displayable s)
