@@ -9,7 +9,7 @@
 ## $Id: translator.py 14248 2007-03-14 17:13:31Z ska $
 ##
 ######################################################################
-import StringIO, re, sys, struct, bisect, os, subprocess, copy
+import StringIO, re, sys, struct, bisect, os, copy
 from sets import Set
 
 if __name__ == "__main__":
@@ -36,27 +36,6 @@ def getSyscallStrings(data):
 	cur = cur + len(s) + 1
     return addressesToName
 
-class JasminProcess:
-    def __init__(self, name, data):
-        self.filename = config.outDirectory + "/" + name + ".j"
-        fd = open(self.filename, "w")
-        # Write the data to the tempfile
-        fd.write(data)
-        fd.close()
-
-        # Fork jasmin
-        self.process = subprocess.Popen([ config.jasmin, "-d " + config.outDirectory + " " + self.filename ])
-
-    def wait(self):
-        "Wait for the process to complete and clean up after it"
-        try:
-            os.waitpid(self.process.pid, 0)
-        except:
-            # Already terminated
-            pass
-        if not config.saveTemps:
-            os.unlink(self.filename)
-
 
 class Controller(codeblock.CodeBlock):
     def __init__(self, filename, syscallDirectories, onlyReadSyscalls=False):
@@ -70,7 +49,7 @@ class Controller(codeblock.CodeBlock):
 	self.usedSyscalls = {}
 	self.compileFunctions = True
         self.prunedRanges = []
-        self.jasminProcesses = []
+        self.processes = []
 
 	self.optimizer = optimizer.Optimizer()
 	self.registerHandler = register.RegisterHandler(self, bytecode.ByteCodeGenerator(self))
@@ -142,7 +121,7 @@ class Controller(codeblock.CodeBlock):
 
 	for fn in otherFunctions:
 	    javaMethods.append(javamethod.JavaMethod(self, [fn]))
-	self.jumptab = javamethod.GlobalJumptabMethod(self, colocateFunctions + otherFunctions)
+	self.jumptab = javamethod.GlobalJavaCallTableMethod(self, colocateFunctions + otherFunctions)
 	javaMethods.append(self.jumptab)
 
         self.javaClasses = self.splitMethodsInClasses(javaMethods)
@@ -251,7 +230,9 @@ class Controller(codeblock.CodeBlock):
 
         # Some should always be in the first class
         for method in methodsToSplit:
-            if method == self.jumptab or method.name == "start":
+            if method.name == self.jumptab.name:
+                del methodsToSplit[ methodsToSplit.index(method) ] # Just remove it
+            elif method.name == "start":
                 addToPrimary.append(method)
                 del methodsToSplit[ methodsToSplit.index(method) ]
         # Split the methods
@@ -264,6 +245,10 @@ class Controller(codeblock.CodeBlock):
         # ... And add to first
         for method in addToPrimary:
             primary.addMethod(method)
+
+        jc = javaclass.JavaClassHighLevel(self, "CibylCallTable")
+        jc.addMethod(self.jumptab)
+        out.append(jc) # MUST be last
         return out
 
     def addAlignedSection(self, out, sectionName, alignment):
@@ -299,9 +284,6 @@ class Controller(codeblock.CodeBlock):
 	out.write(sections)
 	out.close()
 
-
-    def forkJasmin(self, name, data):
-        self.jasminProcesses.append(JasminProcess(name, data))
 
     # Based on Instruction.java from the Topsy OS by
     # George Fankhauser <gfa@acm.org>
@@ -416,26 +398,22 @@ class Controller(codeblock.CodeBlock):
             self.outfile = StringIO.StringIO()
             c.compile()
             self.outfile.flush()
-            self.forkJasmin(c.getName(), self.outfile.getvalue())
+            self.processes.append(c.forkProcess(self.outfile.getvalue()))
             self.outfile.close()
 
-        # Wait for the jasmin(s) to terminate and cleanup after them
-        for p in self.jasminProcesses:
-            p.wait()
+        # Wait for the forked processes to terminate and cleanup after them
+        for p in self.processes:
+            "Wait for the process to complete and clean up after it"
+            try:
+                os.waitpid(p.process.pid, 0)
+            except:
+                # Already terminated
+                pass
+            if not config.saveTemps:
+                os.unlink(p.filename)
 
         self.writeDataFile(config.outDirectory + "/" + config.dataOutFilename)
 
     def emit(self, what):
 	"Emit instructions"
 	self.outfile.write(what + "\n")
-
-
-if __name__ == "__main__":
-    """This example should fork two jasmin processes and compile those
-    to TstA.class and TstB.class and leave no temporary files behind"""
-    d1 = ".class public TstA\n.super java/lang/Object\n"
-    d2 = ".class public TstB\n.super java/lang/Object\n"
-
-    procs = [ JasminProcess("TstA", d1), JasminProcess("TstB", d2) ]
-    for p in procs:
-        p.wait()
