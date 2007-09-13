@@ -464,7 +464,7 @@ class GlobalJavaCallTableMethod(JavaMethod):
 	}
         size = (len(self.functions) / config.callTableHierarchy)
 
-        self.controller.emit("public static final int %s(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {" % self.name)
+        self.controller.emit("public static final int %s(int address, int sp, int a0, int a1, int a2, int a3)  throws Exception {" % self.name)
 
         # These *must* be sorted
         self.functions.sort()
