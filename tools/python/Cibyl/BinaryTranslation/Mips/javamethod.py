@@ -464,7 +464,7 @@ class GlobalJavaCallTableMethod(JavaMethod):
 	}
         size = (len(self.functions) / config.callTableHierarchy)
 
-        self.controller.emit("public static final int %s(int address, int sp, int a0, int a1, int a2, int a3) {" % self.name)
+        self.controller.emit("public static final int %s(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {" % self.name)
 
         # These *must* be sorted
         self.functions.sort()
@@ -482,7 +482,7 @@ class GlobalJavaCallTableMethod(JavaMethod):
 
         for i in range(0, config.callTableHierarchy):
             if config.callTableHierarchy > 1:
-                self.controller.emit("private static final int %s%d(int address, int sp, int a0, int a1, int a2, int a3) {" % (self.name, i))
+                self.controller.emit("private static final int %s%d(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {" % (self.name, i))
             self.controller.emit("int v0 = 0;");
             self.controller.emit("switch(address) {")
             fns = self.functions[ i*size : (i+1) * size ]
@@ -506,6 +506,6 @@ class GlobalJavaCallTableMethod(JavaMethod):
                     else:
                         self.controller.emit( reg2local[r] + suffix)
                 self.controller.emit("); break;")
-            self.controller.emit("default: break;}")
+            self.controller.emit('default: throw new Exception("Call to unknown location " + Integer.toHexString(address));}')
             self.controller.emit("return v0;")
             self.controller.emit("}")

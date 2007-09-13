@@ -465,10 +465,4 @@ public class CRunTime
     // CRunTime.console.push(str);
     System.out.println(str);
   }
-
-  public static final void abortWithAddress(String str, int address) throws Exception
-  {
-    CRunTime.emitTrace(str + "0x" + Integer.toHexString(address));
-    throw new Exception();
-  }
 }
