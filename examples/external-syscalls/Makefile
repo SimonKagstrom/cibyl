@@ -12,8 +12,10 @@
 SUBDIRS = c
 RESOURCES=res/program.data.bin
 SOURCES = src/CRunTime.java src/StandaloneMain.java src/Syscalls.java src/CibylConfig.java
-TARGET   =src/CompiledProgram.class
+TARGET   =
 
+# The compilation options, set to e.g., -O to run all optimizations
+CIBYL_MIPS2JAVA_OPTS ?=-Iinclude
 CIBYL_SYSCALL_SETS ?= ansi hello
 CIBYL_GENERATE_JAVA_WRAPPERS_OPTS=-I include -S syscalls
 JAVA_OPTS=
@@ -22,7 +24,7 @@ all: include/ $(SUBDIRS)
 
 include $(CIBYL_BASE)/build/Rules-java.mk
 
-res/program.data.bin: c/program.data.bin
+res/program.data.bin: tmpclasses/program.data.bin
 	cp $< $@
 
 include/: FORCE
