@@ -13,7 +13,7 @@ CIBYL_SYSCALL_SETS   ?= j2me
 EXTRA_CLEAN=tmpclasses/ classes/ res/ src/ $(SOURCES) .dirs .jar_built *~ c/syscalls.h
 
 SOURCES   ?= src/Main.java src/CRunTime.java src/GameScreenCanvas.java src/Syscalls.java src/CibylConfig.java
-JAVA_OPTS ?= -source 1.4 -bootclasspath $(WTK_PATH)/lib/cldcapi11.jar:$(WTK_PATH)/lib/midpapi20.jar:$(CIBYL_CLASSPATH)
+CIBYL_JAVA_OPTS ?= -source 1.4 -bootclasspath $(WTK_PATH)/lib/cldcapi11.jar:$(WTK_PATH)/lib/midpapi20.jar
 EMULATOR_OPTIONS ?=
 CIBYL_GENERATE_JAVA_WRAPPERS_OPTS ?=
 
