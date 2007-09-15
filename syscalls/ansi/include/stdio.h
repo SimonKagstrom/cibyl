@@ -59,6 +59,8 @@ extern void clearerr(FILE* stream); /* Not generated */
 extern int feof(FILE* stream); /* Not generated */
 extern int ferror(FILE* stream); /* Not generated */
 
+
+extern void rewind(FILE *stream);
 extern int fseek(FILE* stream, long offset, int whence); /* Not generated */
 extern long ftell(FILE *stream);
 extern int fflush(FILE* stream); /* Not generated */

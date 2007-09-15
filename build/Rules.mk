@@ -54,4 +54,10 @@ $(TARGET): $(OBJS)
 %.oo: %.cc
 	$(cxx) -fno-exceptions -fno-rtti $(COPTS) -c $< -o $@
 
+%.oo: %.cpp
+	$(cxx) -fno-exceptions -fno-rtti $(COPTS) -c $< -o $@
+
+%.oo: %.cxx
+	$(cxx) -fno-exceptions -fno-rtti $(COPTS) -c $< -o $@
+
 include $(CIBYL_BASE)/build/Rules-common.mk
