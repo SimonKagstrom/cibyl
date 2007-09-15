@@ -57,6 +57,10 @@ public class CRunTime
   {
     int memorySize = (int)(Runtime.getRuntime().freeMemory() * CibylConfig.cibylMemoryProportion);
 
+    CRunTime.memory = null;
+    CRunTime.objectRepository = null;
+    System.gc();
+
     if (CibylConfig.memorySize != 0)
       memorySize = (int)CRunTime.faultMemoryIn(CibylConfig.memorySize);
 
