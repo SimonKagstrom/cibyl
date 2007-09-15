@@ -1,5 +1,6 @@
 Cibyl (12)
-	* Use psyco if available. This improves performance by ~20%.
+	* Use psyco if available. This typically decreases compilation
+	time by ~20%.
 
 	* Profile-guided optimization framework has been added. The first
 	enabled optimization is to arrange methods in classes ordered by
@@ -24,9 +25,11 @@ Cibyl (12)
 	--class-size-limit=NR specifies what size to split at, or
 	--single-class to generate only one class.
 
-	* Added a sanity check to acertain that the environment is setup
+	* Added sanity checks to acertain that the environment is setup
 	for Cibyl (and produce a helpful message if not), cleaned up of
-	parts of the code
+	parts of the code. Options --javac-command-line=LINE and
+	--jasmin-command-line has been added to supply Javac and Jasmin
+	command lines manually (overriding environment variables)
 
 	* Fixed bug where __negdf2 was misnamed (thanks to Abhishek Singh)
 
