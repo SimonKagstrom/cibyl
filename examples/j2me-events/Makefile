@@ -11,7 +11,7 @@
 ######################################################################
 SUBDIRS = c
 RESOURCES=res/program.data.bin
-TARGET   =src/CibylConfig.java src/CompiledProgram.class midlet.jar midlet.jad
+TARGET   =src/CibylConfig.java midlet.jar midlet.jad
 
 # This is actually not needed since we include Rules-j2me, but
 # we keep it here to show how new syscall sets are added. Further,
