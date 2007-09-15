@@ -37,20 +37,25 @@ traceFunctionCalls = False
 infile = None
 profileFile = None
 
+
+wtk = os.getenv("WTK_PATH", ".")
+
+jasminCommandLine="jasmin"
+javacCommandLine="javac -source 1.4 -bootclasspath " + wtk + "/lib/cldcapi11.jar:" + wtk + "/lib/midpapi20.jar"
+
+# setup some of the environment
+jasmin = os.getenv("CIBYL_JASMIN", jasminCommandLine)
+javac = os.getenv("CIBYL_JAVAC", javacCommandLine)
+readelf = os.getenv("CIBYL_READELF", "readelf")
+nm = os.getenv("CIBYL_NM", "nm")
+objcopy = os.getenv("CIBYL_OBJCOPY", "objcopy")
+cpp = os.getenv("CIBYL_CPP", "cpp")
+
 def getBasePath():
     base = os.getenv("CIBYL_BASE")
     if base == None:
 	base = "/usr/local/share/cibyl"
     return base
-
-# setup some of the environment
-jasmin = os.getenv("CIBYL_JASMIN", "jasmin")
-javac = os.getenv("CIBYL_JAVAC", "javac")
-javac_opts = os.getenv("CIBYL_JAVA_OPTS", "")
-readelf = os.getenv("CIBYL_READELF", "readelf")
-nm = os.getenv("CIBYL_NM", "nm")
-objcopy = os.getenv("CIBYL_OBJCOPY", "objcopy")
-cpp = os.getenv("CIBYL_CPP", "cpp")
 
 def checkOne(cmdline, fn, error_message):
     f = os.popen(cmdline)

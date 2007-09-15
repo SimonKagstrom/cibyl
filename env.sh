@@ -11,9 +11,19 @@ export WTK_PATH=/home/ska/j2me/WTK2.2/
 # This is where you have javac etc installed (could be /usr/bin if appropriate)
 export JAVA_PATH=/usr/lib/j2sdk1.5-sun/bin/
 
-# Describes how to compile with javac
-export CIBYL_JAVAC=$JAVA_PATH/javac
-export CIBYL_JAVA_OPTS="-source 1.4 -bootclasspath $WTK_PATH/lib/cldcapi11.jar:$WTK_PATH/lib/midpapi20.jar"
+#----------
+# The rest of the configuration is typically optional
+#----------
+
+#   Describes how to compile with javac, can be passed as
+#   --javac-command-line to cibyl-mips2java
+#export CIBYL_JAVAC="$JAVA_PATH/javac -source 1.4 -bootclasspath $WTK_PATH/lib/cldcapi11.jar:$WTK_PATH/lib/midpapi20.jar"
+
+#   Some things which might need setting in windows. Thanks to Roelof
+#   Berg. Can be passed as --jasmin-command-line to cibyl-mips2java
+
+#export CIBYL_JASMIN="java -jar c:/cygwin/home/dir/jasmin-2.3/jasmin.jar"
+
 
 # If you don't have binutils-multiarch, define these. Thanks to Roelof Berg for
 # pointing this out
@@ -22,6 +32,3 @@ export CIBYL_JAVA_OPTS="-source 1.4 -bootclasspath $WTK_PATH/lib/cldcapi11.jar:$
 #export CIBYL_OBJCOPY=mips-unknown-elf-objcopy
 
 #export CIBYL_CPP=cpp
-
-# Some things which might need setting in windows. Thanks to Roelof Berg
-#export CIBYL_JASMIN="java -jar c:/cygwin/home/dir/jasmin-2.3/jasmin.jar"

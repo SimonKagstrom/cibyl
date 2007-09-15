@@ -60,9 +60,7 @@ class JavaClass(bytecode.ByteCodeGenerator):
                 fd.close()
 
                 # Fork jasmin
-                self.process = subprocess.Popen([ config.jasmin,
-                                                  "-d", config.outDirectory,
-                                                  self.filename ])
+                self.process = subprocess.Popen(config.jasmin.split() + ["-d", config.outDirectory, self.filename ])
         return JasminProcess(self.name, data)
 
 
@@ -106,9 +104,8 @@ class JavaClassHighLevel(JavaClass):
                         pass
 
                 # Fork java
-                self.process = subprocess.Popen([ config.javac, "-d", config.outDirectory,
-                                                  "-classpath", config.outDirectory,
-                                                  self.filename ] + config.javac_opts.split() )
+                self.process = subprocess.Popen(config.javac.split() + [ "-d", config.outDirectory,
+                                                  "-classpath", config.outDirectory, self.filename ] )
         return JavaProcess(self.controller, self.name, data)
 
     def compile(self):

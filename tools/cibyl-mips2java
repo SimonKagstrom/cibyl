@@ -78,6 +78,15 @@ parser.add_option("--call-table-hierarchy", default=1,
                   help="""Split the call table in NR hiearchies (workaround a JVM bug on some
 phones). Default is 1 (no hierarchy)""",
 		  dest="callTableHierarchy", metavar="NR")
+parser.add_option("--javac-command-line", default=None,
+                  help="""Set the javac command line. Default 'javac -source 1.4 -bootclasspath
+$WTK_PATH/lib/cldcapi11.jar:$WTK_PATH/lib/midpapi20.jar'. javac must
+support the -d and -classpath options, which are passed by the tool.""",
+		  dest="javacCommandLine", metavar="COMMAND_LINE")
+parser.add_option("--jasmin-command-line", default=None,
+                  help="""Set the jasmin command line. Default 'jasmin'. jasmin must support the
+-d which is passed by the tool.""",
+		  dest="jasminCommandLine", metavar="COMMAND_LINE")
 parser.add_option("--optimize-use-profile", default=None,
                   help="""Use profile-based optimization from a J2ME profiler file.""",
 		  dest="profileFile", metavar="PROFILE.prf")
@@ -129,6 +138,10 @@ config.traceFunctionCalls = options.traceFunctionCalls
 config.verbose = options.verbose
 config.outDirectory = options.outDirectory
 config.dataOutFilename = "program.data.bin"
+if options.jasminCommandLine:
+    config.jasmin = options.jasminCommandLine
+if options.javacCommandLine:
+    config.javac = options.javacCommandLine
 
 config.callTableHierarchy = int(options.callTableHierarchy)
 
