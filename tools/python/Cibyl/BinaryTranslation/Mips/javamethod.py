@@ -462,7 +462,7 @@ class GlobalJavaCallTableMethod(JavaMethod):
 	    mips.namesToRegisters["a2"] : "a2",
 	    mips.namesToRegisters["a3"] : "a3",
 	}
-        size = (len(self.functions) / config.callTableHierarchy)
+        size = len(self.functions) / config.callTableHierarchy
 
         self.controller.emit("public static final int %s(int address, int sp, int a0, int a1, int a2, int a3)  throws Exception {" % self.name)
 
@@ -471,11 +471,11 @@ class GlobalJavaCallTableMethod(JavaMethod):
 
         if config.callTableHierarchy > 1:
             for i in range(0, config.callTableHierarchy):
-                first = self.functions[ i * size ]
-                last = self.functions[ (i+1) * size ]
                 if i == config.callTableHierarchy-1:
                     self.controller.emit("else")
                 else:
+                    first = self.functions[ i * size ]
+                    last = self.functions[ (i+1) * size ] # Don't dereference the last if it's outside
                     self.controller.emit("if (address >= 0x%x && address < 0x%x)" % (first.address, last.address))
                 self.controller.emit("  return %s%d(address, sp, a0,a1,a2,a3);" % (self.name, i))
             self.controller.emit("}")
