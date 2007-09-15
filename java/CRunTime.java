@@ -55,11 +55,11 @@ public class CRunTime
 
   public static final void init(DataInputStream codeStream)
   {
-    int memorySize = (int)(Runtime.getRuntime().freeMemory() * CibylConfig.cibylMemoryProportion);
-
     CRunTime.memory = null;
     CRunTime.objectRepository = null;
     System.gc();
+
+    int memorySize = (int)(Runtime.getRuntime().freeMemory() * CibylConfig.cibylMemoryProportion);
 
     if (CibylConfig.memorySize != 0)
       memorySize = (int)CRunTime.faultMemoryIn(CibylConfig.memorySize);
