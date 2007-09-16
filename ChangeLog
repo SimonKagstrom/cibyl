@@ -1,4 +1,12 @@
 Cibyl (12)
+	* Link all .rodata.* sections to .rodata. This again avoids some
+	C++ problems.
+
+	* Use pushsection for .cibylstrtab. This avoids a C++ bug where,
+	due to using other sections than .text for some code, the assembly
+	part would break with "Error: operation combines symbols in
+	different segments".
+
 	* Use psyco if available. This typically decreases compilation
 	time by ~20%.
 
