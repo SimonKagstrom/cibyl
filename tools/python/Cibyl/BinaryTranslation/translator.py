@@ -299,7 +299,7 @@ class Controller(codeblock.CodeBlock):
 	    data = rodata[i:i+4]
 	    word = struct.unpack(">L", data)[0]
 
-	    if word >= baseAddress and word < baseAddress + len(text):
+	    if word >= baseAddress and word < baseAddress + len(text) and word % 4 == 0:
 		self.addLabel(word, True)
 
         if config.pruneUnusedFunctions:
