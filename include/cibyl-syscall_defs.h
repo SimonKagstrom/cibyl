@@ -19,9 +19,9 @@ type name(void) \
 	\
 	__asm__ volatile ( \
         ".set  push\n.set  noreorder\n" \
-        ".section .cibylstrtab, \"aS\"\n" \
+        ".pushsection .cibylstrtab, \"aS\"\n" \
         "1: .asciz \"" #name "\"\n" \
-        ".section .text\n" \
+        ".popsection\n" \
         ".long 1b\n" \
 	".set\tpop\n" \
         "move %[out], $2\n"\
@@ -42,9 +42,9 @@ type name(atype a) \
         ".set  push\n.set  noreorder\n" \
         ".short 0xfefe\n" \
         ".short %1\n" \
-        ".section .cibylstrtab, \"aS\"\n" \
+        ".pushsection .cibylstrtab, \"aS\"\n" \
         "1: .asciz \"" #name "\"\n" \
-        ".section .text\n" \
+        ".popsection\n" \
         ".long 1b\n" \
 	".set\tpop\n" \
 	"move %[out], $2\n"\
@@ -67,9 +67,9 @@ type name(atype a, btype b) \
         ".short %1\n" \
         ".short 0xfefe\n" \
         ".short %2\n" \
-        ".section .cibylstrtab, \"aS\"\n" \
+        ".pushsection .cibylstrtab, \"aS\"\n" \
         "1: .asciz \"" #name "\"\n" \
-        ".section .text\n" \
+        ".popsection\n" \
         ".long 1b\n" \
 	".set\tpop\n" \
 	"move %[out], $2\n"\
@@ -94,9 +94,9 @@ type name(atype a, btype b, ctype c) \
         ".short %2\n" \
         ".short 0xfefe\n" \
         ".short %3\n" \
-        ".section .cibylstrtab, \"aS\"\n" \
+        ".pushsection .cibylstrtab, \"aS\"\n" \
         "1: .asciz \"" #name "\"\n" \
-        ".section .text\n" \
+        ".popsection\n" \
         ".long 1b\n" \
 	".set\tpop\n" \
 	"move %[out], $2\n"\
@@ -123,9 +123,9 @@ type name(atype a, btype b, ctype c, dtype d) \
         ".short %3\n" \
         ".short 0xfefe\n" \
         ".short %4\n" \
-        ".section .cibylstrtab, \"aS\"\n" \
+        ".pushsection .cibylstrtab, \"aS\"\n" \
         "1: .asciz \"" #name "\"\n" \
-        ".section .text\n" \
+        ".popsection\n" \
         ".long 1b\n" \
 	".set\tpop\n" \
 	"move %[out], $2\n"\
@@ -154,9 +154,9 @@ type name(atype a, btype b, ctype c, dtype d, etype e) \
         ".short %4\n" \
         ".short 0xfefe\n" \
         ".short %5\n" \
-        ".section .cibylstrtab, \"aS\"\n" \
+        ".pushsection .cibylstrtab, \"aS\"\n" \
         "1: .asciz \"" #name "\"\n" \
-        ".section .text\n" \
+        ".popsection\n" \
         ".long 1b\n" \
 	".set\tpop\n" \
 	"move %[out], $2\n"\
@@ -188,9 +188,9 @@ type name(atype a, btype b, ctype c, dtype d, etype e, ftype f) \
         ".short %5\n" \
         ".short 0xfefe\n" \
         ".short %6\n" \
-        ".section .cibylstrtab, \"aS\"\n" \
+        ".pushsection .cibylstrtab, \"aS\"\n" \
         "1: .asciz \"" #name "\"\n" \
-        ".section .text\n" \
+        ".popsection\n" \
         ".long 1b\n" \
 	".set\tpop\n" \
 	"move %[out], $2\n"\
@@ -223,9 +223,9 @@ type name(atype a, btype b, ctype c, dtype d, etype e, ftype f, gtype g) \
         ".short %6\n" \
         ".short 0xfefe\n" \
         ".short %7\n" \
-        ".section .cibylstrtab, \"aS\"\n" \
+        ".pushsection .cibylstrtab, \"aS\"\n" \
         "1: .asciz \"" #name "\"\n" \
-        ".section .text\n" \
+        ".popsection\n" \
         ".long 1b\n" \
 	".set\tpop\n" \
 	"move %[out], $2\n"\
@@ -260,9 +260,9 @@ type name(atype a, btype b, ctype c, dtype d, etype e, ftype f, gtype g, htype h
         ".short %7\n" \
         ".short 0xfefe\n" \
         ".short %8\n" \
-        ".section .cibylstrtab, \"aS\"\n" \
+        ".pushsection .cibylstrtab, \"aS\"\n" \
         "1: .asciz \"" #name "\"\n" \
-        ".section .text\n" \
+        ".popsection\n" \
         ".long 1b\n" \
 	".set\tpop\n" \
 	"move %[out], $2\n"\
@@ -300,9 +300,9 @@ type name(atype a, btype b, ctype c, dtype d, etype e, ftype f, gtype g, htype h
         ".short %8\n" \
         ".short 0xfefe\n" \
         ".short %9\n" \
-        ".section .cibylstrtab, \"aS\"\n" \
+        ".pushsection .cibylstrtab, \"aS\"\n" \
         "1: .asciz \"" #name "\"\n" \
-        ".section .text\n" \
+        ".popsection\n" \
         ".long 1b\n" \
 	".set\tpop\n" \
 	"move %[out], $2\n"\
@@ -343,9 +343,9 @@ type name(atype a, btype b, ctype c, dtype d, etype e, ftype f, gtype g, htype h
         ".short %9\n" \
         ".short 0xfefe\n" \
         ".short %10\n" \
-        ".section .cibylstrtab, \"aS\"\n" \
+        ".pushsection .cibylstrtab, \"aS\"\n" \
         "1: .asciz \"" #name "\"\n" \
-        ".section .text\n" \
+        ".popsection\n" \
         ".long 1b\n" \
 	".set\tpop\n" \
 	"move %[out], $2\n"\
