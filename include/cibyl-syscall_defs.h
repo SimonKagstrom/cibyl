@@ -12,6 +12,10 @@
 #ifndef __CIBYL_SYSCALL_DEFS_H__
 #define __CIBYL_SYSCALL_DEFS_H__
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #define _syscall0(type,name) \
 type name(void) \
 { \
@@ -356,5 +360,8 @@ type name(atype a, btype b, ctype c, dtype d, etype e, ftype f, gtype g, htype h
 	\
 	return (type) out; \
 }
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !__NOPH_SYSCALL_DEFS_H__ */

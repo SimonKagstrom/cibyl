@@ -15,6 +15,10 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 typedef struct
 {
   uint8_t   *data;
@@ -63,5 +67,9 @@ void cibar_close(cibar_t *p);
  * @return a FILE pointer to the cibar
  */
 FILE *cibar_file_open(cibar_t *p, const char *name);;
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !__CIBAR_H__ */

@@ -12,6 +12,10 @@
 #ifndef __CIBYL_H__
 #define __CIBYL_H__
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 /* Stack size */
 #ifndef NOPH_STACK_SIZE
 # define NOPH_STACK_SIZE  8192 /* 8KB stack */
@@ -117,5 +121,9 @@ void NOPH_panic(const char *fmt, ...);
 } while(0)
 
 #endif /* __ASSEMBLER__ */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !__CIBYL_H__ */

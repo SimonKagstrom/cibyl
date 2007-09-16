@@ -14,6 +14,10 @@
 
 #include <stdint.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 typedef struct
 {
   int64_t  key;
@@ -80,5 +84,9 @@ const char *s9_lookup(s9_t *s9, const char *sequence, int *n, void **it);
            no more words for this key
  */
 const char *s9_lookup_next(s9_t *s9, void **it);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !__S9_H__ */

@@ -14,6 +14,10 @@
 #include <stdio.h>
 #include <dirent.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 /**
  * @file cibyl-fileops.h Describes Cibyl "filesystems" (implementations
  * of the ANSI C file operations)
@@ -129,5 +133,9 @@ void cibyl_dir_free(DIR *dir);
  * @throws NOPH_Exception_t if the mode cannot be converted
  */
 cibyl_fops_open_mode_t cibyl_file_get_mode(const char *mode);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !__CIBYL_FILEOPS_H__ */

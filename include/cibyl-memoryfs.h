@@ -15,6 +15,10 @@
 #include <stdio.h>
 #include <cibyl-fileops.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 typedef struct
 {
   void *data;
@@ -74,5 +78,9 @@ FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *mode);
  * @return a pointer to the start of data
  */
 void *NOPH_MemoryFile_getDataPtr(FILE *fp);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !__CIBYL_MEMORYFS_H__ */
