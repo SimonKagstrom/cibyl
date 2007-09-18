@@ -19,7 +19,7 @@ OBJS    = main.o run-tests.o console.o \
           tests/varargs.o tests/libm.o tests/memory.o tests/java-exceptions.o \
 	  tests/unsigned-int.o tests/file-operations.o tests/jr.o tests/jr_test.o \
           tests/relocation.o tests/astar/main.o tests/astar/finder.o \
-          tests/astar/astar.o tests/astar/prio_queue.o
+          tests/astar/astar.o tests/astar/prio_queue.o tests/slt.o tests/lui.o
 LDLIBS  = -lm -lsoftfloat -lmidp -ljsr075
 EXTRA_CLEAN=*.host.o tests/*.host.o
 

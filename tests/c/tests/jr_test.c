@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * Copyright (C) 2007,  Blekinge Institute of Technology
+ * Copyright (C) 2007,  Simon Kagstrom
  *
  * Filename:      jr_test.c
  * Author:        Simon Kagstrom <ska@bth.se>
