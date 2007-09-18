@@ -105,6 +105,7 @@ static char_test_t char_tests[] =
 
   BIN_OP(char_shl, <<,  0x10, 4),
   BIN_OP(char_shl, <<,  0x10, 1),
+  BIN_OP(char_shl, <<,  (1<<7), 1),
   BIN_OP(char_shl, <<,  -1, 1),
   BIN_OP(char_shl, <<,  0, 31),
   BIN_OP(char_shl, <<,  0, 0),
@@ -189,12 +190,17 @@ static unsigned_char_test_t unsigned_char_tests[] =
 
   BIN_OP_UNSIGNED(unsigned_char_shr, >>,  0x10, 0x10),
   BIN_OP_UNSIGNED(unsigned_char_shr, >>,  0x10, 1),
+  BIN_OP_UNSIGNED(unsigned_char_shr, >>,  0xff, 1),
+  BIN_OP_UNSIGNED(unsigned_char_shr, >>,  0xff, 7),
+  BIN_OP_UNSIGNED(unsigned_char_shr, >>,  0xff, 8),
   BIN_OP_UNSIGNED(unsigned_char_shr, >>,  1, 1),
   BIN_OP_UNSIGNED(unsigned_char_shr, >>,  1, 0),
   BIN_OP_UNSIGNED(unsigned_char_shr, >>,  0, 0),
 
   BIN_OP_UNSIGNED(unsigned_char_shl, <<,  0x10, 4),
   BIN_OP_UNSIGNED(unsigned_char_shl, <<,  0x10, 1),
+  BIN_OP_UNSIGNED(unsigned_char_shl, <<,  (1<<7), 1),
+  BIN_OP_UNSIGNED(unsigned_char_shl, <<,  0xff, 1),
   BIN_OP_UNSIGNED(unsigned_char_shl, <<,  0xff, 1),
   BIN_OP_UNSIGNED(unsigned_char_shl, <<,  0, 31),
   BIN_OP_UNSIGNED(unsigned_char_shl, <<,  0, 0),
