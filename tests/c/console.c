@@ -9,6 +9,24 @@
  * $Id:$
  *
  ********************************************************************/
+#ifdef HOST
+#include <stdio.h>
+void console_push(char *str)
+{
+}
+
+void console_redraw(void)
+{
+}
+
+void console_init(void)
+{
+}
+
+void console_finalize(void)
+{
+}
+#else
 #include <javax/microedition/lcdui.h>
 #include <javax/microedition/lcdui/game.h>
 #include <javax/microedition/io.h>
@@ -160,3 +178,4 @@ void console_finalize(void)
 {
   fclose(console.fp);
 }
+#endif /* endif */
