@@ -9,6 +9,11 @@
  * $Id: file-operations.c 13719 2007-02-19 16:29:51Z ska $
  *
  ********************************************************************/
+#ifdef HOST
+void file_operations_run(void)
+{
+}
+#else
 #include <test.h>
 #include <stdio.h>
 #include <string.h>
@@ -283,3 +288,4 @@ void file_operations_run(void)
   else
     PASS("Deleting %s", path);
 }
+#endif
