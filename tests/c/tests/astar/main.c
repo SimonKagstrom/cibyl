@@ -9,7 +9,9 @@
  * $Id: main.c 12265 2006-11-20 07:02:49Z ska $
  *
  ********************************************************************/
+#ifndef HOST
 #include <java/lang.h>
+#endif
 #include <stdio.h>
 
 #include "finder.h"
@@ -127,12 +129,16 @@ int astar_main(int argc, char *argv[])
     return 1;
 
   pf_init(&finder);
+#ifndef HOST
   before = NOPH_System_currentTimeMillis();
+#endif
   path = a_star_implementation(&finder,
 		   1, 1,
 		   47, 47);
+#ifndef HOST
   after = NOPH_System_currentTimeMillis();
   test_output("Cibyl astar time: %d ms\n", (after - before));
+#endif
 
   if (path == NULL)
     return 1;
