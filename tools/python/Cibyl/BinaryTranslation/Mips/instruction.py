@@ -443,10 +443,7 @@ class MemoryAccess(Instruction):
 class LoadXX(MemoryAccess):
     """Load a byte or short from memory."""
     def compile(self):
-	self.pushRegister( self.rs )
-	if self.extra != 0:
-	    self.pushConst( self.extra )
-	    self.emit("iadd")
+	self.pushMemoryAddress( self.rs, self.extra )
 	self.invokestatic("CRunTime/memoryRead%s(I)I" % insnToJavaInstruction[self.opCode][1])
 	self.popToRegister( self.rt )
     def fixup(self):
@@ -455,6 +452,13 @@ class LoadXX(MemoryAccess):
     def run(self):
 	self.optimizer.setRegisterValue(self.rt, UnknownValue())
 	return False
+
+class LoadXXSigned(LoadXX):
+    def compile(self):
+	self.pushMemoryAddress( self.rs, self.extra )
+	self.invokestatic("CRunTime/memoryRead%s(I)I" % insnToJavaInstruction[self.opCode][1])
+        self.emit(insnToJavaInstruction[self.opCode][2])
+	self.popToRegister( self.rt )
 
 class StoreXX(MemoryAccess):
     """Store a byte or short to memory."""
@@ -981,10 +985,10 @@ insnToJavaInstruction = {
     ## Memory handling
     mips.OP_LW   : (Lw,   None),
     mips.OP_SW   : (Sw,   None),
-    mips.OP_LB   : (LoadXX, "Byte"),
+    mips.OP_LB   : (LoadXXSigned, "ByteUnsigned", "i2b"),
 #    mips.OP_LBU  : (Lbu, None),
     mips.OP_LBU  : (LoadXX, "ByteUnsigned"),
-    mips.OP_LH   : (LoadXX, "Short"),
+    mips.OP_LH   : (LoadXXSigned, "ShortUnsigned", "i2s"),
     mips.OP_LHU  : (LoadXX, "ShortUnsigned"),
     mips.OP_LWL  : (LoadXX, "WordLeft"),
     mips.OP_LWR  : (Nop, None),               # Everything is done in LWL
