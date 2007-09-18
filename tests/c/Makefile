@@ -21,6 +21,7 @@ OBJS    = main.o run-tests.o console.o \
           tests/relocation.o tests/astar/main.o tests/astar/finder.o \
           tests/astar/astar.o tests/astar/prio_queue.o
 LDLIBS  = -lm -lsoftfloat -lmidp -ljsr075
+EXTRA_CLEAN=*.host.o tests/*.host.o
 
 include $(CIBYL_BASE)/build/Rules.mk
 
@@ -28,4 +29,7 @@ program.host: $(patsubst %.o,%.host.o,$(OBJS))
 	gcc -o $@ $+ -lm
 
 %.host.o: %.c
-	gcc -msse -mfpmath=sse -DVERBOSE=1 -I. -std=c99 -DHOST=1 -c -Os -Wall -o $@ $<
+	gcc -DVERBOSE=0 -I. -std=c99 -DHOST=1 -c -Os -Wall -o $@ $<
+
+%.host.o: %.S
+	gcc -DVERBOSE=0 -I. -std=c99 -DHOST=1 -c -Os -Wall -o $@ $<
