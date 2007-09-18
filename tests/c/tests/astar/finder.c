@@ -12,8 +12,6 @@
 #define FPS_TO_MS(x) (1000/(x))
 #define MS_TO_SLEEP FPS_TO_MS(50)
 
-#include <cibyl.h>
-
 #include "finder.h"
 
 static int dir_to_dx(finder_dir_t dir)
