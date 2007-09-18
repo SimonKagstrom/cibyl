@@ -298,7 +298,7 @@ public class CRunTime
     int val = CRunTime.memory[address / 4];
     int b = 3 - (address & 3);
 
-    return (val >> (b*8)) & 0xff;
+    return (val >>> (b*8)) & 0xff;
   }
 
 
@@ -318,7 +318,7 @@ public class CRunTime
     int val = CRunTime.memory[address / 4];
     int b = 2 - (address & 2);
 
-    return (val >> (b*8)) & 0xffff;
+    return (val >>> (b*8)) & 0xffff;
   }
 
   public static final int memoryReadShort(int address)
