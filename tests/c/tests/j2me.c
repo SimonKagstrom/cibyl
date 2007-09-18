@@ -9,6 +9,11 @@
  * $Id:$
  *
  ********************************************************************/
+#ifdef HOST
+void j2me_run(void)
+{
+}
+#else
 #include <java/lang.h>
 #include <test.h>
 
@@ -27,3 +32,5 @@ void j2me_run(void)
 {
   System_currentTimeMillis();
 }
+
+#endif

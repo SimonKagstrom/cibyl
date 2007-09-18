@@ -9,6 +9,7 @@
  * $Id:$
  *
  ********************************************************************/
+#if !defined(HOST)
 .data
 lbl:    .long   fwd
 .text
@@ -23,3 +24,9 @@ fwd:
 	jr	$31		# jr ra
         j       fwd
 .end jr_test_asm
+#else
+.globl jr_test_asm
+jr_test_asm:
+        movl    $35, %eax
+        ret
+#endif

@@ -9,6 +9,11 @@
  * $Id: java-exceptions.c 13568 2007-02-10 10:23:08Z ska $
  *
  ********************************************************************/
+#ifdef HOST
+void exceptions_run(void)
+{
+}
+#else
 #include <test.h>
 #include <stdlib.h>
 #include <javax/microedition/io.h>
@@ -183,3 +188,4 @@ void exceptions_run(void)
   else
     PASS("opening %s did not throw an exception\n", s);
 }
+#endif
