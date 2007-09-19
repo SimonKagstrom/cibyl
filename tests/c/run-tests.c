@@ -40,6 +40,7 @@ extern void jr_run(void);
 extern void j2me_run(void);
 extern void slt_run(void);
 extern void lui_run(void);
+extern void shifts_run(void);
 
 test_run_t all_tests[] =
 {
@@ -55,6 +56,7 @@ test_run_t all_tests[] =
   TEST(j2me_run),
   TEST(slt_run),
   TEST(lui_run),
+  TEST(shifts_run),
 };
 
 
