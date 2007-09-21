@@ -74,6 +74,8 @@ static int_test_t int_tests[] =
 
   BIN_OP(int_and, &,  0xffffffff, 1),
   BIN_OP(int_and, &,  1, 0xffffffff),
+  BIN_OP(int_and, &,  1234, 0xffffffff),
+  BIN_OP(int_and, &,  1234, 0xffff),
   BIN_OP(int_and, &,  0, 0xffffffff),
   BIN_OP(int_and, &,  2, 3),
 
@@ -126,9 +128,28 @@ static int_test_t int_tests[] =
   BIN_OP(int_ne, !=, 0, 0),
 };
 
+int int_nor(int a, int b)
+{
+  return ~(a | b);
+}
+#define run_nor(a, b)                                            \
+   {                                                             \
+     int res = int_nor(a, b);                                    \
+     if (res != ~((a) | (b)))                                    \
+       FAIL("nor %x, %x: %x != %x", a, b, res, ~((a) | (b)));    \
+     else                                                        \
+       PASS("nor %x, %x: %x != %x", a, b, res, ~((a) | (b)));    \
+   }
 
 /* The run-the-tests function */
 void int_run(void)
 {
   run_test_bin_vector(int, int_test_t, int_tests, "%d");
+
+  run_nor(0, 0);
+  run_nor(0xffffffff, 0xffffffff);
+  run_nor(0x0, 0xffffffff);
+  run_nor(0xffffffff, 0xfff00fff);
+  run_nor(0x0, 0xfff00fff);
+  run_nor(0x0fffffff, 0xf0000000);
 }
