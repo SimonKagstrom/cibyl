@@ -152,4 +152,5 @@ void int_run(void)
   run_nor(0xffffffff, 0xfff00fff);
   run_nor(0x0, 0xfff00fff);
   run_nor(0x0fffffff, 0xf0000000);
+  run_nor(0xf0000000, 0x10000000);
 }
