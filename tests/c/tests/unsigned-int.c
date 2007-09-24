@@ -53,12 +53,14 @@ static unsigned_int_test_t unsigned_int_tests[] =
   BIN_OP_UNSIGNED(unsigned_int_mul, *, -1, -1),
 
   BIN_OP_UNSIGNED(unsigned_int_div, /, -1, -1),
+  BIN_OP_UNSIGNED(unsigned_int_div, /, -1, 1),
   BIN_OP_UNSIGNED(unsigned_int_div, /, -1, 5),
   BIN_OP_UNSIGNED(unsigned_int_div, /,  1, 414141),
   BIN_OP_UNSIGNED(unsigned_int_div, /,  1, -1),
   BIN_OP_UNSIGNED(unsigned_int_div, /,  155525, 536),
 
   BIN_OP_UNSIGNED(unsigned_int_mod, %,  155525, 536),
+  BIN_OP_UNSIGNED(unsigned_int_mod, %, -1, 1),
   BIN_OP_UNSIGNED(unsigned_int_mod, %,  0, 1),
   BIN_OP_UNSIGNED(unsigned_int_mod, %,  1, 1),
   BIN_OP_UNSIGNED(unsigned_int_mod, %,  4, -1),
