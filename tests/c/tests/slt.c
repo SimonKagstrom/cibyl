@@ -90,18 +90,18 @@ void test_0xffff(int v, int exp, int expu)
 
 void test_0x0(int v, int exp, int expu)
 {
-  int res = slti_0x0(0x0);
-  int res2 = sltiu_0x0(0x0);
+  int res = slti_0x0(v);
+  int res2 = sltiu_0x0(v);
 
   if (res != exp)
-    FAIL("slti %x < 0xffff, %x != %x", v, res, exp);
+    FAIL("slti %x < 0, %x != %x", v, res, exp);
   else
-    PASS("slti %x < 0xffff, %x == %x", v, res, exp);
+    PASS("slti %x < 0, %x == %x", v, res, exp);
 
   if (res2 != expu)
-    FAIL("sltiu %x < 0xffff, %x != %x", v, res2, expu);
+    FAIL("sltiu %x < 0, %x != %x", v, res2, expu);
   else
-    PASS("sltiu %x < 0xffff, %x == %x", v, res2, expu);
+    PASS("sltiu %x < 0, %x == %x", v, res2, expu);
 }
 
 #define run_slt_test(a, b) \
@@ -115,6 +115,7 @@ void slt_run(void)
   test_0xffff(0x10000, 0x10000 < -1, 1 < 0xffff);
 
   test_0x0(0, 1 < 0, 1 < 0);
+  test_0x0(-1, 1, 0);
   test_0x0(0x10000, 0x10000 < -1, 1 < 0);
 
   run_slt_test(0x0, 0x0);

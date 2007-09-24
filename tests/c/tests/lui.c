@@ -56,7 +56,7 @@ lui_ori_test(0xaaaa, 0xaaaa);
 lui_ori_test(0xfff, 0xffff);
 lui_ori_test(0x3, 0xf85e);
 lui_addiu_test(0x8, -17992);
-lui_addiu_test(0xaaaa, 0xaaaa);
+lui_addiu_test(0xaaaa, 0x0aaa);
 
 #define run_lui_test(upper)              \
   {                                      \
@@ -93,7 +93,7 @@ void lui_run(void)
   run_lui_ori_test(0x5555, 0x5555);
   run_lui_ori_test(0xaaaa, 0xaaaa);
   run_lui_ori_test(0xfff, 0xffff);
-  run_lui_addiu_test(0xaaaa, 0xaaaa);
+  run_lui_addiu_test(0xaaaa, 0x0aaa);
   run_lui_addiu_test(0x8, -17992);
 }
 #endif
