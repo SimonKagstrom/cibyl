@@ -176,6 +176,7 @@ if options.optimize_all:
     config.doMultOptimization = True
     config.doMemoryRegisterOptimization = True
     config.doRegisterScheduling = True
+    config.doPeepholeOptimize = True
 
 config.checkEnvironment()
 

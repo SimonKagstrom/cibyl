@@ -12,6 +12,7 @@
 import os, subprocess
 
 from Cibyl.BinaryTranslation import bytecode, register
+from Cibyl.PeepholeOptimizer import parse
 from Cibyl import config
 
 
@@ -58,6 +59,10 @@ class JavaClass(bytecode.ByteCodeGenerator):
                 # Write the data to the tempfile
                 fd.write(data)
                 fd.close()
+
+                # Do the peephole optimizing if enabled
+                if config.doPeepholeOptimize:
+                    parse.run( config.peepholeIterations, self.filename, self.filename )
 
                 # Fork jasmin
                 self.process = subprocess.Popen(config.jasmin.split() + ["-d", config.outDirectory, self.filename ])

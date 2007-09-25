@@ -19,6 +19,7 @@ doMultOptimization = False
 doMemoryRegisterOptimization = False
 doRegisterScheduling = False
 doOptimizeIndirectCalls = False
+doPeepholeOptimize = False
 
 doInlineAllBuiltins = False
 inlineBuiltinsFunctions = []
@@ -28,6 +29,7 @@ colocateFunctions = []
 operandStackLimit = None
 classSizeLimit = 12000
 callTableHierarchy = 1
+peepholeIterations = 2
 
 debug = False
 tracing = False
