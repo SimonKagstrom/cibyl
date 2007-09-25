@@ -33,7 +33,12 @@ public class StandaloneMain
       System.exit(1);
     }
 
-    CRunTime.init(is);
+    try {
+        CRunTime.init(is);
+    } catch(Exception e)
+        {
+            e.printStackTrace();
+        }
     Cibyl.start(0,
                 0,
                 0,

@@ -1,4 +1,9 @@
 Cibyl (12)
+	* Minor optimizations to some instructions (some from NestedVM)
+
+	* The peephole optimizer is now automatically called if -O is
+	specified
+
 	* Display an error dialogue if the device cannot allocate enough
 	memory or throws some other exception (Ehud)
 
