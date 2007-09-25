@@ -75,8 +75,8 @@ extern size_t fread(void* ptr, size_t size, size_t nmemb, FILE* stream); /* Not 
 extern size_t fwrite(const void* ptr, size_t size, size_t nmemb, FILE* stream); /* Not generated */
 
 extern int vsnprintf(char* str, unsigned int size, const char* format, va_list ap);
-#define vsprintf(str, fmt, ap) snprintf(str, 0xfffffff, fmt, ap)
-#define vfprintf(str, fmt, ap) fprintf(str, fmt, ap)
+#define vsprintf(str, fmt, ap) vsnprintf(str, 0xfffffff, fmt, ap)
+extern int vfprintf(FILE *fp, const char* fmt, va_list ap);
 extern int vprintf(const char* format, va_list ap);
 extern int snprintf(char *buf, size_t n, const char *fmt, ...);
 #define sprintf(buf, fmt, x...) snprintf(buf, 0xfffffff, fmt, x)

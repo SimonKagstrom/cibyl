@@ -114,19 +114,38 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
   /* The main thread function */
   public void run()
   {
-    DataInputStream is = this.getResourceStream("/program.data.bin");
+    try {
+      DataInputStream is = this.getResourceStream("/program.data.bin");
 
-    /* Setup the runtime support */
-    CRunTime.init(is);
-    Syscalls.initJ2ME(this, this.getGraphics(), this.main);
+      /* Setup the runtime support */
+      CRunTime.init(is);
+      is.close();
+      is = null;
+      Syscalls.initJ2ME(this, this.getGraphics(), this.main);
 
-    try { /* Added */
       /* Start the virtual machine */
       Cibyl.start(0, /* sp, set in crt0.S */
                   0, /* a0 */
                   0, /* a1 */
                   0, /* a2 */
                   0);/* a3 */
-    } catch (Exception e) { e.printStackTrace(); }
+
+    } catch (OutOfMemoryError e) {
+      Alert msg = new Alert("Error", "Out of memory", null, AlertType.INFO);
+      msg.setTimeout(Alert.FOREVER);
+      this.display.setCurrent(msg);
+      e.printStackTrace();
+      try {Thread.sleep(5000);} catch (Exception e2) {}
+      main.notifyDestroyed();
+      return;
+    } catch (Exception e) {
+      Alert msg = new Alert("Error", e.getMessage(), null, AlertType.INFO);
+      msg.setTimeout(Alert.FOREVER);
+      this.display.setCurrent(msg);
+      e.printStackTrace();
+      try {Thread.sleep(5000);} catch (Exception e2) {}
+      main.notifyDestroyed();
+      return;
+    }
   }
 }

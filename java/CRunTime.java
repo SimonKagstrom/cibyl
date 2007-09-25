@@ -34,7 +34,7 @@ public class CRunTime
    * @param memorySize the total size of the memory, should be larger
    * than memoryImage to fit the .bss, the heap and the stack
    */
-  public static final void init(int memoryImage[], int memorySize)
+  public static final void init(DataInputStream codeStream, int memorySize) throws Exception
   {
     CRunTime.maxRepositoryObjects = 256;
     CRunTime.objectRepository = new Object[ CRunTime.maxRepositoryObjects ];
@@ -46,14 +46,15 @@ public class CRunTime
     CRunTime.memory = new int[memorySize / 4];
 
     /* Copy memory */
-    for (int i=0; i<memoryImage.length; i++)
-      CRunTime.memory[i] = memoryImage[i];
+    int len = codeStream.available() / 4;
+    for (int i=0; i<len; i++)
+      CRunTime.memory[i] = codeStream.readInt();
 
     CRunTime.memory[1] = CibylConfig.stackSize;
     CRunTime.memory[3] = memorySize - (CibylConfig.eventStackSize - 8);
   }
 
-  public static final void init(DataInputStream codeStream)
+  public static final void init(DataInputStream codeStream) throws Exception
   {
     CRunTime.memory = null;
     CRunTime.objectRepository = null;
@@ -62,6 +63,9 @@ public class CRunTime
     int memorySize = (int)(Runtime.getRuntime().freeMemory() * CibylConfig.cibylMemoryProportion);
 
     if (CibylConfig.memorySize != 0)
+      memorySize = CibylConfig.memorySize;
+
+    if (CibylConfig.faultMemoryIn)
       memorySize = (int)CRunTime.faultMemoryIn(CibylConfig.memorySize);
 
     /* See to it that the memory is aligned to 8. This caused a very
@@ -72,32 +76,15 @@ public class CRunTime
     memorySize -= (memorySize & 7);
     CRunTime.eventStackPointer = memorySize - 8;
 
-    try
+    int len = codeStream.available() / 4;
+
+    if (len < 5)
       {
-	int len = codeStream.available() / 4;
-	int b[] = new int[ len ];
-	int i = 0;
-
-	if (len < 5)
-	  {
-	    /* This binary is broken - we need the header data */
-	    System.out.println("ERROR: data input is too small");
-	    return;
-	  }
-
-	while (i < len)
-	  {
-	    b[i] = codeStream.readInt();
-	    i++;
-	  }
-
-	CRunTime.init(b, memorySize);
+          /* This binary is broken - we need the header data */
+          throw new Exception("Data input is too small");
       }
-    catch(Exception e)
-      {
-	System.err.println("Threw " + e);
-	return;
-      }
+
+      CRunTime.init(codeStream, memorySize);
   }
 
   /**

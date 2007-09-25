@@ -314,16 +314,23 @@ int fgetc(FILE* fp)
 char* fgets(char* s, int size, FILE* fp)
 {
   char *out = s;
+  char *itr = s;
   int c;
 
   do
     {
       c = fgetc(fp);
-      if (feof(fp))
-        return out;
-      *s = c;
-      s++;
-    } while (c != '\0' && c != '\n');
+      if (feof(fp)) {
+        if (itr == s) return NULL;
+	else c = '\0';
+      }
+
+      *itr = c;
+      itr++;
+      size--;
+    } while (c != '\0' && c != '\n' && size);
+
+    *itr = '\0';
 
   return out;
 }

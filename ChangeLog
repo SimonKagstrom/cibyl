@@ -1,4 +1,12 @@
 Cibyl (12)
+	* Display an error dialogue if the device cannot allocate enough
+	memory or throws some other exception (Ehud)
+
+	* Avoid copying data memory more than once (Ehud)
+
+	* libc has been extended with some gmtime, vsnprintf and various
+	other functionality (Ehud)
+
 	* Link all .rodata.* sections to .rodata. This again avoids some
 	C++ problems.
 
@@ -52,7 +60,8 @@ Cibyl (12)
 	improvements to cibyl-mips2java, which should improve performance
 	by about 10%
 
-	* Extended with various new J2ME syscalls (partially from Ehud)
+	* Extended with various new J2ME syscalls for sockets, http
+	connections and other functionality (partially from Ehud)
 
 	* Removed the rex6000 syscalls - it's not really something useful
 	for public consumption anyway

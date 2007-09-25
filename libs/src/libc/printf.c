@@ -121,6 +121,30 @@ int vprintf(const char *fmt, va_list ap)
 	fputs(outbuf, stdout);
 
     fflush(stdout);
+    return r;
+}
+
+int vfprintf(FILE *fp, const char *fmt, va_list ap)
+{
+    char outbuf[256];
+    int r;
+
+    /*
+     * Safety check
+     */
+    if ( fmt == NULL )
+	return 0;
+
+    /*
+     * Print into buffer.
+     */
+    r = vsnprintf(outbuf, sizeof(outbuf), fmt, ap);
+
+    /*
+     * Output to terminal.
+     */
+    if ( r > 0 )
+	fputs(outbuf, fp);
 
     return r;
 }

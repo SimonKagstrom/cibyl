@@ -105,6 +105,7 @@ typedef int NOPH_Form_t;
 typedef int NOPH_Item_t;
 typedef int NOPH_ChoiceGroup_t;
 typedef int NOPH_TextField_t;
+typedef int NOPH_StringItem_t;
 typedef int NOPH_Gauge_t;
 
 /* Canvas and GameCanvas classes. */
@@ -162,6 +163,7 @@ int NOPH_Image_getWidth(NOPH_Image_t image);
 int NOPH_Image_getHeight(NOPH_Image_t image);
 NOPH_Graphics_t NOPH_Image_getGraphics(NOPH_Image_t image);
 bool_t NOPH_Image_isMutable(NOPH_Image_t image);
+NOPH_Image_t NOPH_Image_setMutable(NOPH_Image_t src); /* Not generated */
 
 /* Graphics class */
 void NOPH_Graphics_setFont(NOPH_Graphics_t graphics, NOPH_Font_t font);
@@ -219,6 +221,9 @@ NOPH_TextField_t NOPH_TextField_new(const char* label, const char* text, int max
 int NOPH_TextField_size(NOPH_TextField_t tf);
 void NOPH_TextField_getCString(NOPH_TextField_t tf, char* buffer, int size); /* Not generated */
 void NOPH_TextField_setString(NOPH_TextField_t tf, const char* text);
+NOPH_StringItem_t NOPH_StringItem_new(const char* label, const char* text);
+void NOPH_StringItem_getCString(NOPH_StringItem_t si, char* buffer, int size); /* Not generated */
+void NOPH_StringItem_setText(NOPH_StringItem_t si, const char* text);
 NOPH_Gauge_t NOPH_Gauge_new(const char* label, bool_t interactive, int maxValue, int initialValue);
 void NOPH_Gauge_setValue(NOPH_Gauge_t gauge, int value);
 

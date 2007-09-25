@@ -35,15 +35,16 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
     {
       fileconnection_outputfile_t *p;
       long offset = 0;
+      int fc_mode = NOPH_Connector_READ_WRITE;
 
-      fc = NOPH_Connector_openFileConnection_mode(path, NOPH_Connector_READ_WRITE);
+      fc = NOPH_Connector_openFileConnection_mode(path, fc_mode);
 
       /* Create and maybe truncate the file */
       NOPH_try(NOPH_setter_exception_handler, (void*)&error)
         {
           if (!NOPH_FileConnection_exists(fc))
             NOPH_FileConnection_create(fc);
-          if (mode == READ_TRUNCATE)
+	  else if ((mode == READ_TRUNCATE) || (mode == WRITE))
             NOPH_FileConnection_truncate(fc, 0);
           error = 0;
         } NOPH_catch();
@@ -57,8 +58,10 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
       p = (fileconnection_outputfile_t*)fp->priv;
       fp->file_size = NOPH_FileConnection_fileSize(fc);
 
-      if (mode == APPEND)
+      if (mode == APPEND) {
         offset = fp->file_size;
+        fp->vfptr = fp->fptr = fp->file_size;
+      }
       NOPH_try(NOPH_setter_exception_handler, (void*)&error)
         {
           p->os_file.os = NOPH_FileConnection_openOutputStream(fc, offset); /* Can throw stuff */

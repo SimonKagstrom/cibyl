@@ -35,9 +35,11 @@ typedef int NOPH_FileConnection_t;
 typedef int NOPH_InputConnection_t;
 typedef int NOPH_StreamConnection_t;
 typedef int NOPH_HttpConnection_t;
+typedef int NOPH_SocketConnection_t;
 typedef int NOPH_RecordStore_t;
 
 /* Connector */
+NOPH_Connection_t NOPH_Connector_open(const char* name); /* Throws */
 NOPH_DataInputStream_t NOPH_Connector_openDataInputStream(const char* name); /* Throws */
 NOPH_FileConnection_t NOPH_Connector_openFileConnection_mode(const char* name, int mode); /* Not generated */
 
@@ -61,6 +63,20 @@ void NOPH_FileConnection_create(NOPH_FileConnection_t fc); /* Throws */
 void NOPH_FileConnection_delete(NOPH_FileConnection_t fc); /* Throws */
 void NOPH_FileConnection_close(NOPH_FileConnection_t fc); /* Throws */
 NOPH_Enumeration_t NOPH_FileConnection_list(NOPH_FileConnection_t fc); /* Throws */
+
+/* Sockets API */
+NOPH_InputStream_t NOPH_SocketConnection_openInputStream(NOPH_SocketConnection_t s); /* Throws */
+NOPH_OutputStream_t NOPH_SocketConnection_openOutputStream(NOPH_SocketConnection_t s); /* Throws */
+void NOPH_SocketConnection_close(NOPH_SocketConnection_t s); /* Throws */
+
+/* HTTP API */
+void NOPH_HttpConnection_setRequestMethod(NOPH_HttpConnection_t hc, const char* method); /* Throws */
+void NOPH_HttpConnection_setRequestProperty(NOPH_HttpConnection_t hc, const char* key, const char* value); /* Throws */
+int NOPH_HttpConnection_getResponseCode(NOPH_HttpConnection_t hc); /* Throws */
+int NOPH_HttpConnection_getLength(NOPH_HttpConnection_t hc); /* Throws */
+NOPH_OutputStream_t NOPH_HttpConnection_openOutputStream(NOPH_HttpConnection_t hc); /* Throws */
+NOPH_InputStream_t NOPH_HttpConnection_openInputStream(NOPH_HttpConnection_t hc); /* Throws */
+void NOPH_HttpConnection_close(NOPH_HttpConnection_t hc); /* Throws */
 
 /* FileSystemRegistry (JSR-075) */
 NOPH_Enumeration_t NOPH_FileSystemRegistry_listRoots(void); /* Throws */
