@@ -47,7 +47,7 @@ parser.add_option("-g", "--debug", action="store_true", default=False,
 		  help="""Turn on generation of debugging information.""",
 		  dest="debug")
 parser.add_option("-O", "--optimize-all", action="store_true", default=False,
-                  help="""Enable all optimizations above except optimize-inline-all-builtins and
+                  help="""Enable all optimizations except optimize-inline-all-builtins and
 optimize-colocate-functions.""",
 		  dest="optimize_all")
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
@@ -78,6 +78,9 @@ parser.add_option("--call-table-hierarchy", default=1,
                   help="""Split the call table in NR hiearchies (workaround a JVM bug on some
 phones). Default is 1 (no hierarchy)""",
 		  dest="callTableHierarchy", metavar="NR")
+parser.add_option("--peephole-iterations", default=2,
+                  help="""Set the number of iterations to run the peephole optimizer (default 2)""",
+		  dest="peepholeIterations", metavar="NR")
 parser.add_option("--javac-command-line", default=None,
                   help="""Set the javac command line. Default 'javac -source 1.4 -bootclasspath
 $WTK_PATH/lib/cldcapi11.jar:$WTK_PATH/lib/midpapi20.jar'. javac must
@@ -94,6 +97,9 @@ parser.add_option("--optimize-memory-registers", action="store_true", default=Fa
 		  help="""Turn on the memory register optimization. This improves performance of
 frequent accesses to the same register in a basic block.""",
 		  dest="memory_register_optimization")
+parser.add_option("--optimize-peephole", action="store_true", default=False,
+		  help="""Turn on the peephole optimizer.""",
+		  dest="peepholeOptimize")
 parser.add_option("--optimize-multiplications", action="store_true", default=False,
                   help="""Turn on the mult/div optimizations. This improves the performance of
 most multiplications and divisions.""",
@@ -130,6 +136,7 @@ config.doMemoryRegisterOptimization = options.memory_register_optimization
 config.doRegisterScheduling = options.optimize_register_scheduling
 config.doInlineAllBuiltins = options.doInlineAllBuiltins
 config.doOptimizeIndirectCalls = options.doOptimizeIndirectCalls
+config.doPeepholeOptimize = options.peepholeOptimize
 
 config.debug = options.debug
 config.saveTemps = options.saveTemps
@@ -144,6 +151,7 @@ if options.javacCommandLine:
     config.javac = options.javacCommandLine
 
 config.callTableHierarchy = int(options.callTableHierarchy)
+config.peepholeIterations = int(options.peepholeIterations)
 
 config.infile = infile
 config.profileFile = options.profileFile
