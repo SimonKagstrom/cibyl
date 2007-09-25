@@ -45,6 +45,7 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 	self.isBranchDestination = False
 	self.isFunctionCall = False
 	self.isReturnInstruction = False
+        self.isDelayed = False
 	# Destination register and source registers
 	self.destinations = Set()
 	self.sources = Set()
@@ -62,6 +63,7 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
     def addDelayedInstruction(self, insn):
 	"Add an instruction in the delay-slot of this instruction"
 	self.delayed = insn
+        insn.isDelayed = True
 
     def pushLabel(self, address):
 	label = self.controller.getLabel(address)
@@ -190,10 +192,7 @@ class Ifmt(Instruction):
 	byteCodeOp = insnToJavaInstruction[self.opCode][1]
 
 	self.pushRegister( self.rs )
-	if signExtend:
-	    self.pushConst( self.extra & 0xffff )
-	else:
-	    self.pushConst( self.extra )
+        self.pushConst( self.extra )
 	self.emit( byteCodeOp )
 	self.popToRegister( self.rt )
 
@@ -332,19 +331,12 @@ class Mult(Multxx):
 class Div(Multxx):
     def compile(self):
 	self.pushRegister( self.rs )
-        self.i2l()
 	self.pushRegister( self.rt )
-        self.i2l()
-	self.ldiv()
-	self.pushRegister( self.rs )
-        self.i2l()
-	self.pushRegister( self.rt )
-        self.i2l()
-	self.lrem()
-        self.l2i()
-        self.popToRegister( mips.R_HI)
-        self.l2i()
+        self.dup2()
+	self.idiv()
         self.popToRegister( mips.R_LO)
+	self.irem()
+        self.popToRegister( mips.R_HI)
 
     def maxOperandStackHeight(self):
         return 6
@@ -388,19 +380,39 @@ class Addi(Ifmt):
 	if self.rs == 0:
 	    self.pushConst(self.extra)
 	    self.popToRegister(self.rt)
-	elif self.rt == self.rs and not register.regIsStatic(self.rt):
+        # Partly from NestedVM
+	elif self.rt == self.rs and self.extra >= -32768 and self.extra <= 32767 and not register.regIsStatic(self.rt):
 	    self.iinc(self.rt, self.extra)
+	else:
+	    Ifmt.compile(self)
+
+class Ori(Ifmt):
+    """ori instruction, catches assignments"""
+    def compile(self):
+	if self.rs == 0:
+	    self.pushConst(self.extra)
+	    self.popToRegister(self.rt)
 	else:
 	    Ifmt.compile(self)
 
 class Nor(Rfmt):
     """nor instruction, twostep"""
     def compile(self):
-	self.pushRegister( self.rs )
-	self.pushRegister( self.rt )
-	self.emit("ior")
-	self.pushConst(-1)
-	self.emit("ixor")
+        # Optimization from NestedVM
+        if self.rs != 0 or self.rt != 0:
+            if self.rs != 0 and self.rt != 0:
+                self.pushRegister( self.rs )
+                self.pushRegister( self.rt )
+                self.emit("ior")
+            elif self.rs != 0:
+                self.pushRegister(self.rs)
+            else:
+                self.pushRegister(self.rt)
+            self.pushConst(-1)
+            self.emit("ixor")
+        else:
+            # rs == rt == 0
+            self.pushConst(-1)
 	self.popToRegister( self.rd )
 
     def run(self):
@@ -641,25 +653,29 @@ class Jump(BranchInstruction):
     """j instruction"""
     def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
 	Instruction.__init__(self, controller, address, format, opCode, rd, rs, rt, extra)
+        self.dstAddress = (self.address & 0xf0000000) | (self.extra << 2)
 
     def compile(self):
+        insnAtDest = self.controller.getInstruction( self.dstAddress )
+        assert(not insnAtDest.isDelayed)
+
 	if self.delayed:
 	    self.delayed.compile()
 	ownMethod = self.getJavaMethod()
-	labMethod = self.controller.getLabel(self.extra << 2).getJavaMethod()
+	labMethod = self.controller.getLabel(self.dstAddress).getJavaMethod()
         assert(ownMethod == labMethod)
-        self.goto(self.extra << 2)
+        self.goto(self.dstAddress)
 
 
     def fixup(self):
-	self.controller.addLabel(self.extra << 2)
+	self.controller.addLabel(self.dstAddress)
 	self.isBranch = True
 
     def maxOperandStackHeight(self):
         return 0
 
     def __str__(self):
-	out = "0x%08x: %10s 0x%08x" % (self.address, mips.opStrings[self.opCode], self.extra << 2)
+	out = "0x%08x: %10s 0x%08x" % (self.address, mips.opStrings[self.opCode], self.dstAddress)
     	if self.delayed:
 	    out += "\\n  `- " + str(self.delayed)
 	return out
@@ -678,6 +694,9 @@ class Jal(BranchInstruction):
 	    self.dstAddress = self.extra << 2
 
     def compile(self):
+        insnAtDest = self.controller.getInstruction( self.dstAddress )
+        assert(not insnAtDest.isDelayed)
+
 	if self.delayed:
 	    self.delayed.compile()
 	otherMethod = self.controller.lookupJavaMethod(self.dstAddress)
@@ -881,15 +900,22 @@ class Slt(TwoRegisterSetInstruction):
 
 class OneRegisterConditionalJump(BranchInstruction):
     """bgez and friends"""
+    def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
+	BranchInstruction.__init__(self, controller, address, format, opCode, rd, rs, rt, extra)
+        self.dstAddress = (self.address + 4) + (self.extra << 2)
+
     def compile(self):
+        insnAtDest = self.controller.getInstruction( self.dstAddress )
+        assert(not insnAtDest.isDelayed)
+
 	self.pushRegister( self.rs )
 	if self.delayed:
 	    self.delayed.compile()
 	self.emit("%s %s" % (insnToJavaInstruction[self.opCode][1],
-			     str(self.controller.getLabel(self.address + (self.extra<<2) + 4))) )
+			     str(self.controller.getLabel(self.dstAddress))) )
 
     def fixup(self):
-	self.controller.addLabel( self.address + (self.extra << 2) + 4 )
+	self.controller.addLabel( self.dstAddress )
 	self.isBranch = True
 	self.sources = Set([ self.rs ])
 
@@ -899,22 +925,31 @@ class OneRegisterConditionalJump(BranchInstruction):
     def __str__(self):
 	out = "0x%08x: %10s %s, 0x%08x" % (self.address, mips.opStrings[self.opCode],
 					   mips.registerNames[self.rs],
-					   self.address + (self.extra << 2) + 4)
+					   self.dstAddress)
     	if self.delayed:
 	    out += "\\n  `- " + str(self.delayed)
 	return out
 
 class TwoRegisterConditionalJump(BranchInstruction):
     """beq and friend(s)"""
+    def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
+	BranchInstruction.__init__(self, controller, address, format, opCode, rd, rs, rt, extra)
+        self.dstAddress = (self.address + 4) + (self.extra << 2)
+
     def compile(self):
+        insnAtDest = self.controller.getInstruction( self.dstAddress )
+        assert(not insnAtDest.isDelayed)
+
 	self.pushRegister( self.rs )
 	self.pushRegister( self.rt )
 	if self.delayed:
 	    self.delayed.compile()
+        else:
+            print "No delay slot!", self
 	self.emit("%s %s" % (insnToJavaInstruction[self.opCode][1],
-			     str(self.controller.getLabel(self.address + (self.extra<<2) + 4))) )
+			     str(self.controller.getLabel(self.dstAddress))) )
     def fixup(self):
-	self.controller.addLabel( self.address + (self.extra << 2) + 4 )
+	self.controller.addLabel( self.dstAddress )
 	self.isBranch = True
 	self.sources = Set([ self.rs, self.rt ])
 
@@ -922,7 +957,7 @@ class TwoRegisterConditionalJump(BranchInstruction):
 	out = "0x%08x: %10s %s, %s, 0x%08x" % (self.address, mips.opStrings[self.opCode],
 					       mips.registerNames[self.rs],
 					       mips.registerNames[self.rt],
-					       self.address + (self.extra << 2) + 4)
+					       self.dstAddress)
     	if self.delayed:
 	    out += "\\n  `- " + str(self.delayed)
 	return out
@@ -974,7 +1009,7 @@ insnToJavaInstruction = {
     mips.OP_ADDIU: (Addi, "iadd", False, "+"),
     mips.OP_XORI : (Ifmt, "ixor", False, "^"),
     mips.OP_ANDI : (Ifmt, "iand", True,  "&"),
-    mips.OP_ORI  : (Ifmt, "ior",  True,  "|"),
+    mips.OP_ORI  : (Ori, "ior",  True,  "|"),
 
     ## J-format instructions
     mips.OP_JAL  : (Jal,  None),

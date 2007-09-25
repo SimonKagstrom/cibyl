@@ -15,7 +15,7 @@ __start:
 	lw	$5, 12($2)	# size of memory -> a1
 
 	sub	$29, $5, $3	# Setup stack pointer to
-	sub	$29, $29, 8	# size of memory - stack_size - 8
+	addiu	$29, $29, -8	# size of memory - stack_size - 8
 
 	sub	$5, $5, $3	# heap end (minus stack)
 	jal	smalloc_set_memory_pool	# init malloc
