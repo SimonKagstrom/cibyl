@@ -44,11 +44,11 @@ parser.add_option("-I", "--include", action="callback", help="Directory to searc
 		  type="str", nargs=1,
 		  callback=includeCallback)
 parser.add_option("-g", "--debug", action="store_true", default=False,
-		  help="""Turn on generation of debugging information.""",
+		  help="""Turn on generation of debugging information""",
 		  dest="debug")
 parser.add_option("-O", "--optimize-all", action="store_true", default=False,
                   help="""Enable all optimizations except optimize-inline-all-builtins and
-optimize-colocate-functions.""",
+optimize-colocate-functions""",
 		  dest="optimize_all")
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                   help="Be verbose")
@@ -71,7 +71,7 @@ to set the limit according to the actual used stack size (usually between 4 and 
 		  dest="operandStackLimit", metavar="NR")
 parser.add_option("--class-size-limit", default=None,
                   help="""Set the size limit of generated classes (approximation). After the
-limit is passed, a new class will be created.""",
+limit is passed, a new class will be created""",
 		  dest="classSizeLimit", metavar="BYTES")
 
 parser.add_option("--call-table-hierarchy", default=1,
@@ -84,33 +84,33 @@ parser.add_option("--peephole-iterations", default=2,
 parser.add_option("--javac-command-line", default=None,
                   help="""Set the javac command line. Default 'javac -source 1.4 -bootclasspath
 $WTK_PATH/lib/cldcapi11.jar:$WTK_PATH/lib/midpapi20.jar'. javac must
-support the -d and -classpath options, which are passed by the tool.""",
+support the -d and -classpath options, which are passed by the tool""",
 		  dest="javacCommandLine", metavar="COMMAND_LINE")
 parser.add_option("--jasmin-command-line", default=None,
                   help="""Set the jasmin command line. Default 'jasmin'. jasmin must support the
--d which is passed by the tool.""",
+-d which is passed by the tool""",
 		  dest="jasminCommandLine", metavar="COMMAND_LINE")
 parser.add_option("--optimize-use-profile", default=None,
-                  help="""Use profile-based optimization from a J2ME profiler file.""",
+                  help="""Use profile-based optimization from a J2ME profiler file""",
 		  dest="profileFile", metavar="PROFILE.prf")
 parser.add_option("--optimize-memory-registers", action="store_true", default=False,
 		  help="""Turn on the memory register optimization. This improves performance of
-frequent accesses to the same register in a basic block.""",
+frequent accesses to the same register in a basic block""",
 		  dest="memory_register_optimization")
 parser.add_option("--optimize-peephole", action="store_true", default=False,
-		  help="""Turn on the peephole optimizer.""",
+		  help="""Turn on the peephole optimizer""",
 		  dest="peepholeOptimize")
 parser.add_option("--optimize-multiplications", action="store_true", default=False,
                   help="""Turn on the mult/div optimizations. This improves the performance of
-most multiplications and divisions.""",
+most multiplications and divisions""",
 		  dest="multiplication_optimization")
 parser.add_option("--optimize-indirect-calls", action="store_true", default=False,
                   help="""Turn on optimization of indirect call generation. This will reduce the
-size of the generated class file.""",
+size of the generated class file""",
 		  dest="doOptimizeIndirectCalls")
 parser.add_option("--optimize-inline-all-builtins", action="store_true", default=False,
                   help="""Turn on inlining of ALL builtin functions (e.g., floating point helper
-functions). This will increase the size of the executable, but may improve performance.""",
+functions). This will increase the size of the executable, but may improve performance""",
 		  dest="doInlineAllBuiltins")
 parser.add_option("--optimize-inline-builtins", dest="inlineBuiltinFunctions", default=None,
                   help="Inline builtins for FUNCTIONS (comma-separated)",
@@ -123,7 +123,7 @@ parser.add_option("--optimize-register-scheduling", action="store_true", default
                   help="""Perform register scheduling to reduce the number of registers used by
 a function. The number of arguments passed to leaf functions can also
 be reduced. This reduces the size of the executable and can provide
-performance advantages for frequently called short functions.""",
+performance advantages for frequently called short functions""",
 		  dest="optimize_register_scheduling")
 
 (options, args) = parser.parse_args()
