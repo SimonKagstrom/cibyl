@@ -1,4 +1,7 @@
 Cibyl (12)
+	* Fixed bug where the label lookup was done too early, meaning
+	that the memory register optimization could produce broken code.
+
 	* Minor optimizations to some instructions (some from NestedVM)
 
 	* The peephole optimizer is now automatically called if -O is

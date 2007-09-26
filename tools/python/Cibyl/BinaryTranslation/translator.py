@@ -84,6 +84,8 @@ class Controller(codeblock.CodeBlock):
                 assert(not self.instructionsByAddress.has_key(insn.prefix.address))
                 self.instructionsByAddress[insn.prefix.address] = insn.prefix
                 insn.prefix.fixup()
+
+        for insn in self.instructions:
             if insn.address in self.labels:
                 insn.isBranchDestination = True
 
