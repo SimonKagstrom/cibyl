@@ -944,8 +944,6 @@ class TwoRegisterConditionalJump(BranchInstruction):
 	self.pushRegister( self.rt )
 	if self.delayed:
 	    self.delayed.compile()
-        else:
-            print "No delay slot!", self
 	self.emit("%s %s" % (insnToJavaInstruction[self.opCode][1],
 			     str(self.controller.getLabel(self.dstAddress))) )
     def fixup(self):
