@@ -52,12 +52,15 @@ optimize-colocate-functions""",
 		  dest="optimize_all")
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                   help="Be verbose")
+parser.add_option("--only-translate", action="store_true", dest="onlyTranslate", default=False,
+                  help="""Only run the translation step, do not compile generated source files
+into .class files""")
 parser.add_option("--trace-function-calls", action="store_true", dest="traceFunctionCalls", default=False,
                   help="Generate a trace of function calls")
 parser.add_option("--trace-function-instructions", dest="traceFunctions", default=None,
                   help="Generate an instruction trace for the FUNCTIONS (comma-separated)",
 		  metavar="FUNCTIONS")
-parser.add_option("-t", "--trace-instructions", action="store_true", dest="tracing", default=False,
+parser.add_option("--trace-instructions", action="store_true", dest="tracing", default=False,
                   help="Generate an instruction trace for all functions")
 parser.add_option("--save-temps", action="store_true", default=False,
                   help="Do not remove temporary files",
@@ -137,6 +140,11 @@ config.doRegisterScheduling = options.optimize_register_scheduling
 config.doInlineAllBuiltins = options.doInlineAllBuiltins
 config.doOptimizeIndirectCalls = options.doOptimizeIndirectCalls
 config.doPeepholeOptimize = options.peepholeOptimize
+
+
+if options.onlyTranslate:
+    config.onlyTranslate = True
+    options.saveTemps = True
 
 config.debug = options.debug
 config.saveTemps = options.saveTemps

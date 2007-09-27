@@ -65,7 +65,8 @@ class JavaClass(bytecode.ByteCodeGenerator):
                     parse.run( config.peepholeIterations, self.filename, self.filename )
 
                 # Fork jasmin
-                self.process = subprocess.Popen(config.jasmin.split() + ["-d", config.outDirectory, self.filename ])
+                if not config.onlyTranslate:
+                    self.process = subprocess.Popen(config.jasmin.split() + ["-d", config.outDirectory, self.filename ])
         return JasminProcess(self.name, data)
 
 
@@ -99,6 +100,9 @@ class JavaClassHighLevel(JavaClass):
                 # Write the data to the tempfile
                 fd.write(data)
                 fd.close()
+
+                if config.onlyTranslate:
+                    return
 
                 # Wait for all the Jasmin processes to finish
                 for p in self.controller.processes:

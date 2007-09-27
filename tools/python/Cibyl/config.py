@@ -31,6 +31,9 @@ classSizeLimit = 12000
 callTableHierarchy = 1
 peepholeIterations = 2
 
+saveTemps = False
+onlyTranslate = False
+
 debug = False
 tracing = False
 traceFunctions = None

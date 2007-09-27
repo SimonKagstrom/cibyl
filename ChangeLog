@@ -1,4 +1,7 @@
 Cibyl (12)
+	* Cibyl now produce .class files directly, and the
+	--only-translate option has been added to avoid the compile step
+
 	* Fixed bug where the label lookup was done too early, meaning
 	that the memory register optimization could produce broken code.
 

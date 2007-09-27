@@ -404,15 +404,16 @@ class Controller(codeblock.CodeBlock):
             self.outfile.close()
 
         # Wait for the forked processes to terminate and cleanup after them
-        for p in self.processes:
-            "Wait for the process to complete and clean up after it"
-            try:
-                os.waitpid(p.process.pid, 0)
-            except:
-                # Already terminated
-                pass
-            if not config.saveTemps:
-                os.unlink(p.filename)
+        if not config.onlyTranslate:
+            for p in self.processes:
+                "Wait for the process to complete and clean up after it"
+                try:
+                    os.waitpid(p.process.pid, 0)
+                except:
+                    # Already terminated
+                    pass
+                if not config.saveTemps:
+                    os.unlink(p.filename)
 
         self.writeDataFile(config.outDirectory + "/" + config.dataOutFilename)
 
