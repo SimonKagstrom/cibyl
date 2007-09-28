@@ -21,7 +21,8 @@ OBJS    = main.o run-tests.o console.o \
           tests/relocation.o tests/astar/main.o tests/astar/finder.o \
           tests/astar/astar.o tests/astar/prio_queue.o tests/slt.o tests/lui.o \
           tests/shifts.o tests/and.o tests/vmips_tests.o tests/vmips/shifts.o \
-          tests/vmips/bltz.o tests/vmips/load.o tests/vmips/multu.o tests/vmips/xor.o
+          tests/vmips/bltz.o tests/vmips/load.o tests/vmips/multu.o tests/vmips/xor.o \
+          tests/assign-to-ra.o
 LDLIBS  = -lm -lsoftfloat -lmidp -ljsr075
 EXTRA_CLEAN=*.host.o tests/*.host.o
 

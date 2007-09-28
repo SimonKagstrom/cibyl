@@ -164,6 +164,8 @@ static void handler_file_io(NOPH_Exception_t exception, void *arg)
   NOPH_delete(exception);
 }
 
+extern void assign_to_ra(void);
+
 /* The run-the-tests function */
 void exceptions_run(void)
 {
@@ -187,5 +189,7 @@ void exceptions_run(void)
     FAIL("opening %s should not throw an exception\n", s);
   else
     PASS("opening %s did not throw an exception\n", s);
+
+  assign_to_ra();
 }
 #endif

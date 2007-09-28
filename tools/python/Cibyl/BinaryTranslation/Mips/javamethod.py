@@ -221,6 +221,10 @@ class JavaMethod(CodeBlock):
             for r in checkRegisters:
                 if bb0.registerReadBeforeWritten(r):
                     self.cleanupRegs.add(r)
+        if len(fn.basicBlocks) > 1:
+            for bb in fn.basicBlocks[1 : -1]:
+                if bb.raUsed(mips.R_RA):
+                    self.cleanupRegs.add(mips.R_RA)
         if self.hasMultipleFunctions():
             self.cleanupRegs.add(mips.R_RA)
 
@@ -269,7 +273,7 @@ class JavaMethod(CodeBlock):
                 if mapping.has_key(reg):
                     localsToZero.add(mapping[reg])
             for local in localsToZero:
-                if reg == mips.R_RA:
+                if reg == mips.R_RA and self.hasMultipleFunctions():
                     self.bc.pushConst(-1)
                 else:
                     self.bc.pushConst(0)

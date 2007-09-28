@@ -31,3 +31,13 @@ class BasicBlock(CodeBlock):
                 return False
         # Assume true for unused registers
         return True
+
+    def raUsed(self, reg):
+        for insn in self.instructions:
+            if insn.isDisabled():
+                continue
+            if reg in insn.getSourceRegisters() and not insn.isFunctionCall:
+                return True
+            if reg in insn.getDestinationRegisters() and not insn.isFunctionCall:
+                return True
+        return False

@@ -15,7 +15,7 @@ from optparse import OptionParser
 
 try:
     import psyco
-    psyco.full()
+    psyco.profile()
 except:
     # No psyco
     pass
