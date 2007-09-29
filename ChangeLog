@@ -1,4 +1,8 @@
 Cibyl (12)
+	* Fixed bug where Cibyl generated broken code if the RA register
+	was assigned to/read within a method (thanks Ehud). Also added a
+	test case to check for this.
+
 	* Cibyl now produce .class files directly, and the
 	--only-translate option has been added to avoid the compile step
 
