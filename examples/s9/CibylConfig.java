@@ -14,6 +14,12 @@ class CibylConfig
     /** The proportion of memory allocated to Cibyl (0..1) */
     public static float cibylMemoryProportion = 0.7f;
 
+    /** If the memory should be "faulted" in. This can sometimes allow
+     * for larger memory sizes, but can also sometimes lock the
+     * application.
+     */
+    public static boolean faultMemoryIn = false;
+
     /** Stack size - 8KB by default */
     public static int stackSize = 8192;
 

@@ -24,9 +24,6 @@ all: include/ $(SUBDIRS)
 
 include $(CIBYL_BASE)/build/Rules-java.mk
 
-res/program.data.bin: tmpclasses/program.data.bin
-	cp $< $@
-
 include/: FORCE
 	$(CIBYL_BASE)/tools/cibyl-generate-c-header -o $@ syscalls/ hello
 FORCE:
