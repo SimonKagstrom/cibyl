@@ -386,8 +386,7 @@ class GlobalJavaCallTableMethod(JavaMethod):
                             out.append(function)
                     curBasicBlock = bb
                     relocsToCheck = []
-            if not self.controller.isPruned(cur.offset):
-                relocsToCheck.append(cur)
+            relocsToCheck.append(cur)
         else:
             relocFunctions = self.getFunctionsInText(relocsToCheck)
             for function in relocFunctions:
@@ -423,8 +422,11 @@ class GlobalJavaCallTableMethod(JavaMethod):
         # Try to combine all low and high parts
         for r in [ rel for rel in relocsToCheck if rel.type == "R_MIPS_HI16" ]:
             for s in [ rel for rel in relocsToCheck if rel.type == "R_MIPS_LO16" ]:
-                insn_high = self.controller.getInstruction(r.offset)
-                insn_low = self.controller.getInstruction(s.offset)
+                try:
+                    insn_high = self.controller.getInstruction(r.offset)
+                    insn_low = self.controller.getInstruction(s.offset)
+                except:
+                    continue
                 address = ((insn_high.extra & 0xffff) << 16) + insn_low.extra
                 fn = self.controller.lookupFunction(address)
                 if fn:
