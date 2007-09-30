@@ -386,7 +386,8 @@ class GlobalJavaCallTableMethod(JavaMethod):
                             out.append(function)
                     curBasicBlock = bb
                     relocsToCheck = []
-            relocsToCheck.append(cur)
+            if not self.controller.isPruned(cur.offset):
+                relocsToCheck.append(cur)
         else:
             relocFunctions = self.getFunctionsInText(relocsToCheck)
             for function in relocFunctions:
