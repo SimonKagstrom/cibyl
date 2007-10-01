@@ -1,7 +1,7 @@
 Cibyl (12)
 	* Fixed a bug with the --optimize-indirect-calls option, which
 	could cause a python exception with relocation entries in pruned
-	functions
+	functions (thanks Ehud)
 
 	* Fixed bug where Cibyl generated broken code if the RA register
 	was assigned to/read within a method (thanks Ehud). Also added a
@@ -120,7 +120,7 @@ Cibyl (12)
 	optimization), and also a problem with the last basic block. The
 	bug fix will make generated code slightly smaller.
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Mon Oct  1 17:34:06 CEST 2007
 
 Cibyl (11)
 	* The size of the operand stack is now dynamically set depending
