@@ -27,6 +27,13 @@ typedef int NOPH_Throwable_t;
 
 void NOPH_delete(NOPH_Object_t obj); /* Not generated */
 
+/**
+ * Write a Java String object to a char pointer.
+ *
+ * @param obj the String object to write
+ * @param addr the address to write to
+ * @param maxlen the length of the passed address
+ */
 void NOPH_String_toCharPtr(NOPH_String_t obj, char* addr, int maxlen); /* Not generated */
 
 /* Should return a 64-bit value - we get wraparound problems otherwise! */
