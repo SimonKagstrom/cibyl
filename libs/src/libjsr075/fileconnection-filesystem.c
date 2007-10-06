@@ -169,8 +169,13 @@ static void seek(FILE *fp, long offset)
     }
   real_skip = NOPH_InputStream_skip(p->is_file.is, skip); /* Might throw */
 
+#if 0
+  /* We'd like to do this, but some SE phones seem to return bogus
+   * values from InputStream.skip(). Shame on you SE!
+   */
   if (real_skip != skip)
-    NOPH_throw(NOPH_Exception_new());
+    NOPH_throw(NOPH_Exception_new_string("Real skip != skip: %d vs %d\n", real_skip, skip));
+#endif
 }
 
 
