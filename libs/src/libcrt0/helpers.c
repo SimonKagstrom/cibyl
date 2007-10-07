@@ -50,6 +50,23 @@ void NOPH_setter_exception_handler(NOPH_Exception_t ex, void *arg)
   NOPH_delete(ex);
 }
 
+NOPH_Exception_t NOPH_Exception_new_string_va(char *fmt, ...)
+{
+  char buf[255];
+  va_list ap;
+
+  /*
+   * Print into buffer.
+   */
+  va_start(ap, fmt);
+  vsnprintf(buf, sizeof(buf), fmt, ap);
+  va_end(ap);
+
+#undef NOPH_Exception_new_string
+  return NOPH_Exception_new_string(buf);
+}
+
+
 void NOPH_panic(const char *fmt, ...)
 {
   char buf[255];

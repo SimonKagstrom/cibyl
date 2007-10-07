@@ -1,4 +1,6 @@
 Cibyl (13)
+	* Define NOPH_Exception_new_string to take printf-style arguments
+
 	* Workaround a bug on SE phones - InputStream's from
 	FileConnections return the wrong value on "skip", so we no longer
 	validate the return value in the ::seek method.

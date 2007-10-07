@@ -55,6 +55,9 @@ NOPH_String_t NOPH_Throwable_toString(NOPH_Throwable_t th);
 NOPH_Exception_t NOPH_Exception_new(void);
 NOPH_Exception_t NOPH_Exception_new_string(char* s);
 
+extern NOPH_Exception_t NOPH_Exception_new_string_va(char *s, ...);
+#define NOPH_Exception_new_string NOPH_Exception_new_string_va
+
 /* Object */
 NOPH_Class_t NOPH_Object_getClass(NOPH_Object_t obj);
 
