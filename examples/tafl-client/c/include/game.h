@@ -18,7 +18,7 @@
 #include "ai.h"
 
 /* game id, starting color */
-#define GAME_BUFLEN (1+4)
+#define GAME_BUFLEN (1+4+1)
 #define GAME_TOTAL_BUFLEN (GAME_BUFLEN + PF_TOTAL_BUFLEN)
 
 typedef struct s_game
