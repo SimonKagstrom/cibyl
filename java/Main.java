@@ -46,6 +46,7 @@ public class Main extends MIDlet implements CommandListener
   {
     if (c.getCommandType() == Command.EXIT)
       {
+        canvas.invokeCallback(GameScreenCanvas.CB_ATEXIT, 0, 0);
 	destroyApp(true);
 	notifyDestroyed();
       }
