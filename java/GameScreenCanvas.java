@@ -21,6 +21,13 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
   private Display display;
   private Main main;
   public int callbacks[];
+  public static final int CB_KEY_PRESSED = 0;
+  public static final int CB_KEY_RELEASED = 1;
+  public static final int CB_KEY_REPEATED = 2;
+  public static final int CB_POINTER_DRAGGED = 3;
+  public static final int CB_POINTER_PRESSED = 4;
+  public static final int CB_POINTER_RELEASED = 5;
+  public static final int CB_ATEXIT = 6;
 
   /* Yes, this is ugly. Bear in mind that this class is only a helper
    * for the C funtionality in Cibyl
@@ -46,7 +53,7 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
   {
   }
 
-  private void invokeCallback(int which, int a0, int a1)
+  public void invokeCallback(int which, int a0, int a1)
   {
     if (this.callbacks[which] != 0)
       {
@@ -54,43 +61,41 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
           CibylCallTable.call(this.callbacks[which],
                               CRunTime.eventStackPointer,
                               a0, a1, 0, 0); /* a0 ... a3 */
-        } catch(Exception e)
-          {
-            System.err.println(e);
-            this.main.destroyApp(true);
-          }
+        } catch(Exception e) {
+          this.showError(e, "Calling " + Integer.toHexString(which) + " failed: " + e.getMessage());
+        }
       }
   }
 
   /* Callbacks */
   protected void keyPressed(int keyCode)
   {
-    this.invokeCallback(0, keyCode, -1);
+    this.invokeCallback(GameScreenCanvas.CB_KEY_PRESSED, keyCode, -1);
   }
 
   protected void keyReleased(int keyCode)
   {
-    this.invokeCallback(1, keyCode, -1);
+    this.invokeCallback(GameScreenCanvas.CB_KEY_RELEASED, keyCode, -1);
   }
 
   protected void keyRepeated(int keyCode)
   {
-    this.invokeCallback(2, keyCode, -1);
+    this.invokeCallback(GameScreenCanvas.CB_KEY_REPEATED, keyCode, -1);
   }
 
   protected void pointerDragged(int x, int y)
   {
-    this.invokeCallback(3, x, y);
+    this.invokeCallback(GameScreenCanvas.CB_POINTER_DRAGGED, x, y);
   }
 
   protected void pointerPressed(int x, int y)
   {
-    this.invokeCallback(4, x, y);
+    this.invokeCallback(GameScreenCanvas.CB_POINTER_PRESSED, x, y);
   }
 
   protected void pointerReleased(int x, int y)
   {
-    this.invokeCallback(5, x, y);
+    this.invokeCallback(GameScreenCanvas.CB_POINTER_RELEASED, x, y);
   }
 
   private DataInputStream getResourceStream(String name)
@@ -104,11 +109,20 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
       }
     catch(Exception e)
       {
-	System.err.println("Exception while opening " + name);
-	this.main.destroyApp(true);
+        this.showError(e, "Opening " + name + " failed " + e.getMessage());
       }
 
     return out;
+  }
+
+  private void showError(Throwable e, String s)
+  {
+      Alert msg = new Alert("Error", s, null, AlertType.INFO);
+      msg.setTimeout(Alert.FOREVER);
+      this.display.setCurrent(msg);
+      e.printStackTrace();
+      try {Thread.sleep(5000);} catch (Exception e2) {}
+      main.notifyDestroyed();
   }
 
   /* The main thread function */
@@ -131,21 +145,9 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
                   0);/* a3 */
 
     } catch (OutOfMemoryError e) {
-      Alert msg = new Alert("Error", "Out of memory", null, AlertType.INFO);
-      msg.setTimeout(Alert.FOREVER);
-      this.display.setCurrent(msg);
-      e.printStackTrace();
-      try {Thread.sleep(5000);} catch (Exception e2) {}
-      main.notifyDestroyed();
-      return;
+      this.showError(e, "Out of memory");
     } catch (Exception e) {
-      Alert msg = new Alert("Error", e.getMessage(), null, AlertType.INFO);
-      msg.setTimeout(Alert.FOREVER);
-      this.display.setCurrent(msg);
-      e.printStackTrace();
-      try {Thread.sleep(5000);} catch (Exception e2) {}
-      main.notifyDestroyed();
-      return;
+      this.showError(e, e.getMessage());
     }
   }
 }
