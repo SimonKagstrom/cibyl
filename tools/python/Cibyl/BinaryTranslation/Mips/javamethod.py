@@ -270,7 +270,7 @@ class JavaMethod(CodeBlock):
             # Add all possible mappings to zero
             for fn in self.functions:
                 mapping = registerMapping[fn.address]
-                if mapping.has_key(reg):
+                if mapping.has_key(reg) and not register.regIsStatic(reg):
                     localsToZero.add(mapping[reg])
             for local in localsToZero:
                 if reg == mips.R_RA and self.hasMultipleFunctions():
