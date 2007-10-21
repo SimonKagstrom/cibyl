@@ -20,14 +20,6 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
 {
   private Display display;
   private Main main;
-  public int callbacks[];
-  public static final int CB_KEY_PRESSED = 0;
-  public static final int CB_KEY_RELEASED = 1;
-  public static final int CB_KEY_REPEATED = 2;
-  public static final int CB_POINTER_DRAGGED = 3;
-  public static final int CB_POINTER_PRESSED = 4;
-  public static final int CB_POINTER_RELEASED = 5;
-  public static final int CB_ATEXIT = 6;
 
   /* Yes, this is ugly. Bear in mind that this class is only a helper
    * for the C funtionality in Cibyl
@@ -38,8 +30,6 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
 
     this.display = d;
     this.main = m;
-
-    this.callbacks = new int[10];
   }
 
   public void start()
@@ -55,10 +45,10 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
 
   public void invokeCallback(int which, int a0, int a1)
   {
-    if (this.callbacks[which] != 0)
+    if (CRunTime.callbacks[which] != 0)
       {
         try {
-          CibylCallTable.call(this.callbacks[which],
+          CibylCallTable.call(CRunTime.callbacks[which],
                               CRunTime.eventStackPointer,
                               a0, a1, 0, 0); /* a0 ... a3 */
         } catch(Exception e) {
@@ -70,32 +60,32 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
   /* Callbacks */
   protected void keyPressed(int keyCode)
   {
-    this.invokeCallback(GameScreenCanvas.CB_KEY_PRESSED, keyCode, -1);
+    this.invokeCallback(CRunTime.CB_KEY_PRESSED, keyCode, -1);
   }
 
   protected void keyReleased(int keyCode)
   {
-    this.invokeCallback(GameScreenCanvas.CB_KEY_RELEASED, keyCode, -1);
+    this.invokeCallback(CRunTime.CB_KEY_RELEASED, keyCode, -1);
   }
 
   protected void keyRepeated(int keyCode)
   {
-    this.invokeCallback(GameScreenCanvas.CB_KEY_REPEATED, keyCode, -1);
+    this.invokeCallback(CRunTime.CB_KEY_REPEATED, keyCode, -1);
   }
 
   protected void pointerDragged(int x, int y)
   {
-    this.invokeCallback(GameScreenCanvas.CB_POINTER_DRAGGED, x, y);
+    this.invokeCallback(CRunTime.CB_POINTER_DRAGGED, x, y);
   }
 
   protected void pointerPressed(int x, int y)
   {
-    this.invokeCallback(GameScreenCanvas.CB_POINTER_PRESSED, x, y);
+    this.invokeCallback(CRunTime.CB_POINTER_PRESSED, x, y);
   }
 
   protected void pointerReleased(int x, int y)
   {
-    this.invokeCallback(GameScreenCanvas.CB_POINTER_RELEASED, x, y);
+    this.invokeCallback(CRunTime.CB_POINTER_RELEASED, x, y);
   }
 
   private DataInputStream getResourceStream(String name)

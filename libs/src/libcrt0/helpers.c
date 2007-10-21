@@ -20,6 +20,8 @@ extern unsigned long __ctors_end;
 extern unsigned long __dtors_begin;
 extern unsigned long __dtors_end;
 
+static void atexit_run(void);
+
 static void run_list(unsigned long *start, unsigned long *end)
 {
   void (**p)(void) = (void (**)(void))start;
@@ -98,4 +100,33 @@ void __NOPH_catch(void)
 
 void __NOPH_throw(NOPH_Exception_t ex)
 {
+}
+
+
+/* --- atexit(3) handling */
+static void (**atexit_list)(void);
+static int atexit_n = 0;
+
+/* atexit implementation */
+int atexit( void (*fn)(void) )
+{
+  int cur = atexit_n;
+
+  if (!atexit_list)
+    NOPH_registerCallback(NOPH_CB_ATEXIT, (int)atexit_run);
+
+  atexit_n++;
+  atexit_list = realloc(atexit_list, sizeof(void (*)(void)) * atexit_n);
+  atexit_list[cur] = fn;
+  NOPH_panic_if(!atexit_list, "realloc of atexit lists failed");
+
+  return 0;
+}
+
+static void atexit_run(void)
+{
+  unsigned long *start = (unsigned long*)atexit_list;
+  unsigned long *end = start + atexit_n;
+
+  run_list(start, end);
 }

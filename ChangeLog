@@ -1,4 +1,14 @@
 Cibyl (13)
+	* The framework for registering callbacks (such as the Java
+	Canvas.keyPressed) has been generalized and moved to the ansi
+	syscall set and the CRunTime.java file. Support for atexit has
+	been implemented through this improvement
+
+	* Fixed minor bug on register cleanup (static registers should not
+	be cleaned up)
+
+	* Some minor code refactoring of GameScreenCanvas.java
+
 	* Define NOPH_Exception_new_string to take printf-style arguments
 
 	* Workaround a bug on SE phones - InputStream's from

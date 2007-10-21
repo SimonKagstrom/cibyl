@@ -15,6 +15,7 @@ import java.util.*;
 public class CRunTime
 {
   public static int memory[];
+  public static int callbacks[];
 
   public static int saved_v1; /* Result from functions */
   public static int ra; /* For the debug target */
@@ -25,6 +26,16 @@ public class CRunTime
   public static Object objectRepository[];
   private static int maxRepositoryObjects;
   private static int firstFree;
+
+  /* Constants related to callback handling (see include/cibyl.h and
+   * syscalls/ansi/include/stdlib.h) */
+  public static final int CB_KEY_PRESSED = 0;
+  public static final int CB_KEY_RELEASED = 1;
+  public static final int CB_KEY_REPEATED = 2;
+  public static final int CB_POINTER_DRAGGED = 3;
+  public static final int CB_POINTER_PRESSED = 4;
+  public static final int CB_POINTER_RELEASED = 5;
+  public static final int CB_ATEXIT = 6;
 
   /**
    * Initialize the C runtime. This must be called before the C
@@ -39,6 +50,7 @@ public class CRunTime
     CRunTime.maxRepositoryObjects = 256;
     CRunTime.objectRepository = new Object[ CRunTime.maxRepositoryObjects ];
     CRunTime.objectRepository[0] = null;
+    CRunTime.callbacks = new int[10];
 
     /* 0 is the invalid object, 1 is the exception object */
     CRunTime.firstFree = 2;

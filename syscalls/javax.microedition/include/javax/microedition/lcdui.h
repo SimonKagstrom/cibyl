@@ -17,6 +17,7 @@ extern "C" {
 #endif
 
 #include <cibyl.h>
+#include <stdlib.h>
 #include "midlet.h"
 
 /* From the Canvas class */
@@ -115,9 +116,6 @@ int NOPH_Canvas_getGameAction(NOPH_Canvas_t canvas, int keyCode);
 int NOPH_Canvas_getWidth(NOPH_Canvas_t canvas);
 int NOPH_Canvas_getHeight(NOPH_Canvas_t canvas);
 
-/* Helper */
-void __NOPH_Canvas_registerCallback(int which, int fnAddr); /* Not generated */
-
 /**
  * Register a callback for the keyPressed event. This is the same as
  * implementing Canvas::keyPressed() in Java.
@@ -127,32 +125,32 @@ void __NOPH_Canvas_registerCallback(int which, int fnAddr); /* Not generated */
  */
 static inline void NOPH_Canvas_registerKeyPressedCallback(void (*fn)(int keyCode))
 {
-  __NOPH_Canvas_registerCallback( 0, (int)fn );
+  NOPH_registerCallback( 0, (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
 static inline void NOPH_Canvas_registerKeyReleasedCallback(void (*fn)(int keyCode))
 {
-  __NOPH_Canvas_registerCallback( 1, (int)fn );
+  NOPH_registerCallback( 1, (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
 static inline void NOPH_Canvas_registerKeyRepeatedCallback(void (*fn)(int keyCode))
 {
-  __NOPH_Canvas_registerCallback( 2, (int)fn );
+  NOPH_registerCallback( 2, (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
 static inline void NOPH_Canvas_registerPointerDraggedCallback(void (*fn)(int x, int y))
 {
-  __NOPH_Canvas_registerCallback( 3, (int)fn );
+  NOPH_registerCallback( 3, (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
 static inline void NOPH_Canvas_registerPointerPressedCallback(void (*fn)(int x, int y))
 {
-  __NOPH_Canvas_registerCallback( 4, (int)fn );
+  NOPH_registerCallback( 4, (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
 static inline void NOPH_Canvas_registerPointerReleasedCallback(void (*fn)(int x, int y))
 {
-  __NOPH_Canvas_registerCallback( 5, (int)fn );
+  NOPH_registerCallback( 5, (int)fn );
 }
 
 /* Image class */
