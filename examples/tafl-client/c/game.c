@@ -64,6 +64,7 @@ bool_t game_to_string(game_t *p_game, char *dst, int buflen)
 
   dst[0]  = 'G';
   int_to_charbuf(p_game->id, dst + 1, 4);
+  int_to_charbuf(p_game->turn, dst + 5, 1);
 
   return playfield_to_string(p_game->p_playfield, dst + GAME_BUFLEN, buflen - GAME_BUFLEN);
 }
@@ -74,6 +75,7 @@ bool_t game_from_string(game_t *p_game, char *src, int buflen)
     return FALSE;
 
   p_game->id = charbuf_to_int(src + 1, 4);
+  p_game->turn = charbuf_to_int(src + 5, 4);
 
   return playfield_from_string(p_game->p_playfield, src + GAME_BUFLEN, buflen - GAME_BUFLEN);
 }
