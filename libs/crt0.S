@@ -29,9 +29,7 @@ __start:
 	jal	main
 	nop
 
-	## And run destructors when it's done
-	jal	crt0_run_global_destructors
-
+        ## global destructors should be run by exit()
 	move	$4, $2		# move a0, v0
 	jal	__exit
 	nop

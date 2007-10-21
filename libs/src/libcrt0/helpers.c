@@ -36,6 +36,7 @@ static void run_list(unsigned long *start, unsigned long *end)
 void crt0_run_global_constructors(void)
 {
   run_list(&__ctors_begin, &__ctors_end);
+  NOPH_registerCallback(NOPH_CB_ATEXIT, (int)atexit_run);
 }
 
 void crt0_run_global_destructors(void)
@@ -112,9 +113,6 @@ int atexit( void (*fn)(void) )
 {
   int cur = atexit_n;
 
-  if (!atexit_list)
-    NOPH_registerCallback(NOPH_CB_ATEXIT, (int)atexit_run);
-
   atexit_n++;
   atexit_list = realloc(atexit_list, sizeof(void (*)(void)) * atexit_n);
   atexit_list[cur] = fn;
@@ -129,4 +127,6 @@ static void atexit_run(void)
   unsigned long *end = start + atexit_n;
 
   run_list(start, end);
+
+  crt0_run_global_destructors();
 }

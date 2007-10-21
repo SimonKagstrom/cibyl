@@ -70,6 +70,7 @@ public class CRunTime
   {
     CRunTime.memory = null;
     CRunTime.objectRepository = null;
+    CRunTime.callbacks = null;
     System.gc();
 
     int memorySize = (int)(Runtime.getRuntime().freeMemory() * CibylConfig.cibylMemoryProportion);
