@@ -3,8 +3,8 @@
 ##
 ## Copyright (C) 2006,  Simon Kagstrom
 ##
-## Filename:      cibyl-generate-java-wrappers.py
-## Author:        Simon Kagstrom <ska@bth.se>
+## Filename:	  cibyl-generate-java-wrappers.py
+## Author:		Simon Kagstrom <ska@bth.se>
 ## Description:   Generate Java and C syscall constants
 ##
 ## $Id: cibyl-generate-java-wrappers 14098 2007-03-10 07:50:32Z ska $
@@ -19,13 +19,13 @@ syscallDirectories = []
 defines = []
 headerDirectories = []
 def includeCallback(option, opt, value, parser):
-    syscallDirectories.append(value)
+	syscallDirectories.append(value)
 
 def defineCallback(option, opt, value, parser):
-    defines.append("-D%s" % value)
+	defines.append("-D%s" % value)
 
 def syscallCallback(option, opt, value, parser):
-    headerDirectories.append(value)
+	headerDirectories.append(value)
 
 usage = """Usage: cibyl-generate-java-wrappers [options] program set1 [set2 ...]
 
@@ -38,12 +38,12 @@ within the directory 'dir', e.g., syscalls/j2me.
 
 parser = OptionParser(usage = usage)
 parser.add_option("-o", "--outdir", dest="outdir", default='.',
-                  help="Write output to outdir instead of current directory",
-		  metavar="OUTDIR")
+				  help="Write output to outdir instead of current directory",
+				  metavar="OUTDIR")
 parser.add_option("-I", "--include", action="callback", help="""directory to search for header files.
 You can pass multiple -I arguments.""",
-		  type="str", nargs=1,
-		  callback=includeCallback)
+				  type="str", nargs=1,
+				  callback=includeCallback)
 parser.add_option("-D", "--define", action="callback", help="""define a value for the preprocessor
 (cpp). Used e.g., for jsr075 (FileConnection), which needs -D JSR075. You can pass multiple -D
 arguments""",
@@ -56,8 +56,8 @@ parser.add_option("-S", "--syscalls", action="callback", help="directory to sear
 (options, args) = parser.parse_args()
 
 if len(args) < 2:
-    parser.error("incorrect number of arguments. Invoke with --help for arguments")
-    sys.exit(1)
+	parser.error("incorrect number of arguments. Invoke with --help for arguments")
+	sys.exit(1)
 
 elffile = args[0]
 syscallSets = args[1:]

@@ -3,8 +3,8 @@
 ##
 ## Copyright (C) 2006,  Simon Kagstrom
 ##
-## Filename:      cibyl-generate-c-header
-## Author:        Simon Kagstrom <ska@bth.se>
+## Filename:	  cibyl-generate-c-header
+## Author:		Simon Kagstrom <ska@bth.se>
 ## Description:   Generate Java and C syscall constants
 ##
 ## $Id: cibyl-generate-c-header 13549 2007-02-09 21:19:12Z ska $
@@ -23,13 +23,13 @@ contained within the directory 'dir', e.g., syscalls/j2me.
 """
 parser = OptionParser(usage = usage)
 parser.add_option("-o", "--outdir", dest="outdir", default='.',
-                  help="Write output to outdir instead of current directory",
-		  metavar="OUTDIR")
+				  help="Write output to outdir instead of current directory",
+				  metavar="OUTDIR")
 
 (options, args) = parser.parse_args()
 
 if len(args) < 2:
-    parser.error("incorrect number of arguments. Invoke with --help for arguments")
+	parser.error("incorrect number of arguments. Invoke with --help for arguments")
 
 dirname = args[0]
 syscallSets = args[1:]
