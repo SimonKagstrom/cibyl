@@ -76,14 +76,14 @@ class Controller(codeblock.CodeBlock):
 		for insn in self.instructions:
 			insn.fixup()
 			self.instructionsByAddress[insn.address] = insn
-		if insn.delayed:
-			assert(not self.instructionsByAddress.has_key(insn.delayed.address))
-			self.instructionsByAddress[insn.delayed.address] = insn.delayed
-			insn.delayed.fixup()
-		if insn.prefix:
-			assert(not self.instructionsByAddress.has_key(insn.prefix.address))
-			self.instructionsByAddress[insn.prefix.address] = insn.prefix
-			insn.prefix.fixup()
+			if insn.delayed:
+				assert(not self.instructionsByAddress.has_key(insn.delayed.address))
+				self.instructionsByAddress[insn.delayed.address] = insn.delayed
+				insn.delayed.fixup()
+			if insn.prefix:
+				assert(not self.instructionsByAddress.has_key(insn.prefix.address))
+				self.instructionsByAddress[insn.prefix.address] = insn.prefix
+				insn.prefix.fixup()
 
 		for insn in self.instructions:
 			if insn.address in self.labels:
