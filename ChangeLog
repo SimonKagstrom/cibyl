@@ -1,4 +1,10 @@
 Cibyl (13)
+	* Some support for profile-guided method colocation, which is still
+	not enabled though
+
+	* Changed spaces -> tabs for the python source. The diff will look
+	quite large, but most of it is just whitespace changes.
+
 	* The framework for registering callbacks (such as the Java
 	Canvas.keyPressed) has been generalized and moved to the ansi
 	syscall set and the CRunTime.java file. Support for atexit has

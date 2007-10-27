@@ -38,14 +38,7 @@ class JavaMethod(CodeBlock):
 				self.labels[key] = item
 			self.instructions = self.instructions + fn.instructions
 
-			if fn.address == self.controller.elf.getEntryPoint():
-				self.name = "start"
-			else:
-				sym = self.controller.elf.getSymbolByAddress(fn.address)
-				if sym.localLinkage():
-					self.name = fn.name +  "_%x" % (fn.address)
-				else:
-					self.name = fn.name
+			self.name = fn.name
 			self.methodAccess = "public"
 		self.bc = bytecode.ByteCodeGenerator(self.controller)
 		self.rh = register.RegisterHandler(self.controller, self.bc)
@@ -90,10 +83,6 @@ class JavaMethod(CodeBlock):
 		# And add the function address argument last if we have multiple functions / method
 		if self.hasMultipleFunctions():
 			self.argumentRegisters = self.argumentRegisters + [mips.R_FNA]
-
-	def getSize(self):
-		"Approximate the size of this method"
-		return len(self.instructions) * 9
 
 	def setJavaClass(self, javaClass):
 		self.javaClass = javaClass
@@ -509,7 +498,7 @@ class GlobalJavaCallTableMethod(JavaMethod):
 					if count == len(method.getRegistersToPass()):
 						suffix = ""
 					if r == mips.R_FNA:
-						self.controller.emit(fn.getIndex() + suffix)
+						self.controller.emit(("0x%x" % fn.getIndex()) + suffix)
 					else:
 						self.controller.emit( reg2local[r] + suffix)
 				self.controller.emit("); break;")

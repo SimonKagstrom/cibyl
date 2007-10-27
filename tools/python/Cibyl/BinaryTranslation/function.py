@@ -21,6 +21,11 @@ class Function(CodeBlock):
 	def __init__(self, controller, name, instructions, labels, trace=False):
 		CodeBlock.__init__(self, controller, instructions, labels, trace, setupRegisters = True)
 		self.name = name
+		sym = self.controller.elf.getSymbolByAddress(self.address)
+		if self.address == self.controller.elf.getEntryPoint():
+			self.name = "start"	
+		elif sym.localLinkage():
+			self.name = self.name +  "_%x" % (self.address)
 		self.basicBlocks = []
 
 		# Assume this is a leaf function, but non-recursive
@@ -119,7 +124,6 @@ class Function(CodeBlock):
 		# registers are not automatically saved then
 		if not config.debug and not (self.javaMethod.hasMultipleFunctions() and self.isRecursive):
 			self.doSkipStackStoreOptimization()
-
 
 	def compile(self):
 		"Compile this basic block to Java assembly"

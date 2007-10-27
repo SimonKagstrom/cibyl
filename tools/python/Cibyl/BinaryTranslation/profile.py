@@ -64,6 +64,9 @@ class Profile:
 	def getEntriesSortedByCallCount(self):
 		return self.sortByCount
 
+	def getEntriesSortedByCycles(self):
+		return self.sortByCycles
+
 
 if __name__ == "__main__":
 	f = open(sys.argv[1])

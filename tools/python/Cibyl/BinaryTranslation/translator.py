@@ -2,7 +2,7 @@
 ##
 ## Copyright (C) 2006,  Simon Kagstrom
 ##
-## Filename:	  translator.py
+## filename:	  translator.py
 ## Author:		Simon Kagstrom <ska@bth.se>
 ## Description:   Describes a MIPS binary
 ##
@@ -91,6 +91,7 @@ class Controller(codeblock.CodeBlock):
 
 		# Arrange instructions into functions
 		self.functions = []
+		self.functionsByName = {}
 		for sym in self.elf.getSymbolsByType("tW"):
 			if self.isPruned(sym.address) >= 0:
 				continue
@@ -106,11 +107,18 @@ class Controller(codeblock.CodeBlock):
 			fn = function.Function(self, sym.name, insns, labels, useTracing)
 			self.functions.append(fn)
 
+		for fn in self.functions:
+			self.functionsByName[fn.name] = fn
+
 		self.functions.sort()
 		javaMethods = []
 
 		colocateFunctions = []
 		otherFunctions = []
+
+#		if config.profileFile:
+#			config.colocateFunctions = self.getColocatedFunctionsByProfile()
+
 		for fn in self.functions:
 			if fn.name in config.colocateFunctions:
 				colocateFunctions.append(fn)
@@ -174,6 +182,19 @@ class Controller(codeblock.CodeBlock):
 			if out:
 				return out
 		return None
+
+	def getColocatedFunctionsByProfile(self):
+		entries = self.profile.getEntriesSortedByCycles()
+		out = []
+		size = 0
+		first = entries[0].cycles
+		for e in entries:
+			fn = self.functionsByName[e.name]
+			size = size + fn.getSize()
+			out.append(fn.name)
+			if size >= 32*1024 or e.cycles < first / 100.0:
+				break
+		return out
 
 	def splitMethodsBySize(self, javaMethods, out = []):
 		"Split methods into classes by the size of the classes"
