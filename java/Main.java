@@ -15,21 +15,24 @@ import javax.microedition.lcdui.*;
 public class Main extends MIDlet implements CommandListener
 {
   private GameScreenCanvas canvas;
+  private Display display;
+
+  public Main()
+  {
+    this.display = Display.getDisplay(this);
+    this.canvas = new GameScreenCanvas(this.display, this);
+  }
 
   public void startApp()
   {
-    if (canvas == null)
-      {
-	canvas = new GameScreenCanvas(Display.getDisplay(this), this);
-	if (!CibylConfig.disableExitCmd)
+    if (!CibylConfig.disableExitCmd)
 	{
-	  Command exitCommand = new Command("Exit", Command.EXIT, 0);
-	  canvas.addCommand(exitCommand);
-	  canvas.setCommandListener(this);
+            Command exitCommand = new Command("Exit", Command.EXIT, 0);
+            this.canvas.addCommand(exitCommand);
+            this.canvas.setCommandListener(this);
 	}
-      }
-
     /* Start the canvas */
+    this.display.setCurrent(canvas);
     canvas.start();
   }
 
@@ -39,16 +42,18 @@ public class Main extends MIDlet implements CommandListener
 
   public void destroyApp(boolean unconditional)
   {
+      System.out.println("Maboo here " + unconditional);
       canvas = null;
+      CRunTime.memory = null;
   }
 
   public void commandAction(Command c, Displayable s)
   {
     if (c.getCommandType() == Command.EXIT)
       {
-        canvas.invokeCallback(CRunTime.CB_ATEXIT, 0, 0);
-	destroyApp(true);
-	notifyDestroyed();
+        this.canvas.invokeCallback(CRunTime.CB_ATEXIT, 0, 0);
+	this.destroyApp(true);
+	this.notifyDestroyed();
       }
   }
 }
