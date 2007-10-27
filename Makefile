@@ -22,6 +22,7 @@ include/generated: FORCE
 
 clean:
 	make -C $(SUBDIRS) clean
+	make -C examples clean
 	rm -rf include/generated
 	find . -name "*~" -or -name "*.pyc" | xargs rm -f
 
