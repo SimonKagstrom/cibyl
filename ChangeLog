@@ -13,7 +13,7 @@ Cibyl (13)
 	* Fixed minor bug on register cleanup (static registers should not
 	be cleaned up)
 
-	* Some minor code refactoring of GameScreenCanvas.java
+	* Some minor code refactoring of GameScreenCanvas.java and Main.java
 
 	* Define NOPH_Exception_new_string to take printf-style arguments
 
