@@ -3,7 +3,7 @@
 ## Copyright (C) 2006,  Simon Kagstrom
 ##
 ## filename:	  translator.py
-## Author:		Simon Kagstrom <ska@bth.se>
+## Author:        Simon Kagstrom <ska@bth.se>
 ## Description:   Describes a MIPS binary
 ##
 ## $Id: translator.py 14248 2007-03-14 17:13:31Z ska $
