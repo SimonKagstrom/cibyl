@@ -9,7 +9,7 @@ class CibylConfig
     public static final boolean supressKeyEvents = true;
 
     /** Memory size - 0 means use default size (Runtime.freeMemory() * CibylConfig.cibylMemoryProportion) */
-    public static int memorySize = 0;
+    public static int memorySize = 500 * 1024;
 
     /** The proportion of memory allocated to Cibyl (0..1) */
     public static float cibylMemoryProportion = 0.5f;
