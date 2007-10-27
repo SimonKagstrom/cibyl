@@ -15,7 +15,7 @@ int test_output(const char *fmt, ...)
     int r;
 
     if ( fmt == NULL )
-	return 0;
+	   return 0;
 
     /*
      * Print into buffer.
