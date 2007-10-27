@@ -36,7 +36,6 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
   {
     Thread t = new Thread(this);
     t.start();
-    display.setCurrent(this);
   }
 
   public void stop()
