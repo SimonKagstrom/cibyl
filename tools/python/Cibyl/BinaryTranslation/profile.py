@@ -3,7 +3,7 @@
 ## Copyright (C) 2007,  Simon Kagstrom
 ##
 ## Filename:	  profile.py
-## Author:		Simon Kagstrom <simon.kagstrom@gmail.com>
+## Author:        Simon Kagstrom <simon.kagstrom@gmail.com>
 ## Description:   Parsing of a J2ME .prf file
 ##
 ## $Id:$
