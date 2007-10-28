@@ -42,9 +42,7 @@ public class Main extends MIDlet implements CommandListener
 
   public void destroyApp(boolean unconditional)
   {
-      System.out.println("Maboo here " + unconditional);
       canvas = null;
-      CRunTime.memory = null;
   }
 
   public void commandAction(Command c, Displayable s)
