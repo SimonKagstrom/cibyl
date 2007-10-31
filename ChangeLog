@@ -1,4 +1,6 @@
 Cibyl (13)
+	* Let the top-level Makefile recurse into examples/
+
 	* Some support for profile-guided method colocation, which is still
 	not enabled though
 
@@ -23,7 +25,7 @@ Cibyl (13)
 	FileConnections return the wrong value on "skip", so we no longer
 	validate the return value in the ::seek method.
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Wed Oct 31 19:31:11 CET 2007
 
 Cibyl (12)
 	* Fixed a bug with the --optimize-indirect-calls option, which
