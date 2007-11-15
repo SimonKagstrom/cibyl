@@ -10,6 +10,7 @@
 ##
 ######################################################################
 import jdb, gdbmips
+from Queue import Queue, Empty
 
 EMPTY=""
 
@@ -184,3 +185,24 @@ def handle(s):
         return handlers[s[0]](s[1:])
 
     return EMPTY
+
+inputQueue = Queue(0)
+killed = False
+
+def enqueue(item):
+    print "enq", item
+    inputQueue.put(item)
+
+def run(gdb):
+	while True:
+		try:
+			packet = inputQueue.get(timeout=1)
+		except Empty:
+			continue
+		response = handle(packet)
+		if response == None:
+			# Some error - return
+			gdb.nak()
+		else:
+			gdb.writePacket(response)
+

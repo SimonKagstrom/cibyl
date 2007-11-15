@@ -146,7 +146,6 @@ if options.onlyTranslate:
 	config.onlyTranslate = True
 	options.saveTemps = True
 
-config.debug = options.debug
 config.saveTemps = options.saveTemps
 config.tracing = options.tracing
 config.traceFunctionCalls = options.traceFunctionCalls
@@ -163,6 +162,10 @@ config.peepholeIterations = int(options.peepholeIterations)
 
 config.infile = infile
 config.profileFile = options.profileFile
+
+if options.debug:
+	config.debug = options.debug
+	options.singleClass = True # Force a single class
 
 # Setup the class size limit
 if options.singleClass:

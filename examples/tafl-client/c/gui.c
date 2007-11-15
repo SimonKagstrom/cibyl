@@ -133,11 +133,14 @@ void gui_handle_input_playfield(gui_t *p_gui, int keys)
 	{
 	  if (cur == PF_EMPTY)
 	    {
+              char buf[255];
 	      move_t move = move_new(p_gui->p_game->turn,
 				     p_gui->selected_x, p_gui->selected_y,
 				     p_gui->cursor_x, p_gui->cursor_y);
 
 	      game_do_move(p_gui->p_game, &move);
+              game_to_string(p_gui->p_game, buf, 255);
+              printf("XXX: %s\n", buf);
 	    }
 	  gui_clear_field(p_gui, FALSE);
 	  p_gui->is_selected = FALSE;

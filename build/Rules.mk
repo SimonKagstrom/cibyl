@@ -25,8 +25,8 @@ INCLUDES += -I$(CIBYL_BASE)/include -I$(CIBYL_BASE)/include/generated -I.
 ASOPTS   = -G0 -Wall -Wa,--no-warn -g -mips1 -mno-check-zero-division -mno-abicalls -fno-pic $(INCLUDES) $(ASFLAGS)
 COPTS    = -G0 -DCIBYL=1 -g -msoft-float -fno-optimize-sibling-calls -nostdinc -Wall -Wa,--no-warn -mips1 -mno-check-zero-division -Os -fno-pic -mno-abicalls $(INCLUDES) $(CFLAGS) $(DEFINES)
 LDLIBS   += -lc -ljava
-LDOPTS_DEBUG = -L$(CIBYL_BASE)/libs/lib/ -EB -nostdlib -T$(CIBYL_BASE)/build/linker.lds
-LDOPTS   = $(LDOPTS_DEBUG) --emit-relocs --whole-archive
+LDOPTS_DEBUG = -L$(CIBYL_BASE)/libs/lib/ -EB -nostdlib --whole-archive -T$(CIBYL_BASE)/build/linker.lds
+LDOPTS   = $(LDOPTS_DEBUG) --emit-relocs
 
 ALL_TARGETS ?= $(TARGET) $(TARGET).debug
 

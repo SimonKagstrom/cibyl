@@ -526,7 +526,7 @@ class Lw(LoadXX):
 		if self.rt == mips.R_RA and not self.getJavaMethod().hasMultipleFunctions():
 			if not config.debug:
 				if config.verbose: print "Skipping lw to RA", self
-			return None
+				return None
 		if self.prefix:
 			self.prefix.compile()
 		self.getstatic("CRunTime/memory [I")
@@ -540,7 +540,7 @@ class Sw(StoreXX):
 		if self.rt == mips.R_RA and not self.getJavaMethod().hasMultipleFunctions():
 			if not config.debug:
 				if config.verbose: print "Skipping sw of RA", self
-			return None
+				return None
 		if self.prefix:
 			self.prefix.compile()
 		self.getstatic("CRunTime/memory [I")

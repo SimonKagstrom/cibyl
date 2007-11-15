@@ -1,3 +1,19 @@
+Cibyl (14)
+	* Implemented GDB interruptions (Ctrl-C) in the gdb server
+
+	* Fixed bug in instruction.py where -g would still skip
+	loads/stores to RA
+
+	* cibyl-mips2java: Force single class if -g is specified (needed
+	by the GDB server)
+
+	* GDB server: Handle JDB line numbers correctly (they specify high
+	numbers as 1,474), made JDB handling more verbose if -v is given
+
+	* GDB server: only RA is in CRunTime.java now
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Cibyl (13)
 	* Let the top-level Makefile recurse into examples/
 

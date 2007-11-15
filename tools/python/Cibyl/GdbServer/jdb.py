@@ -11,10 +11,12 @@
 ######################################################################
 import re
 import gdbmips
+from Cibyl import config
 from Cibyl.BinaryTranslation.Mips import mips
 
-backtraceRegexp = re.compile("[ \t]*\[([0-9]*)\] ([a-z,A-Z,_,0-9]*).([a-z,A-Z,_,0-9]*) \(([a-z,A-Z,0-9,_,.]*):([0-9]*)\)")
+backtraceRegexp = re.compile("[ \t]*\[([0-9]*)\] ([a-z,A-Z,_,0-9]*).([a-z,A-Z,_,0-9]*) \(([a-z,A-Z,0-9,_,.]*):([0-9,\,]*)\)")
 
+cibylJavaClass = "Cibyl"
 process = None
 memoryArraySize = 0
 stateValid = False
@@ -29,7 +31,7 @@ def readRegister(reg):
         readState()
     if reg == 0:
         return 0
-    if reg in (gdbmips.R_HI, gdbmips.R_LO, gdbmips.R_K0, gdbmips.R_RA ):
+    if gdbmips.registerNames.has_key(reg):
         return readStaticVariable("CRunTime.%s" % gdbmips.registerNames[reg])
     return regs[reg]
 
@@ -94,14 +96,14 @@ def singleStep(addr):
 
 def setBreakpoint(line):
     kickJdb()
-    sendCommand("stop at CompiledProgram:%d" % line)
+    sendCommand("stop at %s:%d" % (cibylJavaClass, line))
     output = waitForPrompt()
     if output.find("Unable to set") != -1:
         raise JdbException("Cannot set breakpoint at line %d" % line)
 
 def clearBreakpoint(line):
     kickJdb()
-    sendCommand("clear CompiledProgram:%d" % line)
+    sendCommand("clear %s:%d" % (cibylJavaClass, line))
     output = waitForPrompt()
     if output.find("Not found: breakpoint") != -1:
         raise JdbException("Cannot clear breakpoint at line %d" % line)
@@ -113,6 +115,11 @@ def doContinue(addr):
     sendCommand("resume")
     output = waitForPrompt()
     return 0
+
+def doInterrupt():
+    stateValid = False
+    sendCommand("suspend")
+    sendCommand("where 1")
 
 def readJdbMemoryVector(offset):
     kickJdb()
@@ -151,8 +158,8 @@ def readState():
         if match:
             level = int(match.group(1))
             fileName = match.group(4)
-            lineNr = int(match.group(5))
-            if level == 1 and fileName == "CompiledProgram.j":
+            lineNr = int(match.group(5).replace(",", "")) # Handle "1,741"
+            if level == 1 and fileName == "%s.j" % (cibylJavaClass):
                 regs[gdbmips.R_PC] = gdbmips.convertLineToAddress(lineNr)
 
     stateValid = True
@@ -173,12 +180,15 @@ def kickJdb():
     waitForPrompt()
 
 def sendCommand(s):
+    if config.verbose: print "->JDB:", s
     process.sendline(s)
 
 def waitForPrompt(prompt = "([a-z,A-Z,0-9,_])\[([0-9]+)\] $"):
     while True:
         try:
             process.expect(prompt, 2)
+            for l in process.before.splitlines():
+                if config.verbose: print "<-JDB:", l
             return process.before
         except:
             sendCommand("\n")
@@ -188,7 +198,7 @@ def kill():
 
 def init():
     waitForPrompt("> ")
-    sendCommand("stop at CompiledProgram:0")
+    sendCommand("stop at %s:0" % (cibylJavaClass))
     waitForPrompt("> ")
     sendCommand("run")
     getMemoryArraySize()

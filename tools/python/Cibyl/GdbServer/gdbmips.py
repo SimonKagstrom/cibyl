@@ -27,10 +27,7 @@ R_FP  = 38+32+2
 N_REGS = 38+32+2
 
 registerNames = {
-    R_LO : "lo",
-    R_HI : "hi",
     R_RA : "ra",
-    R_K0 : "k0",
 }
 
 elf = None # Elf object
