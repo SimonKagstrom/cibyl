@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="se.bth.Cibyl">
+    <application>
+        <activity class=".Main" android:label="Main">
+            <intent-filter>
+                <action android:value="android.intent.action.MAIN" />
+                <category android:value="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest> 
