@@ -44,16 +44,11 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
 
   public void invokeCallback(int which, int a0, int a1)
   {
-    if (CRunTime.callbacks[which] != 0)
-      {
-        try {
-          CibylCallTable.call(CRunTime.callbacks[which],
-                              CRunTime.eventStackPointer,
-                              a0, a1, 0, 0); /* a0 ... a3 */
-        } catch(Exception e) {
-          this.showError(e, "Calling " + Integer.toHexString(which) + " failed: " + e.getMessage());
-        }
-      }
+    try {
+      CRunTime.invokeCallback(which, a0, a1, 0, 0);
+    } catch(Exception e) {
+      this.showError(e, "Calling " + Integer.toHexString(which) + " failed: " + e.getMessage());
+    }
   }
 
   /* Callbacks */
@@ -106,12 +101,12 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
 
   private void showError(Throwable e, String s)
   {
-      Alert msg = new Alert("Error", s, null, AlertType.INFO);
-      msg.setTimeout(Alert.FOREVER);
-      this.display.setCurrent(msg);
-      e.printStackTrace();
-      try {Thread.sleep(5000);} catch (Exception e2) {}
-      main.notifyDestroyed();
+    Alert msg = new Alert("Error", s, null, AlertType.INFO);
+    msg.setTimeout(Alert.FOREVER);
+    this.display.setCurrent(msg);
+    e.printStackTrace();
+    try {Thread.sleep(5000);} catch (Exception e2) {}
+    main.notifyDestroyed();
   }
 
   /* The main thread function */
