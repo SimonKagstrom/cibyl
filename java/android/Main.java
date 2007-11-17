@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * Copyright (C) 2007,  Simon Kagstrom
+ * Copyright (C) 2007,  Blekinge Institute of Technology
  *
  * Filename:      Main.java
  * Author:        Simon Kagstrom <ska@bth.se>
@@ -9,11 +9,6 @@
  * $Id: StandaloneMain.java 13453 2007-02-05 16:28:37Z ska $
  *
  ********************************************************************/
-package se.bth.Cibyl;
-
-import java.io.*;
-
-import android.content.*;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -23,11 +18,10 @@ import android.widget.TextView;
 /* Created from the LunarLander example */
 public class Main extends Activity {
     @Override
-    protected void onCreate(Bundle icicle) {
+	protected void onCreate(Bundle icicle) {
 	super.onCreate(icicle);
 	try {
-	    Resources res = Resources.getSystem();
-	    InputStream is = res.openRawResource(R.raw.program);
+	    InputStream is = R.openRawResources(R.raw.program);
 
 	    /* Setup the runtime support */
 	    CRunTime.init(is);
@@ -41,11 +35,25 @@ public class Main extends Activity {
 			0, /* a2 */
 			0);/* a3 */
 	} catch(Exception e) {
-	    this.showError(e, "Opening program.data.bin failed " + e.getMessage());
+	    this.showError(e, "Opening " + name + " failed " + e.getMessage());
 	}
     }
 
-    public void invokeCallback(int which, int a0, int a1, int a2, int a3)
+    private DataInputStream getResourceStream(String name)
+    {
+	DataInputStream out = null;
+
+	try {
+	    InputStream stream = this.getClass().getResourceAsStream(name);
+	    out = new DataInputStream(stream);
+	} catch(Exception e) {
+	    this.showError(e, "Opening " + name + " failed " + e.getMessage());
+	}
+
+	return out;
+    }
+
+    private void invokeCallback(int which, int a0, int a1, int a2, int a3)
     {
 	try {
 	    CRunTime.invokeCallback(which, a0, a1, a2, a3);
