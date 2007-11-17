@@ -45,7 +45,7 @@ public class CRunTime
    * @param memorySize the total size of the memory, should be larger
    * than memoryImage to fit the .bss, the heap and the stack
    */
-  public static final void init(DataInputStream codeStream, int memorySize) throws Exception
+  public static final void init(InputStream codeStream, int memorySize) throws Exception
   {
     CRunTime.maxRepositoryObjects = 256;
     CRunTime.objectRepository = new Object[ CRunTime.maxRepositoryObjects ];
@@ -60,13 +60,19 @@ public class CRunTime
     /* Copy memory */
     int len = codeStream.available() / 4;
     for (int i=0; i<len; i++)
-      CRunTime.memory[i] = codeStream.readInt();
+      {
+	int b0 = codeStream.read();
+	int b1 = codeStream.read();
+	int b2 = codeStream.read();
+	int b3 = codeStream.read();
+	CRunTime.memory[i] = ((b0 & 0xff) << 24) | ((b1 & 0xff) << 16) | ((b2 & 0xff) << 8) | (b3 & 0xff);
+      }
 
     CRunTime.memory[1] = CibylConfig.stackSize;
     CRunTime.memory[3] = memorySize - (CibylConfig.eventStackSize - 8);
   }
 
-  public static final void init(DataInputStream codeStream) throws Exception
+  public static final void init(InputStream codeStream) throws Exception
   {
     CRunTime.memory = null;
     CRunTime.objectRepository = null;
@@ -204,6 +210,17 @@ public class CRunTime
     CRunTime.objectRepository[handle] = null;
 
     return out;
+  }
+
+  /* Invoke a registered callback */
+  public static void invokeCallback(int which, int a0, int a1, int a2, int a3) throws Exception
+  {
+    if (CRunTime.callbacks[which] != 0)
+      {
+          CibylCallTable.call(CRunTime.callbacks[which],
+                              CRunTime.eventStackPointer,
+                              a0, a1, a2, a3); /* a0 ... a3 */
+      }
   }
 
   /* Misc. utils */
