@@ -28,15 +28,17 @@ LDLIBS   += -lc -ljava
 LDOPTS_DEBUG = -L$(CIBYL_BASE)/libs/lib/ -EB -nostdlib --whole-archive -T$(CIBYL_BASE)/build/linker.lds
 LDOPTS   = $(LDOPTS_DEBUG) --emit-relocs
 
+CRT0    ?= $(CIBYL_BASE)/libs/crt0.o
+
 ALL_TARGETS ?= $(TARGET) $(TARGET).debug
 
 all: $(ALL_TARGETS)
 
 $(TARGET).debug: $(OBJS)
-	$(ld) $(LDOPTS_DEBUG) $+ $(CIBYL_BASE)/libs/crt0.o --start-group -lcrt0 $(LDLIBS) --end-group -o $@
+	$(ld) $(LDOPTS_DEBUG) $+ $(CRT0) --start-group -lcrt0 $(LDLIBS) --end-group -o $@
 
 $(TARGET): $(OBJS)
-	$(ld) $(LDOPTS) $+ $(CIBYL_BASE)/libs/crt0.o --start-group -lcrt0 $(LDLIBS) --end-group -o $@
+	$(ld) $(LDOPTS) $+ $(CRT0) --start-group -lcrt0 $(LDLIBS) --end-group -o $@
 
 
 %.a: $(OBJS)

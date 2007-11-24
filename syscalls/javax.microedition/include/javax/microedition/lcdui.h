@@ -125,32 +125,32 @@ int NOPH_Canvas_getHeight(NOPH_Canvas_t canvas);
  */
 static inline void NOPH_Canvas_registerKeyPressedCallback(void (*fn)(int keyCode))
 {
-  NOPH_registerCallback( 0, (int)fn );
+  NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.keyPressed", (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
 static inline void NOPH_Canvas_registerKeyReleasedCallback(void (*fn)(int keyCode))
 {
-  NOPH_registerCallback( 1, (int)fn );
+  NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.keyReleased", (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
 static inline void NOPH_Canvas_registerKeyRepeatedCallback(void (*fn)(int keyCode))
 {
-  NOPH_registerCallback( 2, (int)fn );
+  NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.keyRepeated", (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
 static inline void NOPH_Canvas_registerPointerDraggedCallback(void (*fn)(int x, int y))
 {
-  NOPH_registerCallback( 3, (int)fn );
+  NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.pointerDragged", (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
 static inline void NOPH_Canvas_registerPointerPressedCallback(void (*fn)(int x, int y))
 {
-  NOPH_registerCallback( 4, (int)fn );
+  NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.pointerPressed", (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
 static inline void NOPH_Canvas_registerPointerReleasedCallback(void (*fn)(int x, int y))
 {
-  NOPH_registerCallback( 5, (int)fn );
+  NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.pointerReleased", (int)fn );
 }
 
 /* Image class */

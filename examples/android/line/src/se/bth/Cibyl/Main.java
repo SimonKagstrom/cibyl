@@ -19,12 +19,20 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.Window;
 import android.widget.TextView;
+import android.util.Log;
 
 /* Created from the LunarLander example */
 public class Main extends Activity {
+    CibylView view;
+
     @Override
     protected void onCreate(Bundle icicle) {
 	super.onCreate(icicle);
+
+	Log.v("Maboo", "---Main is here. Yo!");
+
+        setContentView(R.layout.main);
+
 	try {
 	    Resources res = Resources.getSystem();
 	    InputStream is = res.openRawResource(R.raw.program);
@@ -34,6 +42,7 @@ public class Main extends Activity {
 	    is.close();
 	    is = null;
 
+	    Log.v("Maboo", "Starting the Cibyl program");
 	    /* Start the virtual machine */
 	    Cibyl.start(0, /* sp, set in crt0.S */
 			0, /* a0 */
@@ -41,7 +50,7 @@ public class Main extends Activity {
 			0, /* a2 */
 			0);/* a3 */
 	} catch(Exception e) {
-	    this.showError(e, "Opening program.data.bin failed " + e.getMessage());
+	    this.showError(e, "Opening program data failed " + e + ", " + e.getMessage());
 	}
     }
 
@@ -56,7 +65,7 @@ public class Main extends Activity {
 
     private void showError(Throwable e, String s)
     {
-	System.out.println("Maboo: " + s);
+	Log.v("Maboo", "Error " + s);
     }
 
     @Override
@@ -71,5 +80,6 @@ public class Main extends Activity {
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 	super.onCreateOptionsMenu(menu);
+	return false;
     }
 }

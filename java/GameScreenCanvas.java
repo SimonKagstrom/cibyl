@@ -21,6 +21,8 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
   private Display display;
   private Main main;
 
+  private int cb_keyPressed, cb_keyReleased, cb_keyRepeated, cb_pointerDragged, cb_pointerPressed, cb_pointerReleased;
+
   /* Yes, this is ugly. Bear in mind that this class is only a helper
    * for the C funtionality in Cibyl
    */
@@ -30,6 +32,24 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
 
     this.display = d;
     this.main = m;
+
+    try {
+      DataInputStream is = this.getResourceStream("/program.data.bin");
+
+      /* Setup the runtime support */
+      CRunTime.init(is);
+      is.close();
+      is = null;
+    } catch (Exception e) {
+      this.showError(e, e.getMessage());
+    }
+
+    cb_keyPressed      = CRunTime.publishCallback("javax.microedition.lcdui.game.GameCanvas.keyPressed");
+    cb_keyReleased     = CRunTime.publishCallback("javax.microedition.lcdui.game.GameCanvas.keyReleased");
+    cb_keyRepeated     = CRunTime.publishCallback("javax.microedition.lcdui.game.GameCanvas.keyRepeated");
+    cb_pointerDragged  = CRunTime.publishCallback("javax.microedition.lcdui.game.GameCanvas.pointerDragged");
+    cb_pointerPressed  = CRunTime.publishCallback("javax.microedition.lcdui.game.GameCanvas.pointerPressed");
+    cb_pointerReleased = CRunTime.publishCallback("javax.microedition.lcdui.game.GameCanvas.pointerReleased");
   }
 
   public void start()
@@ -54,32 +74,32 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
   /* Callbacks */
   protected void keyPressed(int keyCode)
   {
-    this.invokeCallback(CRunTime.CB_KEY_PRESSED, keyCode, -1);
+    this.invokeCallback(this.cb_keyPressed, keyCode, -1);
   }
 
   protected void keyReleased(int keyCode)
   {
-    this.invokeCallback(CRunTime.CB_KEY_RELEASED, keyCode, -1);
+    this.invokeCallback(this.cb_keyReleased, keyCode, -1);
   }
 
   protected void keyRepeated(int keyCode)
   {
-    this.invokeCallback(CRunTime.CB_KEY_REPEATED, keyCode, -1);
+    this.invokeCallback(this.cb_keyRepeated, keyCode, -1);
   }
 
   protected void pointerDragged(int x, int y)
   {
-    this.invokeCallback(CRunTime.CB_POINTER_DRAGGED, x, y);
+    this.invokeCallback(this.cb_pointerDragged, x, y);
   }
 
   protected void pointerPressed(int x, int y)
   {
-    this.invokeCallback(CRunTime.CB_POINTER_PRESSED, x, y);
+    this.invokeCallback(this.cb_pointerPressed, x, y);
   }
 
   protected void pointerReleased(int x, int y)
   {
-    this.invokeCallback(CRunTime.CB_POINTER_RELEASED, x, y);
+    this.invokeCallback(this.cb_pointerReleased, x, y);
   }
 
   private DataInputStream getResourceStream(String name)
@@ -113,14 +133,7 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
   public void run()
   {
     try {
-      DataInputStream is = this.getResourceStream("/program.data.bin");
-
-      /* Setup the runtime support */
-      CRunTime.init(is);
-      is.close();
-      is = null;
       Syscalls.initJ2ME(this, this.getGraphics(), this.main);
-
       /* Start the virtual machine */
       Cibyl.start(0, /* sp, set in crt0.S */
                   0, /* a0 */

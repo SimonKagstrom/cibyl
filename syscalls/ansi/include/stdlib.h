@@ -19,7 +19,7 @@ extern "C" {
 #include <stddef.h>
 
 /* Helper to register callback functions (this is not part of ANSI C, but... ) */
-void NOPH_registerCallback(int which, int fnAddr); /* Not generated */
+int NOPH_registerCallback(char* name, int fnAddr); /* Not generated */
 
 void exit(int code); /* Not generated */
 #define abort() exit(1)

@@ -15,7 +15,6 @@ import java.util.*;
 public class CRunTime
 {
   public static int memory[];
-  public static int callbacks[];
 
   public static int saved_v1; /* Result from functions */
   public static int ra; /* For the debug target */
@@ -26,16 +25,7 @@ public class CRunTime
   public static Object objectRepository[];
   private static int maxRepositoryObjects;
   private static int firstFree;
-
-  /* Constants related to callback handling (see include/cibyl.h and
-   * syscalls/ansi/include/stdlib.h) */
-  public static final int CB_KEY_PRESSED = 0;
-  public static final int CB_KEY_RELEASED = 1;
-  public static final int CB_KEY_REPEATED = 2;
-  public static final int CB_POINTER_DRAGGED = 3;
-  public static final int CB_POINTER_PRESSED = 4;
-  public static final int CB_POINTER_RELEASED = 5;
-  public static final int CB_ATEXIT = 6;
+  private static Hashtable callbacksByName;
 
   /**
    * Initialize the C runtime. This must be called before the C
@@ -48,9 +38,9 @@ public class CRunTime
   public static final void init(InputStream codeStream, int memorySize) throws Exception
   {
     CRunTime.maxRepositoryObjects = 256;
+    CRunTime.callbacksByName = new Hashtable();
     CRunTime.objectRepository = new Object[ CRunTime.maxRepositoryObjects ];
     CRunTime.objectRepository[0] = null;
-    CRunTime.callbacks = new int[10];
 
     /* 0 is the invalid object, 1 is the exception object */
     CRunTime.firstFree = 2;
@@ -76,7 +66,6 @@ public class CRunTime
   {
     CRunTime.memory = null;
     CRunTime.objectRepository = null;
-    CRunTime.callbacks = null;
     System.gc();
 
     int memorySize = (int)(Runtime.getRuntime().freeMemory() * CibylConfig.cibylMemoryProportion);
@@ -212,15 +201,50 @@ public class CRunTime
     return out;
   }
 
-  /* Invoke a registered callback */
-  public static void invokeCallback(int which, int a0, int a1, int a2, int a3) throws Exception
+  /**
+   * Publish a new callback. This is supposed to be called from Java
+   * during startup to get a callback identifier.
+   *
+   * @param name the name of the callback
+   *
+   * @return a callback ID
+   */
+  public static int publishCallback(String name)
   {
-    if (CRunTime.callbacks[which] != 0)
-      {
-          CibylCallTable.call(CRunTime.callbacks[which],
-                              CRunTime.eventStackPointer,
-                              a0, a1, a2, a3); /* a0 ... a3 */
-      }
+    int id = CRunTime.registerObject(name); /* Used to get an id */
+    Integer intObject = new Integer(id);
+
+    CRunTime.callbacksByName.put(name, intObject);   /* Register name:id */
+
+    return id;
+  }
+
+  /**
+   * Register a callback function for a particular string.
+   *
+   * @param charPtr a C char* with the name of the callback
+   * @param fnPtr the function pointer that implements the callback
+   *
+   * @return the callback id
+   */
+  public static int registerCallback(int charPtr, int fnPtr)
+  {
+    String name = CRunTime.charPtrToString(charPtr);
+    Integer id = (Integer)CRunTime.callbacksByName.get(name);
+
+    CRunTime.objectRepository[id.intValue()] = new Integer(fnPtr); /* Replace with the fn ptr */
+
+    return id.intValue();
+  }
+
+  /* Invoke a registered callback */
+  public static int invokeCallback(int which, int a0, int a1, int a2, int a3) throws Exception
+  {
+    Integer id = (Integer)CRunTime.objectRepository[which];
+
+    return CibylCallTable.call(id.intValue(),
+			       CRunTime.eventStackPointer,
+			       a0, a1, a2, a3); /* a0 ... a3 */
   }
 
   /* Misc. utils */

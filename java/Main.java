@@ -16,11 +16,14 @@ public class Main extends MIDlet implements CommandListener
 {
   private GameScreenCanvas canvas;
   private Display display;
+  private int cb_atExit;
 
   public Main()
   {
     this.display = Display.getDisplay(this);
     this.canvas = new GameScreenCanvas(this.display, this);
+
+    this.cb_atExit = CRunTime.publishCallback("Cibyl.atexit"); /* Special */
   }
 
   public void startApp()
@@ -49,7 +52,7 @@ public class Main extends MIDlet implements CommandListener
   {
     if (c.getCommandType() == Command.EXIT)
       {
-        this.canvas.invokeCallback(CRunTime.CB_ATEXIT, 0, 0);
+        this.canvas.invokeCallback(this.cb_atExit, 0, 0);
 	this.destroyApp(true);
 	this.notifyDestroyed();
       }

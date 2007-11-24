@@ -9,7 +9,8 @@ export LANG=en_US
 export WTK_PATH=/home/ska/j2me/WTK2.2/
 
 # This is where you have javac etc installed (could be /usr/bin if appropriate)
-export JAVA_PATH=/usr/lib/j2sdk1.5-sun/bin/
+export JAVA_HOME=/usr/lib/j2sdk1.5-sun/
+export JAVA_PATH=$JAVA_HOME/bin/
 
 #----------
 # The rest of the configuration is typically optional

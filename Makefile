@@ -18,7 +18,7 @@ libs/lib:
 
 include/generated: FORCE
 	install -d include/generated
-	$(CIBYL_BASE)/tools/cibyl-generate-c-header -o $@ $(CIBYL_BASE)/syscalls/ softfloat resource_manager jmicropolygon
+	$(CIBYL_BASE)/tools/cibyl-generate-c-header -o $@ $(CIBYL_BASE)/syscalls/ softfloat resource_manager jmicropolygon android
 
 clean:
 	make -C $(SUBDIRS) clean

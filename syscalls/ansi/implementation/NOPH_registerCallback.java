@@ -1,3 +1,3 @@
-	public static final void NOPH_registerCallback(int which, int fnAddress) {
-	    CRunTime.callbacks[which] = fnAddress;
+	public static final int NOPH_registerCallback(int namePtr, int fnAddress) {
+	    return CRunTime.registerCallback(namePtr, fnAddress);
 	}

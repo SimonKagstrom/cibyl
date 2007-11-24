@@ -1,4 +1,17 @@
 Cibyl (14)
+	* Small bug in the java syscall generator fixed
+
+	* Callback handling has been generalized. Java startup now
+	publishes "callback interfaces" in the form of a string and gets
+	an integer handle back. C code registers callback functions as
+	(string, fnPtr) pairs. Invoking callbacks are done through the
+	handle returned in the publish phase.
+
+	The main motivation behind this support is to avoid global
+	#defines and Java constants. Especially for Google android
+	support, which relies heavily on abstract methods, this is
+	improves maintainability of the code
+
 	* Implemented GDB interruptions (Ctrl-C) in the gdb server
 
 	* Fixed bug in instruction.py where -g would still skip

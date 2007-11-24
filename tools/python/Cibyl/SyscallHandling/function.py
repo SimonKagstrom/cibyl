@@ -155,7 +155,7 @@ class Function:
 	if self.getQualifier() == "/* Not generated */":
 	    template = open("%s/implementation/%s.java" % (dirname, self.getName()))
 	    return template.read()
-	elif self.getJavaClass() == None or self.getJavaMethod == None:
+	elif self.getJavaClass() == None or self.getJavaMethod() == None:
 	    return ""
 	if self.getReturnType() == "void":
 	    ret = "void"

@@ -21,15 +21,6 @@ extern "C" {
 # define NOPH_STACK_SIZE  8192 /* 8KB stack */
 #endif
 
-/* Definitions related to NOPH_registerCallback in stdlib.h */
-#define NOPH_CB_KEY_PRESSED       0
-#define NOPH_CB_KEY_RELEASED      1
-#define NOPH_CB_KEY_REPEATED      2
-#define NOPH_CB_POINTER_DRAGGED   3
-#define NOPH_CB_POINTER_PRESSED   4
-#define NOPH_CB_POINTER_RELEASED  5
-#define NOPH_CB_ATEXIT            6
-
 #ifndef __ASSEMBLER__
 
 # define NOPH_SECTION(x) __attribute__((section (x)))

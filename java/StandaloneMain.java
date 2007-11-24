@@ -35,15 +35,17 @@ public class StandaloneMain
 
     try {
         CRunTime.init(is);
+	CRunTime.publishCallback("Cibyl.atexit"); /* Never used! */
+	Cibyl.start(0,
+		    0,
+		    0,
+		    0,
+		    0);
     } catch(Exception e)
         {
-            e.printStackTrace();
+	  System.out.println(e.getMessage());
+	  e.printStackTrace();
         }
-    Cibyl.start(0,
-                0,
-                0,
-                0,
-                0);
 
     System.err.println("Returned from the C-code (this should not happen)");
   }
