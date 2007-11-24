@@ -72,14 +72,14 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 	# Generic vector-handling code
 	def pushVector(self, name, address):
 		"Generic code to push the address to a vector"
-	 	self.pushStatic("CRunTime/%s [I" % (name))
+		self.pushStatic("CRunTime/%s [I" % (name))
 		self.pushConst(address)
 
 	# Memory-related functions
 	def pushMemoryAddress(self, reg, imm):
 		# Normal memory access
 		self.pushRegister( reg )
-	
+
 		if imm != 0:
 			self.pushConst( imm )
 			self.emit("iadd")
@@ -97,7 +97,7 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 		else:
 			# Normal memory access
 			self.pushRegister( reg )
-	
+
 			self.pushConst( 2 )
 			self.emit("iushr") # (reg + imm) / 4
 			if imm != 0:
@@ -190,7 +190,7 @@ class Ifmt(Instruction):
 	def compile(self):
 		signExtend = insnToJavaInstruction[self.opCode][2]
 		byteCodeOp = insnToJavaInstruction[self.opCode][1]
-	
+
 		self.pushRegister( self.rs )
 		self.pushConst( self.extra )
 		self.emit( byteCodeOp )
@@ -497,27 +497,27 @@ class Lbu(LoadXX):
 		if self.prefix:
 			self.prefix.compile()
 		self.getstatic("CRunTime/memory [I")
-	
+
 		# val = CRunTime.memory[ address / 4 ]
 		self.pushMemoryIndex(self.rs, self.extra)
 		self.emit("iaload")
-	
+
 		# b = 3 - (address & 3)
 		self.pushConst(3)
 		self.pushMemoryAddress(self.rs, self.extra)
 		self.pushConst(3)
 		self.emit("iand")
 		self.emit("isub")
-	
+
 		# b = b * 8
 		self.pushConst(3)
 		self.emit("ishl")
-	
+
 		# out = val >> (b*8)
 		self.emit("ishr")
 		self.pushConst(0xff)
 		self.emit("iand")
-	
+
 		self.popToRegister( self.rt )
 
 class Lw(LoadXX):
@@ -627,7 +627,7 @@ class SyscallRegisterArgument(Instruction):
 	def compile(self):
 		self.pushRegister( self.extra )
 
-	def fixup(self):	
+	def fixup(self):
 		self.sources = Set([ self.extra ])
 
 	def __str__(self):
@@ -670,7 +670,7 @@ class Jump(BranchInstruction):
 	def compile(self):
 		insnAtDest = self.controller.getInstruction( self.dstAddress )
 		assert(not insnAtDest.isDelayed)
-	
+
 		if self.delayed:
 			self.delayed.compile()
 		ownMethod = self.getJavaMethod()
@@ -698,7 +698,7 @@ class Jal(BranchInstruction):
 	def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
 		Instruction.__init__(self, controller, address, format, opCode, rd, rs, rt, extra)
 		self.isFunctionCall = True
-	
+
 		# Handle BAL instructions (which are PC-relative)
 		if self.opCode == mips.OP_BGEZAL:
 			self.dstAddress = self.address + (self.extra << 2) + 4
