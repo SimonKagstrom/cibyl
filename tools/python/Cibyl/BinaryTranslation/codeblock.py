@@ -21,22 +21,22 @@ class CodeBlock:
 		self.instructions = instructions
 		self.labels = labels
 		self.byteCodeSize = None
-	
+
 		self.useTracing = trace
-	
+
 		# Register use statistics
 		self.usedRegisters = Set()
 		self.destinationRegisters = Set()
 		self.sourceRegisters = Set()
 		self.registerUseCount = {}
-	
+
 		# Iterate over instructions to generate registers to zero at
 		# the start and produce sets of all register use
 		if setupRegisters:
 			for insn in self.instructions:
 				self.addDestinationRegisterSet(insn.getDestinationRegisters())
 				self.addSourceRegisterSet(insn.getSourceRegisters())
-	
+
 		if len(self.instructions) == 0:
 			# Should never happen
 			self.address = controller.elf.getEntryPoint()
@@ -135,7 +135,7 @@ class CodeBlock:
 		"Make a new list/dictionary of instructions and labels within an address range"
 		insns = [x for x in self.instructions if x.address >= start and x.address < end]
 		labels = dict([(k,v) for k,v in self.labels.iteritems() if v.address >= start and v.address < end])
-	
+
 		return insns, labels
 
 	def __cmp__(self, other):
