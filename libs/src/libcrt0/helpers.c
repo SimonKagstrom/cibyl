@@ -36,7 +36,7 @@ static void run_list(unsigned long *start, unsigned long *end)
 void crt0_run_global_constructors(void)
 {
   run_list(&__ctors_begin, &__ctors_end);
-  NOPH_registerCallback(NOPH_CB_ATEXIT, (int)atexit_run);
+  NOPH_registerCallback("Cibyl.atexit", (int)atexit_run);
 }
 
 void crt0_run_global_destructors(void)
