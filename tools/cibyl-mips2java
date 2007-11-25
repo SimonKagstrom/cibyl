@@ -103,6 +103,10 @@ frequent accesses to the same register in a basic block""",
 parser.add_option("--optimize-peephole", action="store_true", default=False,
 		  help="""Turn on the peephole optimizer""",
 		  dest="peepholeOptimize")
+parser.add_option("--optimize-value-tracking", action="store_true", default=False,
+		  help="""Turn on the register value tracker. This improves for example memory
+accesses to constant addresses""",
+		  dest="registerValueTracking")
 parser.add_option("--optimize-multiplications", action="store_true", default=False,
 				  help="""Turn on the mult/div optimizations. This improves the performance of
 most multiplications and divisions""",
@@ -140,7 +144,7 @@ config.doRegisterScheduling = options.optimize_register_scheduling
 config.doInlineAllBuiltins = options.doInlineAllBuiltins
 config.doOptimizeIndirectCalls = options.doOptimizeIndirectCalls
 config.doPeepholeOptimize = options.peepholeOptimize
-
+config.doRegisterValueTracking = options.registerValueTracking
 
 if options.onlyTranslate:
 	config.onlyTranslate = True
@@ -196,6 +200,7 @@ if options.optimize_all:
 	config.doMemoryRegisterOptimization = True
 	config.doRegisterScheduling = True
 	config.doPeepholeOptimize = True
+	config.doRegisterValueTracking = True
 
 config.checkEnvironment()
 

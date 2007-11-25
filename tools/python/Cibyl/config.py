@@ -20,6 +20,8 @@ doMemoryRegisterOptimization = False
 doRegisterScheduling = False
 doOptimizeIndirectCalls = False
 doPeepholeOptimize = False
+doRegisterValueTracking = False
+
 
 doInlineAllBuiltins = False
 inlineBuiltinsFunctions = []

@@ -87,7 +87,9 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 
 	def pushMemoryIndex(self, reg, imm):
 		"Push a memory address onto the stack"
-		if self.optimizer.registerValueIsKnown(reg):
+		# If the value is already known, we can just push the
+		# constant and be done with it
+		if config.doRegisterValueTracking and self.optimizer.registerValueIsKnown(reg):
 		    self.pushConst( (self.optimizer.getRegisterValue(reg).value + imm) / 4 )
 		    return
 		if reg in mips.memoryAddressRegisters:
