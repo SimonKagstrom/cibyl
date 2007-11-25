@@ -14,7 +14,7 @@ import template
 import re, sys
 import emit
 
-from templates import goto_next_line, const_and_inc, double_stores, double_pop, getstatic_v1_pop, putstatic_getstatic, dup_pop
+from templates import goto_next_line, const_and_inc, double_stores, double_pop, getstatic_v1_pop, putstatic_getstatic, dup_pop, const_and_pop
 
 FUNCTION_NAME="([A-Z,a-z,0-9,_,\(,\)]+)"
 
