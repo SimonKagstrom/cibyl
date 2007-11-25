@@ -166,6 +166,9 @@ class Optimizer:
 			return
 		self.registers[reg] = UnknownValue()
 
+	def registerValueIsKnown(self, reg):
+	    return isinstance(self.registers[reg], KnownValue)
+
 	def getRegisterValue(self, reg):
 		if reg == 0:
 			return KnownValue(0)
