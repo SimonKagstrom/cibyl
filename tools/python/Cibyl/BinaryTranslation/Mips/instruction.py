@@ -87,6 +87,10 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 
 	def pushMemoryIndex(self, reg, imm):
 		"Push a memory address onto the stack"
+		if self.optimizer.registerValueIsKnown(reg):
+		    print "Constant address 0x%x" % (reg + imm)
+		    self.pushConst( (self.optimizer.getRegisterValue(reg).value + imm) / 4 )
+		    return
 		if reg in mips.memoryAddressRegisters:
 			# The special register contains the address >> 2
 			imm = imm / 4
