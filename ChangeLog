@@ -1,4 +1,9 @@
 Cibyl (14)
+	* Implemented (partially) a register value tracker. This can for
+	example make a fairly big difference when reading or storing
+	values at constant memory locations - the address calculation can
+	then be made completely constant.
+
 	* Small bug in the java syscall generator fixed
 
 	* Callback handling has been generalized. Java startup now
