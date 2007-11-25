@@ -18,6 +18,7 @@ from Cibyl import config
 class CodeBlock:
 	def __init__(self, controller, instructions, labels, trace, setupRegisters=False):
 		self.controller = controller
+		self.optimizer = controller.getOptimizer()
 		self.instructions = instructions
 		self.labels = labels
 		self.byteCodeSize = None
@@ -106,12 +107,14 @@ class CodeBlock:
 	def compile(self):
 		"Compile this code block"
 		for insn in self.instructions:
+			insn.run()
 			# Emit line number
 			lineNr = (insn.address - self.controller.elf.getEntryPoint()) / 4
 			if config.debug:
 				self.controller.emit(".line %d" % ( lineNr ))
 			if self.labels.has_key(insn.address):
 				self.controller.emit( str(self.labels[insn.address]) + ":" )
+				self.optimizer.invalidateAllRegisters()
 			self.controller.emit("; " + str(insn))
 			if insn.delayed:
 				self.controller.emit("; " + str(insn.delayed))
