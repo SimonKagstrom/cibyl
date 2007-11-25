@@ -34,4 +34,17 @@ class MatchClass(Template):
 	items[1] = Nop()
 	return items
 
+
+#	iload  $X
+#	pop
+#->
+class IloadMatchClass(MatchClass):
+    def __init__(self):
+	Template.__init__(self,
+			  [{"class" : Iload},
+			   {"class" : Pop},
+			   ]
+			  )
+
 addTemplate(MatchClass())
+addTemplate(IloadMatchClass())

@@ -78,6 +78,9 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 	# Memory-related functions
 	def pushMemoryAddress(self, reg, imm):
 		# Normal memory access
+		if config.doRegisterValueTracking and self.optimizer.registerValueIsKnown(reg):
+		    self.pushConst( self.optimizer.getRegisterValue(reg).value + imm )
+		    return
 		self.pushRegister( reg )
 
 		if imm != 0:
