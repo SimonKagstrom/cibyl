@@ -133,6 +133,7 @@ registerNames = {
 	44 : "ecb", # Exception callback address
 	45 : "ear", # Exception argument
 	46 : "fna", # Function address (for multiple java methods)
+	47 : "mem", # A reference to the memory
 }
 
 # An inversion of the above
@@ -179,6 +180,7 @@ R_CPC= namesToRegisters["cpc"]
 R_ECB= namesToRegisters["ecb"] # Exception callback address
 R_EAR= namesToRegisters["ear"] # Exception argument
 R_FNA= namesToRegisters["fna"] # Function address (for multiple functions / Java method)
+R_MEM= namesToRegisters["mem"]
 
 N_REGS = len(namesToRegisters)
 
