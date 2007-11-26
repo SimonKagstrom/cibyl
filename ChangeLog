@@ -1,4 +1,8 @@
 Cibyl (14)
+	* Push a local variable as memory reference instead of the static
+	CRunTime.memory each time. This saves 1-2 byte on each memory
+	access, and perhaps improves speed a bit as well.
+
 	* Implemented (partially) a register value tracker. This can for
 	example make a fairly big difference when reading or storing
 	values at constant memory locations - the address calculation can
