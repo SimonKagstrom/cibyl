@@ -79,6 +79,12 @@ class ByteCodeGenerator:
 	def istore(self, nr):
 		self.load_store_helper("istore", nr)
 
+	def aload(self, nr):
+		self.load_store_helper("aload", nr)
+
+	def astore(self, nr):
+		self.load_store_helper("astore", nr)
+
 	def fload(self, nr):
 		self.load_store_helper("fload", nr)
 
