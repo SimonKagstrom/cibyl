@@ -69,6 +69,8 @@ class JavaMethod(CodeBlock):
 				self.addSourceRegister(mips.R_A3)
 				self.addDestinationRegister(mips.R_V0)
 				self.addDestinationRegister(mips.R_V1)
+			self.addSourceRegister(mips.R_MEM)
+			self.addDestinationRegister(mips.R_MEM)
 			fn.setIndex(i)
 			i = i + 1
 
@@ -83,6 +85,7 @@ class JavaMethod(CodeBlock):
 		# And add the function address argument last if we have multiple functions / method
 		if self.hasMultipleFunctions():
 			self.argumentRegisters = self.argumentRegisters + [mips.R_FNA]
+		self.usesMemoryInstructions = False
 
 	def setJavaClass(self, javaClass):
 		self.javaClass = javaClass
@@ -189,6 +192,8 @@ class JavaMethod(CodeBlock):
 			elif isinstance(insn, instruction.Jalr):
 				self.addDestinationRegister(mips.R_V1)
 				self.addDestinationRegister(mips.R_V0)
+                        elif isinstance(insn, instruction.MemoryAccess):
+				self.usesMemoryInstructions = True
 			operandStackSize = insn.maxOperandStackHeight()
 			if insn.delayed:
 				operandStackSize = operandStackSize + insn.delayed.maxOperandStackHeight()
@@ -238,7 +243,7 @@ class JavaMethod(CodeBlock):
 		maxLocals = len(register.reg2local)
 		if config.doRegisterScheduling:
 			registerMapping, maxLocals = register.generateRegisterMapping(self.functions, self.usedRegisters,
-																		  self.argumentRegisters, self.registerUseCount)
+										      self.argumentRegisters, self.registerUseCount)
 			# Default to the first (doesn't matter which)
 			register.reg2local = registerMapping[ self.functions[0].address ]
 		self.controller.emit(".limit locals %d" % maxLocals)
@@ -254,6 +259,8 @@ class JavaMethod(CodeBlock):
 				else:
 					self.controller.emit("; local %2d is register %s" % (local, mips.registerNames[reg]))
 
+		self.cleanupRegs.remove(mips.R_MEM)
+
 		for reg in self.cleanupRegs:
 			localsToZero = Set()
 			# Add all possible mappings to zero
@@ -267,6 +274,10 @@ class JavaMethod(CodeBlock):
 				else:
 					self.bc.pushConst(0)
 				self.bc.istore(local)
+
+		if self.usesMemoryInstructions:
+			self.bc.getstatic("CRunTime/memory [I")
+			self.rh.popToRegister(mips.R_MEM)
 
 		if config.traceFunctionCalls:
 			self.bc.ldc("0x%08x: %s" % (self.address, self.name))
