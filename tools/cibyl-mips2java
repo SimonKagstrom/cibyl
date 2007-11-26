@@ -104,8 +104,8 @@ parser.add_option("--optimize-peephole", action="store_true", default=False,
 		  help="""Turn on the peephole optimizer""",
 		  dest="peepholeOptimize")
 parser.add_option("--optimize-value-tracking", action="store_true", default=False,
-		  help="""Turn on the register value tracker. This improves for example memory
-accesses to constant addresses""",
+		  help="""Turn on the register value tracker (constant propagation). This
+improves for example memory accesses to constant addresses""",
 		  dest="registerValueTracking")
 parser.add_option("--optimize-multiplications", action="store_true", default=False,
 				  help="""Turn on the mult/div optimizations. This improves the performance of
