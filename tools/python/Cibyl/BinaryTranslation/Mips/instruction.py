@@ -504,7 +504,7 @@ class Lbu(LoadXX):
 			return None
 		if self.prefix:
 			self.prefix.compile()
-		self.getstatic("CRunTime/memory [I")
+		self.pushRegister( mips.R_MEM )
 
 		# val = CRunTime.memory[ address / 4 ]
 		self.pushMemoryIndex(self.rs, self.extra)
@@ -537,7 +537,7 @@ class Lw(LoadXX):
 				return None
 		if self.prefix:
 			self.prefix.compile()
-		self.getstatic("CRunTime/memory [I")
+		self.pushRegister( mips.R_MEM )
 		self.pushMemoryIndex(self.rs, self.extra)
 		self.emit("iaload")
 		self.popToRegister( self.rt )
@@ -551,7 +551,7 @@ class Sw(StoreXX):
 				return None
 		if self.prefix:
 			self.prefix.compile()
-		self.getstatic("CRunTime/memory [I")
+		self.pushRegister( mips.R_MEM )
 		self.pushMemoryIndex(self.rs, self.extra)
 		self.pushRegister( self.rt )
 		self.emit("iastore")
