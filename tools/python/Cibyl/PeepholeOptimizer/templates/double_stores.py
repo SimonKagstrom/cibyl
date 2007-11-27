@@ -54,6 +54,8 @@ class MatchStoreLoadStore(Template):
 	for item in items[self.midLoadIndex+1:-1]:
 	    if not midInstructionValid(N, item):
 		return False
+	if self.midLoadIndex != 1 and items[0].stackTop != items[self.midLoadIndex].stackTop-1:
+	    return False
 	return True
 
     # Remove the istore/iload
@@ -260,7 +262,7 @@ class MatchSwap(Template):
     # Remove the istore/iload
     def execute(self, fn, items):
 	items[0] = Nop()
-	items[2] = Instruction("\tswap\n")
+	items[2] = Swap()
 	return items
 
 class MatchSwapDup(MatchSwap):
@@ -290,7 +292,7 @@ class MatchSwapDup(MatchSwap):
     # Remove the istore/iload
     def execute(self, fn, items):
 	items[0] = Nop()
-	items[2] = Instruction("\tswap\n")
+	items[2] = Swap()
 	return items
 
 for n in range(0, 1):
