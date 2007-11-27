@@ -1,4 +1,8 @@
 Cibyl (14)
+	* More peephole optimizations: move constant assignments past
+	memory pushing (to simplify other peephole optimizations), better
+	support for catching double stores
+
 	* Push a local variable as memory reference instead of the static
 	CRunTime.memory each time. This saves 1-2 byte on each memory
 	access, and perhaps improves speed a bit as well.
