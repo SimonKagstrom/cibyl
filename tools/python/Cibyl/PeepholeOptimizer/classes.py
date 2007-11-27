@@ -12,11 +12,12 @@
 import emit
 
 class PushInstruction:
-    pass
+    def __init__(self, n=1):
+	self.stackSize = n
 
 class PopInstruction:
     def __init__(self, n=1):
-	self.N = n
+	self.stackSize = -n
 
 class Base:
     def __init__(self, line):
@@ -34,10 +35,6 @@ class Base:
     def __str__(self):
 	return self.line
 
-class Nop(Base):
-    def __init__(self):
-	Base.__init__(self, "")
-
 class Comment(Base):
     pass
 
@@ -51,21 +48,36 @@ class Instruction(Base):
     def __init__(self, line):
 	Base.__init__(self, line)
 	self.isNop = False
+	self.stackTop = 0
+	self.stackSize = 0
+
+class Nop(Instruction):
+    def __init__(self):
+	Instruction.__init__(self, "")
 
 class Ireturn(Instruction, PopInstruction):
-    pass
+    def __init__(self, line):
+	Instruction.__init__(self, line)
+	PopInstruction.__init__(self)
 
-class Dup(Instruction, PopInstruction):
+class Dup(Instruction, PushInstruction):
     def __init__(self):
 	Instruction.__init__(self, "\tdup\n")
+	PushInstruction.__init__(self)
 
 class Pop(Instruction, PopInstruction):
     def __init__(self):
 	Instruction.__init__(self, "\tpop\n")
+	PopInstruction.__init__(self)
+
+class Swap(Instruction):
+    def __init__(self):
+	Instruction.__init__(self, "\tswap\n")
 
 class Pop2(Instruction, PopInstruction):
     def __init__(self):
 	Instruction.__init__(self, "\tpop2\n")
+	PopInstruction.__init__(self, n=2)
 
 # iconst, ldc, etc
 class Const(Instruction, PushInstruction):
@@ -86,8 +98,9 @@ class Const(Instruction, PushInstruction):
 	    line = "\t" + line + "\n"
 
 	Instruction.__init__(self, line)
+	PushInstruction.__init__(self)
 
-class Iinc(Instruction, PushInstruction):
+class Iinc(Instruction):
     def __init__(self, line, variable, value):
 	Instruction.__init__(self, line)
 	self.value = long(value)
@@ -98,29 +111,45 @@ class Istore(Instruction, PopInstruction):
     def __init__(self, line, variable):
 	Instruction.__init__(self, line)
 	self.targetLocal = variable
+	PopInstruction.__init__(self)
 
 class Iload(Instruction, PushInstruction):
     def __init__(self, line, variable):
 	Instruction.__init__(self, line)
 	self.sourceLocal = variable
+	PushInstruction.__init__(self)
+
+class Aload(Iload, PushInstruction):
+    pass
+
+class Astore(Istore, PushInstruction):
+    pass
 
 class Getstatic(Instruction, PushInstruction):
     def __init__(self, line, variable):
 	Instruction.__init__(self, line)
 	self.sourceLocal = variable
+	PushInstruction.__init__(self)
 
 class Putstatic(Instruction, PopInstruction):
     def __init__(self, line, variable):
 	Instruction.__init__(self, line)
 	self.targetLocal = variable
+	PopInstruction.__init__(self)
 
-class ArithmeticInstruction(Instruction, PushInstruction):
+class ArithmeticInstructionPopTwo(Instruction, PopInstruction):
+    def __init__(self, line):
+	Instruction.__init__(self, line)
+	PopInstruction.__init__(self)
+
+class ArithmeticInstructionPopOne(Instruction):
     pass
 
 class BranchInstruction(Instruction, PopInstruction):
     def __init__(self, line, target):
 	Instruction.__init__(self, line)
 	self.target = target
+	PopInstruction.__init__(self)
 
 class ConditionalBranchOne(BranchInstruction, PopInstruction):
     pass
@@ -128,8 +157,8 @@ class ConditionalBranchOne(BranchInstruction, PopInstruction):
 # pops two items from the stack
 class ConditionalBranchTwo(BranchInstruction, PopInstruction):
     def __init__(self, line, target):
-	PopInstruction.__init__(self, 2)
 	BranchInstruction.__init__(self, line, target)
+	PopInstruction.__init__(self, 2)
 
 class Invokestatic(BranchInstruction, PopInstruction):
     pass
