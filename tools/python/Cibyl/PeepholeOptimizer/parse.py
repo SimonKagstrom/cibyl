@@ -14,7 +14,7 @@ import template
 import re, sys
 import emit
 
-from templates import goto_next_line, const_and_inc, double_stores, double_pop, getstatic_v1_pop, putstatic_getstatic, dup_pop, const_and_pop
+from templates import goto_next_line, const_store_aload, const_and_inc, double_stores, double_pop, getstatic_v1_pop, putstatic_getstatic, dup_pop, const_and_pop
 
 FUNCTION_NAME="([A-Z,a-z,0-9,_,\(,\)]+)"
 
@@ -27,6 +27,8 @@ comment = re.compile("[ ,\t]*;([A-Z,a-z,0-9,_,\(,\), ]+):")
 ins_goto = re.compile("[ ,\t]*goto[ ,\t]([A-Z,a-z,0-9,_]+)")
 ins_iload = re.compile("[ ,\t]*iload[_, ]([0-9]+)")   # iload_0, iload 15
 ins_istore = re.compile("[ ,\t]*istore[_, ]([0-9]+)") # istore_2, istore 15
+ins_aload = re.compile("[ ,\t]*aload[_, ]([0-9]+)")   # iload_0, iload 15
+ins_astore = re.compile("[ ,\t]*astore[_, ]([0-9]+)") # istore_2, istore 15
 ins_getstatic_reg = re.compile("[ ,\t]*getstatic (CRunTime/[hl][io]) I")
 ins_getstatic_reg_v1 = re.compile("[ ,\t]*getstatic (CRunTime/saved_v1) I")
 ins_putstatic_reg = re.compile("[ ,\t]*putstatic (CRunTime/[hl][io]) I")
@@ -86,6 +88,18 @@ def matchIload(line):
 	return Iload(line, match.group(1))
     return None
 
+def matchAstore(line):
+    if ins_astore.match(line):
+	match = ins_astore.match(line)
+	return Astore(line, match.group(1))
+    return None
+
+def matchAload(line):
+    if ins_aload.match(line):
+	match = ins_aload.match(line)
+	return Aload(line, match.group(1))
+    return None
+
 def matchGetstatic(line):
     if ins_getstatic_reg.match(line):
 	match = ins_getstatic_reg.match(line)
@@ -120,7 +134,7 @@ def matchLabel(line):
     return None
 
 def matchInstruction(line):
-    for fn in (matchGoto, matchConst, matchIinc, matchIstore, matchIload, matchCondBranch, matchInvokestatic, matchGetstatic, matchPutstatic):
+    for fn in (matchGoto, matchConst, matchIinc, matchIstore, matchAstore, matchIload, matchAload, matchCondBranch, matchInvokestatic, matchGetstatic, matchPutstatic):
 	m = fn(line)
 	if m:
 	    return m
@@ -128,8 +142,10 @@ def matchInstruction(line):
     if match:
 	# Check for arithmetic instructions
 	if match.group(1) in ("imul", "idiv", "iadd", "isub", "ishl", "ishr", "iushr", "ixor", "iand", "ior",\
-                              "irem", "ineg", "lmul", "ldiv", "lrem" "fmul", "fdiv", "fadd", "fsub", "fneg"):
-	    return ArithmeticInstruction(line)
+                              "irem", "lmul", "ldiv", "lrem" "fmul", "fdiv", "fadd", "fsub"):
+	    return ArithmeticInstructionPopTwo(line)
+	if match.group(1) in ("ineg", "fneg"):
+	    return ArithmeticInstructionPopOne(line)
 	if match.group(1) == "ireturn":
 	    return Ireturn(line)
 	return Instruction(line)
@@ -144,6 +160,7 @@ def readFile(filename):
     all = []
 
     curfn = []
+    curStackTop = 0
     cur = None
     fn = False
     fnLine = ""
@@ -159,11 +176,14 @@ def readFile(filename):
 	    cur = lab
 	elif ins:
 	    cur = ins
+	    curStackTop = curStackTop + cur.stackSize
+	    ins.stackTop = curStackTop
 	elif method_declaration.match(line):
 	    match = method_declaration.match(line)
 	    fn = match.group(1)
 	    fnLine = line
 	    curfn = []
+	    curStackTop = 0
 	    all.append(Base("\n"))
 	    continue
 	elif method_end.match(line):
