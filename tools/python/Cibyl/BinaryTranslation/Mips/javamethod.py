@@ -197,8 +197,12 @@ class JavaMethod(CodeBlock):
 			operandStackSize = insn.maxOperandStackHeight()
 			if insn.delayed:
 				operandStackSize = operandStackSize + insn.delayed.maxOperandStackHeight()
+				if isinstance(insn.delayed, instruction.MemoryAccess):
+					self.usesMemoryInstructions = True
 			if insn.prefix:
 				operandStackSize = operandStackSize + insn.prefix.maxOperandStackHeight()
+				if isinstance(insn.prefix, instruction.MemoryAccess):
+					self.usesMemoryInstructions = True
 
 			if operandStackSize > self.maxOperandStack:
 				self.maxOperandStack = operandStackSize
