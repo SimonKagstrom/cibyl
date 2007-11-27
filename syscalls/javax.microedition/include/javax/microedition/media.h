@@ -18,6 +18,9 @@ extern "C" {
 
 #include <cibyl.h>
 
+#define NOPH_ToneControl_C4 60
+#define NOPH_ToneControl_SILENCE -1
+
 void NOPH_Manager_playTone(int note, int duration, int volume); /* Throws */
 
 #if defined(__cplusplus)
