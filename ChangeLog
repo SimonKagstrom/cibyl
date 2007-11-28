@@ -38,7 +38,7 @@ Cibyl (14)
 
 	* GDB server: only RA is in CRunTime.java now
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Wed Nov 28 18:02:26 CET 2007
 
 Cibyl (13)
 	* Let the top-level Makefile recurse into examples/
