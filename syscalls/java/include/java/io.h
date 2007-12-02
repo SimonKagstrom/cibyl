@@ -38,12 +38,12 @@ void NOPH_InputStream_close(NOPH_InputStream_t is); /* Throws */
 int NOPH_InputStream_skip(NOPH_InputStream_t is, int n); /* Throws */
 
 /* Output stream stuff */
-void NOPH_OutputStream_new(NOPH_OutputStream_t os);
 void NOPH_OutputStream_write(NOPH_OutputStream_t os, int b); /* Throws */
-void NOPH_OutputStream_writeInt(NOPH_OutputStream_t os, int i); /* Throws */
-void NOPH_OutputStream_writeShort(NOPH_OutputStream_t os, short i); /* Throws */
 void NOPH_OutputStream_flush(NOPH_OutputStream_t os); /* Throws */
 void NOPH_OutputStream_close(NOPH_OutputStream_t os); /* Throws */
+
+void NOPH_DataOutputStream_writeInt(NOPH_DataOutputStream_t os, int i); /* Throws */
+void NOPH_DataOutputStream_writeShort(NOPH_DataOutputStream_t os, short i); /* Throws */
 
 /* EOFException */
 NOPH_EOFException_t NOPH_EOFException_new(void);
