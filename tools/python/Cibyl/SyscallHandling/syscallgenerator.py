@@ -149,12 +149,16 @@ class SyscallHeaderGenerator(SyscallGenerator):
 
 
 class SyscallWrapperGenerator(SyscallGenerator):
-    def __init__(self, program, syscallDirectories, dirs, syscallSets, outdir, defines=[]):
+    def __init__(self, program, syscallDirectories, dirs, syscallSets, outdir, defines=[], generateAllSyscalls = False):
 	self.dirs = dirs
 	self.syscallSets = generateSyscallSetDependencies(self.dirs, syscallSets)
 	self.functions = functionsFromHeaderDirectories(syscallDirectories)
 
-	self.controller = Controller(program, syscallDirectories, onlyReadSyscalls=True)
+	self.generateAllSyscalls = generateAllSyscalls
+	if generateAllSyscalls:
+	    self.controller = None
+	else:
+	    self.controller = Controller(program, syscallDirectories, onlyReadSyscalls=True)
 	self.outdir = outdir
 	self.outfile = open(outdir + "/Syscalls.java", "w")
 	self.defines = defines
@@ -182,7 +186,7 @@ class SyscallWrapperGenerator(SyscallGenerator):
 	for curDir in self.dirs:
 	    lines = []
 	    for item in self.functions:
-		if self.controller.usesSyscall(item.name) and fileExists(curDir + "/" + item.getSyscallSet()):
+		if (self.generateAllSyscalls or self.controller.usesSyscall(item.name)) and fileExists(curDir + "/" + item.getSyscallSet()):
 		    lines.append(item.generateJavaCall(curDir + "/" + item.getSyscallSet() ))
 	    self.outfile.writelines( preprocess(self.defines, lines) )
 	self.outfile.write("}\n")
