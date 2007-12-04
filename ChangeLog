@@ -1,4 +1,8 @@
 Cibyl (14)
+	* Fixed bug in the register value tracking - it needs to
+	invalidate registers on basic block entry *and* exit (branch), not
+	just on entry. Well, well.
+
 	* Make -O2 the default optimization level. The "Kings Quest I
 	enter into castle" bug in Sarien is actually fixed by this. Looks
 	like a GCC bug.

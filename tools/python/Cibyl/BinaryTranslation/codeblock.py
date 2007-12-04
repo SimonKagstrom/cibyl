@@ -114,6 +114,7 @@ class CodeBlock:
 				self.controller.emit(".line %d" % ( lineNr ))
 			if self.labels.has_key(insn.address):
 				self.controller.emit( str(self.labels[insn.address]) + ":" )
+			if self.labels.has_key(insn.address) or insn.isBranch:
 				self.optimizer.invalidateAllRegisters()
 			self.controller.emit("; " + str(insn))
 			if insn.delayed:
