@@ -1,4 +1,15 @@
 Cibyl (14)
+	* Make -O2 the default optimization level. The "Kings Quest I
+	enter into castle" bug in Sarien is actually fixed by this. Looks
+	like a GCC bug.
+
+	* Corrected various syscall stuff,  isinff name (was isnanf...),
+	some of the softfloat functions are not implemented in J2ME,
+	cannot create OutputStream (abstrac) etc
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
+Cibyl (14)
 	* More peephole optimizations: move constant assignments past
 	memory pushing (to simplify other peephole optimizations), better
 	support for catching double stores

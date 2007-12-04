@@ -23,9 +23,9 @@ ar       ?= mips-linux-gnu-ar
 # Cibyl, although I would wish it could be turned off only by itself.
 INCLUDES += -I$(CIBYL_BASE)/include -I$(CIBYL_BASE)/include/generated -I.
 ASOPTS   = -G0 -Wall -Wa,--no-warn -g -mips1 -mno-check-zero-division -mno-abicalls -fno-pic $(INCLUDES) $(ASFLAGS)
-COPTS    = -G0 -DCIBYL=1 -g -msoft-float -fno-optimize-sibling-calls -nostdinc -Wall -Wa,--no-warn -mips1 -mno-check-zero-division -Os -fno-pic -mno-abicalls $(INCLUDES) $(CFLAGS) $(DEFINES)
+COPTS    = -G0 -DCIBYL=1 -g -msoft-float -fno-optimize-sibling-calls -nostdinc -Wall -Wa,--no-warn -mips1 -mno-check-zero-division -O2 -fno-pic -mno-abicalls $(INCLUDES) $(CFLAGS) $(DEFINES)
 LDLIBS   += -lc -ljava
-LDOPTS_DEBUG = -L$(CIBYL_BASE)/libs/lib/ -EB -nostdlib --whole-archive -T$(CIBYL_BASE)/build/linker.lds
+LDOPTS_DEBUG = -L$(CIBYL_BASE)/libs/lib/ -EB -nostdlib --whole-archive
 LDOPTS   = $(LDOPTS_DEBUG) --emit-relocs
 
 CRT0    ?= $(CIBYL_BASE)/libs/crt0.o
@@ -35,10 +35,10 @@ ALL_TARGETS ?= $(TARGET) $(TARGET).debug
 all: $(ALL_TARGETS)
 
 $(TARGET).debug: $(OBJS)
-	$(ld) $(LDOPTS_DEBUG) $+ $(CRT0) --start-group -lcrt0 $(LDLIBS) --end-group -o $@
+	$(ld) $(LDOPTS_DEBUG) $+ $(CRT0) $(CIBYL_BASE)/libs/crt0-qemu-debug.o -T$(CIBYL_BASE)/build/linker.lds --start-group -lcrt0 $(LDLIBS) -ldebug --end-group -o $@
 
 $(TARGET): $(OBJS)
-	$(ld) $(LDOPTS) $+ $(CRT0) --start-group -lcrt0 $(LDLIBS) --end-group -o $@
+	$(ld) $(LDOPTS) $+ $(CRT0) -T$(CIBYL_BASE)/build/linker.lds --start-group -lcrt0 $(LDLIBS) --end-group -o $@
 
 
 %.a: $(OBJS)
