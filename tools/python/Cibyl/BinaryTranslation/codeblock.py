@@ -114,7 +114,7 @@ class CodeBlock:
 				self.controller.emit(".line %d" % ( lineNr ))
 			if self.labels.has_key(insn.address):
 				self.controller.emit( str(self.labels[insn.address]) + ":" )
-			if self.labels.has_key(insn.address) or insn.isBranch:
+			if self.labels.has_key(insn.address):
 				self.optimizer.invalidateAllRegisters()
 			self.controller.emit("; " + str(insn))
 			if insn.delayed:
@@ -122,6 +122,8 @@ class CodeBlock:
 			if self.useTracing:
 				insn.trace()
 			insn.compile()
+			if insn.delayed:
+			    self.optimizer.invalidateAllRegisters()
 
 	def getByteCodeSize(self):
 		"Get the approximate size of the bytecode in this code block"
