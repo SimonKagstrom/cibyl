@@ -63,9 +63,10 @@ if not options.generateAllSyscalls and len(args) < 2:
 
 if options.generateAllSyscalls:
     elffile = None
+    syscallSets = args
 else:
     elffile = args[0]
-syscallSets = args[1:]
+    syscallSets = args[1:]
 
 f = SyscallWrapperGenerator(elffile, syscallDirectories, headerDirectories, syscallSets,
 			    outdir = options.outdir, defines = defines, generateAllSyscalls = options.generateAllSyscalls)
