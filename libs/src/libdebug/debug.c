@@ -10,13 +10,14 @@
  *
  ********************************************************************/
 #include <stdio.h>
+#include <stdint.h>
 
-#include "regnames.h"
+#include <cibyl-mips-regdef.h>
 
-unsigned long cibyl_debug_regs[N_REGS];
+unsigned long cibyl_debug_regs[NREGS];
 static unsigned long stack_start;
 
-static const char *regnr_to_name[N_REGS] =
+static const char *regnr_to_name[NREGS] =
 {
   [R_ZERO] = "zero",   [R_AT] = "  at", [R_V0] = "  v0",
   [R_V1]   = "  v1",   [R_A0] = "  a0", [R_A1] = "  a1",
@@ -54,7 +55,7 @@ void cibyl_dump_stack_helper(void)
   unsigned long *p_stk = (unsigned long*)regs[R_SP];
 
   printf("Registers:");
-  for (i=0; i < N_REGS; i++)
+  for (i=0; i < NREGS; i++)
     {
       if (i % 4 == 0)
 	printf("\n");
@@ -74,3 +75,33 @@ void cibyl_dump_stack_helper(void)
     }
   printf("\n");
 }
+
+/* --- Cibyl/Qemu implementation --- */
+volatile uint32_t *cibyl_device = (volatile uint32_t*)0x10000000;
+
+/* Exception handler for reserved instructions */
+uint32_t __qemu_reserved(uint32_t *saved_regs,
+			 uint32_t c0_status, uint32_t c0_cause, uint32_t c0_epc)
+{
+  uint32_t *insn = (uint32_t*)c0_epc;
+
+  /* FIXME: Check if this really is valid */
+  if ( (((*insn) >> 24) & 0xfe) == 0xfe )
+    *cibyl_device = saved_regs[(*insn) & 0xffff];
+
+  if ( (((*insn) >> 24) & 0xf0) == 0xf0 )
+    {
+      *(cibyl_device+1) = 0xc1b41;
+      /* This was a call, now read the return value */
+      saved_regs[R_V0] = *cibyl_device;
+    }
+
+  return c0_epc + 4;
+}
+
+uint32_t __qemu_default(uint32_t *saved_regs,
+			uint32_t c0_status, uint32_t c0_cause, uint32_t c0_epc)
+{
+  return c0_epc + 4;
+}
+
