@@ -21,12 +21,13 @@ class QemuServer
 	public int value;
 	public int args[];
 
-	public static final int MSG_PEER_MEM_READ = 1;
-	public static final int MSG_PEER_MEM_WRITE = 2;
-	public static final int MSG_PEER_CALLBACK = 3;
-	public static final int MSG_QEMU_REQ = 4;
-	public static final int MSG_QEMU_MEM_VALUE = 5;
-	public static final int MSG_OK = 6;
+	public static final int MSG_PEER_MEM_READ   = 1;
+	public static final int MSG_PEER_MEM_WRITE  = 2;
+	public static final int MSG_PEER_CALLBACK   = 3;
+	public static final int MSG_QEMU_REQ        = 4;
+	public static final int MSG_QEMU_MEM_VALUE  = 5;
+	public static final int MSG_QEMU_SET_STRTAB = 6;
+	public static final int MSG_OK              = 7;
 
 	public Packet()
 	{
@@ -68,13 +69,17 @@ class QemuServer
 
     public QemuServer()
     {
-	this.connection = (ServerSocketConnection)Connector.open("socket://:9788");
+	try {
+	    this.connection = (ServerSocketConnection)Connector.open("socket://:9788");
+	} catch(Exception e) {
+	    System.err.println("Threw " + e);
+	}
     }
 
-    private void error(String s) throws Exception
+    private void error(String s)
     {
 	System.err.println(s);
-	throw new Exception("Error");
+	//	throw new Exception("Error");
     }
 
 
@@ -146,15 +151,37 @@ class QemuServer
 	    }
     }
 
+    private void setStrtab(Packet p)
+    {
+	int startAddress = p.args[0];
+	int endAddress = p.args[1];
+	byte strs[] = new byte[endAddress - startAddress];
+
+	for (int addr = startAddress; addr < endAddress; addr += 4)
+	    {
+		int v = this.readMem(addr);
+
+		strs[addr - startAddress + 0] = (byte)((v & 0xff));
+		strs[addr - startAddress + 1] = (byte)((v & 0xff00) >> 8);
+		strs[addr - startAddress + 2] = (byte)((v & 0xff0000) >> 16);
+		strs[addr - startAddress + 3] = (byte)((v & 0xff000000) >> 24);
+	    }
+	this.parseStrTab(strs);
+    }
+
     public void run()
     {
 	SocketConnection socket;
 	Packet p = new Packet();
 
-	socket = (SocketConnection)this.connection.acceptAndOpen();
+	try {
+	    socket = (SocketConnection)this.connection.acceptAndOpen();
 
-	this.is = socket.openDataInputStream();
-	this.os = socket.openDataOutputStream();
+	    this.is = socket.openDataInputStream();
+	    this.os = socket.openDataOutputStream();
+	} catch(Exception e) {
+	    System.err.println("Threw exception " + e);
+	}
 
 	/* Read packets */
 	while (true)
@@ -162,6 +189,9 @@ class QemuServer
 		p.read(is);
 		switch (p.value)
 		    {
+		    case Packet.MSG_QEMU_SET_STRTAB:
+			this.setStrtab(p);
+			break;
 		    case Packet.MSG_QEMU_REQ:
 			Syscalls.run(this, p.value, p.args);
 			break;
