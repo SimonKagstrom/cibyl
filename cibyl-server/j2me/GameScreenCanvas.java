@@ -38,12 +38,8 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
     this.qemuServer = new QemuServer();
 
     try {
-      DataInputStream is = this.getResourceStream("/program.data.bin");
-
       /* Setup the runtime support */
-      CRunTime.init(is, this.qemuServer);
-      is.close();
-      is = null;
+      CRunTime.init(null, this.qemuServer);
     } catch (Exception e) {
       this.showError(e, e.getMessage());
     }
