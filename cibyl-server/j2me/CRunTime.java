@@ -73,14 +73,6 @@ public class CRunTime
     memorySize -= (memorySize & 7);
     CRunTime.eventStackPointer = memorySize - 8;
 
-    int len = codeStream.available() / 4;
-
-    if (len < 5)
-      {
-          /* This binary is broken - we need the header data */
-          throw new Exception("Data input is too small");
-      }
-
     CRunTime.init(codeStream, memorySize);
   }
 
