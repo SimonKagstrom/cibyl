@@ -1,4 +1,6 @@
 Cibyl (15)
+	* Initial work on the Qemu proxy server and debug support.
+
 	* Fixed bug in the register value tracking - it needs to
 	invalidate registers on basic block entry *and* exit (branch), not
 	just on entry. Well, well.
