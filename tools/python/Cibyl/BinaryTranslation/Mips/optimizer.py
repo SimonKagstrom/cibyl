@@ -12,9 +12,6 @@
 import mips
 
 class Value:
-	def __init__(self):
-		pass
-
 	def doOperation(self, s, *args):
 		if s == "+": return self.__add__(*args)
 		if s == "-": return self.__sub__(*args)
