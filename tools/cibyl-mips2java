@@ -81,6 +81,11 @@ parser.add_option("--call-table-hierarchy", default=1,
 				  help="""Split the call table in NR hiearchies (workaround a JVM bug on some
 phones). Default is 1 (no hierarchy)""",
 		  dest="callTableHierarchy", metavar="NR")
+parser.add_option("--use-direct-memory-references", action="store_true", default=False,
+		  help="""Emit the memory vector directly for each memory access instead of
+using an aload reference (which saves space and might improve
+performance). This is a workaround against problems on some SE phones.""",
+		  dest="aloadMemory")
 parser.add_option("--peephole-iterations", default=2,
 				  help="""Set the number of iterations to run the peephole optimizer (default 2)""",
 		  dest="peepholeIterations", metavar="NR")
@@ -138,6 +143,7 @@ if len(args) != 1:
 	parser.error("incorrect number of arguments.\n\nInvoke with --help for arguments")
 infile = args[0]
 
+config.aloadMemory = not options.aloadMemory # OK, this looks strange. I agree
 config.doMultOptimization = options.multiplication_optimization
 config.doMemoryRegisterOptimization = options.memory_register_optimization
 config.doRegisterScheduling = options.optimize_register_scheduling
@@ -202,8 +208,10 @@ if options.optimize_all:
 	config.doPeepholeOptimize = True
 	config.doRegisterValueTracking = True
 
-config.checkEnvironment()
+def doCompile():
+	global controller
+	config.checkEnvironment()
+	controller = Controller(config.infile, syscallDirectories)
+	controller.compile()
 
-# Translate the MIPS file to Java class(es)
-controller = Controller(config.infile, syscallDirectories)
-controller.compile()
+doCompile()

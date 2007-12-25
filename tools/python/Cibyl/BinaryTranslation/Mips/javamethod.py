@@ -279,7 +279,7 @@ class JavaMethod(CodeBlock):
 					self.bc.pushConst(0)
 				self.bc.istore(local)
 
-		if self.usesMemoryInstructions:
+		if config.aloadMemory and self.usesMemoryInstructions:
 			self.bc.getstatic("CRunTime/memory [I")
 			self.rh.popToRegister(mips.R_MEM)
 

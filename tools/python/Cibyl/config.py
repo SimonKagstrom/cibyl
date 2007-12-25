@@ -22,6 +22,7 @@ doOptimizeIndirectCalls = False
 doPeepholeOptimize = False
 doRegisterValueTracking = False
 
+aloadMemory = True
 
 doInlineAllBuiltins = False
 inlineBuiltinsFunctions = []

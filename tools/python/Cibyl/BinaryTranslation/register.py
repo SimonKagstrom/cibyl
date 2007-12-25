@@ -169,7 +169,10 @@ class RegisterHandler:
 			self.byteCodeGenerator.pushConst(0)
 		elif reg == mips.R_MEM:
                         nr = self.regToLocalVariable(reg)
-			self.byteCodeGenerator.aload(nr)
+			if config.aloadMemory:
+				self.byteCodeGenerator.aload(nr)
+			else:
+				self.byteCodeGenerator.getstatic("CRunTime/memory [I")
 		elif regIsStatic(reg):
 			self.byteCodeGenerator.getstatic(staticRegs[reg])
 		else:
@@ -180,7 +183,7 @@ class RegisterHandler:
 		if reg == 0:
 			print "WARNING: Trying to assign to register zero. Ignored.", self
 			return
-		elif reg == mips.R_MEM:
+		elif config.aloadMemory and reg == mips.R_MEM:
 			nr = self.regToLocalVariable(reg)
 			self.byteCodeGenerator.astore(nr)
 		elif regIsStatic(reg):

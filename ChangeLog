@@ -1,5 +1,10 @@
 Cibyl (15)
-	* Initial work on the Qemu proxy server and debug support.
+	* Added an option to turn off the generation of CRunTime.memory
+	aloads/astores. This works around a SE bug in Sarien (stupid
+	phones!)
+
+	* Initial work on the Qemu proxy server and debug support. This
+	does _not_ yet work
 
 	* Fixed bug in the register value tracking - it needs to
 	invalidate registers on basic block entry *and* exit (branch), not
