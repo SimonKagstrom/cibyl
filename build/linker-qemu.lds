@@ -22,5 +22,7 @@ SECTIONS
 
 	/* The string table with the system call names */
 	. = 0xff000000;
+	PROVIDE(__cibylstrtab_begin = .);
        	.cibylstrtab : { *(.cibylstrtab) }
+	PROVIDE(__cibylstrtab_end = .);
 }
