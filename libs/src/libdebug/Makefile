@@ -18,4 +18,3 @@ include $(CIBYL_BASE)/build/Rules.mk
 
 install: libdebug.a
 	cp $< $(CIBYL_BASE)/libs/lib
-	cp cibyl-debug.h $(CIBYL_BASE)/include/generated/
