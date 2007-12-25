@@ -76,8 +76,12 @@ __qemu_start:
 	and	t0, t0, t1 # Set the exception vector to 0x80000080
 	mtc0	t0, c0_status
 
-	.long	0xfefe0004
-	.long	0xff000100
+
+	la	a0, __cibylstrtab_begin
+	la	a1, __cibylstrtab_end
+	.long	0xfefe0004	# pass a0
+	.long	0xfefe0005	# pass a1
+	.long	0xffffffff	# special case - pass the string table!
 
 	j	__start
 	nop
