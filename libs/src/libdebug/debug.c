@@ -89,9 +89,9 @@ uint32_t __qemu_reserved(uint32_t *saved_regs,
   if ( (((*insn) >> 24) & 0xfe) == 0xfe )
     *cibyl_device = saved_regs[(*insn) & 0xffff];
 
-  if ( (((*insn) >> 24) & 0xf0) == 0xf0 )
+  if ( (((*insn) >> 24) & 0xff) == 0xff )
     {
-      *(cibyl_device+1) = 0xc1b41;
+      *(cibyl_device+1) = *insn;
       /* This was a call, now read the return value */
       saved_regs[R_V0] = *cibyl_device;
     }
