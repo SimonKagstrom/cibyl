@@ -30,6 +30,11 @@ static inline int islower(int c)
   return ( c >= 'a' && c <= 'z' );
 }
 
+static inline int isalpha(int c)
+{
+  return isupper(c) || islower(c);
+}
+
 static inline int isspace(int c)
 {
   return (c == ' ') || (c == '\f') || (c == '\n') || (c == '\r') ||
