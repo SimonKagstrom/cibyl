@@ -79,7 +79,7 @@ extern int vsnprintf(char* str, unsigned int size, const char* format, va_list a
 extern int vfprintf(FILE *fp, const char* fmt, va_list ap);
 extern int vprintf(const char* format, va_list ap);
 extern int snprintf(char *buf, size_t n, const char *fmt, ...);
-#define sprintf(buf, fmt, x...) snprintf(buf, 0xfffffff, fmt, x)
+extern int sprintf(char *buf, const char *fmt, ...);
 extern int fprintf(FILE *fp, const char* fmt, ...);
 extern int printf(const char* fmt, ...);
 

@@ -34,6 +34,28 @@ int snprintf(char *buf, size_t n, const char *fmt, ...)
     return r;
 }
 
+
+int sprintf(char *buf, const char *fmt, ...)
+{
+    va_list ap;
+    int r;
+
+    /*
+     * Safety check
+     */
+    if ( fmt == NULL )
+	return 0;
+
+    /*
+     * Print into buffer.
+     */
+    va_start(ap, fmt);
+    r = vsnprintf(buf, 0xffffffff, fmt, ap);
+    va_end(ap);
+
+    return r;
+}
+
 /*
  * Function printf (fmt, ...)
  *
