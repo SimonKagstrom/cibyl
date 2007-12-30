@@ -158,13 +158,9 @@ void cibyl_dir_free(DIR *dir)
 
 /* ----- */
 
-FILE *fopen(const char *path, const char *in_mode)
+static cibyl_fops_t *get_fops_from_uri(const char *path, const char **uri_out)
 {
-  cibyl_fops_open_mode_t mode;
-  FILE *out = NULL;
   int i;
-
-  mode = cibyl_file_get_mode(in_mode);
 
   for (i = 0; i < fops.n_ops; i++)
     {
@@ -174,23 +170,31 @@ FILE *fopen(const char *path, const char *in_mode)
 
       if (uri && strncmp(uri, path, len) == 0)
 	{
+	  *uri_out = uri;
 	  /* URI match! */
-          if (cur->keep_uri)
-            len = 0;
-	  if ( !(out = cur->open(path + len, mode)) )
-            return NULL;
-          return out;
+	  return cur;
 	}
     }
 
-  /* Found nothing, return the default */
-  if (fops.fallback)
-    {
-      if ( !(out = fops.fallback->open(path, mode)) )
-        return NULL;
-    }
+  return NULL;
+}
 
-  return out;
+FILE *fopen(const char *path, const char *in_mode)
+{
+  cibyl_fops_open_mode_t mode;
+  cibyl_fops_t *f;
+  const char *uri = NULL;
+  int len = 0;
+
+  mode = cibyl_file_get_mode(in_mode);
+  f = get_fops_from_uri(path, &uri);
+
+  if (!f)
+    f = fops.fallback;
+
+  if (!f->keep_uri)
+    len = strlen(uri);
+  return f->open(path + len, mode);
 }
 
 
@@ -408,4 +412,9 @@ struct dirent *readdir(DIR *dir)
     return NULL;
 
   return &global_dirent;
+}
+
+int remove(const char *pathname)
+{
+  return -1;
 }
