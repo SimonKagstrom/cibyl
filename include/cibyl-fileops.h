@@ -51,6 +51,7 @@ typedef struct s_cibyl_fops
   void (*seek)(FILE *fp, long offset);  /* Move the file pointer relative to the current position  */
 
   int (*flush)(FILE *fp); /* flush the stream */
+  int (*remove)(const char *pathname); /* Remove a file (might not be supported) */
 } cibyl_fops_t;
 
 /**
