@@ -115,10 +115,7 @@ void NOPH_setter_exception_handler(NOPH_Exception_t ex, void *arg);
  */
 void NOPH_panic(const char *fmt, ...);
 
-#define NOPH_panic_if(cond, fmt...) do { \
-  if (cond)                              \
-    NOPH_panic(fmt);                     \
-} while(0)
+void NOPH_panic_if(int cond, const char *fmt, ...);
 
 #endif /* __ASSEMBLER__ */
 
