@@ -35,7 +35,7 @@ ALL_TARGETS ?= $(TARGET) $(TARGET).debug
 all: $(ALL_TARGETS)
 
 $(TARGET).debug: $(OBJS)
-	$(ld) $(LDOPTS_DEBUG) $+ $(CRT0) $(CIBYL_BASE)/libs/crt0-qemu-debug.o -T$(CIBYL_BASE)/build/linker.lds --start-group -lcrt0 $(LDLIBS) -ldebug --end-group -o $@
+	$(ld) $(LDOPTS_DEBUG) $+ $(CRT0) $(CIBYL_BASE)/libs/crt0-qemu-debug.o -T$(CIBYL_BASE)/build/linker-qemu.lds --start-group -lcrt0 $(LDLIBS) -ldebug --end-group -o $@
 
 $(TARGET): $(OBJS)
 	$(ld) $(LDOPTS) $+ $(CRT0) -T$(CIBYL_BASE)/build/linker.lds --start-group -lcrt0 $(LDLIBS) --end-group -o $@
