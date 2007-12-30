@@ -31,7 +31,7 @@ __start:
 
         ## global destructors should be run by exit()
 	move	$4, $2		# move a0, v0
-	jal	__exit
+	jal	exit
 	nop
 .end	__start
 
