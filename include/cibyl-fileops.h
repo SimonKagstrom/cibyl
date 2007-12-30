@@ -30,7 +30,7 @@ typedef enum
   WRITE,         /* "w"  */
   APPEND,        /* "a"  */
   READ_APPEND,   /* "a+"  */
-  READ_TRUNCATE, /* "w+" */
+  READ_TRUNCATE  /* "w+" */
 } cibyl_fops_open_mode_t;
 
 /**
