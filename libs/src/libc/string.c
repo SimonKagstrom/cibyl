@@ -67,6 +67,26 @@ void *memcpy(void *dest, const void *src, size_t n)
   return dest;
 }
 
+void *memmove(void *s1, const void *s2, size_t n)
+{
+  register char *s = (char *) s1;
+  register const char *p = (const char *) s2;
+
+  if (p >= s) {
+    while (n) {
+      *s++ = *p++;
+      --n;
+    }
+  } else {
+    while (n) {
+      --n;
+      s[n] = p[n];
+    }
+  }
+
+  return s1;
+}
+
 /*
  * From uClibc, some modifications ...
  *
