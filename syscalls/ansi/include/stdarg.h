@@ -37,7 +37,7 @@ Boston, MA 02110-1301, USA.  */
 #undef __need___va_list
 
 /* Define __gnuc_va_list.  */
-
+#define __STDC_VERSION__ 199900
 #ifndef __GNUC_VA_LIST
 #define __GNUC_VA_LIST
 typedef __builtin_va_list __gnuc_va_list;
