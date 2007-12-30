@@ -74,6 +74,8 @@ extern int __fputs(const char* ptr, FILE* stream); /* Not generated */
 extern size_t fread(void* ptr, size_t size, size_t nmemb, FILE* stream); /* Not generated */
 extern size_t fwrite(const void* ptr, size_t size, size_t nmemb, FILE* stream); /* Not generated */
 
+extern int remove(const char *pathname);
+
 extern int vsnprintf(char* str, unsigned int size, const char* format, va_list ap);
 #define vsprintf(str, fmt, ap) vsnprintf(str, 0xfffffff, fmt, ap)
 extern int vfprintf(FILE *fp, const char* fmt, va_list ap);
@@ -82,6 +84,8 @@ extern int snprintf(char *buf, size_t n, const char *fmt, ...);
 extern int sprintf(char *buf, const char *fmt, ...);
 extern int fprintf(FILE *fp, const char* fmt, ...);
 extern int printf(const char* fmt, ...);
+
+extern int sscanf(const char *str, const char *format, ...); /* TMP! */
 
 void __setup_io(void* addr_stdout, void* addr_stderr); /* Not generated */
 

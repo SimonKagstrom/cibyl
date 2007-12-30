@@ -9,6 +9,7 @@
 */
 
 #include <time.h>
+#include <java/util.h>
 
 static unsigned long
 _mktime (unsigned int year, unsigned int mon,
@@ -124,24 +125,23 @@ struct tm *gmtime(const time_t *timep)
 	return &t;
 }
 
+struct tm *localtime_r(const time_t *timep, struct tm *result)
+{
+	NOPH_TimeZone_t tz = NOPH_TimeZone_getDefault();
+	int bias = NOPH_TimeZone_getRawOffset(tz);
 
-/*
- * TODO: implement get_bias using a java syscall
- *
- * This function is missing the implementation of get_bias which
- * should return the the difference of the current timezone in minutes.
- * It should also return whether the current machine is in day light saving
- * time.
- */
-#if 0
+	result->tm_isdst = NOPH_TimeZone_useDaylightTime(tz);
+
+	__offtime(timep, -bias * 60, result);
+	return result;
+}
+
 struct tm *localtime(const time_t *timep)
 {
 	static struct tm t;
-	int bias = -get_bias(&t.tm_isdst);
-	__offtime(timep, -bias * 60, &t);
-	return &t;
+
+	return localtime_r(timep, &t);
 }
-#endif
 
 time_t timegm(struct tm *_tm)
 {

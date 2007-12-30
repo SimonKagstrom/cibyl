@@ -33,6 +33,9 @@ struct tm {
 extern struct tm *gmtime(const time_t *timep);
 extern time_t timegm(struct tm *_tm);
 
+extern struct tm *localtime(const time_t *timep);
+extern struct tm *localtime_r(const time_t *timep, struct tm *result);
+
 time_t time(time_t* t); /* Not generated */
 int __gettimeofday(int* tv, int* tz); /* Not generated */
 

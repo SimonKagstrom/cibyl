@@ -46,6 +46,18 @@ static inline int isdigit(int c)
   return (c >= '0') && (c <= '9');
 }
 
+static inline int isalnum(int c)
+{
+  return isalpha(c) || isdigit(c);
+}
+
+static inline int isprint(int c)
+{
+  c &= 0x7f;
+
+  return (c >= 32 && c < 127);
+}
+
 extern int tolower (int c);
 extern int toupper (int c);
 
