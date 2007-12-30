@@ -21,8 +21,9 @@ extern "C" {
 /* Helper to register callback functions (this is not part of ANSI C, but... ) */
 int NOPH_registerCallback(char* name, int fnAddr); /* Not generated */
 
-void exit(int code); /* Not generated */
-#define abort() exit(1)
+void __exit(int code); /* Not generated */
+extern void __attribute__((noreturn)) exit(int code);
+#define abort() __exit(1)
 
 extern int atexit(void (*function)(void));
 

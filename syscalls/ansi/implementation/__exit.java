@@ -1,4 +1,4 @@
-	public static final void exit(int a0) {
+	public static final void __exit(int a0) {
 #if defined(NOJ2ME)
 	  System.exit(a0);
 #else

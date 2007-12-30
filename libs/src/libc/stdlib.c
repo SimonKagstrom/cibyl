@@ -70,3 +70,9 @@ int atoi(const char *nptr)
 {
   return strtol(nptr, NULL, 10);
 }
+
+void __attribute__((noreturn)) exit(int code)
+{
+  __exit(code);
+  while(1);
+}
