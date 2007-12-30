@@ -57,9 +57,7 @@ extern size_t strspn(const char *s, const char *accept);
 extern size_t strcspn(const char *s, const char *reject);
 extern char *strpbrk(const char *s, const char *accept);
 
-static inline void *memmove(void *dest, const void *src, size_t n) {
-  return memcpy(dest, src, n);
-}
+extern void *memmove(void *dest, const void *src, size_t n);
 
 #if defined(__cplusplus)
 }
