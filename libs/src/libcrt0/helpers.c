@@ -89,6 +89,27 @@ void NOPH_panic(const char *fmt, ...)
   exit(1);
 }
 
+void NOPH_panic_if(int cond, const char *fmt, ...)
+{
+  char buf[255];
+  va_list ap;
+
+  if (!cond)
+    return;
+
+  /*
+   * Print into buffer.
+   */
+  va_start(ap, fmt);
+  vsnprintf(buf, sizeof(buf), fmt, ap);
+  va_end(ap);
+
+  fprintf(stderr, "PANIC: ");
+  fprintf(stderr, buf);
+  fprintf(stderr, "\n");
+  NOPH_throw(NOPH_Exception_new());
+  exit(1);
+}
 
 /* Dummy functions - handled by builtins always */
 void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), void *arg)
