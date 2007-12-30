@@ -1,10 +1,23 @@
 Cibyl (15)
+	* Added a remove() function pointer for the fops. This is used to
+	remove files in the different file systems (although none are
+	implemented yet). Also slightly restructured the handling of file
+	ops.
+
+	* Remove the unecessary ; at the end of _syscall definitions
+	(causes a warning with some GCC options)
+
+	* exit is now really noreturn and is a real function
+
+	* Implemented localtime, localtime_r and the Java TimeZone class
+	(parts of), sscanf from dietlibc and limits.h from glibc
+
 	* Added an option to turn off the generation of CRunTime.memory
 	aloads/astores. This works around a SE bug in Sarien (stupid
 	phones!)
 
 	* Initial work on the Qemu proxy server and debug support. This
-	does _not_ yet work
+	does *not* work yet.
 
 	* Fixed bug in the register value tracking - it needs to
 	invalidate registers on basic block entry *and* exit (branch), not
