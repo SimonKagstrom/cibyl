@@ -51,8 +51,10 @@ class Controller(codeblock.CodeBlock):
 		self.prunedRanges = []
 		self.processes = []
 
+		self.bc = bytecode.ByteCodeGenerator(self)
+
 		self.optimizer = optimizer.Optimizer()
-		self.registerHandler = register.RegisterHandler(self, bytecode.ByteCodeGenerator(self))
+		self.registerHandler = register.RegisterHandler(self, self.bc)
 		self.elf = Cibyl.elf.Elf(self.filename)
 
 		self.addressesToName = getSyscallStrings(self.elf.getSectionContents(".cibylstrtab"))

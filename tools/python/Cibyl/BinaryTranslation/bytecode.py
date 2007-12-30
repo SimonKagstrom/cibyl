@@ -9,24 +9,6 @@
 ## $Id: bytecode.py 12821 2006-12-22 14:46:47Z ska $
 ##
 ######################################################################
-opcodeSize = {
-	"ishr"   : 1,
-	"ishl"   : 1,
-	"iushr"  : 1,
-	"iadd"   : 1,
-	"isub"   : 1,
-	"iand"   : 1,
-	"iload"  : 1,
-	"iload_0": 1,
-	"iload_1": 1,
-	"iload_2": 1,
-	"iload_3": 1,
-}
-
-def sizeof(what):
-	"Returns the size of the instruction and constant passed"
-	return 1
-
 class ByteCodeGenerator:
 	def __init__(self, controller):
 		self.controller = controller
@@ -166,9 +148,6 @@ class ByteCodeGenerator:
 
 	def invokestatic(self, fn):
 		self.emit('invokestatic %s' % (fn) )
-
-	def getSize(self):
-		return 1 # At least :-)
 
 	def emit(self, what):
 		self.controller.emit("\t%s" % what)
