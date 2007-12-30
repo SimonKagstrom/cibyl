@@ -144,7 +144,7 @@ class SyscallHeaderGenerator(SyscallGenerator):
 		if item.getNrArgs() > 0:
 		    for arg in item.getArgs():
 			outfile.write(", %s" % arg)
-		outfile.write("); %s\n" % (item.getQualifier()) )
+		outfile.write(") %s\n" % (item.getQualifier()) )
 	    outfile.close()
 
 
