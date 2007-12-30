@@ -18,9 +18,18 @@ extern "C" {
 #include <java/lang.h>
 
 typedef int NOPH_Enumeration_t;
+typedef int NOPH_TimeZone_t;
 
 bool_t NOPH_Enumeration_hasMoreElements(NOPH_Enumeration_t enumeration);
 NOPH_Object_t NOPH_Enumeration_nextElement(NOPH_Enumeration_t enumeration); /* Throws */
+
+/* Time zone stuff */
+NOPH_TimeZone_t NOPH_TimeZone_getDefault(void);
+NOPH_TimeZone_t NOPH_TimeZone_getTimeZone(char *ID);
+int NOPH_TimeZone_getRawOffset(NOPH_TimeZone_t tz);
+NOPH_String_t NOPH_TimeZone_getID(NOPH_TimeZone_t tz);
+bool_t NOPH_TimeZone_useDaylightTime(NOPH_TimeZone_t tz);
+
 
 #if defined(__cplusplus)
 }
