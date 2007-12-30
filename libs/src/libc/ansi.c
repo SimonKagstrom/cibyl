@@ -32,10 +32,6 @@ static void __attribute__((constructor)) setup_ansi_support(void)
   stderr = NOPH_OutputStream_createFILE(os_stderr);
 }
 
-
-/* This is the other way around - called from assembly */
-void __exit(int val) { exit(val); }
-
 #undef putchar
 int putchar(int c) { return __putchar(c); }
 
