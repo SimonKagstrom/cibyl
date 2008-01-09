@@ -30,7 +30,8 @@ LDOPTS   = $(LDOPTS_DEBUG) --emit-relocs
 
 CRT0    ?= $(CIBYL_BASE)/libs/crt0.o
 
-ALL_TARGETS ?= $(TARGET) $(TARGET).debug
+ALL_TARGETS ?= $(TARGET)
+# $(TARGET).debug
 
 all: $(ALL_TARGETS)
 
