@@ -101,37 +101,28 @@ class CodeBlock:
 		"Add an instruction to the set of instructions in this code block"
 		self.instructions.append(insn)
 
-	def doAssignment(self, reg, val):
-		print "ASSIGNING %d to %d" % (reg, val.value)
-
 	def compile(self):
 		"Compile this code block"
 		for insn in self.instructions:
-			insn.run()
 			# Emit line number
-			lineNr = (insn.address - self.controller.elf.getEntryPoint()) / 4
 			if config.debug:
+				lineNr = (insn.address - self.controller.elf.getEntryPoint()) / 4
 				self.controller.emit(".line %d" % ( lineNr ))
 			if self.labels.has_key(insn.address):
 				self.controller.emit( str(self.labels[insn.address]) + ":" )
-			if self.labels.has_key(insn.address):
-				self.optimizer.invalidateAllRegisters()
+			if config.doRegisterValueTracking:
+				insn.run()
+				if self.labels.has_key(insn.address):
+					self.optimizer.invalidateAllRegisters()
 			self.controller.emit("; " + str(insn))
 			if insn.delayed:
 				self.controller.emit("; " + str(insn.delayed))
 			if self.useTracing:
 				insn.trace()
 			insn.compile()
-			if insn.delayed:
+			if config.doRegisterValueTracking and insn.delayed:
 			    self.optimizer.invalidateAllRegisters()
-
-	def getByteCodeSize(self):
-		"Get the approximate size of the bytecode in this code block"
-		if self.byteCodeSize == None:
-			self.byteCodeSize = 0
-			for insn in self.instructions:
-				self.byteCodeSize += 4
-		return self.byteCodeSize
+		del self.instructions
 
 	def getSize(self):
 		"Approximate the size of this codeblock"
@@ -139,10 +130,7 @@ class CodeBlock:
 
 	def splitByAddresses(self, start, end):
 		"Make a new list/dictionary of instructions and labels within an address range"
-		insns = [x for x in self.instructions if x.address >= start and x.address < end]
-		labels = dict([(k,v) for k,v in self.labels.iteritems() if v.address >= start and v.address < end])
-
-		return insns, labels
+		return [x for x in self.instructions if x.address >= start and x.address < end], dict([(k,v) for k,v in self.labels.iteritems() if v.address >= start and v.address < end])
 
 	def __cmp__(self, other):
 		return cmp(self.address, other.address)
