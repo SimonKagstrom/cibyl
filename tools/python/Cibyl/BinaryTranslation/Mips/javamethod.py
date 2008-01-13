@@ -295,6 +295,7 @@ class JavaMethod(CodeBlock):
 		# Emit the local jumptable
 		lookuptab = self.generateLookupTable()
 		if lookuptab:
+			self.bc.goto("__CIBYL_function_return") # To catch noreturns
 			self.controller.emit("__CIBYL_local_jumptab:")
 			self.bc.lookupswitch(lookuptab, "__CIBYL_function_return")
 

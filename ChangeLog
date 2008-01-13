@@ -16,7 +16,9 @@ Cibyl (15)
 	* Remove the unecessary ; at the end of _syscall definitions
 	(causes a warning with some GCC options)
 
-	* exit is now really noreturn and is a real function
+	* exit is now really noreturn and is a real function. Also fixed
+	the local jumptab to deal with these situations (add a jump over
+	it to prevent that something just "falls" into it)
 
 	* Implemented localtime, localtime_r and the Java TimeZone class
 	(parts of), sscanf from dietlibc and limits.h from glibc
