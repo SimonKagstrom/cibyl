@@ -23,7 +23,7 @@ class Function(CodeBlock):
 		self.name = name
 		sym = self.controller.elf.getSymbolByAddress(self.address)
 		if self.address == self.controller.elf.getEntryPoint():
-			self.name = "start"	
+			self.name = "start"
 		elif sym.localLinkage():
 			self.name = self.name +  "_%x" % (self.address)
 		self.basicBlocks = []
@@ -33,22 +33,23 @@ class Function(CodeBlock):
 		self.isRecursive = False
 
 		# Create basic blocks and check leafness
-		tmp = []
+		first = 0
+		last = 0
 		for insn in self.instructions:
-			tmp.append(insn)
+			last = last + 1
 			if insn.isBranch or insn.isBranchDestination and not insn.address == self.address:
 				# Remove the last instruction if this is a branch -
 				# but not for the function entry point. The reason is
 				# that some functions might start with a branch
 				if insn.isBranchDestination and not insn.address == self.address:
-					tmp = tmp[:-1]
-				if tmp != []:
+					last = last - 1
+				if last != first:
 					# Do not append empty basic blocks
-					bb = BasicBlock(self.controller, tmp, self.labels, trace)
+					bb = BasicBlock(self.controller, self.instructions[first:last], self.labels, trace)
 					self.basicBlocks.append(bb)
-				tmp = []
+				first = last
 				if insn.isBranchDestination and not insn.address == self.address:
-					tmp.append(insn)
+					last = last + 1
 
 			if insn.isFunctionCall:
 				self.isLeafFunction = False
@@ -59,8 +60,8 @@ class Function(CodeBlock):
 			insn.setFunction(self)
 		else:
 			# Last one
-			if tmp != []:
-				self.basicBlocks.append(BasicBlock(self.controller, tmp, self.labels, trace))
+			if last != first:
+				self.basicBlocks.append(BasicBlock(self.controller, self.instructions[first:last], self.labels, trace))
 
 	def isLeaf(self):
 		return self.isLeafFunction
@@ -103,8 +104,7 @@ class Function(CodeBlock):
 				if config.verbose: print "Removing", insn
 				insn.nullify()
 
-		returnBasicBlocks = []
-		returnBasicBlocks = returnBasicBlocks + self.getReturnBasicBlocks()
+		returnBasicBlocks = self.getReturnBasicBlocks()
 		for bb in returnBasicBlocks:
 			for insn in bb.instructions:
 				# Validate that there is no use of the saved registers
@@ -131,5 +131,5 @@ class Function(CodeBlock):
 			bb.compile()
 
 	def __str__(self):
-		out = "%s(%d):\n" % (self.name, self.getByteCodeSize())
+		out = "%s:\n" % (self.name)
 		return out + CodeBlock.__str__(self)
