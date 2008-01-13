@@ -122,7 +122,6 @@ class CodeBlock:
 			insn.compile()
 			if config.doRegisterValueTracking and insn.delayed:
 			    self.optimizer.invalidateAllRegisters()
-		del self.instructions
 
 	def getSize(self):
 		"Approximate the size of this codeblock"
