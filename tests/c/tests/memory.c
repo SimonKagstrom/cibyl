@@ -103,6 +103,26 @@ void memory_write_ushort(volatile uint16_t *p, uint16_t val,
     PASS("sh: %x != %x\n", *chk, result);
 }
 
+unsigned int memory_read_unaligned_offset(void)
+{
+  unsigned int out;
+
+  asm volatile(".section .data         \n"
+	       ".align 4               \n"
+	       "1:                     \n"
+	       ".long    0x11111111    \n"
+	       ".long    0x22222222    \n"
+	       ".section .text         \n"
+	       "la       $8, 1b        \n"
+	       "addiu    $8, $8, 1     \n"
+	       "lw       %[out], 3($8) \n"
+	       : [out]"=r"(out)
+	       :
+	       : "t0"
+	       );
+
+  return out;
+}
 
 struct tjoho
 {
@@ -154,6 +174,7 @@ void memory_test_swl(struct tjoho *src, int val,
 void memory_run(void)
 {
   struct tjoho tmp;
+  unsigned int res;
 
   memory_read_byte_unsigned(&memory_vals[0], (uint8_t)0xff);
   memory_read_byte_unsigned(&memory_vals[1], (uint8_t)0xfe);
@@ -202,6 +223,12 @@ void memory_run(void)
   memory_test_lwl(&misalign, 0x02030405);
   memory_test_lwl(&misalign2, 0xff001234);
   memory_test_lwl(&misalign3, 0x02030405);
+
+  res = memory_read_unaligned_offset();
+  if (res != 0x22222222)
+    FAIL("Reading unaligned address + offset 0x%x", res);
+  else
+    PASS("Reading unaligned address + offset 0x%x", res);
 
   tmp = misalign2;
   memory_test_swl(&tmp, 0xff001234,
