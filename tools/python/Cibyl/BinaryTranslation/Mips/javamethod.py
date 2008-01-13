@@ -10,7 +10,6 @@
 ##
 ######################################################################
 from Cibyl.BinaryTranslation import bytecode, register
-from Cibyl.BinaryTranslation.Optimization.Mips import memoryRegisters
 from Cibyl.BinaryTranslation.Optimization.Mips import mult
 from Cibyl import config
 import mips, instruction
@@ -167,13 +166,6 @@ class JavaMethod(CodeBlock):
 		for fn in self.functions:
 			fn.fixup()
 
-		if config.doMemoryRegisterOptimization:
-			for fn in self.functions:
-				for bb in fn.basicBlocks:
-					memoryRegisters.run(bb)
-					self.addDestinationRegisterSet(bb.destinationRegisters)
-					self.addSourceRegisterSet(bb.sourceRegisters)
-
 		if config.doMultOptimization:
 			for fn in self.functions:
 				mult.run(fn)
@@ -212,7 +204,7 @@ class JavaMethod(CodeBlock):
 		# used registers which are read before written to in the first
 		# basic block - or are not used there - are placed in the
 		# cleanup list
-		skipRegisters = Set(self.argumentRegisters + mips.memoryAddressRegisters + [mips.R_HI, mips.R_LO, mips.R_ZERO, mips.R_RA])
+		skipRegisters = Set(self.argumentRegisters + [mips.R_HI, mips.R_LO, mips.R_ZERO, mips.R_RA])
 		checkRegisters = self.usedRegisters - skipRegisters
 		for fn in self.functions:
 			bb0 = fn.basicBlocks[0]

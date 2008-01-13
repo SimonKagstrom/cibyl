@@ -101,10 +101,6 @@ parser.add_option("--jasmin-command-line", default=None,
 parser.add_option("--optimize-use-profile", default=None,
 				  help="""Use profile-based optimization from a J2ME profiler file""",
 		  dest="profileFile", metavar="PROFILE.prf")
-parser.add_option("--optimize-memory-registers", action="store_true", default=False,
-		  help="""Turn on the memory register optimization. This improves performance of
-frequent accesses to the same register in a basic block""",
-		  dest="memory_register_optimization")
 parser.add_option("--optimize-peephole", action="store_true", default=False,
 		  help="""Turn on the peephole optimizer""",
 		  dest="peepholeOptimize")
@@ -145,7 +141,6 @@ infile = args[0]
 
 config.aloadMemory = not options.aloadMemory # OK, this looks strange. I agree
 config.doMultOptimization = options.multiplication_optimization
-config.doMemoryRegisterOptimization = options.memory_register_optimization
 config.doRegisterScheduling = options.optimize_register_scheduling
 config.doInlineAllBuiltins = options.doInlineAllBuiltins
 config.doOptimizeIndirectCalls = options.doOptimizeIndirectCalls

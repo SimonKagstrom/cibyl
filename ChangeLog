@@ -4,7 +4,9 @@ Cibyl (15)
 
 	   lw   a0, 3(s0)
 
-	where s0 is e.g., 1.
+	where s0 is e.g., 1. The memory register optimization has been
+	removed since it's difficult to maintain with this bug. Only very
+	minor performance decrease should be expected from that
 
 	* Added a remove() function pointer for the fops. This is used to
 	remove files in the different file systems (although none are
@@ -29,10 +31,6 @@ Cibyl (15)
 	* Fixed bug in the register value tracking - it needs to
 	invalidate registers on basic block entry *and* exit (branch), not
 	just on entry. Well, well.
-
-	* Make -O2 the default optimization level. The "Kings Quest I
-	enter into castle" bug in Sarien is actually fixed by this. Looks
-	like a GCC bug.
 
 	* Corrected various syscall stuff,  isinff name (was isnanf...),
 	some of the softfloat functions are not implemented in J2ME,

@@ -95,23 +95,15 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 		if config.doRegisterValueTracking and self.optimizer.registerValueIsKnown(reg):
 		    self.pushConst( (self.optimizer.getRegisterValue(reg).value + imm) / 4 )
 		    return
-		if reg in mips.memoryAddressRegisters:
-			# The special register contains the address >> 2
-			imm = imm / 4
-			self.pushRegister(reg)
-			if imm != 0:
-				self.pushConst( imm )
-				self.emit("iadd")
-		else:
-			# Normal memory access
-			push_extra_before = False
-			self.pushRegister( reg )
-			if imm != 0:
-				self.pushConst( imm )
-				self.emit("iadd")
-				push_extra_before = True
-			self.pushConst( 2 )
-			self.emit("iushr") # (reg + imm) / 4
+		# Normal memory access
+		push_extra_before = False
+		self.pushRegister( reg )
+		if imm != 0:
+			self.pushConst( imm )
+			self.emit("iadd")
+			push_extra_before = True
+		self.pushConst( 2 )
+		self.emit("iushr") # (reg + imm) / 4
 
 	def fixup(self):
 		pass
@@ -647,24 +639,6 @@ class SyscallRegisterArgument(Instruction):
 
 	def run(self):
 		return False
-
-class AssignMemoryRegister(Instruction):
-	"""Special generated instruction to make memory accesses more efficient"""
-	def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
-		Instruction.__init__(self, controller, address, format, opCode, rd, rs, rt, extra)
-		self.sources = Set([ self.rs ])
-		self.destinations = Set([ self.rd ])
-
-	def compile(self):
-		self.controller.registerHandler.resetMemoryRegister(self.rd)
-		# Does rd = rs >> 2
-		self.pushRegister(self.rs)
-		self.pushConst(2)
-		self.emit("iushr")
-		self.popToRegister(self.rd)
-
-	def __str__(self):
-		return "  %s = %s >> 2" % (mips.registerNames[ self.rd ], mips.registerNames[ self.rs ])
 
 class BranchInstruction(Instruction):
 	def run(self):

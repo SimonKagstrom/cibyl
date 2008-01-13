@@ -139,18 +139,6 @@ registerNames = {
 # An inversion of the above
 namesToRegisters = dict([ (v, k) for k, v in registerNames.iteritems() ])
 
-memoryAddressRegisters = [
-	namesToRegisters["cm0"],
-	namesToRegisters["cm1"],
-	namesToRegisters["cm2"],
-	namesToRegisters["cm3"],
-	namesToRegisters["cm4"],
-	namesToRegisters["cm5"],
-	namesToRegisters["cm6"],
-	namesToRegisters["cm7"],
-	namesToRegisters["cm8"],
-]
-
 callerSavedRegisters = [
 	namesToRegisters["s0"],
 	namesToRegisters["s1"],
