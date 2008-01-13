@@ -1,0 +1,10 @@
+1. Compile and run all examples and the test suite with CIBYL_MIPS2JAVA_OPTS
+   empty, set to -O and set to -g
+
+2. Compile and run sarien the same way
+
+3. svn cp http://../trunk tags/cibyl-ver
+
+4. cd tags
+   ./builRelease.sh
+
