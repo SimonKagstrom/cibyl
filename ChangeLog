@@ -1,4 +1,11 @@
 Cibyl (15)
+	* Fixed a nasty bug for loads with unaligned base addresses and
+	offsets, e.g.,
+
+	   lw   a0, 3(s0)
+
+	where s0 is e.g., 1.
+
 	* Added a remove() function pointer for the fops. This is used to
 	remove files in the different file systems (although none are
 	implemented yet). Also slightly restructured the handling of file

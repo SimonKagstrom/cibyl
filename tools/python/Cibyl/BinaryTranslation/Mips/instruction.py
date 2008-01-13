@@ -104,13 +104,14 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 				self.emit("iadd")
 		else:
 			# Normal memory access
+			push_extra_before = False
 			self.pushRegister( reg )
-
+			if imm != 0:
+				self.pushConst( imm )
+				self.emit("iadd")
+				push_extra_before = True
 			self.pushConst( 2 )
 			self.emit("iushr") # (reg + imm) / 4
-			if imm != 0:
-				self.pushConst( imm / 4 )
-				self.emit("iadd")
 
 	def fixup(self):
 		pass
