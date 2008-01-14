@@ -162,6 +162,8 @@ static cibyl_fops_t *get_fops_from_uri(const char *path, const char **uri_out)
 {
   int i;
 
+  *uri_out = NULL;
+
   for (i = 0; i < fops.n_ops; i++)
     {
       cibyl_fops_t *cur = fops.table[i];
