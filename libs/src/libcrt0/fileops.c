@@ -193,8 +193,7 @@ FILE *fopen(const char *path, const char *in_mode)
 
   if (!f)
     f = fops.fallback;
-
-  if (!f->keep_uri && uri != NULL)
+  else if (!f->keep_uri && uri != NULL) /* Never for the default */
     len = strlen(uri);
   return f->open(path + len, mode);
 }
