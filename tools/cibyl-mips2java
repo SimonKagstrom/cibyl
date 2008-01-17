@@ -57,11 +57,9 @@ parser.add_option("--only-translate", action="store_true", dest="onlyTranslate",
 into .class files""")
 parser.add_option("--trace-function-calls", action="store_true", dest="traceFunctionCalls", default=False,
 				  help="Generate a trace of function calls")
-parser.add_option("--trace-function-instructions", dest="traceFunctions", default=None,
-				  help="Generate an instruction trace for the FUNCTIONS (comma-separated)",
-		  metavar="FUNCTIONS")
-parser.add_option("--trace-instructions", action="store_true", dest="tracing", default=False,
-				  help="Generate an instruction trace for all functions")
+parser.add_option("--trace-range", dest="traceRange", default=None,
+				  help="Generate an instruction trace for the range RANGE (e.g., 0x100000,0x1000200)",
+		  metavar="RANGE")
 parser.add_option("--save-temps", action="store_true", default=False,
 				  help="Do not remove temporary files",
 		  dest="saveTemps")
@@ -147,12 +145,14 @@ config.doOptimizeIndirectCalls = options.doOptimizeIndirectCalls
 config.doPeepholeOptimize = options.peepholeOptimize
 config.doRegisterValueTracking = options.registerValueTracking
 
+registerTraceStart = 0
+registerTraceEnd = 0
+
 if options.onlyTranslate:
 	config.onlyTranslate = True
 	options.saveTemps = True
 
 config.saveTemps = options.saveTemps
-config.tracing = options.tracing
 config.traceFunctionCalls = options.traceFunctionCalls
 config.verbose = options.verbose
 config.outDirectory = options.outDirectory
@@ -179,12 +179,13 @@ if options.singleClass:
 if options.classSizeLimit:
 	config.classSizeLimit = int(options.classSizeLimit)
 
+if options.traceRange:
+	a,b = options.traceRange.split(",")
+	config.traceStart = int(a, 16)
+	config.traceEnd = int(b, 16)
 
 if options.operandStackLimit:
 	config.operandStackLimit = int(options.operandStackLimit)
-
-if options.traceFunctions:
-	config.traceFunctions = options.traceFunctions.split(",")
 
 if options.inlineBuiltinFunctions:
 	config.inlineBuiltinFunctions = options.inlineBuiltinFunctions.split(",")

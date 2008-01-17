@@ -40,6 +40,8 @@ debug = False
 tracing = False
 traceFunctions = None
 traceFunctionCalls = False
+traceStart = 0
+traceEnd = 0
 
 infile = None
 profileFile = None

@@ -143,10 +143,30 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 			out = out.union(self.prefix.sources)
 		return out
 
+
+	def traceRegisterValues(self):
+		if self.rs != mips.R_RA: # OK, ugly...
+		    self.pushRegister(self.rs)
+		else:
+		    self.pushConst(0)
+		if self.rt != mips.R_RA:
+		    self.pushRegister(self.rt)
+		else:
+		    self.pushConst(0)
+		if self.rd != mips.R_RA:
+		    self.pushRegister(self.rd)
+		else:
+		    self.pushConst(0)
+		self.invokestatic("CRunTime/emitRegisterTrace(III)V")
+		if self.delayed:
+		    self.delayed.traceRegisterValues()
+
 	def trace(self):
 		"Trace this instruction."
 		self.ldc(str(self))
 		self.invokestatic("CRunTime/emitTrace(Ljava/lang/String;)V")
+		if not self.isDisabled():
+		    self.traceRegisterValues()
 
 	def nullify(self):
 		"Deactivate the compilation of this instruction"

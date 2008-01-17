@@ -218,6 +218,9 @@ class JavaMethod(CodeBlock):
 		if self.hasMultipleFunctions():
 			self.cleanupRegs.add(mips.R_RA)
 
+		if config.traceStart <= self.address and config.traceEnd >= self.address:
+		    self.cleanupRegs = self.usedRegisters - skipRegisters
+
 
 	def compile(self):
 		"""Compile this method. The calling convention looks as

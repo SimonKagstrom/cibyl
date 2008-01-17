@@ -510,4 +510,9 @@ public class CRunTime
     // CRunTime.console.push(str);
     System.out.println(str);
   }
+
+  public static final void emitRegisterTrace(int rs, int rt, int rd)
+  {
+    System.out.println("  rs: 0x" + Integer.toHexString(rs) + " rs: 0x" + Integer.toHexString(rt) + " rd: 0x" + Integer.toHexString(rd));
+  }
 }

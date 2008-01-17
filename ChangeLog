@@ -1,4 +1,8 @@
 Cibyl (15)
+	* Changed the instruction tracing to use --trace-range=start,end
+	instead, and also output the register values for these
+	instructions
+
 	* Fixed a nasty bug for loads with unaligned base addresses and
 	offsets, e.g.,
 

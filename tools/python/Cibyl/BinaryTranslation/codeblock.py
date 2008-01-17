@@ -119,6 +119,8 @@ class CodeBlock:
 				self.controller.emit("; " + str(insn.delayed))
 			if self.useTracing:
 				insn.trace()
+			if insn.address >= config.traceStart and insn.address <= config.traceEnd:
+			    insn.trace()
 			insn.compile()
 			if config.doRegisterValueTracking and insn.delayed:
 			    self.optimizer.invalidateAllRegisters()
