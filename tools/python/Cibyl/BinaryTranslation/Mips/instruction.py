@@ -710,6 +710,9 @@ class Jal(BranchInstruction):
 			self.dstAddress = self.address + (self.extra << 2) + 4
 		else:
 			self.dstAddress = self.extra << 2
+		self.rs = 0
+		self.rt = 0
+		self.rd = 0
 
 	def compile(self):
 		insnAtDest = self.controller.getInstruction( self.dstAddress )
@@ -921,6 +924,8 @@ class OneRegisterConditionalJump(BranchInstruction):
 	def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
 		BranchInstruction.__init__(self, controller, address, format, opCode, rd, rs, rt, extra)
 		self.dstAddress = (self.address + 4) + (self.extra << 2)
+		self.rd = 0
+		self.rt = 0
 
 	def compile(self):
 		insnAtDest = self.controller.getInstruction( self.dstAddress )
