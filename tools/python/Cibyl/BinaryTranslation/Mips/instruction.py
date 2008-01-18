@@ -669,6 +669,9 @@ class Jump(BranchInstruction):
 	def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
 		Instruction.__init__(self, controller, address, format, opCode, rd, rs, rt, extra)
 		self.dstAddress = (self.address & 0xf0000000) | (self.extra << 2)
+		self.rs = 0
+		self.rt = 0
+		self.rd = 0
 
 	def compile(self):
 		insnAtDest = self.controller.getInstruction( self.dstAddress )
