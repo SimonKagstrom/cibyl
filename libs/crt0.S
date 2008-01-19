@@ -14,8 +14,7 @@ __start:
 	lw	$4, 8($2)	# start of memory -> a0 (start of .bss)
 	lw	$5, 12($2)	# size of memory -> a1
 
-	sub	$29, $5, $3	# Setup stack pointer to
-	addiu	$29, $29, -8	# size of memory - stack_size - 8
+	addiu	$29, $5, -8	# size of memory - 8
 
 	sub	$5, $5, $3	# heap end (minus stack)
 	jal	smalloc_set_memory_pool	# init malloc
