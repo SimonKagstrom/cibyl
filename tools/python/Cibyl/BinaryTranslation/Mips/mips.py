@@ -1,12 +1,12 @@
 ######################################################################
 ##
-## Copyright (C) 2006,  Simon Kagstrom
+## Copyright (C) 2007-2008,  Simon Kagstrom
 ##
 ## Filename:	  Mips.py
-## Author:		Simon Kagstrom <ska@bth.se>
+## Author:	  Simon Kagstrom <simon.kagstrom@gmail.com>
 ## Description:   MIPS defs
 ##
-## $Id: mips.py 12821 2006-12-22 14:46:47Z ska $
+## $Id: mips.py $
 ##
 ######################################################################
 OP_ADD	= 1
