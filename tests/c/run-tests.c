@@ -43,6 +43,7 @@ extern void lui_run(void);
 extern void shifts_run(void);
 extern void and_run(void);
 extern void vmips_run(void);
+extern void ll_ret_run(void);
 
 test_run_t all_tests[] =
 {
@@ -61,6 +62,7 @@ test_run_t all_tests[] =
   TEST(and_run),
   TEST(shifts_run),
   TEST(vmips_run),
+  TEST(ll_ret_run),
 };
 
 
