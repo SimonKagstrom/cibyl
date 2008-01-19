@@ -43,6 +43,8 @@ traceFunctionCalls = False
 traceStart = 0
 traceEnd = 0
 
+threadSafe = False
+
 infile = None
 profileFile = None
 

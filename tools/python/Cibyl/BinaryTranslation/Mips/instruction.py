@@ -398,6 +398,9 @@ class ShiftInstructionsV(Rfmt):
 
 class Addi(Ifmt):
 	"""addiu instruction, catches assignments"""
+	def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
+		Instruction.__init__(self, controller, address, format, opCode, 0, rs, rt, extra)
+
 	def compile(self):
 		if self.rs == 0:
 			self.pushConst(self.extra)
@@ -410,6 +413,9 @@ class Addi(Ifmt):
 
 class Ori(Ifmt):
 	"""ori instruction, catches assignments"""
+	def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
+		Instruction.__init__(self, controller, address, format, opCode, 0, rs, rt, extra)
+
 	def compile(self):
 		if self.rs == 0:
 			self.pushConst(self.extra)
@@ -444,6 +450,9 @@ class Nor(Rfmt):
 
 class Lui(Ifmt):
 	"""lui instruction"""
+	def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
+		Instruction.__init__(self, controller, address, format, opCode, 0, 0, rt, extra)
+
 	def compile(self):
 		self.pushConst(self.extra << 16)
 		self.popToRegister(self.rt)
@@ -461,6 +470,9 @@ class Lui(Ifmt):
 
 
 class MemoryAccess(Instruction):
+	def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
+		Instruction.__init__(self, controller, address, format, opCode, 0, rs, rt, extra)
+
 	def __str__(self):
 		out = "0x%08x: %10s %s, 0x%04x(%s)" % (self.address, mips.opStrings[self.opCode],
 						   mips.registerNames[self.rt],
@@ -667,11 +679,8 @@ class BranchInstruction(Instruction):
 class Jump(BranchInstruction):
 	"""j instruction"""
 	def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
-		Instruction.__init__(self, controller, address, format, opCode, rd, rs, rt, extra)
+		Instruction.__init__(self, controller, address, format, opCode, 0, 0, 0, extra)
 		self.dstAddress = (self.address & 0xf0000000) | (self.extra << 2)
-		self.rs = 0
-		self.rt = 0
-		self.rd = 0
 
 	def compile(self):
 		insnAtDest = self.controller.getInstruction( self.dstAddress )
@@ -702,7 +711,7 @@ class Jump(BranchInstruction):
 class Jal(BranchInstruction):
 	"""jal instruction."""
 	def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
-		Instruction.__init__(self, controller, address, format, opCode, rd, rs, rt, extra)
+		Instruction.__init__(self, controller, address, format, opCode, 0, 0, 0, extra)
 		self.isFunctionCall = True
 
 		# Handle BAL instructions (which are PC-relative)
@@ -710,9 +719,6 @@ class Jal(BranchInstruction):
 			self.dstAddress = self.address + (self.extra << 2) + 4
 		else:
 			self.dstAddress = self.extra << 2
-		self.rs = 0
-		self.rt = 0
-		self.rd = 0
 
 	def compile(self):
 		insnAtDest = self.controller.getInstruction( self.dstAddress )
@@ -746,12 +752,28 @@ class Jal(BranchInstruction):
 				self.popToRegister(mips.R_RA)
 
 			otherMethod.invoke(self.dstAddress)
-			if otherMethod.clobbersReg(mips.R_V1):
-				self.getstatic("CRunTime/saved_v1 I")
-				self.popToRegister(mips.R_V1)
+			if not config.threadSafe:
+				if otherMethod.clobbersReg(mips.R_V1):
+					self.getstatic("CRunTime/saved_v1 I")
+					self.popToRegister(mips.R_V1)
 
-			if otherMethod.getJavaReturnType() == "I":
-				self.popToRegister(mips.R_V0)
+				if otherMethod.getJavaReturnType() == "I":
+					self.popToRegister(mips.R_V0)
+
+			else:
+				if otherMethod.clobbersReg(mips.R_V1) and otherMethod.clobbersReg(mips.R_V0):
+					self.dup2()
+					self.pushConst(32)
+					self.lushr()
+					self.l2i()
+					self.popToRegister( mips.R_V1)
+					self.l2i()
+					self.popToRegister( mips.R_V0)
+				elif otherMethod.clobbersReg(mips.R_V1) or otherMethod.clobbersReg(mips.R_V0):
+					if otherMethod.clobbersReg(mips.R_V1):
+						self.popToRegister(mips.R_V1)
+					else:
+						self.popToRegister(mips.R_V0)
 
 	def fixup(self):
 		self.controller.addLabel(self.address + 8, inJumpTab = False)
@@ -922,10 +944,8 @@ class Slt(TwoRegisterSetInstruction):
 class OneRegisterConditionalJump(BranchInstruction):
 	"""bgez and friends"""
 	def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
-		BranchInstruction.__init__(self, controller, address, format, opCode, rd, rs, rt, extra)
+		BranchInstruction.__init__(self, controller, address, format, opCode, 0, rs, 0, extra)
 		self.dstAddress = (self.address + 4) + (self.extra << 2)
-		self.rd = 0
-		self.rt = 0
 
 	def compile(self):
 		insnAtDest = self.controller.getInstruction( self.dstAddress )
