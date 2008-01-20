@@ -1,4 +1,6 @@
 Cibyl (15)
+	* A realloc bug was fixed - it didn't check for the return value
+
 	* Added a --memory-debug option which will instrument all stores
 	in the program. The cibyl_memdebug_start_addr and
 	cibyl_memdebug_end_addr can be used to set the address range to
