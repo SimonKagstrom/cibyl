@@ -1,4 +1,10 @@
 Cibyl (15)
+	* Fixed a bug with callbacks being published but not registered -
+	this would lead to a call of address 0
+
+	* Fixed a bug in fflush - the fn pointer could be called even if
+	being NULL
+
 	* A realloc bug was fixed - it didn't check for the return value
 
 	* Added a --memory-debug option which will instrument all stores
