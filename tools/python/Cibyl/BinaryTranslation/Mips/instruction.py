@@ -26,6 +26,13 @@ def newInstruction(opCode):
 	except:
 		return Unimplemented
 
+def setupMemoryDebug():
+	insnToJavaInstruction[ mips.OP_SW ]  = (StoreXX,   "WordPc")
+	insnToJavaInstruction[ mips.OP_SB ]  = (StoreXX,   "BytePc")
+	insnToJavaInstruction[ mips.OP_SH ]  = (StoreXX,   "ShortPc")
+	insnToJavaInstruction[ mips.OP_SWL ] = (StoreXX,   "WordLeftPc")
+
+
 class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 	def __init__(self, controller, address, format, opCode, rd, rs, rt, extra):
 		bytecode.ByteCodeGenerator.__init__(self, controller)
@@ -511,9 +518,18 @@ class LoadXXSigned(LoadXX):
 class StoreXX(MemoryAccess):
 	"""Store a byte or short to memory."""
 	def compile(self):
+		if config.memoryDebug:
+			if self.rt == mips.R_RA and not self.getJavaMethod().hasMultipleFunctions():
+				if not config.debug:
+			    		if config.verbose: print "Skipping sw of RA", self
+			    		return None
+			self.pushConst( self.address )
 		self.pushMemoryAddress(self.rs, self.extra)
 		self.pushRegister( self.rt )
-		self.invokestatic("CRunTime/memoryWrite%s(II)V" % insnToJavaInstruction[self.opCode][1])
+		if config.memoryDebug:
+			self.invokestatic("CRunTime/memoryWrite%s(III)V" % insnToJavaInstruction[self.opCode][1])
+		else:
+			self.invokestatic("CRunTime/memoryWrite%s(II)V" % insnToJavaInstruction[self.opCode][1])
 
 	def fixup(self):
 		self.sources = Set([ self.rs, self.rt ])

@@ -320,6 +320,26 @@ public class CRunTime
   }
 
 
+  public static final void memoryWriteBytePc(int pc, int address, int in)
+  {
+    CRunTime.assertMemoryWrite("1-byte", pc, address, in);
+    CRunTime.memoryWriteByte(address, in);
+  }
+
+  public static final void memoryWriteShortPc(int pc, int address, int in)
+  {
+    CRunTime.assertMemoryWrite("2-byte", pc, address, in);
+    CRunTime.memoryWriteShort(address, in);
+  }
+
+  public static final void memoryWriteWordPc(int pc, int address, int in)
+  {
+    CRunTime.assertMemoryWrite("4-byte", pc, address, in);
+    CRunTime.memoryWriteWord(address, in);
+  }
+
+
+
   public static final long memoryReadLong(int address)
   {
     long low = ((long)CRunTime.memory[ (address + 4) >> 2 ]) & 0xffffffffl;
@@ -434,6 +454,12 @@ public class CRunTime
     CRunTime.memoryWriteByte(address + 0, (rtVal >> 24));
   }
 
+  public static final void memoryWriteWordLeftPc(int pc, int address, int rtVal)
+  {
+    CRunTime.assertMemoryWrite("lwl", pc, address, rtVal);
+    CRunTime.memoryWriteWordLeft(address, rtVal);
+  }
+
   public static final void kill()
   {
     CRunTime.memory[-1] = 0;
@@ -501,6 +527,14 @@ public class CRunTime
     CRunTime.functionNesting--;
   }
 
+  public static final void assertMemoryWrite(String type, int pc, int address, int in)
+  {
+    if (address >= CRunTime.memoryReadWord(16) && address <= CRunTime.memoryReadWord(20))
+      {
+	System.out.println(type + " on " + Integer.toHexString(pc) + " memory[" + Integer.toHexString(address) + "] = " + Integer.toHexString(in) + "");
+      }
+  }
+
   // private static Console console;
   /* Used by cibyl-mips2java when tracing is turned on */
   public static final void emitTrace(String str)
@@ -513,6 +547,6 @@ public class CRunTime
 
   public static final void emitRegisterTrace(int rs, int rt, int rd)
   {
-    System.out.println("  rs: 0x" + Integer.toHexString(rs) + " rs: 0x" + Integer.toHexString(rt) + " rd: 0x" + Integer.toHexString(rd));
+    System.out.println("  rs: 0x" + Integer.toHexString(rs) + " rt: 0x" + Integer.toHexString(rt) + " rd: 0x" + Integer.toHexString(rd));
   }
 }

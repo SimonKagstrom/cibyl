@@ -221,6 +221,8 @@ class JavaMethod(CodeBlock):
 		if config.traceStart <= self.address and config.traceEnd >= self.address:
 		    self.cleanupRegs = self.usedRegisters - skipRegisters
 		    self.maxOperandStack = self.maxOperandStack + 4
+		if config.memoryDebug:
+		    self.maxOperandStack = self.maxOperandStack + 2
 
 
 	def compile(self):

@@ -37,6 +37,7 @@ saveTemps = False
 onlyTranslate = False
 
 debug = False
+memoryDebug = False
 tracing = False
 traceFunctions = None
 traceFunctionCalls = False
