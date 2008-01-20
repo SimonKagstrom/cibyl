@@ -1,4 +1,12 @@
 Cibyl (15)
+	* Added a --memory-debug option which will instrument all stores
+	in the program. The cibyl_memdebug_start_addr and
+	cibyl_memdebug_end_addr can be used to set the address range to
+	check, by default it is 0...4
+
+	* The stack pointer was set wrong: instead of setting it to
+	memory_size, it was set to memory_size - stack_size, wasting 8KB
+
 	* Changed the instruction tracing to use --trace-range=start,end
 	instead, and also output the register values for these
 	instructions
