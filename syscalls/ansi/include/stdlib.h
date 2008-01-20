@@ -47,15 +47,7 @@ static inline void *calloc(size_t nmemb, size_t size)
   return out;
 }
 
-static inline void *realloc(void *ptr, size_t size)
-{
-  void *out = (void*)malloc(size);
-  if (ptr) {
-    memcpy (out, ptr, size);
-    free(ptr);
-  }
-  return out;
-}
+extern void *realloc(void *ptr, size_t size);
 
 static inline int abs(int x)
 {
