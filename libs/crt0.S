@@ -35,11 +35,17 @@ __start:
 .end	__start
 
 .section .data0
+.globl cibyl_memdebug_start_addr	# Export to C
+.globl cibyl_memdebug_end_addr
 metainfo:
 	.word	__start			# Start address
 	.word	NOPH_STACK_SIZE		# Stack size
 	.word	__edata			# End of allocated data
 	.word	0			# Allocated memory (set by CRunTime.java)
+cibyl_memdebug_start_addr:
+	.word	0			# Start address to check if --memory-debug is on
+cibyl_memdebug_end_addr:
+	.word	4			# End address to check if --memory-debug is on
 
 ### Force something into .rodata
 .section .rodata
