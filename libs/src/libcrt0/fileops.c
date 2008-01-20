@@ -299,7 +299,7 @@ int feof(FILE *fp)
 
 int fflush(FILE* fp)
 {
-  if (fp == NULL)
+  if (fp->ops->flush == NULL)
     return 0;
   return fp->ops->flush(fp);
 }
