@@ -341,6 +341,19 @@ void free(void *ptr)
     _free(ptr);
 } /* free */
 
+void *realloc(void *ptr, size_t size)
+{
+  void *out = (void*)malloc(size);
+
+  if (!out)
+    return NULL;
+
+  if (ptr) {
+    memcpy (out, ptr, size);
+    free(ptr);
+  }
+  return out;
+}
 
 void smalloc_set_memory_pool(void *memory_start, void *memory_end)
 {
