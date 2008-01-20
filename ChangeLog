@@ -50,7 +50,7 @@ Cibyl (15)
 
 	* Corrected various syscall stuff,  isinff name (was isnanf...),
 	some of the softfloat functions are not implemented in J2ME,
-	cannot create OutputStream (abstrac) etc
+	cannot create OutputStream (abstract) etc
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
 
