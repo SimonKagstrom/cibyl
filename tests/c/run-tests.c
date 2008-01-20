@@ -44,6 +44,7 @@ extern void shifts_run(void);
 extern void and_run(void);
 extern void vmips_run(void);
 extern void ll_ret_run(void);
+extern void malloc_run(void);
 
 test_run_t all_tests[] =
 {
@@ -84,6 +85,7 @@ void test_run_all_tests(int run_fileops)
   if (run_fileops)
     {
       /* Delay these to avoid having to allow file access too often */
+      malloc_run();
       exceptions_run();
       file_operations_run();
       relocation_run();
