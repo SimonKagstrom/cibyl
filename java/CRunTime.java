@@ -211,7 +211,7 @@ public class CRunTime
    */
   public static int publishCallback(String name)
   {
-    int id = CRunTime.registerObject(name); /* Used to get an id */
+    int id = CRunTime.registerObject(new Integer(0)); /* Used to get an id, 0 means nothing here */
     Integer intObject = new Integer(id);
 
     CRunTime.callbacksByName.put(name, intObject);   /* Register name:id */
@@ -231,16 +231,21 @@ public class CRunTime
   {
     String name = CRunTime.charPtrToString(charPtr);
     Integer id = (Integer)CRunTime.callbacksByName.get(name);
+    Integer old = (Integer)CRunTime.objectRepository[id.intValue()];
 
     CRunTime.objectRepository[id.intValue()] = new Integer(fnPtr); /* Replace with the fn ptr */
 
-    return id.intValue();
+    return old.intValue();
   }
 
   /* Invoke a registered callback */
   public static int invokeCallback(int which, int a0, int a1, int a2, int a3) throws Exception
   {
     Integer id = (Integer)CRunTime.objectRepository[which];
+
+    /* If this callback is not yet registered, just return 0 */
+    if (id.intValue() == 0)
+	return 0;
 
     return CibylCallTable.call(id.intValue(),
 			       CRunTime.eventStackPointer,

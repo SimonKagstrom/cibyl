@@ -122,35 +122,37 @@ int NOPH_Canvas_getHeight(NOPH_Canvas_t canvas);
  *
  * @param fn the callback function to call when a key is pressed. Pass
  *           NULL to disable the callback
+ * @return a pointer to the previous callback function pointer, or
+ *         NULL if there is no other
  */
-static inline void NOPH_Canvas_registerKeyPressedCallback(void (*fn)(int keyCode))
+static inline void* NOPH_Canvas_registerKeyPressedCallback(void (*fn)(int keyCode))
 {
-  NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.keyPressed", (int)fn );
+  return (void*)NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.keyPressed", (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
-static inline void NOPH_Canvas_registerKeyReleasedCallback(void (*fn)(int keyCode))
+static inline void* NOPH_Canvas_registerKeyReleasedCallback(void (*fn)(int keyCode))
 {
-  NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.keyReleased", (int)fn );
+  return (void*)NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.keyReleased", (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
-static inline void NOPH_Canvas_registerKeyRepeatedCallback(void (*fn)(int keyCode))
+static inline void* NOPH_Canvas_registerKeyRepeatedCallback(void (*fn)(int keyCode))
 {
-  NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.keyRepeated", (int)fn );
+  return (void*)NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.keyRepeated", (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
-static inline void NOPH_Canvas_registerPointerDraggedCallback(void (*fn)(int x, int y))
+static inline void* NOPH_Canvas_registerPointerDraggedCallback(void (*fn)(int x, int y))
 {
-  NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.pointerDragged", (int)fn );
+  return (void*)NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.pointerDragged", (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
-static inline void NOPH_Canvas_registerPointerPressedCallback(void (*fn)(int x, int y))
+static inline void* NOPH_Canvas_registerPointerPressedCallback(void (*fn)(int x, int y))
 {
-  NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.pointerPressed", (int)fn );
+  return (void*)NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.pointerPressed", (int)fn );
 }
 /** @see NOPH_Canvas_registerKeyPressedCallback */
-static inline void NOPH_Canvas_registerPointerReleasedCallback(void (*fn)(int x, int y))
+static inline void* NOPH_Canvas_registerPointerReleasedCallback(void (*fn)(int x, int y))
 {
-  NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.pointerReleased", (int)fn );
+  return (void*)NOPH_registerCallback("javax.microedition.lcdui.game.GameCanvas.pointerReleased", (int)fn );
 }
 
 /* Image class */
