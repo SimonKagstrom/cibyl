@@ -58,7 +58,7 @@ Cibyl (15)
 	some of the softfloat functions are not implemented in J2ME,
 	cannot create OutputStream (abstract) etc
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Mon Jan 21 19:24:57 CET 2008
 
 Cibyl (14)
 	* More peephole optimizations: move constant assignments past
