@@ -1,4 +1,5 @@
 Cibyl (16)
+	* Check malloc return value in strdup
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
 
