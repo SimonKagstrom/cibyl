@@ -234,6 +234,8 @@ int memcmp(const void* s1, const void* s2, size_t n) { return __memcmp(s1, s2, n
 
 char *strdup(const char *s) {
         char *str = (char *)malloc(strlen(s) + 1);
+        if (!str)
+          return NULL;
         strcpy(str, s);
         return str;
 }
