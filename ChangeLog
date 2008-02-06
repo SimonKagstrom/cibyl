@@ -1,3 +1,7 @@
+Cibyl (16)
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Cibyl (15)
 	* Fixed a bug with callbacks being published but not registered -
 	this would lead to a call of address 0

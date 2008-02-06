@@ -534,9 +534,9 @@ public class CRunTime
 
   public static final void assertMemoryWrite(String type, int pc, int address, int in)
   {
-    if (address >= CRunTime.memoryReadWord(16) && address <= CRunTime.memoryReadWord(20))
+    if (address >= CRunTime.memoryReadWord(16) && address < CRunTime.memoryReadWord(20))
       {
-	System.out.println(type + " on " + Integer.toHexString(pc) + " memory[" + Integer.toHexString(address) + "] = " + Integer.toHexString(in) + "");
+	System.out.println(type + " on 0x" + Integer.toHexString(pc) + " memory[0x" + Integer.toHexString(address) + "] = 0x" + Integer.toHexString(in) + "");
       }
   }
 
