@@ -1,4 +1,6 @@
 Cibyl (16)
+	* Add function pruning option to workaround bugs on some phones
+
 	* Check malloc return value in strdup
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>

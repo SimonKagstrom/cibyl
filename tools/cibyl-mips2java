@@ -86,8 +86,11 @@ phones). Default is 1 (no hierarchy)""",
 parser.add_option("--use-direct-memory-references", action="store_true", default=False,
 		  help="""Emit the memory vector directly for each memory access instead of
 using an aload reference (which saves space and might improve
-performance). This is a workaround against problems on some SE phones.""",
+performance). This is a workaround against problems on some phones.""",
 		  dest="aloadMemory")
+parser.add_option("--no-function-pruning", action="store_false", default=True,
+				  help="Don't prune unused functions (some GCC versions will not allow function pruning)",
+		  dest="pruneUnusedFunctions")
 parser.add_option("--peephole-iterations", default=2,
 				  help="""Set the number of iterations to run the peephole optimizer (default 2)""",
 		  dest="peepholeIterations", metavar="NR")
@@ -148,6 +151,8 @@ config.doInlineAllBuiltins = options.doInlineAllBuiltins
 config.doOptimizeIndirectCalls = options.doOptimizeIndirectCalls
 config.doPeepholeOptimize = options.peepholeOptimize
 config.doRegisterValueTracking = options.registerValueTracking
+
+config.pruneUnusedFunctions = options.pruneUnusedFunctions
 
 if options.onlyTranslate:
 	config.onlyTranslate = True
