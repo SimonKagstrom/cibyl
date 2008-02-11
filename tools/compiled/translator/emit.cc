@@ -31,10 +31,8 @@ Emit::Emit()
   this->fp = stdout;
 }
 
-void Emit::bc_pushconst(uint32_t _val)
+void Emit::bc_pushconst(int32_t val)
 {
-  int32_t val = (int32_t)_val;
-
   if (val == -1)
     this->writeIndent("iconst_m1");
   else if (val >= 0 && val <= 5)
@@ -47,7 +45,7 @@ void Emit::bc_pushconst(uint32_t _val)
     this->writeIndent("ldc %d", val);
 }
 
-void Emit::bc_pushaddress(MIPS_register_t reg, uint32_t extra)
+void Emit::bc_pushaddress(MIPS_register_t reg, int32_t extra)
 {
   this->bc_pushregister(reg);
   if (extra != 0)
@@ -57,7 +55,7 @@ void Emit::bc_pushaddress(MIPS_register_t reg, uint32_t extra)
     }
 }
 
-void Emit::bc_pushindex(MIPS_register_t reg, uint32_t extra)
+void Emit::bc_pushindex(MIPS_register_t reg, int32_t extra)
 {
   bool push_extra_before = false;
 

@@ -25,7 +25,7 @@ class Instruction : public Entity
 {
 public:
   Instruction(uint32_t address, int opcode,
-	      MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd, uint32_t extra);
+	      MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd, int32_t extra);
 
   virtual ~Instruction();
 
@@ -121,13 +121,13 @@ public:
 
   MIPS_register_t getRd() { return this->rd; }
 
-  uint32_t getExtra() { return this->extra; }
+  int32_t getExtra() { return this->extra; }
 
   BasicBlock *parent;
 protected:
   int opcode;
   MIPS_register_t rs, rt, rd;
-  uint32_t extra;
+  int32_t extra;
   Instruction *delayed;
   Instruction *prefix;
 

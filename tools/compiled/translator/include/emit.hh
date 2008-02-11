@@ -34,15 +34,15 @@ public:
 
   void bc_condbranch(const char *what, ...);
 
-  void bc_pushconst(uint32_t nr);
+  void bc_pushconst(int32_t nr);
 
   void bc_pushregister(MIPS_register_t reg);
 
   void bc_popregister(MIPS_register_t reg);
 
-  void bc_pushindex(MIPS_register_t reg, uint32_t extra);
+  void bc_pushindex(MIPS_register_t reg, int32_t extra);
 
-  void bc_pushaddress(MIPS_register_t reg, uint32_t extra);
+  void bc_pushaddress(MIPS_register_t reg, int32_t extra);
 
   void bc_getstatic(const char *what) { this->writeIndent("getstatic %s", what); }
 

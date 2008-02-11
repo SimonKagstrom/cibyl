@@ -23,7 +23,7 @@
 
 Instruction::Instruction(uint32_t address, int opcode,
 			 MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd,
-			 uint32_t extra)
+			 int32_t extra)
 {
   this->address = address;
   this->size = 4;
@@ -50,7 +50,7 @@ class Ifmt : public Instruction
 {
 public:
   Ifmt(const char *what, uint32_t address, int opcode,
-       MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd, uint32_t extra) : Instruction(address, opcode, rs, rt, rd, extra)
+       MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd, int32_t extra) : Instruction(address, opcode, rs, rt, rd, extra)
   {
     this->bc = what;
   }
@@ -89,7 +89,7 @@ class Addi : public Ifmt
 {
 public:
   Addi(uint32_t address, int opcode,
-       MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd, uint32_t extra) : Ifmt("iadd", address, opcode, rs, rt, rd, extra)
+       MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd, int32_t extra) : Ifmt("iadd", address, opcode, rs, rt, rd, extra)
   {
   }
 
@@ -116,7 +116,7 @@ public:
 class Lui : public Instruction
 {
 public:
-  Lui(uint32_t address, int opcode, MIPS_register_t rt, uint32_t extra) :
+  Lui(uint32_t address, int opcode, MIPS_register_t rt, int32_t extra) :
     Instruction(address, opcode, R_ZERO, rt, R_ZERO, extra)
   {
   }
@@ -261,7 +261,7 @@ class ShiftInstruction : public Rfmt
 {
 public:
   ShiftInstruction(const char *what, uint32_t address, int opcode,
-		   MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd, uint32_t extra) : Rfmt(what, address, opcode, rs, rt, rd)
+		   MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd, int32_t extra) : Rfmt(what, address, opcode, rs, rt, rd)
   {
     this->extra = extra;
   }
@@ -317,7 +317,7 @@ class MulDiv : public Instruction
 {
 public:
   MulDiv(const char *what, uint32_t address, int opcode,
-	 MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd, uint32_t extra) : Instruction(address, opcode, rs, rt, rd, extra)
+	 MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd, int32_t extra) : Instruction(address, opcode, rs, rt, rd, extra)
   {
     this->bc = what;
   }
@@ -496,7 +496,7 @@ class OneRegisterSetInstruction : public Instruction
 {
 public:
   OneRegisterSetInstruction(const char *what, uint32_t address, int opcode,
-			    MIPS_register_t rs, MIPS_register_t rt, uint32_t extra) : Instruction(address, opcode, rs, rt, R_ZERO, extra)
+			    MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : Instruction(address, opcode, rs, rt, R_ZERO, extra)
   {
     this->bc = what;
   }
@@ -586,7 +586,7 @@ class Slti : public OneRegisterSetInstruction
 {
 public:
   Slti(uint32_t address, int opcode,
-       MIPS_register_t rs, MIPS_register_t rt, uint32_t extra) : OneRegisterSetInstruction("", address, opcode, rs, rt, extra)
+       MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : OneRegisterSetInstruction("", address, opcode, rs, rt, extra)
   {
   }
 
@@ -606,7 +606,7 @@ class LoadXX : public Instruction
 {
 public:
   LoadXX(const char *what, uint32_t address, int opcode,
-	 MIPS_register_t rs, MIPS_register_t rt, uint32_t extra) : Instruction(address, opcode, rs, rt, R_ZERO, extra)
+	 MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : Instruction(address, opcode, rs, rt, R_ZERO, extra)
   {
     this->bc = what;
   }
@@ -642,7 +642,7 @@ class StoreXX : public Instruction
 {
 public:
   StoreXX(const char *what, uint32_t address, int opcode,
-	  MIPS_register_t rs, MIPS_register_t rt, uint32_t extra) : Instruction(address, opcode, rs, rt, R_ZERO, extra)
+	  MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : Instruction(address, opcode, rs, rt, R_ZERO, extra)
   {
     this->bc = what;
   }
@@ -685,7 +685,7 @@ class LoadXXSigned : public LoadXX
 {
 public:
   LoadXXSigned(const char *what, const char *convert, uint32_t address, int opcode,
-	       MIPS_register_t rs, MIPS_register_t rt, uint32_t extra) : LoadXX(what, address, opcode, rs, rt, extra)
+	       MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : LoadXX(what, address, opcode, rs, rt, extra)
   {
     this->convert = convert;
   }
@@ -706,7 +706,7 @@ class LW : public LoadXX
 {
 public:
   LW(uint32_t address, int opcode,
-     MIPS_register_t rs, MIPS_register_t rt, uint32_t extra) : LoadXX("", address, opcode, rs, rt, extra)
+     MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : LoadXX("", address, opcode, rs, rt, extra)
   {
   }
 
@@ -730,7 +730,7 @@ class SW : public StoreXX
 {
 public:
   SW(uint32_t address, int opcode,
-     MIPS_register_t rs, MIPS_register_t rt, uint32_t extra) : StoreXX("Word", address, opcode, rs, rt, extra)
+     MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : StoreXX("Word", address, opcode, rs, rt, extra)
   {
   }
 
@@ -758,7 +758,7 @@ class BranchInstruction : public Instruction
 public:
   BranchInstruction(uint32_t address, int opcode,
 		    MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd,
-		    uint32_t extra) : Instruction(address, opcode, rs, rt, rd, extra)
+		    int32_t extra) : Instruction(address, opcode, rs, rt, rd, extra)
   {
   }
 
@@ -780,7 +780,7 @@ public:
 class Jump : public BranchInstruction
 {
 public:
-  Jump(uint32_t address, int opcode, uint32_t extra) : BranchInstruction(address, opcode, R_ZERO, R_ZERO, R_ZERO, extra)
+  Jump(uint32_t address, int opcode, int32_t extra) : BranchInstruction(address, opcode, R_ZERO, R_ZERO, R_ZERO, extra)
   {
   }
 
@@ -877,7 +877,7 @@ private:
 class Jal : public BranchInstruction
 {
 public:
-  Jal(uint32_t address, int opcode, uint32_t extra) : BranchInstruction(address, opcode, R_ZERO, R_ZERO, R_ZERO, extra)
+  Jal(uint32_t address, int opcode, int32_t extra) : BranchInstruction(address, opcode, R_ZERO, R_ZERO, R_ZERO, extra)
   {
     this->dstMethod = NULL;
   }
@@ -1004,7 +1004,7 @@ class TwoRegisterConditionalJump : public BranchInstruction
 {
 public:
   TwoRegisterConditionalJump(const char *what, uint32_t address, int opcode, MIPS_register_t rs,
-			     MIPS_register_t rt, uint32_t extra) : BranchInstruction(address, opcode, rs, rt, R_ZERO, extra)
+			     MIPS_register_t rt, int32_t extra) : BranchInstruction(address, opcode, rs, rt, R_ZERO, extra)
   {
     this->bc = what;
     this->dst = (this->address + 4) + (this->extra << 2);
@@ -1059,7 +1059,7 @@ class OneRegisterConditionalJump : public BranchInstruction
 {
 public:
   OneRegisterConditionalJump(const char *what, uint32_t address, int opcode, MIPS_register_t rs,
-			     uint32_t extra) : BranchInstruction(address, opcode, rs, R_ZERO, R_ZERO, extra)
+			     int32_t extra) : BranchInstruction(address, opcode, rs, R_ZERO, R_ZERO, extra)
   {
     this->bc = what;
     this->dst = (this->address + 4) + (this->extra << 2);
@@ -1114,7 +1114,7 @@ private:
 class SyscallInsn : public Instruction
 {
 public:
-  SyscallInsn(uint32_t address, uint32_t extra) : Instruction(address, 0, R_ZERO, R_ZERO, R_ZERO, extra)
+  SyscallInsn(uint32_t address, int32_t extra) : Instruction(address, 0, R_ZERO, R_ZERO, R_ZERO, extra)
   {
     this->sysc = NULL;
   }
@@ -1156,7 +1156,7 @@ protected:
 class SyscallRegisterArgument : public Instruction
 {
 public:
-  SyscallRegisterArgument(uint32_t address, uint32_t extra) : Instruction(address, 0, R_ZERO, R_ZERO, R_ZERO, extra)
+  SyscallRegisterArgument(uint32_t address, int32_t extra) : Instruction(address, 0, R_ZERO, R_ZERO, R_ZERO, extra)
   {
   }
 
@@ -1188,7 +1188,7 @@ public:
 Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
 {
   MIPS_register_t rs, rt, rd;
-  uint32_t extra;
+  int32_t extra;
   mips_op_entry_t opentry;
   mips_opcode_t opcode;
 
