@@ -1,0 +1,15 @@
+Passes:
+-------
+
+0: - Read ELF
+   - Create all instructions
+   - Create Syscalls
+   - Create methods
+   - Create functions
+
+1: - Run pass1 for classes, ..., instructions (used to set methods
+     etc)
+   - Create a table of jump targets and sources
+
+2: - Compile all classes, methods, functions, basic blocks
+     and instructions

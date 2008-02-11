@@ -9,7 +9,7 @@
 ## $Id: syscallgenerator.py 14099 2007-03-10 07:51:59Z ska $
 ##
 ######################################################################
-import sys, re, os, tempfile
+import sys, re, os, tempfile, struct
 from sets import Set
 from Cibyl.BinaryTranslation.translator import Controller
 from Cibyl import config
@@ -201,3 +201,53 @@ class SyscallWrapperGenerator(SyscallGenerator):
 			out = open("%s/%s" % (self.outdir, f), "w")
 			out.writelines(data)
 			out.close()
+
+
+
+class SyscallDatabaseGenerator(SyscallGenerator):
+    def __init__(self, dirname, syscallSets, outfile):
+	SyscallGenerator.__init__(self, [dirname], syscallSets)
+	self.outfile = outfile
+
+    def encodeReturnType(self, item):
+        if item.getReturnType() == "void":
+            return 0
+        # Otherwise it returns *something*
+        return 1
+
+    def encodeQualifier(self, item):
+        # Assume no qualifier
+        out = 0
+        if item.getQualifier() == "/* Throws */":
+            out = out | 1
+        if item.getQualifier() == "/* Not generated */":
+            out = out | 2
+        return out
+
+    def run(self):
+        items = []
+        strtab = {}
+        strs = {}
+        of = open(self.outfile, "w")
+	for curFile in self.files:
+	    for item in curFile.all:
+		if not isinstance(item, Function):
+		    continue
+                items.append(item)
+
+        out = []
+        strtab_offs = 0
+        for item in items:
+            out.append( ( item.getNr(), self.encodeReturnType(item), item.getNrArgs(), self.encodeQualifier(item), strtab_offs) )
+            strtab_offs = strtab_offs + len(item.getName()) + 1
+
+        of.write(struct.pack(">L", len(out)) )               # Nr items
+        of.write(struct.pack(">L", 4 + len(out) * 4 * 5) )   # Offset to strtab
+        # Write the out structures
+        for s in out:
+            of.write(struct.pack(">LLLLL", s[0], s[1], s[2], s[3], s[4]))
+        # Write the string table
+        for item in items:
+            of.write(item.getName() + '\0')
+
+        of.close()
