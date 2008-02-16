@@ -75,15 +75,6 @@ public:
     return this->isBranch();
   }
 
-  int addToRegisterUsage(MIPS_register_t reg, int *p)
-  {
-    if (reg == 0)
-      return 0;
-    p[reg]++;
-
-    return 1;
-  }
-
   /**
    * Fill in the register destinations
    *
