@@ -36,6 +36,8 @@ public:
 
   void bc_pushconst(int32_t nr);
 
+  void bc_pushconst_u(uint32_t nr);
+
   void bc_pushregister(MIPS_register_t reg);
 
   void bc_popregister(MIPS_register_t reg);
