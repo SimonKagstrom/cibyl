@@ -14,7 +14,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <assert.h>
+
 #include <emit.hh>
+#include <controller.hh>
 
 #define do_vsnprintf(buf, fmt) do {\
   va_list ap; \
@@ -29,6 +31,18 @@
 Emit::Emit()
 {
   this->fp = stdout;
+}
+
+void Emit::bc_pushconst_u(uint32_t val)
+{
+  if (val >= 0 && val <= 5)
+    this->writeIndent("iconst_%u", val);
+  else if (val <= 127)
+    this->writeIndent("bipush %u", val);
+  else if (val <= 32767)
+    this->writeIndent("sipush %u", val);
+  else
+    this->writeIndent("ldc %u", val);
 }
 
 void Emit::bc_pushconst(int32_t val)
@@ -110,8 +124,10 @@ void Emit::bc_popregister(MIPS_register_t reg)
   if (regalloc->regIsStatic(reg))
     this->bc_putstatic( regalloc->regToStatic(reg) );
   else if (!regalloc->regIsAllocated(reg)) /* This is an error! */
-    fprintf(stderr, "Warning/Error: Popping to register %s, which is not allocated\n",
-            mips_reg_strings[reg]);
+    {
+      fprintf(stderr, "Warning/Error at 0x%08x: Popping to register %s, which is not allocated\n",
+              controller->getCurrentInstruction()->getAddress(), mips_reg_strings[reg]);
+    }
   else
     this->bc_istore( regalloc->regToLocal(reg) );
 }
