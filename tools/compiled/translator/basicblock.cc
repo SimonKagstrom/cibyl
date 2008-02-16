@@ -34,6 +34,8 @@ bool BasicBlock::pass1()
     {
       Instruction *insn = this->instructions[i];
 
+      controller->setCurrentInstruction(insn);
+
       /* Compile the instruction */
       if (!insn->pass1())
 	out = false;
@@ -131,6 +133,8 @@ bool BasicBlock::pass2()
   for (int i = 0; i < this->n_insns; i++)
     {
       Instruction *insn = this->instructions[i];
+
+      controller->setCurrentInstruction(insn);
 
       /* FIXME: Emit .line info if debug is on */
       if (insn->isBranchTarget() || controller->hasJumptabLabel(insn->getAddress()))
