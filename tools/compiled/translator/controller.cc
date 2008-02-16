@@ -34,6 +34,8 @@ Controller::Controller(const char *dstdir, const char *elf_filename,
 
   for (int i = 0; i < n_dbs; i++)
     this->readSyscallDatabase(database_filenames[i]);
+
+  this->builtins = new BuiltinFactory();
 }
 
 void Controller::readSyscallDatabase(const char *filename)
