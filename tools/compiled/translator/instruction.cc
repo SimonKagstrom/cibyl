@@ -119,6 +119,7 @@ public:
   Lui(uint32_t address, int opcode, MIPS_register_t rt, int32_t extra) :
     Instruction(address, opcode, R_ZERO, rt, R_ZERO, extra)
   {
+    this->extra = this->extra & 0xffff;
   }
 
   bool pass1()
@@ -128,10 +129,17 @@ public:
 
   bool pass2()
   {
-    emit->bc_pushconst( this->extra << 16 );
+    uint32_t v = (uint32_t)this->extra;
+
+    emit->bc_pushconst_u( v << 16 );
     emit->bc_popregister( this->rt );
 
     return true;
+  }
+
+  int fillDestinations(int *p)
+  {
+    return this->addToRegisterUsage(this->rt, p);
   }
 };
 
@@ -880,6 +888,7 @@ public:
   Jal(uint32_t address, int opcode, int32_t extra) : BranchInstruction(address, opcode, R_ZERO, R_ZERO, R_ZERO, extra)
   {
     this->dstMethod = NULL;
+    this->builtin = NULL;
   }
 
   bool pass1()
@@ -888,6 +897,10 @@ public:
 
     if (this->delayed)
       this->delayed->pass1();
+
+    this->builtin = controller->matchBuiltin(this->dstMethod->getName());
+    if (this->builtin)
+      return this->builtin->pass1(this);
 
     if (!this->dstMethod)
       {
@@ -905,7 +918,8 @@ public:
     if (this->delayed)
       this->delayed->pass2();
 
-    /* FIXME: Check builtins */
+    if (this->builtin)
+      return this->builtin->pass2(this);
 
     /* Pass registers */
     for (MIPS_register_t reg = this->dstMethod->getFirstRegisterToPass(&it);
@@ -931,15 +945,22 @@ public:
   {
     int out = 0;
 
-    out += this->addToRegisterUsage(R_V0, p);
-    out += this->addToRegisterUsage(R_V1, p);
+    out += this->addToRegisterUsage(R_V0, p) + this->addToRegisterUsage(R_V1, p);
+    if (this->builtin)
+      out += this->builtin->fillDestinations(p);
 
     return out;
   }
 
   int fillSources(int *p)
   {
-    return this->addToRegisterUsage(this->rs, p) + this->addToRegisterUsage(R_A0, p) + this->addToRegisterUsage(R_A1, p) + this->addToRegisterUsage(R_A2, p) + this->addToRegisterUsage(R_A3, p) + this->addToRegisterUsage(R_SP, p);
+    int out = 0;
+
+    out += this->addToRegisterUsage(this->rs, p) + this->addToRegisterUsage(R_A0, p) + this->addToRegisterUsage(R_A1, p) + this->addToRegisterUsage(R_A2, p) + this->addToRegisterUsage(R_A3, p) + this->addToRegisterUsage(R_SP, p);
+    if (this->builtin)
+      out += this->builtin->fillSources(p);
+
+    return out;
   };
 
   int getMaxStackHeight()
@@ -950,6 +971,7 @@ public:
 
 protected:
   JavaMethod *dstMethod;
+  Builtin *builtin;
 };
 
 
