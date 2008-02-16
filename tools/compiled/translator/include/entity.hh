@@ -15,6 +15,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <mips.hh>
+
 class Entity
 {
 public:
@@ -32,6 +34,15 @@ public:
   uint32_t getSize()
   {
     return this->size;
+  }
+
+  int addToRegisterUsage(MIPS_register_t reg, int *p)
+  {
+    if (reg == 0)
+      return 0;
+    p[reg]++;
+
+    return 1;
   }
 
 protected:
