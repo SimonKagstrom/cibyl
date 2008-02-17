@@ -79,7 +79,7 @@ void exception_test_2(void)
   if (caught_exception != 1)
     FAIL("array-idx-out exception: %d", caught_exception);
   else
-    PASS("array-idx-out excption %d", caught_exception);
+    PASS("array-idx-out exception: %d", caught_exception);
 
   if (exceptions_b != 10)
     FAIL("executing code after exception: %d != %d", exceptions_b, exceptions_a);
