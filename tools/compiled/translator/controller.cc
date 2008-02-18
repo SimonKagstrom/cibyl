@@ -214,11 +214,11 @@ void Controller::lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entrie
     {
       uint32_t v = be32_to_host(data[n]);
 
-      if (v >= text_start && v < text_end)
+      if (v >= text_start && v < text_end && (v & 0x3 == 0))
         {
           JavaMethod *mt = cl->getMethodByAddress(v);
 
-          /* Something has an address in this method */
+          /* Something has an address in this method (which can be an address) */
           mt->addJumptabLabel(v);
           this->addJumptabLabel(v);
         }
