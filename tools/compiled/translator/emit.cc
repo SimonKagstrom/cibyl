@@ -23,7 +23,7 @@
   int r; \
   assert ( fmt != NULL ); \
   va_start(ap, fmt); \
-  r = vsnprintf(buf, 255, fmt, ap); \
+  r = vsnprintf(buf, 2048, fmt, ap); \
   va_end(ap); \
 } while(0)
 
@@ -139,7 +139,7 @@ void Emit::bc_iinc(MIPS_register_t reg, int extra)
 
 void Emit::bc_label(const char *fmt, ...)
 {
-  char buf[255];
+  char buf[2048];
 
   do_vsnprintf(buf, fmt);
   this->output(buf);
@@ -148,7 +148,7 @@ void Emit::bc_label(const char *fmt, ...)
 
 void Emit::bc_condbranch(const char *fmt, ...)
 {
-  char buf[255];
+  char buf[2048];
 
   this->output("\t");
   do_vsnprintf(buf, fmt);
@@ -158,7 +158,7 @@ void Emit::bc_condbranch(const char *fmt, ...)
 
 void Emit::bc_generic(const char *fmt, ...)
 {
-  char buf[255];
+  char buf[2048];
 
   do_vsnprintf(buf, fmt);
   this->output(buf);
@@ -166,7 +166,7 @@ void Emit::bc_generic(const char *fmt, ...)
 
 void Emit::bc_invokestatic(const char *fmt, ...)
 {
-  char buf[255];
+  char buf[2048];
 
   this->output("\tinvokestatic ");
   do_vsnprintf(buf, fmt);
@@ -190,7 +190,7 @@ void Emit::bc_lookupswitch(int n, uint32_t *table,
 
 void Emit::error(const char *fmt, ...)
 {
-  char buf[255];
+  char buf[2048];
 
   do_vsnprintf(buf, fmt);
   this->output("; ERROR: ");
@@ -200,7 +200,7 @@ void Emit::error(const char *fmt, ...)
 
 void Emit::warning(const char *fmt, ...)
 {
-  char buf[255];
+  char buf[2048];
 
   do_vsnprintf(buf, fmt);
 
@@ -212,7 +212,7 @@ void Emit::warning(const char *fmt, ...)
 
 void Emit::write(const char *fmt, ...)
 {
-  char buf[255];
+  char buf[2048];
 
   do_vsnprintf(buf, fmt);
 
@@ -222,7 +222,7 @@ void Emit::write(const char *fmt, ...)
 
 void Emit::writeIndent(const char *fmt, ...)
 {
-  char buf[255];
+  char buf[2048];
 
   do_vsnprintf(buf, fmt);
 
