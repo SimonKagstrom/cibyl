@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <javamethod.hh>
+#include <controller.hh>
 #include <emit.hh>
 
 JavaMethod::JavaMethod(Function **fns,
@@ -43,6 +44,8 @@ JavaMethod::JavaMethod(Function **fns,
     }
 
   memset(this->registerUsage, 0, sizeof(this->registerUsage));
+  this->n_exceptionHandlers = 0;
+  this->exceptionHandlers = NULL;
 }
 
 JavaMethod::~JavaMethod()
@@ -156,6 +159,26 @@ bool JavaMethod::pass2()
                             "__CIBYL_function_return");
     }
 
+  for (int i = 0; i < this->n_exceptionHandlers; i++)
+    {
+      ExceptionHandler *eh = this->exceptionHandlers[i];
+
+      emit->bc_label("%s", eh->name);
+      /* Register the object passed here */
+      emit->bc_invokestatic("CRunTime/registerObject(Ljava/lang/Object;)I");
+      emit->bc_pushregister(R_ECB);
+      emit->bc_swap();
+      /* This is just a jalr(ecb, sp, ear (exception obj)) */
+      emit->bc_pushregister(R_SP);
+      emit->bc_swap();
+      emit->bc_pushregister(R_EAR);
+      emit->bc_pushconst(0);
+      emit->bc_pushconst(0);
+      emit->bc_invokestatic(controller->getCallTableMethod()->getJavaMethodName());
+      emit->bc_pop();
+      emit->bc_goto( eh->end );
+    }
+
   emit->bc_label("__CIBYL_function_return");
   if (this->clobbersReg(R_V1))
     {
@@ -210,4 +233,18 @@ MIPS_register_t JavaMethod::getNextRegisterToPass(void *_it)
 bool JavaMethod::clobbersReg(MIPS_register_t reg)
 {
   return this->registerUsage[reg] > 0;
+}
+
+char *JavaMethod::addExceptionHandler(uint32_t start, uint32_t end)
+{
+  int n = this->n_exceptionHandlers;
+  ExceptionHandler *eh;
+
+  this->exceptionHandlers = (ExceptionHandler**)xrealloc(this->exceptionHandlers, n + 1);
+  this->n_exceptionHandlers = n + 1;
+
+  eh = new ExceptionHandler(start, end);
+  this->exceptionHandlers[n] = eh;
+
+  return eh->name;
 }

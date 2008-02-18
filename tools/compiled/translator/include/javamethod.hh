@@ -14,9 +14,28 @@
 
 #include <function.hh>
 #include <mips.hh>
+#include <utils.h>
 #include <registerallocator.hh>
 
 class JavaClass;
+
+/* Helper class */
+class ExceptionHandler
+{
+public:
+  ExceptionHandler(uint32_t start, uint32_t end)
+  {
+    this->start = start;
+    this->end = end;
+
+    this->name = (char*)xcalloc(32, 1);
+    snprintf(this->name, 32, "L_EXH_%08x_%08x", start, end);
+  }
+
+  uint32_t start;
+  uint32_t end;
+  char *name;
+};
 
 class JavaMethod : public CodeBlock
 {
@@ -52,6 +71,16 @@ public:
     return this->n_registersToPass;
   }
 
+  /**
+   * Add an exception handler between @start and @end
+   *
+   * @param start the start address
+   * @param end the end address
+   *
+   * @return the name of the exception handler
+   */
+  char *addExceptionHandler(uint32_t start, uint32_t end);
+
 protected:
   Function **functions;
   int n_functions;
@@ -61,6 +90,9 @@ protected:
 
   int n_registersToPass;
   bool registerIndirectJumps;
+
+  int n_exceptionHandlers;
+  ExceptionHandler **exceptionHandlers;
 };
 
 class CallTableMethod : public JavaMethod
