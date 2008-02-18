@@ -134,7 +134,7 @@ public:
 
   Instruction *createNop(uint32_t address);
 
-  Instruction *createJal(uint32_t address, uint32_t extra);
+  Instruction *createTailCallJump(uint32_t address, uint32_t extra);
 
 private:
   static InstructionFactory *instance;

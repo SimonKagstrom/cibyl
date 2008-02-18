@@ -912,7 +912,7 @@ public:
     return true;
   }
 
-  bool pass2()
+  virtual bool pass2()
   {
     void *it;
 
@@ -973,6 +973,25 @@ public:
 protected:
   JavaMethod *dstMethod;
   Builtin *builtin;
+};
+
+
+class JalReturn : public Jal
+{
+public:
+  JalReturn(uint32_t address, int opcode, int32_t extra) : Jal(address, opcode, extra)
+  {
+  }
+
+  bool pass2()
+  {
+    bool out = Jal::pass2();
+
+    /* Return from this function (undo the tail call optimization) */
+    emit->bc_goto("__CIBYL_function_return");
+
+    return out;
+  }
 };
 
 
@@ -1414,7 +1433,7 @@ Instruction *InstructionFactory::createNop(uint32_t address)
   return new Nop(address);
 }
 
-Instruction *InstructionFactory::createJal(uint32_t address, uint32_t extra)
+Instruction *InstructionFactory::createTailCallJump(uint32_t address, uint32_t extra)
 {
-  return new Jal(address, OP_JAL, extra);
+  return new JalReturn(address, OP_JAL, extra);
 }

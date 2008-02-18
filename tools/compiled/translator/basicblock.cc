@@ -47,8 +47,8 @@ bool BasicBlock::pass1()
               /* Typically tail call optimizations, just "unoptimize" */
               emit->warning("Jump from 0x%x to 0x%x not within the same method, replacing with jal\n",
                             this->address, dstAddress);
-              this->instructions[i] = InstructionFactory::getInstance()->createJal(insn->getAddress(),
-                                                                                   insn->getExtra());
+              this->instructions[i] = InstructionFactory::getInstance()->createTailCallJump(insn->getAddress(),
+                                                                                            insn->getExtra());
               if (insn->isBranchTarget())
                 this->instructions[i]->setBranchTarget();
               this->instructions[i]->setDelayed(insn->getDelayed());
