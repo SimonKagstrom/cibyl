@@ -14,11 +14,20 @@
 
 Instruction *tryInstruction;
 
+Builtin::~Builtin()
+{
+}
+
 BuiltinFactory::BuiltinFactory()
 {
 }
 
 Builtin* BuiltinFactory::match(const char *name)
 {
+  /* Only look at the first part of the name */
+  if (strncmp(name, "__NOPH_try", strlen("__NOPH_try")) == 0)
+    return new ExceptionBuiltinTry();
+  else if (strncmp(name, "__NOPH_catch", strlen("__NOPH_catch")) == 0)
+    return new ExceptionBuiltinCatch();
   return NULL;
 }
