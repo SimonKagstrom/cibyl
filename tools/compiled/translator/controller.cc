@@ -152,7 +152,7 @@ Syscall *Controller::getSyscall(uint32_t value)
                                                        strlen(name), name);
       if (!p)
         {
-          fprintf(stderr, "No syscall with offset 0x%x\n", value);
+          fprintf(stderr, "No syscall %s:\n  Are all syscall databases added on the command line (cibyl-syscalls.db)?\n", name);
           exit(1);
         }
 
