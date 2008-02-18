@@ -96,6 +96,8 @@ public:
 
   void bc_l2i() { this->writeIndent("l2i"); }
 
+  void bc_swap() { this->writeIndent("swap"); }
+
   void bc_iaload() { this->writeIndent("iaload"); }
 
   void bc_iastore() { this->writeIndent("iastore"); }
