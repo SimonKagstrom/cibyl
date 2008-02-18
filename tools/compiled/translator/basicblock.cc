@@ -36,9 +36,26 @@ bool BasicBlock::pass1()
 
       controller->setCurrentInstruction(insn);
 
-      /* Compile the instruction */
-      if (!insn->pass1())
-	out = false;
+      if (insn->getOpcode() == OP_J)
+        {
+          uint32_t dstAddress = insn->getExtra() << 2;
+          JavaMethod *src = controller->getMethodByAddress(insn->getAddress());
+          JavaMethod *dst = controller->getMethodByAddress(dstAddress);
+
+          if (src != dst)
+            {
+              /* Typically tail call optimizations, just "unoptimize" */
+              emit->warning("Jump from 0x%x to 0x%x not within the same method, replacing with jal\n",
+                            this->address, dstAddress);
+              this->instructions[i] = InstructionFactory::getInstance()->createJal(insn->getAddress(),
+                                                                                   insn->getExtra());
+              if (insn->isBranchTarget())
+                this->instructions[i]->setBranchTarget();
+              this->instructions[i]->setDelayed(insn->getDelayed());
+              delete insn;
+              insn = this->instructions[i];
+            }
+        }
 
       if ( (this->type == PROLOGUE && insn->getOpcode() == OP_SW && insn->getRs() == R_SP) ||
 	   (this->type == EPILOGUE && insn->getOpcode() == OP_LW && insn->getRs() == R_SP) )
@@ -61,14 +78,19 @@ bool BasicBlock::pass1()
 	      if ( (this->type == PROLOGUE && p_s[reg] != 0) ||
                    (this->type == EPILOGUE && p_d[reg] != 0) )
 		{
-		  this->instructions[i] = new Nop(insn->getAddress());
+		  this->instructions[i] = InstructionFactory::getInstance()->createNop(insn->getAddress());
                   if (insn->isBranchTarget())
                     this->instructions[i]->setBranchTarget();
 		  delete insn;
+                  insn = this->instructions[i];
 		  break;
 		}
 	    }
 	}
+
+      /* Prepare the instruction */
+      if (!insn->pass1())
+	out = false;
     }
 
   return out;
