@@ -21,6 +21,8 @@
 Controller::Controller(const char *dstdir, const char *elf_filename,
                        int n_dbs, const char **database_filenames) : CodeBlock()
 {
+  char buf[255];
+
   this->elf = new CibylElf(elf_filename);
   elf = this->elf;
 
@@ -36,6 +38,9 @@ Controller::Controller(const char *dstdir, const char *elf_filename,
     this->readSyscallDatabase(database_filenames[i]);
 
   this->builtins = new BuiltinFactory();
+
+  snprintf(buf, 80, "%s/%s", this->dstdir, "Cibyl.j");
+  emit->setOutputFile(buf);
 }
 
 void Controller::readSyscallDatabase(const char *filename)
@@ -250,11 +255,9 @@ bool Controller::pass1()
 
 bool Controller::pass2()
 {
-  char buf[80];
   bool out = true;
+  char buf[255];
 
-  snprintf(buf, 80, "%s/%s", this->dstdir, "Cibyl.j");
-  emit->setOutputFile(buf);
   for (int i = 0; i < this->n_classes; i++)
     {
       if (this->classes[i]->pass2() != true)
