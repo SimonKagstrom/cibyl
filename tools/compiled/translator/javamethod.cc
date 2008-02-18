@@ -240,7 +240,8 @@ char *JavaMethod::addExceptionHandler(uint32_t start, uint32_t end)
   int n = this->n_exceptionHandlers;
   ExceptionHandler *eh;
 
-  this->exceptionHandlers = (ExceptionHandler**)xrealloc(this->exceptionHandlers, n + 1);
+  this->exceptionHandlers = (ExceptionHandler**)xrealloc(this->exceptionHandlers,
+                                                         (n + 1) * sizeof(ExceptionHandler*) );
   this->n_exceptionHandlers = n + 1;
 
   eh = new ExceptionHandler(start, end);
