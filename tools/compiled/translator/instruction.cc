@@ -813,10 +813,11 @@ public:
 
     if (!dst)
       {
-	emit->error("Jump from 0x%x to 0x%x is not within the function\n",
-		    this->address, dst->getAddress());
+	emit->error("Jump from 0x%x to 0x%x: target not found\n",
+		    this->address, this->extra << 2);
 	return false;
       }
+
     emit->bc_goto(dst->getAddress());
 
     return true;
@@ -1378,4 +1379,14 @@ InstructionFactory *InstructionFactory::getInstance()
     InstructionFactory::instance = new InstructionFactory();
 
   return InstructionFactory::instance;
+}
+
+Instruction *InstructionFactory::createNop(uint32_t address)
+{
+  return new Nop(address);
+}
+
+Instruction *InstructionFactory::createJal(uint32_t address, uint32_t extra)
+{
+  return new Jal(address, OP_JAL, extra);
 }
