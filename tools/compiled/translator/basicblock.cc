@@ -40,8 +40,8 @@ bool BasicBlock::pass1()
       if (!insn->pass1())
 	out = false;
 
-      if ( (this->type == PROLOGUE && insn->getOpcode() == OP_SW) ||
-	   (this->type == EPILOGUE && insn->getOpcode() == OP_LW) )
+      if ( (this->type == PROLOGUE && insn->getOpcode() == OP_SW && insn->getRs() == R_SP) ||
+	   (this->type == EPILOGUE && insn->getOpcode() == OP_LW && insn->getRs() == R_SP) )
 	{
 	  int p_s[N_REGS];
 	  int p_d[N_REGS];
