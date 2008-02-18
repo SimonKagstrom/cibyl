@@ -12,6 +12,8 @@
 #ifndef __EXCEPTIONS_HH__
 #define __EXCEPTIONS_HH__
 
+#include <javamethod.hh>
+#include <controller.hh>
 #include <builtins.hh>
 #include <emit.hh>
 
@@ -20,6 +22,10 @@ extern Instruction *tryInstruction;
 class ExceptionBuiltinBase : public Builtin
 {
 public:
+  ExceptionBuiltinBase(const char *name) : Builtin(name)
+  {
+  }
+
   bool pass1(Instruction *insn)
   {
     insn->setBranchTarget();
@@ -32,9 +38,13 @@ public:
   };
 };
 
-class ExcetpionBuiltinTry : ExceptionBuiltinBase
+class ExceptionBuiltinTry : public ExceptionBuiltinBase
 {
 public:
+  ExceptionBuiltinTry() : ExceptionBuiltinBase("__NOPH_try")
+  {
+  }
+
   int fillSources(int *p)
   {
     return this->addToRegisterUsage(R_A0, p) + this->addToRegisterUsage(R_A1, p);
@@ -49,6 +59,31 @@ public:
 
     tryInstruction = insn;
 
+    return true;
+  }
+};
+
+class ExceptionBuiltinCatch : public ExceptionBuiltinBase
+{
+public:
+  ExceptionBuiltinCatch() : ExceptionBuiltinBase("__NOPH_catch")
+  {
+  }
+
+  int fillSources(int *p)
+  {
+    return this->addToRegisterUsage(R_SP, p); /* ECB, EAR in try */
+  };
+
+  bool pass2(Instruction *insn)
+  {
+    JavaMethod *method = controller->getMethodByAddress(insn->getAddress());
+    uint32_t start = tryInstruction->getAddress();
+    uint32_t end = insn->getAddress();
+    const char *handler = method->addExceptionHandler(start, end);
+
+    emit->bc_generic(".catch all from L_%x to L_%x using %s\n",
+                     start, end, handler);
     return true;
   }
 };
