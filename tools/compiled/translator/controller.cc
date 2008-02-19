@@ -214,8 +214,12 @@ void Controller::lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entrie
     {
       uint32_t v = be32_to_host(data[n]);
 
-      if (v >= text_start && v < text_end && (v & 0x3 == 0))
+      if (v >= text_start && v < text_end)
         {
+          /* Skip things which can not be code addresses */
+          if (v & 0x3 != 0)
+            continue;
+
           JavaMethod *mt = cl->getMethodByAddress(v);
 
           /* Something has an address in this method (which can be an address) */
