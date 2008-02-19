@@ -49,7 +49,7 @@ file_chunk_t *read_file(const char *filename)
 
   if (lstat(filename, &buf) < 0)
     {
-      perror("lstat");
+      fprintf(stderr, "Cannot open file %s\n", filename);
       exit(1);
       return NULL;
     }
