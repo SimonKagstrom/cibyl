@@ -12,7 +12,7 @@
 SUBDIRS=libs
 SYSCALL_SETS=softfloat resource_manager jmicropolygon android
 
-all: libs/lib include/generated cibyl-syscalls.db $(SUBDIRS)
+all: libs/lib include/generated $(SUBDIRS)
 
 libs/lib:
 	install -d $@
@@ -20,9 +20,7 @@ libs/lib:
 include/generated: FORCE
 	install -d include/generated
 	$(CIBYL_BASE)/tools/cibyl-generate-c-header -o $@ $(CIBYL_BASE)/syscalls/ $(SYSCALL_SETS)
-
-cibyl-syscalls.db: FORCE
-	$(CIBYL_BASE)/tools/cibyl-generate-syscall-db -o $@ $(CIBYL_BASE)/syscalls/ $(SYSCALL_SETS)
+	$(CIBYL_BASE)/tools/cibyl-generate-syscall-db -o $@/cibyl-syscalls.db $(CIBYL_BASE)/syscalls/ $(SYSCALL_SETS)
 
 clean:
 	make -C $(SUBDIRS) clean

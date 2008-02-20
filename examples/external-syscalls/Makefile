@@ -26,4 +26,6 @@ include $(CIBYL_BASE)/build/Rules-java.mk
 
 include/: FORCE
 	$(CIBYL_BASE)/tools/cibyl-generate-c-header -o $@ syscalls/ hello
+	$(CIBYL_BASE)/tools/cibyl-generate-syscall-db -o $@/cibyl-syscalls.db syscalls/ hello
+
 FORCE:
