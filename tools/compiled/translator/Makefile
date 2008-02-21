@@ -4,7 +4,7 @@
 ##
 ## Filename:      Makefile
 ## Author:        Simon Kagstrom <simon.kagstrom@gmail.com>
-## Description:   stuff
+## Description:   Makefile for the C++ translator
 ##
 ## $Id:$
 ##
@@ -23,11 +23,16 @@ OBJS=$(patsubst %.cc,%.oo,$(SRCS))
 all: xcibyl-translator
 
 clean:
-	rm -f *.oo *~
+	rm -rf *.oo *~ xcibyl-translator lib/libghthash-0.6.2 lib/.libghthash
 
 %.oo: %.cc
-	$(HOST_CXX) $(HOST_CFLAGS) -c -o $@ $<
+	$(HOST_CXX) -Ilib/libghthash-0.6.2/src/ $(HOST_CFLAGS) -c -o $@ $<
 
-xcibyl-translator: $(OBJS)
+lib/.libghthash:
+	cd lib && tar -xzf libghthash-0.6.2.tar.gz
+	cd lib/libghthash-0.6.2/ && ./configure && make
+	touch $@
+
+xcibyl-translator: lib/.libghthash $(OBJS)
 	echo $(OBJS)
-	$(HOST_LD) -o $@ $+ -lghthash -lelf
+	$(HOST_LD) -Llib/libghthash-0.6.2/src/.libs/ -o $@ $(OBJS) -lghthash -lelf -static
