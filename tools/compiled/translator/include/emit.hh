@@ -111,7 +111,7 @@ public:
 
   void warning(const char *dst, ...);
 
-  void setOutputFile(const char *filename);
+  void setOutputFile(FILE *fp);
 
 private:
   void bc_load_store_helper(const char *type, int nr);
