@@ -14,6 +14,7 @@
 
 #include <arpa/inet.h> /* htonl */
 #include <stdlib.h>
+#include <stdio.h>
 
 void *xcalloc(size_t nmemb, size_t size);
 
@@ -41,5 +42,7 @@ typedef struct
 } file_chunk_t;
 
 file_chunk_t *read_file(const char *filename);
+
+FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode);
 
 #endif /* !__UTILS_H__ */
