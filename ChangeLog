@@ -5,7 +5,13 @@ Cibyl (16)
 	* Re-implemented most parts of the translator in C++. This
 	improves compilation performance quite a bit and the bottleneck
 	is now the Jasmin step. Not all optimizations are implemented in
-	the C++ version yet.
+	the C++ version yet. cibyl-mips2java will automatically use the
+	C++ translator providing no optimizations are selected.
+
+	The translation step is no longer the bottleneck, Jasmin and the
+	Java syscall wrapper generation now takes most time. With the new
+	translator, Sarien compiles in around 30 seconds totally instead
+	of over one minute.
 
 	* Add function pruning option to workaround bugs on some phones
 
