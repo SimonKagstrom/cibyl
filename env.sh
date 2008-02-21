@@ -31,5 +31,9 @@ export JAVA_PATH=$JAVA_HOME/bin/
 #export CIBYL_READELF=mips-unknown-elf-readelf
 #export CIBYL_NM=mips-unknown-elf-nm
 #export CIBYL_OBJCOPY=mips-unknown-elf-objcopy
-
 #export CIBYL_CPP=cpp
+
+#For the C++ translator
+#export CIBYL_XCIBYL_TRANSLATOR=xcibyl-translator
+#export HOST_CXX=g++
+#export HOST_LD=g++
