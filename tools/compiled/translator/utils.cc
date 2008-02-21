@@ -64,3 +64,23 @@ file_chunk_t *read_file(const char *filename)
 
   return out;
 }
+
+FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode)
+{
+  int len = strlen(dir) + strlen(filename) + 4;
+  FILE *fp;
+  char *buf;
+
+  buf = (char*)xcalloc(len, 1);
+
+  snprintf(buf, len, "%s/%s", dir, filename);
+  fp = fopen(buf, mode);
+  free(buf);
+  if (!fp)
+    {
+      fprintf(stderr, "Cannot open file %s/%s\n", dir, filename);
+      exit(1);
+    }
+
+  return fp;
+}
