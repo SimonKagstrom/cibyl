@@ -36,3 +36,7 @@ syscallSets = args[1:]
 
 f = SyscallHeaderGenerator(dirname, syscallSets, options.outdir)
 f.run()
+
+# And run the database generator as well
+f = SyscallDatabaseGenerator(dirname, syscallSets, options.outdir + "/cibyl-syscalls.db")
+f.run()
