@@ -236,16 +236,11 @@ void Emit::output(char *what)
   fprintf(this->fp, what);
 }
 
-void Emit::setOutputFile(const char *filename)
+void Emit::setOutputFile(FILE *fp)
 {
   if (this->fp != stdout)
     fclose(this->fp);
-  this->fp = fopen(filename, "w");
-  if (!this->fp)
-    {
-      fprintf(stderr, "Cannot open %s\n", filename);
-      exit(1);
-    }
+  this->fp = fp;
 }
 
 Emit *emit;
