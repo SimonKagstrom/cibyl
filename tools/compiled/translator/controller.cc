@@ -21,8 +21,6 @@
 Controller::Controller(const char *dstdir, const char *elf_filename,
                        int n_dbs, const char **database_filenames) : CodeBlock()
 {
-  char buf[255];
-
   this->elf = new CibylElf(elf_filename);
   elf = this->elf;
 
@@ -39,8 +37,7 @@ Controller::Controller(const char *dstdir, const char *elf_filename,
 
   this->builtins = new BuiltinFactory();
 
-  snprintf(buf, 80, "%s/%s", this->dstdir, "Cibyl.j");
-  emit->setOutputFile(buf);
+  emit->setOutputFile(open_file_in_dir(this->dstdir, "Cibyl.j", "w"));
 }
 
 void Controller::readSyscallDatabase(const char *filename)
@@ -229,6 +226,35 @@ void Controller::lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entrie
     }
 }
 
+uint32_t Controller::addAlignedSection(uint32_t addr, FILE *fp, void *data,
+                                       size_t data_len, int alignment)
+{
+  uint32_t out = addr;
+  int pad = 0;
+
+  if (addr & (alignment - 1))
+    pad = (-addr) & (alignment - 1);
+  out += pad;
+  while (pad != 0)
+    {
+      int v = fputc('\0', fp);
+      if (v < 0)
+        {
+          fprintf(stderr, "Cannot write padding to outfile in aligned section\n");
+          exit(1);
+        }
+      pad--;
+    }
+
+  if (fwrite(data, 1, data_len, fp) != data_len)
+    {
+      fprintf(stderr, "Cannot write data to outfile in aligned section\n");
+      exit(1);
+    }
+
+  return out + data_len;
+}
+
 bool Controller::pass1()
 {
   bool out = true;
@@ -260,15 +286,27 @@ bool Controller::pass1()
 bool Controller::pass2()
 {
   bool out = true;
-  char buf[255];
+  uint32_t addr = 0;
+  FILE *fp;
+
+  /* Output the data sections to a file */
+  fp = open_file_in_dir(this->dstdir, "program.data.bin", "w");
+  addr = this->addAlignedSection(addr, fp, this->elf->getData(),
+                                 this->elf->getDataSize(), 16);
+  addr = this->addAlignedSection(addr, fp, this->elf->getRodata(),
+                                 this->elf->getRodataSize(), 16);
+  addr = this->addAlignedSection(addr, fp, this->elf->getCtors(),
+                                 this->elf->getCtorsSize(), 16);
+  addr = this->addAlignedSection(addr, fp, this->elf->getDtors(),
+                                 this->elf->getDtorsSize(), 16);
+  fclose(fp);
 
   for (int i = 0; i < this->n_classes; i++)
     {
       if (this->classes[i]->pass2() != true)
 	out = false;
     }
-  snprintf(buf, 80, "%s/%s", this->dstdir, "CibylCallTable.java");
-  emit->setOutputFile(buf);
+  emit->setOutputFile(open_file_in_dir(this->dstdir, "CibylCallTable.java", "w"));
   this->callTableMethod->pass2();
 
   return out;
