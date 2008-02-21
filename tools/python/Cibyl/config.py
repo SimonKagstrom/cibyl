@@ -50,6 +50,12 @@ infile = None
 profileFile = None
 
 
+def getBasePath():
+    base = os.getenv("CIBYL_BASE")
+    if base == None:
+	base = "/usr/local/share/cibyl"
+    return base
+
 wtk = os.getenv("WTK_PATH", ".")
 
 jasminCommandLine="jasmin"
@@ -63,11 +69,8 @@ nm = os.getenv("CIBYL_NM", "nm")
 objcopy = os.getenv("CIBYL_OBJCOPY", "objcopy")
 cpp = os.getenv("CIBYL_CPP", "cpp")
 
-def getBasePath():
-    base = os.getenv("CIBYL_BASE")
-    if base == None:
-	base = "/usr/local/share/cibyl"
-    return base
+xcibyl_translator = os.getenv("CIBYL_XCIBYL_TRANSLATOR",
+                              getBasePath() + "/tools/compiled/translator/xcibyl-translator")
 
 def checkOne(cmdline, fn, error_message):
     f = os.popen(cmdline)

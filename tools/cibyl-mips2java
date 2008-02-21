@@ -25,6 +25,7 @@ sys.path.append('%s/python/' % sys.path[0])
 from Cibyl.BinaryTranslation.translator import Controller
 from Cibyl.BinaryTranslation.Mips import instruction
 from Cibyl.BinaryTranslation.translator import config
+from Cibyl.CompiledHelpers.helpers import *
 
 # Handling of the -I option is done through this callback
 syscallDirectories = []
@@ -208,7 +209,6 @@ if options.colocateFunctions:
 
 if options.optimize_all:
 	config.doMultOptimization = True
-	config.doMemoryRegisterOptimization = True
 	config.doRegisterScheduling = True
 	config.doPeepholeOptimize = True
 	config.doRegisterValueTracking = True
@@ -216,10 +216,24 @@ if options.optimize_all:
 if config.memoryDebug:
 	instruction.setupMemoryDebug()
 
+usePythonCompiler = False
+
+# The C++ compiler cannot be used with some options
+if config.doRegisterValueTracking or config.colocateFunctions or options.inlineBuiltinFunctions or options.debug:
+    usePythonCompiler = True
+
 def doCompile():
 	global controller
 	config.checkEnvironment()
 	controller = Controller(config.infile, syscallDirectories)
 	controller.compile()
 
-doCompile()
+def doCppCompile():
+    doTranslation(config.infile, syscallDirectories)
+    doJasmin(config.outDirectory + "/Cibyl.j")
+    doJavac(config.outDirectory + "/CibylCallTable.java")
+
+if usePythonCompiler:
+    doCompile()
+else:
+    doCppCompile()
