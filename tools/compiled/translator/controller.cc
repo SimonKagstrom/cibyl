@@ -16,6 +16,7 @@
 #include <emit.hh>
 #include <controller.hh>
 #include <registerallocator.hh>
+#include <syscall-wrappers.hh>
 #include <config.hh>
 
 Controller::Controller(const char *dstdir, const char *elf_filename,
@@ -25,6 +26,7 @@ Controller::Controller(const char *dstdir, const char *elf_filename,
   elf = this->elf;
 
   this->syscall_db_table = ght_create(1024);
+  this->syscall_used_table = ght_create(1024);
 
   this->dstdir = dstdir;
   this->instructions = NULL;
@@ -160,6 +162,9 @@ Syscall *Controller::getSyscall(uint32_t value)
 
       this->syscalls[value] = new Syscall(p->name, p->nrArgs,
                                           p->returns ? 'I' : 'V' );
+      /* Insert into the table for the syscall wrappers */
+      ght_insert(this->syscall_used_table, p,
+                 strlen(p->name), (void*)p->name);
     }
   return this->syscalls[value];
 }

@@ -85,6 +85,7 @@ private:
   Syscall **syscalls; /* Sparse table of syscalls */
 
   ght_hash_table_t *syscall_db_table;
+  ght_hash_table_t *syscall_used_table;
 
   Instruction *currentInstruction;
 
