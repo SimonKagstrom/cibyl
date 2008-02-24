@@ -16,7 +16,7 @@ HOST_CFLAGS ?=-ggdb -Iinclude -Wall
 SRCS=instruction.cc basicblock.cc controller.cc javamethod.cc \
      function.cc javaclass.cc mips.cc utils.cc elf.cc emit.cc \
      registerallocator.cc calltablemethod.oo codeblock.oo \
-     string-instruction.cc builtins.cc
+     string-instruction.cc builtins.cc syscall-wrappers.oo
 
 OBJS=$(patsubst %.cc,%.oo,$(SRCS))
 
