@@ -12,6 +12,7 @@
 #ifndef __EMIT_HH__
 #define __EMIT_HH__
 
+#include <stdio.h>
 #include <stdint.h>
 #include <registerallocator.hh>
 
