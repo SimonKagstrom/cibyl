@@ -33,6 +33,8 @@ Controller::Controller(const char *dstdir, const char *elf_filename,
   this->functions = NULL;
   this->methods = NULL;
   this->classes = NULL;
+  this->n_syscall_dirs = 0;
+  this->syscall_dirs = NULL;
 
   for (int i = 0; i < n_dbs; i++)
     this->readSyscallDatabase(database_filenames[i]);
@@ -46,17 +48,24 @@ void Controller::readSyscallDatabase(const char *filename)
 {
   cibyl_db_entry_t *syscall_entries;
   file_chunk_t *file = read_file(filename);
-  uint32_t magic, n_syscall_dirs, n;
+  int first_syscall_dir = this->n_syscall_dirs;
+  uint32_t magic, n_dirs, n;
   char *strtab;
 
   magic = be32_to_host(((uint32_t*)file->data)[0]);
-  n_syscall_dirs = be32_to_host(((uint32_t*)file->data)[1]);
+  n_dirs = be32_to_host(((uint32_t*)file->data)[1]);
   n = be32_to_host(((uint32_t*)file->data)[2]);
   strtab = (char*)file->data +
     be32_to_host((((uint32_t*)file->data)[3]));
 
+  /* Add to the syscall directories */
+  this->n_syscall_dirs += n_dirs;
+  this->syscall_dirs = (char**)xrealloc(this->syscall_dirs, this->n_syscall_dirs * sizeof(char**));
+  for (int i = first_syscall_dir; i < this->n_syscall_dirs; i++)
+      this->syscall_dirs[i] = ((char*)strtab) + be32_to_host(((uint32_t*)file->data)[4 + i - first_syscall_dir]);
+
   syscall_entries = (cibyl_db_entry_t*)(((uint32_t*)file->data) +
-                                        4 + n_syscall_dirs);
+                                        4 + n_dirs);
 
   /* Fixup the entries */
   for (uint32_t i = 0; i < n; i++)
@@ -294,6 +303,7 @@ bool Controller::pass1()
 
 bool Controller::pass2()
 {
+  SyscallWrapperGenerator *syscallWrappers;
   bool out = true;
   uint32_t addr = 0;
   FILE *fp;
@@ -317,6 +327,11 @@ bool Controller::pass2()
     }
   emit->setOutputFile(open_file_in_dir(this->dstdir, "CibylCallTable.java", "w"));
   this->callTableMethod->pass2();
+
+  emit->setOutputFile(open_file_in_dir(this->dstdir, "Syscalls.java", "w"));
+  syscallWrappers = new SyscallWrapperGenerator(this->n_syscall_dirs, this->syscall_dirs,
+                                                this->syscall_used_table);
+  syscallWrappers->pass2();
 
   return out;
 }

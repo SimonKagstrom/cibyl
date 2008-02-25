@@ -13,17 +13,34 @@
 #include <syscall-wrappers.hh>
 
 
-SyscallWrapperGenerator::SyscallWrapperGenerator(ght_hash_table_t *used_syscalls)
+SyscallWrapperGenerator::SyscallWrapperGenerator(int n_syscall_dirs, char **syscall_dirs,
+                                                 ght_hash_table_t *used_syscalls)
 {
+  this->n_syscall_dirs = n_syscall_dirs;
+  this->syscall_dirs = syscall_dirs;
   this->used_syscalls = used_syscalls;
 }
 
-
+void SyscallWrapperGenerator::doOne(cibyl_db_entry_t *p)
+{
+}
 
 bool SyscallWrapperGenerator::pass2()
 {
-  emit->bc_generic("/* GENERATED, DON'T EDIT */");
-  emit->bc_generic("public class Syscalls {");
+  cibyl_db_entry_t *p;
+  ght_iterator_t it;
+  const void *key;
+
+  emit->bc_generic("/* GENERATED, DON'T EDIT */\n");
+  emit->bc_generic("public class Syscalls {\n");
+  emit->bc_generic("}\n");
+
+  for (p = (cibyl_db_entry_t *)ght_first(this->used_syscalls, &it, &key);
+       p;
+       p = (cibyl_db_entry_t *)ght_next(this->used_syscalls, &it, &key))
+    {
+      this->doOne(p);
+    }
 
   return true;
 }
