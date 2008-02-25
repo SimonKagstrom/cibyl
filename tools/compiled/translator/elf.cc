@@ -71,6 +71,7 @@ CibylElf::CibylElf(const char *filename)
       Elf_Data *data = elf_getdata(scn, NULL);
       char *name;
 
+      name = elf_strptr(this->elf, shstrndx, shdr->sh_name);
       if (!data)
         {
           fprintf(stderr, "elf_getdata failed on section %s in %s\n",
@@ -78,7 +79,6 @@ CibylElf::CibylElf(const char *filename)
           exit(1);
         }
 
-      name = elf_strptr(this->elf, shstrndx, shdr->sh_name);
       if ( strcmp(name, ".text") == 0 )
         {
           this->text = (uint8_t*)data->d_buf;

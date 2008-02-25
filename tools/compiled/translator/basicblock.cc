@@ -127,6 +127,9 @@ void BasicBlock::commentInstruction(Instruction *insn)
   char buf[255];
   char out[255];
 
+  memset(buf, 0, 255);
+  memset(out, 0, 255);
+
   /* Output a comment */
   int l = snprintf(buf, 255, "0x%x: ", insn->getAddress());
   l += instruction_to_string(insn, buf+l, 255);
