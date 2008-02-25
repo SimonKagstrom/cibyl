@@ -224,30 +224,49 @@ class SyscallDatabaseGenerator(SyscallGenerator):
             out = out | 2
         return out
 
+    def add_str(self, s):
+        # Add the string including null-termination
+        out = self.strtab_offs
+        self.strtab_offs = self.strtab_offs + len(s) + 1
+        self.strs.append(s)
+        return out
+
     def run(self):
         items = []
         strtab = {}
-        strs = {}
+        self.strtab_offs = 0
+        self.strs = []
+
+        # Read all syscall directories
         of = open(self.outfile, "w")
+        for d in self.dirs:
+            print os.path.abspath(d)
 	for curFile in self.files:
 	    for item in curFile.all:
 		if not isinstance(item, Function):
 		    continue
                 items.append(item)
 
+        # Create the structure
         out = []
-        strtab_offs = 0
         for item in items:
-            out.append( ( item.getNr(), self.encodeReturnType(item), item.getNrArgs(), self.encodeQualifier(item), strtab_offs) )
-            strtab_offs = strtab_offs + len(item.getName()) + 1
+            offs = self.add_str(item.getName())
+            out.append( ( item.getNr(), self.encodeReturnType(item), item.getNrArgs(), self.encodeQualifier(item), offs) )
 
+        # Write the header
+        of.write(struct.pack(">L", 0xa1b1c1d1)) # magic
+        of.write(struct.pack(">L", len(self.dirs))) # Nr syscall directories
         of.write(struct.pack(">L", len(out)) )               # Nr items
-        of.write(struct.pack(">L", 4 + len(out) * 4 * 5) )   # Offset to strtab
+        of.write(struct.pack(">L", 4 * 4 + 4*len(self.dirs) + len(out) * 4 * 5) )   # Offset to strtab
+        # The path names, as strtab offsets
+        for d in self.dirs:
+            offs = self.add_str(os.path.abspath(d))
+            of.write(struct.pack(">L", offs))
         # Write the out structures
         for s in out:
             of.write(struct.pack(">LLLLL", s[0], s[1], s[2], s[3], s[4]))
         # Write the string table
-        for item in items:
-            of.write(item.getName() + '\0')
+        for item in self.strs:
+            of.write(item + '\0')
 
         of.close()

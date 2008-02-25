@@ -46,13 +46,17 @@ void Controller::readSyscallDatabase(const char *filename)
 {
   cibyl_db_entry_t *syscall_entries;
   file_chunk_t *file = read_file(filename);
-  uint32_t n;
+  uint32_t magic, n_syscall_dirs, n;
   char *strtab;
 
-  n = be32_to_host(((uint32_t*)file->data)[0]);
-  strtab = (char*)file->data + sizeof(uint32_t) + be32_to_host((((uint32_t*)file->data)[1]));
+  magic = be32_to_host(((uint32_t*)file->data)[0]);
+  n_syscall_dirs = be32_to_host(((uint32_t*)file->data)[1]);
+  n = be32_to_host(((uint32_t*)file->data)[2]);
+  strtab = (char*)file->data +
+    be32_to_host((((uint32_t*)file->data)[3]));
 
-  syscall_entries = (cibyl_db_entry_t*)(((uint32_t*)file->data) + 2);
+  syscall_entries = (cibyl_db_entry_t*)(((uint32_t*)file->data) +
+                                        4 + n_syscall_dirs);
 
   /* Fixup the entries */
   for (uint32_t i = 0; i < n; i++)
