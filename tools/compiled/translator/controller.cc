@@ -10,6 +10,7 @@
  *
  ********************************************************************/
 #include <assert.h>
+#include <unistd.h>
 #include <stdio.h>
 
 #include <utils.h>
@@ -349,8 +350,12 @@ static void usage()
          "with possible syscalls (any number can be given)\n.");
 }
 
-int main(int argc, const char *argv[])
+int main(int argc, const char **argv)
 {
+  uint32_t trace_start = 0;
+  uint32_t trace_end = 0;
+  int opt;
+
   if (argc < 4)
     {
       fprintf(stderr, "Too few arguments\n");
@@ -359,8 +364,42 @@ int main(int argc, const char *argv[])
       return 1;
     }
 
+  while ((opt = getopt(argc, (char* const*)argv, "t:") != -1))
+    {
+      switch (opt)
+        {
+        case 't':
+          long s, e;
+          char *endp;
+
+          printf("Option %s, %s\n", argv[optind], argv[optind+1]);
+          trace_start = strtol(argv[optind], &endp, 0);
+          if (endp == argv[optind])
+            {
+              fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
+                      argv[optind]);
+              exit(1);
+            }
+          trace_end = strtol(argv[optind+1], &endp, 0);
+          if (endp == argv[optind+1])
+            {
+              fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
+                      argv[optind+1]);
+              exit(1);
+            }
+          optind += 2;
+          break;
+        default:
+          usage();
+          exit(1);
+          break;
+        }
+    }
+
   emit = new Emit();
   config = new Config();
+  config->traceRange[0] = trace_start;
+  config->traceRange[1] = trace_end;
 
   regalloc = new RegisterAllocator();
   controller = new Controller(argv[1], argv[2], argc-3, &argv[3]);
