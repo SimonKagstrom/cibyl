@@ -84,3 +84,45 @@ FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode)
 
   return fp;
 }
+
+
+/* From tobin */
+static uint32_t swap32(uint32_t x)
+{
+  uint32_t out;
+
+
+  out = ( (x & 0xffull) << 24 ) |
+    ( ((x & 0xff00ull) >> 8) << 16) |
+    ( ((x & 0xff0000ull) >> 16) << 8) |
+    ( ((x & 0xff000000ull) >> 24) << 0);
+
+      return out;
+}
+
+static uint64_t swap64(uint64_t x)
+{
+  uint64_t out;
+
+  out = ( ((x & 0xffull) << 56 ) |
+          ( ((x & 0xff00ull) >> 8) << 48 ) |
+          ( ((x & 0xff0000ull) >> 16) << 40 ) |
+          ( ((x & 0xff000000ull) >> 24) << 32 ) |
+          ( ((x & 0xff00000000ull) >> 32) << 24 ) |
+          ( ((x & 0xff0000000000ull) >> 40)  << 16 ) |
+          ( ((x & 0xff000000000000ull) >> 48) << 8 ) |
+          ( ((x & 0xff00000000000000ull) >> 56) << 0 ) );
+
+return out;
+}
+
+unsigned long be_to_host(unsigned long in)
+{
+  if (sizeof(unsigned long) == 4)
+    return (unsigned long)swap32((uint32_t)in);
+  else if (sizeof(unsigned long) == 8)
+    return (unsigned long)swap64((uint64_t)in);
+
+  fprintf(stderr, "ERROR: unsigned long must be 4 or 8 bytes!\n");
+  exit(1);
+}

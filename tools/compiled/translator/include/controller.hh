@@ -60,6 +60,7 @@ public:
 
 private:
   char *resolveStrtabAddress(char *strtab, char *offset);
+  unsigned long getSyscallFileLong(void *_p, int offset);
   void readSyscallDatabase(const char *filename);
   void lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entries);
 

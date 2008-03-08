@@ -21,7 +21,7 @@
 
 typedef struct
 {
-  uint8_t cType, d1, d2, d3;
+  unsigned long flags;
   char *javaType;
   char *name;
 } cibyl_db_arg_t;
@@ -29,15 +29,15 @@ typedef struct
 /* The syscall database. Everything in big-endian order */
 typedef struct
 {
-  uint32_t nr;
-  uint32_t returns;
-  uint32_t nrArgs;
-  uint32_t qualifier;
+  unsigned long nr;
+  unsigned long returns;
+  unsigned long nrArgs;
+  unsigned long qualifier;
   char *name;
   char *javaClass;
   char *javaMethod;
   cibyl_db_arg_t *args;
-  uint32_t user; /* Unused */
+  unsigned long user; /* Unused */
 } cibyl_db_entry_t;
 
 class Syscall

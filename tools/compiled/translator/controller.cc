@@ -50,51 +50,62 @@ char *Controller::resolveStrtabAddress(char *strtab, char *offset)
   return strtab + be32_to_host((int)offset);
 }
 
+unsigned long Controller::getSyscallFileLong(void *_p, int offset)
+{
+  unsigned long *p = (unsigned long*)_p;
+
+  return p[offset];
+}
+
 void Controller::readSyscallDatabase(const char *filename)
 {
   cibyl_db_entry_t *syscall_entries;
   file_chunk_t *file = read_file(filename);
   int first_syscall_dir = this->n_syscall_dirs;
-  uint32_t magic, n_dirs, n, args_start;
+  unsigned long magic, n_dirs, n, args_start;
   char *strtab;
 
-  magic = be32_to_host(((uint32_t*)file->data)[0]);
-  n_dirs = be32_to_host(((uint32_t*)file->data)[1]);
-  n = be32_to_host(((uint32_t*)file->data)[2]);
-  args_start = (uint32_t)file->data +
-    be32_to_host((((uint32_t*)file->data)[3]));
+  magic = be_to_host(this->getSyscallFileLong(file->data, 0));
+  n_dirs = be_to_host(this->getSyscallFileLong(file->data, 1));
+  n = be_to_host(this->getSyscallFileLong(file->data, 2));
+  args_start = (unsigned long)file->data +
+    be_to_host(this->getSyscallFileLong(file->data, 3));
   strtab = (char*)file->data +
-    be32_to_host((((uint32_t*)file->data)[4]));
+    be_to_host(this->getSyscallFileLong(file->data, 4));
 
   /* Add to the syscall directories */
   this->n_syscall_dirs += n_dirs;
   this->syscall_dirs = (char**)xrealloc(this->syscall_dirs, this->n_syscall_dirs * sizeof(char**));
   for (int i = first_syscall_dir; i < this->n_syscall_dirs; i++)
-      this->syscall_dirs[i] = ((char*)strtab) + be32_to_host(((uint32_t*)file->data)[5 + i - first_syscall_dir]);
+      this->syscall_dirs[i] = ((char*)strtab) +
+        be_to_host(this->getSyscallFileLong(file->data,
+                                            5 + i - first_syscall_dir));
 
-  syscall_entries = (cibyl_db_entry_t*)(((uint32_t*)file->data) +
+  syscall_entries = (cibyl_db_entry_t*)(((unsigned long*)file->data) +
                                         5 + n_dirs);
 
   /* Fixup the entries */
-  for (uint32_t i = 0; i < n; i++)
+  for (unsigned int i = 0; i < n; i++)
     {
       cibyl_db_entry_t *cur = &syscall_entries[i];
 
-      cur->nr = be32_to_host(cur->nr);
-      cur->returns = be32_to_host(cur->returns);
-      cur->nrArgs = be32_to_host(cur->nrArgs);
-      cur->qualifier = be32_to_host(cur->qualifier);
-      cur->name = strtab + be32_to_host((uint32_t)cur->name);
-      cur->javaClass = strtab + be32_to_host((uint32_t)cur->javaClass);
-      cur->javaMethod = strtab + be32_to_host((uint32_t)cur->javaMethod);
-      cur->args = (cibyl_db_arg_t*)(args_start + be32_to_host((uint32_t)cur->args));
+      cur->nr = be_to_host(cur->nr);
+      cur->returns = be_to_host(cur->returns);
+      cur->nrArgs = be_to_host(cur->nrArgs);
+      cur->qualifier = be_to_host(cur->qualifier);
+      cur->name = strtab + be_to_host((unsigned long)cur->name);
+      cur->javaClass = strtab + be_to_host((unsigned long)cur->javaClass);
+      cur->javaMethod = strtab + be_to_host((unsigned long)cur->javaMethod);
+      cur->args = (cibyl_db_arg_t*)(args_start + be_to_host((unsigned long)cur->args));
       cur->user = first_syscall_dir;
 
       for (unsigned int j = 0; j < cur->nrArgs; j++)
         {
-          int jt_offs = be32_to_host((uint32_t)cur->args[j].javaType) & 0x00ffffff;
+          unsigned long jt_offs = be_to_host((unsigned long)cur->args[j].javaType) & 0x00ffffff;
+
           cur->args[j].javaType = (char*)(strtab + jt_offs);
-          cur->args[j].name = (char*)(strtab + be32_to_host((uint32_t)cur->args[j].name));
+          cur->args[j].name = (char*)(strtab +
+                                      be32_to_host((unsigned long)cur->args[j].name));
         }
 
       /* Add to the hash table */
