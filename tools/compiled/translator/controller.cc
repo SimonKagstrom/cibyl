@@ -47,7 +47,7 @@ Controller::Controller(const char *dstdir, const char *elf_filename,
 
 char *Controller::resolveStrtabAddress(char *strtab, char *offset)
 {
-  return strtab + be32_to_host((uint32_t)offest);
+  return strtab + be32_to_host((int)offset);
 }
 
 void Controller::readSyscallDatabase(const char *filename)
