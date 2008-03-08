@@ -231,7 +231,7 @@ void Emit::writeIndent(const char *fmt, ...)
   this->output("\n");
 }
 
-void Emit::output(char *what)
+void Emit::output(const char *what)
 {
   fprintf(this->fp, what);
 }
