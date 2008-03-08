@@ -230,8 +230,6 @@ class SyscallDatabaseGenerator(SyscallGenerator):
         if arg.isObjectReference():
             t = 1
 
-        print "XXX", t, arg.getType(), arg.getJavaType()
-
         return ((t << 24) | offs)
 
     def add_str(self, s):
@@ -274,7 +272,7 @@ class SyscallDatabaseGenerator(SyscallGenerator):
 
         # Size of each struct is 7
         arg_offs = 5 * 4 + 4 * len(self.dirs) + 9 * len(out) * 4
-        strtab_offs = arg_offs + 2 * len(args) * 4
+        strtab_offs = arg_offs + 3 * len(args) * 4
 
         # Write the header
         of.write(struct.pack(">L", 0xa1b1c1d1)) # magic
@@ -294,7 +292,7 @@ class SyscallDatabaseGenerator(SyscallGenerator):
             of.write(struct.pack(">LLLLLLLLL",
                                  s[0], s[1], s[2], s[3], s[4], s[5], s[6],
                                  arg_count, 0)) # Last is for usage outside
-            arg_count = arg_count + 4 * 2 * s[2]
+            arg_count = arg_count + 4 * 3 * s[2]
 
         # Write the arguments
         for a in args:
