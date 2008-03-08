@@ -2,6 +2,8 @@ Simon Kågström - Cibyl main author
 
 Ehud Shabtai   - Various bug fixes, syscall sets, optimized implementations of fread etc
 
+Eran Netanel   - Bug fix for handling labels on delay slot instructions
+
 Roelof Berg    - Misc floating point additions, build system improvements
 
 "7not6"        - Build system improvements

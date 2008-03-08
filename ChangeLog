@@ -1,4 +1,8 @@
 Cibyl (16)
+	* Handle lables to instructions in delay slots safely and emit a
+	warning for it (should never happen). Thanks to Eran Netanel for
+	finding and debugging this
+
 	* Added code to handle tail-call optimizations (jumps to other
 	functions). This is still just in the C++ translator.
 
@@ -13,7 +17,8 @@ Cibyl (16)
 	translator, Sarien compiles in around 30 seconds totally instead
 	of over one minute.
 
-	* Add function pruning option to workaround bugs on some phones
+	* Add disabling of function pruning to workaround Cibyl bugs triggered
+	by some versions of GCC
 
 	* Check malloc return value in strdup
 
