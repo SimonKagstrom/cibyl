@@ -79,6 +79,8 @@ public:
   }
 
 private:
+  void fixupSymbolSize(ElfSymbol **table, int n);
+
   static CibylElf *instance;
 
   Elf *elf; /* from libelf */

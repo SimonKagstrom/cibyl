@@ -21,6 +21,16 @@
 
 #include <elf.hh>
 
+
+static int symbol_cmp(const void *_a, const void *_b)
+{
+  ElfSymbol *a = *(ElfSymbol**)_a;
+  ElfSymbol *b = *(ElfSymbol**)_b;
+
+  return a->addr - b->addr;
+}
+
+
 CibylElf::CibylElf(const char *filename)
 {
   Elf_Scn *scn = NULL;
@@ -144,7 +154,30 @@ CibylElf::CibylElf(const char *filename)
         }
     }
 
+  /* Sort the symbols and fixup addresses */
+  this->fixupSymbolSize(this->functionSymbols,
+                        this->n_functionSymbols);
+  this->fixupSymbolSize(this->dataSymbols,
+                        this->n_dataSymbols);
+
   close(fd);
+}
+
+void CibylElf::fixupSymbolSize(ElfSymbol **table, int n)
+{
+  /* Sort the symbols by address */
+  qsort((void*)table, n, sizeof(ElfSymbol*), symbol_cmp);
+
+  /* Fixup sizes */
+  for (int i = 1; i < this->n_functionSymbols; i++)
+    {
+      ElfSymbol *cur = this->functionSymbols[i];
+      ElfSymbol *last = this->functionSymbols[i-1];
+
+      if (last->addr + last->size <
+          cur->addr - 4)
+        last->size = cur->addr - last->addr - 4;
+    }
 }
 
 ElfSymbol **CibylElf::getFunctions()
