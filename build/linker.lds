@@ -4,7 +4,7 @@ ENTRY(__start)
 SECTIONS
 {
        	. = 0x1000000;
-       	.text ALIGN(4)  : { *(.init) *(.text) *(.text.*) }
+       	.text ALIGN(4)  : { *(.init) *(.text) *(.text.*) *(.gnu.linkonce.t.*) }
        	. = 0x0;
        	.data ALIGN(16) : { *(.data0) *(.data) *(.rodata.str1.4)  *(.rodata.cst4) *(.rodata.cst8) *(.reginfo) }
        	.rodata ALIGN(16) : { *(.rodata) *(.rodata.*) }
