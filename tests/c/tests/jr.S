@@ -23,7 +23,16 @@ jr_test_asm:
 fwd:
 	jr	$31		# jr ra
         j       fwd
+
+        la      $4, fwd
+.set noreorder
+        jr      $4
+l:      addiu   $4, $4, 4
+        nop
+.set reorder
 .end jr_test_asm
+.data
+        .long   l
 #else
 .globl jr_test_asm
 jr_test_asm:

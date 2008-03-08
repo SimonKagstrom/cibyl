@@ -19,6 +19,13 @@
 #define CIBYL_DB_QUALIFIER_THROWS         1
 #define CIBYL_DB_QUALIFIER_NOT_GENERATED  2
 
+typedef struct
+{
+  uint8_t cType, d1, d2, d3;
+  char *javaType;
+  char *name;
+} cibyl_db_arg_t;
+
 /* The syscall database. Everything in big-endian order */
 typedef struct
 {
@@ -27,6 +34,10 @@ typedef struct
   uint32_t nrArgs;
   uint32_t qualifier;
   char *name;
+  char *javaClass;
+  char *javaMethod;
+  cibyl_db_arg_t *args;
+  uint32_t user; /* Unused */
 } cibyl_db_entry_t;
 
 class Syscall

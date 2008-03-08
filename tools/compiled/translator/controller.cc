@@ -45,28 +45,35 @@ Controller::Controller(const char *dstdir, const char *elf_filename,
   emit->setOutputFile(open_file_in_dir(this->dstdir, "Cibyl.j", "w"));
 }
 
+char *Controller::resolveStrtabAddress(char *strtab, char *offset)
+{
+  return strtab + be32_to_host((uint32_t)offest);
+}
+
 void Controller::readSyscallDatabase(const char *filename)
 {
   cibyl_db_entry_t *syscall_entries;
   file_chunk_t *file = read_file(filename);
   int first_syscall_dir = this->n_syscall_dirs;
-  uint32_t magic, n_dirs, n;
+  uint32_t magic, n_dirs, n, args_start;
   char *strtab;
 
   magic = be32_to_host(((uint32_t*)file->data)[0]);
   n_dirs = be32_to_host(((uint32_t*)file->data)[1]);
   n = be32_to_host(((uint32_t*)file->data)[2]);
-  strtab = (char*)file->data +
+  args_start = (uint32_t)file->data +
     be32_to_host((((uint32_t*)file->data)[3]));
+  strtab = (char*)file->data +
+    be32_to_host((((uint32_t*)file->data)[4]));
 
   /* Add to the syscall directories */
   this->n_syscall_dirs += n_dirs;
   this->syscall_dirs = (char**)xrealloc(this->syscall_dirs, this->n_syscall_dirs * sizeof(char**));
   for (int i = first_syscall_dir; i < this->n_syscall_dirs; i++)
-      this->syscall_dirs[i] = ((char*)strtab) + be32_to_host(((uint32_t*)file->data)[4 + i - first_syscall_dir]);
+      this->syscall_dirs[i] = ((char*)strtab) + be32_to_host(((uint32_t*)file->data)[5 + i - first_syscall_dir]);
 
   syscall_entries = (cibyl_db_entry_t*)(((uint32_t*)file->data) +
-                                        4 + n_dirs);
+                                        5 + n_dirs);
 
   /* Fixup the entries */
   for (uint32_t i = 0; i < n; i++)
@@ -78,6 +85,16 @@ void Controller::readSyscallDatabase(const char *filename)
       cur->nrArgs = be32_to_host(cur->nrArgs);
       cur->qualifier = be32_to_host(cur->qualifier);
       cur->name = strtab + be32_to_host((uint32_t)cur->name);
+      cur->javaClass = strtab + be32_to_host((uint32_t)cur->javaClass);
+      cur->javaMethod = strtab + be32_to_host((uint32_t)cur->javaMethod);
+      cur->args = (cibyl_db_arg_t*)(args_start + be32_to_host((uint32_t)cur->args));
+      cur->user = first_syscall_dir;
+
+      for (unsigned int j = 0; j < cur->nrArgs; j++)
+        {
+          cur->args[j].javaType = (char*)(strtab + be32_to_host((uint32_t)cur->args[j].javaType));
+          cur->args[j].name = (char*)(strtab + be32_to_host((uint32_t)cur->args[j].name));
+        }
 
       /* Add to the hash table */
       ght_insert(this->syscall_db_table, (void*)cur,

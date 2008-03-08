@@ -23,6 +23,24 @@ SyscallWrapperGenerator::SyscallWrapperGenerator(int n_syscall_dirs, char **sysc
 
 void SyscallWrapperGenerator::doOne(cibyl_db_entry_t *p)
 {
+  emit->bc_generic("  public static final %s %s(",
+                   p->returns ? "int" : "void", p->name);
+  for (unsigned int i = 0; i < p->nrArgs; i++)
+    {
+      emit->bc_generic("int __%s%s",
+                       p->args[i].name,
+                       i == p->nrArgs-1 ? "" : ",");
+    }
+  emit->bc_generic(") {\n");
+  for (unsigned int i = 0; i < p->nrArgs; i++)
+    {
+      emit->bc_generic("    %s %s = (%s)CRunTime.objectRepository[__%s];\n",
+                       p->args[i].javaType, p->args[i].name,
+                       p->args[i].javaType,
+                       p->args[i].name, p->args[i].name);
+    }
+
+  emit->bc_generic("  }\n");
 }
 
 bool SyscallWrapperGenerator::pass2()
@@ -33,7 +51,6 @@ bool SyscallWrapperGenerator::pass2()
 
   emit->bc_generic("/* GENERATED, DON'T EDIT */\n");
   emit->bc_generic("public class Syscalls {\n");
-  emit->bc_generic("}\n");
 
   for (p = (cibyl_db_entry_t *)ght_first(this->used_syscalls, &it, &key);
        p;
@@ -41,6 +58,7 @@ bool SyscallWrapperGenerator::pass2()
     {
       this->doOne(p);
     }
+  emit->bc_generic("}\n");
 
   return true;
 }
