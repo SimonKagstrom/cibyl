@@ -6,10 +6,12 @@ export CIBYL_BASE=`pwd`
 export LANG=en_US
 
 # This is the directory where you have Sun Wireless toolkit installed
-export WTK_PATH=/home/ska/j2me/WTK2.2/
+export WTK_PATH=/home/ska/j2me/sun/
+# Needed for Sun Wireless toolkit 2.5.2 on Ubuntu Hardy
+export LIBXCB_ALLOW_SLOPPY_LOCK=1
 
 # This is where you have javac etc installed (could be /usr/bin if appropriate)
-export JAVA_HOME=/usr/lib/j2sdk1.5-sun/
+export JAVA_HOME=/usr/lib/jvm/java-6-sun/
 export JAVA_PATH=$JAVA_HOME/bin/
 
 #----------
