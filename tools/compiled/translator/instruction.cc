@@ -1254,6 +1254,20 @@ public:
 };
 
 
+
+class DelaySlotNop : public Nop
+{
+public:
+  DelaySlotNop(uint32_t address) : Nop(address)
+  {
+  }
+
+  bool isDelaySlotNop()
+  {
+    return true;
+  }
+};
+
 /* --- The factory --- */
 Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
 {
@@ -1431,6 +1445,11 @@ InstructionFactory *InstructionFactory::getInstance()
 Instruction *InstructionFactory::createNop(uint32_t address)
 {
   return new Nop(address);
+}
+
+Instruction *InstructionFactory::createDelaySlotNop(uint32_t address)
+{
+  return new DelaySlotNop(address);
 }
 
 Instruction *InstructionFactory::createTailCallJump(uint32_t address, uint32_t extra)

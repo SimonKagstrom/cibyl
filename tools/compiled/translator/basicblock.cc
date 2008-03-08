@@ -162,7 +162,8 @@ bool BasicBlock::pass2()
       controller->setCurrentInstruction(insn);
 
       /* FIXME: Emit .line info if debug is on */
-      if (insn->isBranchTarget() || controller->hasJumptabLabel(insn->getAddress()))
+      if ( (insn->isBranchTarget() || controller->hasJumptabLabel(insn->getAddress())) &&
+           !insn->isDelaySlotNop() )
 	emit->bc_label( "L_%x", insn->getAddress() );
 
       if (!insn->isNop())
@@ -171,6 +172,21 @@ bool BasicBlock::pass2()
       /* Compile the instruction */
       if (!insn->pass2())
 	out = false;
+
+      if ( insn->hasDelaySlot() && controller->hasJumptabLabel(insn->getDelayed()->getAddress()) )
+        {
+          uint32_t addr = insn->getDelayed()->getAddress();
+
+          emit->warning("Instruction on address 0x%x is in delay slot but has a label\n",
+                        addr);
+          /* Jump past the instruction and emit it again */
+          emit->bc_goto("L_%x_out", addr);
+
+          /* Emit the instruction again */
+          emit->bc_label("L_%x", addr);
+          insn->getDelayed()->pass2();
+          emit->bc_label("L_%x_out", addr);
+        }
     }
 
   return out;

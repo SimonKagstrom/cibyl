@@ -11,7 +11,7 @@
  ********************************************************************/
 #if !defined(HOST)
 .data
-lbl:    .long   fwd
+lbl:    .long   123f
 .text
 .globl jr_test_asm
 .ent jr_test_asm
@@ -20,19 +20,22 @@ jr_test_asm:
 	li	$2, 0
 	jr	$4
 	li	$2, 1		# Should never happen
-fwd:
+123:
 	jr	$31		# jr ra
-        j       fwd
+        j       123b
 
-        la      $4, fwd
+        la      $4, 123b
 .set noreorder
         jr      $4
-l:      addiu   $4, $4, 4
+321:    addiu   $4, $4, 4
+        nop
+        jr      $31
         nop
 .set reorder
 .end jr_test_asm
+
 .data
-        .long   l
+        .long   321b
 #else
 .globl jr_test_asm
 jr_test_asm:

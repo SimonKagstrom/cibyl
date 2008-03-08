@@ -75,6 +75,14 @@ public:
     return this->isBranch();
   }
 
+  /* Delay slot instructions are "appended" to the parent
+   * instruction. A special class denotes delay slot nops to handle
+   * e.g., labels on delay slots */
+  virtual bool isDelaySlotNop()
+  {
+    return false;
+  }
+
   /**
    * Fill in the register destinations
    *
@@ -133,6 +141,8 @@ public:
   Instruction *create(uint32_t address, uint32_t encoding);
 
   Instruction *createNop(uint32_t address);
+
+  Instruction *createDelaySlotNop(uint32_t address);
 
   Instruction *createTailCallJump(uint32_t address, uint32_t extra);
 

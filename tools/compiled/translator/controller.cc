@@ -135,7 +135,7 @@ bool Controller::pass0()
       if (i >= 1 && last->hasDelaySlot())
 	{
 	  last->setDelayed(insn);
-	  insn = InstructionFactory::getInstance()->createNop( insn->getAddress() );
+	  insn = InstructionFactory::getInstance()->createDelaySlotNop( insn->getAddress() );
 	}
       this->instructions[i] = insn;
       last = insn;
