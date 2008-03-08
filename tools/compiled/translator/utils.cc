@@ -41,10 +41,11 @@ void *xrealloc(void *ptr, size_t size)
   return out;
 }
 
-file_chunk_t *read_file(const char *filename)
+void *read_file(const char *filename, size_t *out_size)
 {
-  file_chunk_t *out;
   struct stat buf;
+  void *data;
+  size_t size;
   FILE *f;
 
   if (lstat(filename, &buf) < 0)
@@ -54,15 +55,15 @@ file_chunk_t *read_file(const char *filename)
       return NULL;
     }
 
-  out = (file_chunk_t*)xcalloc(sizeof(file_chunk_t), 1);
-
-  out->size = buf.st_size;
-  out->data = malloc(out->size);
+  size = buf.st_size;
+  data = malloc(size);
   f = fopen(filename, "r");
-  assert(fread(out->data, 1, out->size, f) == out->size);
+  assert(fread(data, 1, size, f) == size);
   fclose(f);
 
-  return out;
+  *out_size = size;
+
+  return data;
 }
 
 FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode)

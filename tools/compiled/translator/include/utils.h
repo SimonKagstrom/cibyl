@@ -38,13 +38,8 @@ static inline uint32_t signext_16(uint16_t in)
   return out;
 }
 
-typedef struct
-{
-  void *data;
-  size_t size;
-} file_chunk_t;
 
-file_chunk_t *read_file(const char *filename);
+void *read_file(const char *filename, size_t *out_size);
 
 FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode);
 
