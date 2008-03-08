@@ -146,6 +146,16 @@ void Emit::bc_label(const char *fmt, ...)
   this->output(":\n");
 }
 
+void Emit::bc_goto(const char *fmt, ...)
+{
+  char buf[2048];
+
+  this->output("\tgoto ");
+  do_vsnprintf(buf, fmt);
+  this->output(buf);
+  this->output("\n");
+}
+
 void Emit::bc_condbranch(const char *fmt, ...)
 {
   char buf[2048];

@@ -31,7 +31,7 @@ public:
 
   void bc_goto(uint32_t dst) { this->writeIndent("goto L_%x", dst); }
 
-  void bc_goto(const char *where) { this->writeIndent("goto %s", where); }
+  void bc_goto(const char *what, ...);
 
   void bc_condbranch(const char *what, ...);
 
