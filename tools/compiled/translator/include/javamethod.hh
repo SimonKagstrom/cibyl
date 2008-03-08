@@ -113,7 +113,7 @@ public:
 
   char *getJavaMethodName()
   {
-    return "CibylCallTable/call(IIIIII)I";
+    return (char*)"CibylCallTable/call(IIIIII)I";
   }
 protected:
   JavaMethod **methods;

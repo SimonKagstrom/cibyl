@@ -29,7 +29,7 @@ public:
 
   bool pass2();
 
-  char *getName() { return this->name; }
+  const char *getName() { return this->name; }
 
   int fillDestinations(int *p);
 

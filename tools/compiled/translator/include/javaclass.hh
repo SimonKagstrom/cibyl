@@ -26,7 +26,7 @@ public:
 
   bool pass2();
 
-  char *getName();
+  const char *getName();
 
 private:
   int n_methods;

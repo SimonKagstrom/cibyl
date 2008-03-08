@@ -21,7 +21,7 @@ class Emit
 public:
   Emit();
 
-  void bc_comment(const char *what) { this->output("; "); this->write((char*)what); }
+  void bc_comment(const char *what) { this->output("; "); this->write(what); }
 
   void bc_generic(const char *what, ...);
 
@@ -121,7 +121,7 @@ private:
 
   void writeIndent(const char *dst, ...);
 
-  void output(char *what);
+  void output(const char *what);
 
   FILE *fp;
 };

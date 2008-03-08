@@ -137,7 +137,7 @@ StartFunction::StartFunction(const char *name, Instruction **insns,
                              int first_insn, int last_insn) : Function(name, insns, first_insn, last_insn)
 {
   free(this->name);
-  this->name = "start";
+  this->name = (char*)"start";
 }
 
 bool StartFunction::pass1()

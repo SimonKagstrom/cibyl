@@ -62,7 +62,7 @@ JavaMethod *JavaClass::getMethodByAddress(uint32_t addr)
 				method_search_cmp);
 }
 
-char *JavaClass::getName()
+const char *JavaClass::getName()
 {
   return "Cibyl";
 }

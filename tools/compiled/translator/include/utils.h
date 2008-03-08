@@ -20,6 +20,9 @@ void *xcalloc(size_t nmemb, size_t size);
 
 void *xrealloc(void *ptr, size_t size);
 
+/* Byte swap with the native size */
+unsigned long be_to_host(unsigned long in);
+
 static inline uint32_t be32_to_host(uint32_t in)
 {
   return ntohl(in);
