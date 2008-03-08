@@ -19,10 +19,18 @@
 #define CIBYL_DB_QUALIFIER_THROWS         1
 #define CIBYL_DB_QUALIFIER_NOT_GENERATED  2
 
+#define CIBYL_DB_RETURN_VOID    0
+#define CIBYL_DB_RETURN_INT     1
+#define CIBYL_DB_RETURN_BOOLEAN 2
+#define CIBYL_DB_RETURN_OBJREF  3
+
+#define CIBYL_DB_ARG_OBJREF 1
+
 typedef struct
 {
   unsigned long flags;
   char *javaType;
+  char *type;
   char *name;
 } cibyl_db_arg_t;
 
@@ -36,8 +44,9 @@ typedef struct
   char *name;
   char *javaClass;
   char *javaMethod;
+  char *set; /* The "syscall set" this belongs to */
   cibyl_db_arg_t *args;
-  unsigned long user; /* Unused */
+  unsigned long user;
 } cibyl_db_entry_t;
 
 class Syscall

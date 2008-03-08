@@ -210,10 +210,15 @@ class SyscallDatabaseGenerator(SyscallGenerator):
 	self.outfile = outfile
 
     def encodeReturnType(self, item):
-        if item.getReturnType() == "void":
+        if item.getJavaReturnType() == "void":
             return 0
-        # Otherwise it returns *something*
-        return 1
+        if item.getJavaReturnType() == "int":
+            return 1
+        if item.getJavaReturnType() == "boolean":
+            return 2
+
+        # objref
+        return 3
 
     def encodeQualifier(self, item):
         # Assume no qualifier
@@ -229,6 +234,12 @@ class SyscallDatabaseGenerator(SyscallGenerator):
         t = 0
         if arg.isObjectReference():
             t = 1
+
+        return ((t << 24) | offs)
+
+    def encodeArgumentType(self, arg):
+        offs = self.add_str(arg.getType())
+        t = 0
 
         return ((t << 24) | offs)
 
@@ -264,20 +275,22 @@ class SyscallDatabaseGenerator(SyscallGenerator):
             javaMethod_offs = self.add_str(item.getJavaMethod())
             out.append( ( item.getNr(), self.encodeReturnType(item), item.getNrArgs(),
                           self.encodeQualifier(item), name_offs, javaClass_offs,
-                          javaMethod_offs) )
+                          javaMethod_offs, self.add_str(item.getSyscallSet()) ) )
             if item.getNrArgs() != 0:
                 for arg in item.args:
                     args.append((self.encodeArgumentJavaType(arg),
+                                 self.encodeArgumentType(arg),
                                  self.add_str(arg.getName())))
 
-        # Size of each struct is 7
-        arg_offs = 5 * 4 + 4 * len(self.dirs) + 9 * len(out) * 4
-        strtab_offs = arg_offs + 3 * len(args) * 4
+        # Size of each struct is 10
+        arg_offs = 6 * 4 + 4 * len(self.dirs) + 4 * len(self.syscallSets) + 10 * len(out) * 4
+        strtab_offs = arg_offs + 4 * len(args) * 4
 
         # Write the header
         of.write(struct.pack(">L", 0xa1b1c1d1)) # magic
         of.write(struct.pack(">L", len(self.dirs))) # Nr syscall directories
-        of.write(struct.pack(">L", len(out)) )               # Nr items
+        of.write(struct.pack(">L", len(self.syscallSets))) # Nr syscall sets
+        of.write(struct.pack(">L", len(out)) )      # Nr items
         of.write(struct.pack(">L", arg_offs))
         of.write(struct.pack(">L", strtab_offs))
 
@@ -286,17 +299,22 @@ class SyscallDatabaseGenerator(SyscallGenerator):
             offs = self.add_str(os.path.abspath(d))
             of.write(struct.pack(">L", offs))
 
+        # The syscall set names, as strtab offsets
+        for s in self.syscallSets:
+            offs = self.add_str(os.path.abspath(s))
+            of.write(struct.pack(">L", offs))
+
         # Write the out structures
         arg_count = 0
         for s in out:
-            of.write(struct.pack(">LLLLLLLLL",
-                                 s[0], s[1], s[2], s[3], s[4], s[5], s[6],
+            of.write(struct.pack(">LLLLLLLLLL",
+                                 s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7],
                                  arg_count, 0)) # Last is for usage outside
-            arg_count = arg_count + 4 * 3 * s[2]
+            arg_count = arg_count + 4 * 4 * s[2]
 
         # Write the arguments
         for a in args:
-            of.write(struct.pack(">LLL", 0, a[0], a[1]))
+            of.write(struct.pack(">LLLL", 0, a[0], a[1], a[2]))
 
         # Write the string table
         for item in self.strs:

@@ -33,7 +33,13 @@ public:
   bool pass2();
 
 private:
+  const char *getJavaReturnString(int r);
+  void doOneArgumentGet(cibyl_db_entry_t *p, cibyl_db_arg_t *a );
+
   void doOne(cibyl_db_entry_t *p);
+
+  void doOneNonGenerated(const char *dirname,
+                         cibyl_db_entry_t *p);
 
   int n_syscall_dirs;
   char **syscall_dirs;

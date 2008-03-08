@@ -81,6 +81,7 @@ private:
   int n_functions;
   int n_instructions;
   int n_syscall_dirs;
+  int n_syscall_sets;
 
   const char *dstdir;
 
@@ -90,6 +91,7 @@ private:
   ght_hash_table_t *syscall_db_table;
   ght_hash_table_t *syscall_used_table;
   char **syscall_dirs;
+  char **syscall_sets;
 
   Instruction *currentInstruction;
 

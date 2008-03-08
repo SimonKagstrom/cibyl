@@ -61,31 +61,38 @@ void Controller::readSyscallDatabase(const char *filename)
 {
   cibyl_db_entry_t *syscall_entries;
   int first_syscall_dir = this->n_syscall_dirs;
-  unsigned long magic, n_dirs, n, args_start;
+  int first_syscall_set = this->n_syscall_sets;
+  unsigned long magic, n_dirs, n_sets, n, args_start, idx;
   char *strtab;
   size_t size;
   void *data;
 
   data = read_file(filename, &size);
 
-  magic = be_to_host(this->getSyscallFileLong(data, 0));
-  n_dirs = be_to_host(this->getSyscallFileLong(data, 1));
-  n = be_to_host(this->getSyscallFileLong(data, 2));
+  idx = 0;
+  magic = be_to_host(this->getSyscallFileLong(data, idx++));
+  n_dirs = be_to_host(this->getSyscallFileLong(data, idx++));
+  n_sets = be_to_host(this->getSyscallFileLong(data, idx++));
+  n = be_to_host(this->getSyscallFileLong(data, idx++));
   args_start = (unsigned long)data +
-    be_to_host(this->getSyscallFileLong(data, 3));
+    be_to_host(this->getSyscallFileLong(data, idx++));
   strtab = (char*)data +
-    be_to_host(this->getSyscallFileLong(data, 4));
+    be_to_host(this->getSyscallFileLong(data, idx++));
 
-  /* Add to the syscall directories */
+  /* Add to the syscall directories and sets */
   this->n_syscall_dirs += n_dirs;
   this->syscall_dirs = (char**)xrealloc(this->syscall_dirs, this->n_syscall_dirs * sizeof(char**));
   for (int i = first_syscall_dir; i < this->n_syscall_dirs; i++)
       this->syscall_dirs[i] = ((char*)strtab) +
-        be_to_host(this->getSyscallFileLong(data,
-                                            5 + i - first_syscall_dir));
+        be_to_host(this->getSyscallFileLong(data, idx++));
 
-  syscall_entries = (cibyl_db_entry_t*)(((unsigned long*)data) +
-                                        5 + n_dirs);
+  this->n_syscall_sets += n_sets;
+  this->syscall_sets = (char**)xrealloc(this->syscall_sets, this->n_syscall_sets * sizeof(char**));
+  for (int i = first_syscall_set; i < this->n_syscall_sets; i++)
+      this->syscall_sets[i] = ((char*)strtab) +
+        be_to_host(this->getSyscallFileLong(data, idx++));
+
+  syscall_entries = (cibyl_db_entry_t*)(((unsigned long*)data) + idx++);
 
   /* Fixup the entries */
   for (unsigned int i = 0; i < n; i++)
