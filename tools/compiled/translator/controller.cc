@@ -92,7 +92,8 @@ void Controller::readSyscallDatabase(const char *filename)
 
       for (unsigned int j = 0; j < cur->nrArgs; j++)
         {
-          cur->args[j].javaType = (char*)(strtab + be32_to_host((uint32_t)cur->args[j].javaType));
+          int jt_offs = be32_to_host((uint32_t)cur->args[j].javaType) & 0x00ffffff;
+          cur->args[j].javaType = (char*)(strtab + jt_offs);
           cur->args[j].name = (char*)(strtab + be32_to_host((uint32_t)cur->args[j].name));
         }
 
@@ -386,7 +387,6 @@ int main(int argc, const char **argv)
       switch (opt)
         {
         case 't':
-          long s, e;
           char *endp;
 
           printf("Option %s, %s\n", argv[optind], argv[optind+1]);
