@@ -1426,8 +1426,12 @@ Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
     case OP_BLTZ: return new OneRegisterConditionalJump("iflt", address, opcode, rs, extra);
 
     default:
-      return NULL;
+      break;
     }
+
+  fprintf(stderr, "Pattern 0x%x on address 0x%x is not an instruction\n",
+          word, address);
+  exit(1);
 
   return NULL;
 }
