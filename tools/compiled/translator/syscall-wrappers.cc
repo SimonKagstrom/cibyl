@@ -140,7 +140,7 @@ void SyscallWrapperGenerator::doOne(cibyl_db_entry_t *p)
 
       if (p->returns == CIBYL_DB_RETURN_OBJREF)
         {
-          emit->bc_generic("    int registeredHandle = CRunTime.registerObject(%s);",
+          emit->bc_generic("    int registeredHandle = CRunTime.registerObject(%s);\n",
                            rn);
           rn = "registeredHandle";
         }

@@ -6,6 +6,8 @@ Cibyl (16)
 	* Added code to handle tail-call optimizations (jumps to other
 	functions). This is still just in the C++ translator.
 
+	* Better warning/error messages
+
 	* Re-implemented most parts of the translator in C++. This
 	improves compilation performance quite a bit and the bottleneck
 	is now the Jasmin step. Not all optimizations are implemented in

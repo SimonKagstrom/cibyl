@@ -301,7 +301,7 @@ class SyscallDatabaseGenerator(SyscallGenerator):
 
         # The syscall set names, as strtab offsets
         for s in self.syscallSets:
-            offs = self.add_str(os.path.abspath(s))
+            offs = self.add_str(s)
             of.write(struct.pack(">L", offs))
 
         # Write the out structures
