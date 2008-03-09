@@ -35,7 +35,9 @@ Controller::Controller(const char *dstdir, const char *elf_filename,
   this->methods = NULL;
   this->classes = NULL;
   this->n_syscall_dirs = 0;
+  this->n_syscall_sets = 0;
   this->syscall_dirs = NULL;
+  this->syscall_sets = NULL;
 
   for (int i = 0; i < n_dbs; i++)
     this->readSyscallDatabase(database_filenames[i]);
@@ -67,8 +69,14 @@ void Controller::readSyscallDatabase(const char *filename)
   size_t size;
   void *data;
 
-  data = read_file(filename, &size);
+  data = read_file(&size, filename);
+  if (!data)
+    {
+      fprintf(stderr, "Cannot read %s\n", filename);
+      exit(1);
+    }
 
+  /* This is oh-so-ugly... */
   idx = 0;
   magic = be_to_host(this->getSyscallFileLong(data, idx++));
   n_dirs = be_to_host(this->getSyscallFileLong(data, idx++));
@@ -373,6 +381,7 @@ bool Controller::pass2()
 
   emit->setOutputFile(open_file_in_dir(this->dstdir, "Syscalls.java", "w"));
   syscallWrappers = new SyscallWrapperGenerator(this->n_syscall_dirs, this->syscall_dirs,
+                                                this->n_syscall_sets, this->syscall_sets,
                                                 this->syscall_used_table);
   syscallWrappers->pass2();
 

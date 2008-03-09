@@ -39,7 +39,9 @@ static inline uint32_t signext_16(uint16_t in)
 }
 
 
-void *read_file(const char *filename, size_t *out_size);
+void *read_file(size_t *out_size, const char *fmt, ...);
+
+void *read_cpp(size_t *out_size, const char *fmt, ...);
 
 FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode);
 

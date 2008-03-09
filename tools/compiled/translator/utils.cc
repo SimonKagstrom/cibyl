@@ -15,6 +15,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
+
 #include <utils.h>
 
 void *xcalloc(size_t nmemb, size_t size)
@@ -41,24 +43,92 @@ void *xrealloc(void *ptr, size_t size)
   return out;
 }
 
-void *read_file(const char *filename, size_t *out_size)
+void *read_cpp(size_t *out_size, const char *fmt, ...)
 {
   struct stat buf;
+  const char *cpp;
+  char path[2048];
+  va_list ap;
   void *data;
   size_t size;
   FILE *f;
+  int r, l;
 
-  if (lstat(filename, &buf) < 0)
+  cpp = getenv("CIBYL_CPP");
+  if (!cpp)
+    cpp = "cpp";
+
+  if (strlen(cpp) > 2048)
     {
-      fprintf(stderr, "Cannot open file %s\n", filename);
+      fprintf(stderr, "Strlen too large in CPP pipe\n");
       exit(1);
-      return NULL;
     }
 
+  l = snprintf(path, 2048, "%s -C -P ", cpp);
+
+  /* Create the command */
+  assert ( fmt != NULL );
+  va_start(ap, fmt);
+  r = vsnprintf(path + l, 2048 - l, fmt, ap);
+  va_end(ap);
+
+  /* No file to CPP? */
+  if (lstat(path + l, &buf) < 0)
+    return NULL;
+
+  f = popen(path, "r");
+  if (!f)
+    {
+      fprintf(stderr, "popen %s failed\n", path);
+      exit(1);
+    }
+  data = xcalloc(buf.st_size * 4, 1);
+
+  size = fread(data, 1, buf.st_size * 4, f);
+  if (size != 0 && size >= (size_t)(buf.st_size * 4))
+    {
+      fprintf(stderr, "Outbuffer of %s is too large: %d vs %d\n",
+              path, size, buf.st_size * 4);
+      exit(1);
+    }
+
+  *out_size = size;
+
+  return data;
+}
+
+void *read_file(size_t *out_size, const char *fmt, ...)
+{
+  struct stat buf;
+  char path[2048];
+  va_list ap;
+  void *data;
+  size_t size;
+  FILE *f;
+  int r;
+
+  /* Create the filename */
+  assert ( fmt != NULL );
+  va_start(ap, fmt);
+  r = vsnprintf(path, 2048, fmt, ap);
+  va_end(ap);
+
+  if (lstat(path, &buf) < 0)
+    return NULL;
+
   size = buf.st_size;
-  data = malloc(size);
-  f = fopen(filename, "r");
-  assert(fread(data, 1, size, f) == size);
+  data = xcalloc(size + 2, 1); /* NULL-terminate, if used as string */
+  f = fopen(path, "r");
+  if (!f)
+    {
+      free(data);
+      return NULL;
+    }
+  if (fread(data, 1, size, f) != size)
+    {
+      free(data);
+      data = NULL;
+    }
   fclose(f);
 
   *out_size = size;
@@ -86,7 +156,6 @@ FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode)
   return fp;
 }
 
-
 /* From tobin */
 static uint32_t swap32(uint32_t x)
 {
@@ -106,13 +175,13 @@ static uint64_t swap64(uint64_t x)
   uint64_t out;
 
   out = ( ((x & 0xffull) << 56 ) |
-          ( ((x & 0xff00ull) >> 8) << 48 ) |
-          ( ((x & 0xff0000ull) >> 16) << 40 ) |
-          ( ((x & 0xff000000ull) >> 24) << 32 ) |
-          ( ((x & 0xff00000000ull) >> 32) << 24 ) |
-          ( ((x & 0xff0000000000ull) >> 40)  << 16 ) |
-          ( ((x & 0xff000000000000ull) >> 48) << 8 ) |
-          ( ((x & 0xff00000000000000ull) >> 56) << 0 ) );
+	  ( ((x & 0xff00ull) >> 8) << 48 ) |
+	  ( ((x & 0xff0000ull) >> 16) << 40 ) |
+	  ( ((x & 0xff000000ull) >> 24) << 32 ) |
+	  ( ((x & 0xff00000000ull) >> 32) << 24 ) |
+	  ( ((x & 0xff0000000000ull) >> 40)  << 16 ) |
+	  ( ((x & 0xff000000000000ull) >> 48) << 8 ) |
+	  ( ((x & 0xff00000000000000ull) >> 56) << 0 ) );
 
 return out;
 }

@@ -27,6 +27,7 @@ public:
    * syscall names. This should be freed by the calling entity
    */
   SyscallWrapperGenerator(int n_syscall_dirs, char **syscall_dirs,
+                          int n_syscall_sets, char **syscall_sets,
                           ght_hash_table_t *used_syscalls);
 
   /* No pass1 - this will not be created until after pass1 */
@@ -38,11 +39,15 @@ private:
 
   void doOne(cibyl_db_entry_t *p);
 
+  void generateHeaders();
+
   void doOneNonGenerated(const char *dirname,
                          cibyl_db_entry_t *p);
 
   int n_syscall_dirs;
   char **syscall_dirs;
+  int n_syscall_sets;
+  char **syscall_sets;
   ght_hash_table_t *used_syscalls;
 };
 
