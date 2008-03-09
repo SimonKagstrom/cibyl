@@ -87,7 +87,7 @@ void *read_cpp(size_t *out_size, const char *fmt, ...)
   size = fread(data, 1, buf.st_size * 4, f);
   if (size != 0 && size >= (size_t)(buf.st_size * 4))
     {
-      fprintf(stderr, "Outbuffer of %s is too large: %d vs %d\n",
+      fprintf(stderr, "Outbuffer of %s is too large: %u vs %ld\n",
               path, size, buf.st_size * 4);
       exit(1);
     }
