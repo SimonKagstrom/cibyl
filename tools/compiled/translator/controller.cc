@@ -20,7 +20,8 @@
 #include <syscall-wrappers.hh>
 #include <config.hh>
 
-Controller::Controller(const char *dstdir, const char *elf_filename,
+Controller::Controller(const char **defines,
+                       const char *dstdir, const char *elf_filename,
                        int n_dbs, const char **database_filenames) : CodeBlock()
 {
   this->elf = new CibylElf(elf_filename);
@@ -38,6 +39,7 @@ Controller::Controller(const char *dstdir, const char *elf_filename,
   this->n_syscall_sets = 0;
   this->syscall_dirs = NULL;
   this->syscall_sets = NULL;
+  this->defines = defines;
 
   for (int i = 0; i < n_dbs; i++)
     this->readSyscallDatabase(database_filenames[i]);
@@ -383,7 +385,7 @@ bool Controller::pass2()
   emit->setOutputFile(open_file_in_dir(this->dstdir, "CibylCallTable.java", "w"));
   this->callTableMethod->pass2();
 
-  syscallWrappers = new SyscallWrapperGenerator(this->dstdir,
+  syscallWrappers = new SyscallWrapperGenerator(this->defines, this->dstdir,
                                                 this->n_syscall_dirs, this->syscall_dirs,
                                                 this->n_syscall_sets, this->syscall_sets,
                                                 this->syscall_used_table);
@@ -409,9 +411,11 @@ int main(int argc, const char **argv)
 {
   uint32_t trace_start = 0;
   uint32_t trace_end = 0;
-  int opt;
+  const char **defines = (const char **)xcalloc(argc, sizeof(const char*));
+  int n, n_defines = 0;
+  char *endp;
 
-  if (argc < 4)
+  if (argc < 6)
     {
       fprintf(stderr, "Too few arguments\n");
 
@@ -419,35 +423,25 @@ int main(int argc, const char **argv)
       return 1;
     }
 
-  while ((opt = getopt(argc, (char* const*)argv, "t:") != -1))
+  trace_start = strtol(argv[1], &endp, 0);
+  if (endp == argv[1])
     {
-      switch (opt)
-        {
-        case 't':
-          char *endp;
+      fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
+              argv[1]);
+      exit(1);
+    }
+  trace_end = strtol(argv[2], &endp, 0);
+  if (endp == argv[2])
+    {
+      fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
+              argv[2]);
+      exit(1);
+    }
 
-          printf("Option %s, %s\n", argv[optind], argv[optind+1]);
-          trace_start = strtol(argv[optind], &endp, 0);
-          if (endp == argv[optind])
-            {
-              fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
-                      argv[optind]);
-              exit(1);
-            }
-          trace_end = strtol(argv[optind+1], &endp, 0);
-          if (endp == argv[optind+1])
-            {
-              fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
-                      argv[optind+1]);
-              exit(1);
-            }
-          optind += 2;
-          break;
-        default:
-          usage();
-          exit(1);
-          break;
-        }
+  /* Setup defines */
+  for (n = 3; n < argc && strncmp(argv[n], "-D", 2) == 0; n++)
+    {
+      defines[n_defines++] = argv[n];
     }
 
   emit = new Emit();
@@ -456,7 +450,8 @@ int main(int argc, const char **argv)
   config->traceRange[1] = trace_end;
 
   regalloc = new RegisterAllocator();
-  controller = new Controller(argv[1], argv[2], argc-3, &argv[3]);
+  controller = new Controller(defines, argv[n], argv[n+1],
+                              argc - n - 2, &argv[n + 2]);
 
   controller->pass0();
   controller->pass1();

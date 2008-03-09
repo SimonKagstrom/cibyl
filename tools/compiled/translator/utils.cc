@@ -43,7 +43,7 @@ void *xrealloc(void *ptr, size_t size)
   return out;
 }
 
-void *read_cpp(size_t *out_size, const char *fmt, ...)
+void *read_cpp(size_t *out_size, const char **defines, const char *fmt, ...)
 {
   struct stat buf;
   const char *cpp;
@@ -66,6 +66,11 @@ void *read_cpp(size_t *out_size, const char *fmt, ...)
 
   /* pipe cpp, -C menas keep comments, -P means emit no line information */
   l = snprintf(path, 2048, "%s -C -P ", cpp);
+  for (int i = 0; defines[i]; i++)
+    {
+      const char *def = defines[i];
+      l += snprintf(path + l, 2048 - l, "%s ", def);
+    }
 
   /* Create the command */
   assert ( fmt != NULL );

@@ -27,10 +27,16 @@ def doJavac(filename):
 
 def doTranslation(filename, syscallDirectories):
     dbs = ""
+    defines = " "
+
+    for d in config.defines:
+        defines = defines + d + " "
 
     for d in syscallDirectories:
         dbs = dbs + d + "/cibyl-syscalls.db "
 
-    ret = os.system(config.xcibyl_translator + " " + config.outDirectory + " " + config.infile + " " + dbs)
+    ret = os.system(config.xcibyl_translator + " " + str(config.traceStart) + " " +
+                    str(config.traceEnd) +  " " + defines + config.outDirectory + " " +
+                    config.infile + " " + dbs)
     if ret != 0:
         sys.exit(ret)

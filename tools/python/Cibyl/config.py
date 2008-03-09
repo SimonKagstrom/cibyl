@@ -44,6 +44,8 @@ traceFunctionCalls = False
 traceStart = 0
 traceEnd = 0
 
+defines = []
+
 threadSafe = False
 
 infile = None

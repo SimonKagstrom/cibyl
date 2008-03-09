@@ -15,7 +15,7 @@
 #include <sys/stat.h>
 
 
-SyscallWrapperGenerator::SyscallWrapperGenerator(const char *dstdir,
+SyscallWrapperGenerator::SyscallWrapperGenerator(const char **defines, const char *dstdir,
                                                  int n_syscall_dirs, char **syscall_dirs,
                                                  int n_syscall_sets, char **syscall_sets,
                                                  ght_hash_table_t *used_syscalls)
@@ -30,6 +30,7 @@ SyscallWrapperGenerator::SyscallWrapperGenerator(const char *dstdir,
   this->n_syscall_sets = n_syscall_sets;
   this->syscall_sets = syscall_sets;
   this->used_syscalls = used_syscalls;
+  this->defines = defines;
 
   this->set_usage = (int*)xcalloc( n_syscall_sets, sizeof(int) );
 
@@ -71,7 +72,7 @@ void SyscallWrapperGenerator::doOneNonGenerated(const char *dir,
   const char* data;
   size_t size;
 
-  data = (const char*)read_cpp(&size, "%s/%s/implementation/%s.java",
+  data = (const char*)read_cpp(&size, this->defines, "%s/%s/implementation/%s.java",
                                dir, p->set, p->name);
   if (!data)
     {
@@ -172,7 +173,7 @@ void SyscallWrapperGenerator::generateImports()
           if (this->set_usage[j] == 0)
             continue;
 
-          data = (const char*)read_cpp(&size, "%s/%s/imports",
+          data = (const char*)read_cpp(&size, this->defines, "%s/%s/imports",
                                        dir, cur);
           if (data)
             emit->bc_generic("%s", data);
@@ -197,7 +198,7 @@ void SyscallWrapperGenerator::generateInits()
           if (this->set_usage[j] == 0)
             continue;
 
-          data = (const char*)read_cpp(&size, "%s/%s/init",
+          data = (const char*)read_cpp(&size, this->defines, "%s/%s/init",
                                        dir, cur);
           if (data)
             emit->bc_generic("%s", data);
@@ -240,7 +241,7 @@ void SyscallWrapperGenerator::generateHelperClasses()
                   continue;
                 }
 
-              data = (const char*)read_cpp(&size, "%s/%s/classes/%s",
+              data = (const char*)read_cpp(&size, this->defines, "%s/%s/classes/%s",
                                            dirname, cur, de->d_name);
               if (data)
                 {

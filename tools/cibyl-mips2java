@@ -32,6 +32,10 @@ syscallDirectories = []
 def includeCallback(option, opt, value, parser):
 	syscallDirectories.append(value)
 
+defines = []
+def defineCallback(option, opt, value, parser):
+	defines.append("-D%s" % value)
+
 usage = """usage: %prog [options] infile
 
 Recompile the big-endian MIPS ELF file 'infile' to Java bytecode
@@ -57,6 +61,11 @@ parser.add_option("-v", "--verbose", action="store_true", dest="verbose", defaul
 parser.add_option("--only-translate", action="store_true", dest="onlyTranslate", default=False,
 				  help="""Only run the translation step, do not compile generated source files
 into .class files""")
+parser.add_option("-D", "--define", action="callback", help="""define a value for the preprocessor
+(cpp). Used e.g., for jsr075 (FileConnection), which needs -D JSR075. You can pass multiple -D
+arguments""",
+		  type="str", nargs=1,
+		  callback=defineCallback)
 parser.add_option("--trace-function-calls", action="store_true", dest="traceFunctionCalls", default=False,
 				  help="Generate a trace of function calls")
 parser.add_option("--trace-range", dest="traceRange", default=None,
@@ -177,6 +186,8 @@ config.peepholeIterations = int(options.peepholeIterations)
 
 config.infile = infile
 config.profileFile = options.profileFile
+
+config.defines = defines
 
 if options.debug:
 	config.debug = options.debug

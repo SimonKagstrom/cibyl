@@ -22,7 +22,9 @@
 class Controller : public CodeBlock
 {
 public:
-  Controller(const char *dstdir, const char *elf_filename, int n_dbs, const char **database_filenames);
+  Controller(const char **defines,
+             const char *dstdir, const char *elf_filename,
+             int n_dbs, const char **database_filenames);
 
   bool pass0();
   bool pass1();
@@ -92,6 +94,8 @@ private:
   ght_hash_table_t *syscall_used_table;
   char **syscall_dirs;
   char **syscall_sets;
+
+  const char **defines; /* NULL-terminated */
 
   Instruction *currentInstruction;
 
