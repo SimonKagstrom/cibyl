@@ -383,8 +383,8 @@ bool Controller::pass2()
   emit->setOutputFile(open_file_in_dir(this->dstdir, "CibylCallTable.java", "w"));
   this->callTableMethod->pass2();
 
-  emit->setOutputFile(open_file_in_dir(this->dstdir, "Syscalls.java", "w"));
-  syscallWrappers = new SyscallWrapperGenerator(this->n_syscall_dirs, this->syscall_dirs,
+  syscallWrappers = new SyscallWrapperGenerator(this->dstdir,
+                                                this->n_syscall_dirs, this->syscall_dirs,
                                                 this->n_syscall_sets, this->syscall_sets,
                                                 this->syscall_used_table);
   syscallWrappers->pass2();

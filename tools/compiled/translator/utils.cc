@@ -64,6 +64,7 @@ void *read_cpp(size_t *out_size, const char *fmt, ...)
       exit(1);
     }
 
+  /* pipe cpp, -C menas keep comments, -P means emit no line information */
   l = snprintf(path, 2048, "%s -C -P ", cpp);
 
   /* Create the command */
@@ -135,6 +136,22 @@ void *read_file(size_t *out_size, const char *fmt, ...)
 
   return data;
 }
+
+DIR *open_dir_fmt(const char *fmt, ...)
+{
+  char path[2048];
+  va_list ap;
+  int r;
+
+  /* Create the dirname */
+  assert ( fmt != NULL );
+  va_start(ap, fmt);
+  r = vsnprintf(path, 2048, fmt, ap);
+  va_end(ap);
+
+  return opendir(path);
+}
+
 
 FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode)
 {

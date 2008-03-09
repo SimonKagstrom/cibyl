@@ -15,7 +15,8 @@
 #include <sys/stat.h>
 
 
-SyscallWrapperGenerator::SyscallWrapperGenerator(int n_syscall_dirs, char **syscall_dirs,
+SyscallWrapperGenerator::SyscallWrapperGenerator(const char *dstdir,
+                                                 int n_syscall_dirs, char **syscall_dirs,
                                                  int n_syscall_sets, char **syscall_sets,
                                                  ght_hash_table_t *used_syscalls)
 {
@@ -23,6 +24,7 @@ SyscallWrapperGenerator::SyscallWrapperGenerator(int n_syscall_dirs, char **sysc
   ght_iterator_t it;
   const void *key;
 
+  this->dstdir = dstdir;
   this->n_syscall_dirs = n_syscall_dirs;
   this->syscall_dirs = syscall_dirs;
   this->n_syscall_sets = n_syscall_sets;
@@ -203,12 +205,61 @@ void SyscallWrapperGenerator::generateInits()
     }
 }
 
+
+void SyscallWrapperGenerator::generateHelperClasses()
+{
+  /* The syscall sets do not carry dir information, thus loop through
+   * all dirs and all sets */
+  for (int i = 0; i < this->n_syscall_dirs; i++)
+    {
+      char *dirname = this->syscall_dirs[i];
+
+      for (int j = 0; j < this->n_syscall_sets; j++)
+        {
+          char *cur = this->syscall_sets[j];
+          struct dirent *de;
+          DIR *dir;
+
+          if (this->set_usage[j] == 0)
+            continue;
+
+          dir = open_dir_fmt("%s/%s/classes", dirname, cur);
+
+          if (!dir)
+            continue;
+          de = readdir(dir);
+          while(de)
+            {
+              const char* data;
+              size_t size;
+
+              /* Only match *.java */
+              if ( !strstr(de->d_name, ".java") )
+                {
+                  de = readdir(dir);
+                  continue;
+                }
+
+              data = (const char*)read_cpp(&size, "%s/%s/classes/%s",
+                                           dirname, cur, de->d_name);
+              if (data)
+                {
+                  emit->setOutputFile(open_file_in_dir(this->dstdir, de->d_name, "w"));
+                  emit->bc_generic("%s", data);
+                }
+              de = readdir(dir);
+            }
+        }
+    }
+}
+
 bool SyscallWrapperGenerator::pass2()
 {
   cibyl_db_entry_t *p;
   ght_iterator_t it;
   const void *key;
 
+  emit->setOutputFile(open_file_in_dir(this->dstdir, "Syscalls.java", "w"));
   emit->bc_generic("/* GENERATED, DON'T EDIT */\n");
   this->generateImports();
   emit->bc_generic("public class Syscalls {\n");
@@ -226,6 +277,7 @@ bool SyscallWrapperGenerator::pass2()
                                 p);
     }
   emit->bc_generic("}\n");
+  this->generateHelperClasses();
 
   return true;
 }

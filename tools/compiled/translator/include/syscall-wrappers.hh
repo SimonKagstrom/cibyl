@@ -21,12 +21,16 @@ public:
   /**
    * Create a new syscall wrapper generator.
    *
+   * @param dstdir the destination directory
    * @param n_syscall_dir the number of syscall directory names
    * @param syscall_dirs a vector of syscall directory names (absolute paths)
+   * @param n_syscall_sets the number of syscall set names
+   * @param syscall_sets a vector of syscall directory set names
    * @param used_syscalls a table of syscall_db_entry_t's mapped by
    * syscall names. This should be freed by the calling entity
    */
-  SyscallWrapperGenerator(int n_syscall_dirs, char **syscall_dirs,
+  SyscallWrapperGenerator(const char *dstdir,
+                          int n_syscall_dirs, char **syscall_dirs,
                           int n_syscall_sets, char **syscall_sets,
                           ght_hash_table_t *used_syscalls);
 
@@ -43,9 +47,12 @@ private:
 
   void generateInits();
 
+  void generateHelperClasses();
+
   void doOneNonGenerated(const char *dirname,
                          cibyl_db_entry_t *p);
 
+  const char *dstdir;
   int n_syscall_dirs;
   char **syscall_dirs;
   int n_syscall_sets;
