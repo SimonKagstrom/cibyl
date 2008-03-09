@@ -38,6 +38,8 @@ static void game_loop(void)
 
 int main(int argc, char *argv[])
 {
+  NOPH_GameCanvas_get(); /* We want to force-in _something_ from J2ME :-) */
+
   printf("Press keys and see the keycodes.\n");
 
   game_loop();

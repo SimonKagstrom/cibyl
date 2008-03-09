@@ -11,7 +11,6 @@
 ######################################################################
 SUBDIRS = c
 RESOURCES=res/program.data.bin
-SOURCES = src/CRunTime.java src/StandaloneMain.java src/Syscalls.java src/CibylConfig.java
 
 CIBYL_SYSCALL_SETS ?= ansi
 JAVA_OPTS=

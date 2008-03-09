@@ -11,7 +11,7 @@
 ######################################################################
 SUBDIRS = c
 RESOURCES=res/program.data.bin
-TARGET   =src/CibylConfig.java midlet.jar midlet.jad
+TARGET   =tmpclasses/CibylConfig.java midlet.jar midlet.jad
 
 # This is actually not needed since we include Rules-j2me, but
 # we keep it here to show how new syscall sets are added. Further,
@@ -20,5 +20,5 @@ CIBYL_SYSCALL_SETS ?= javax.microedition ansi
 
 include $(CIBYL_BASE)/build/Rules-j2me.mk
 
-src/CibylConfig.java: CibylConfig.java
+tmpclasses/CibylConfig.java: CibylConfig.java
 	cp $< $@
