@@ -88,15 +88,19 @@ void *read_cpp(size_t *out_size, const char **defines, const char *fmt, ...)
       fprintf(stderr, "popen %s failed\n", path);
       exit(1);
     }
+  printf("Size of %s: %d\n", path + l, buf.st_size);
   data = xcalloc(buf.st_size * 4, 1);
 
-  size = fread(data, 1, buf.st_size * 4, f);
-  if (size != 0 && size >= (size_t)(buf.st_size * 4))
+  while ( (size = fread(data, 1, buf.st_size * 4, f)) != 0)
     {
-      fprintf(stderr, "Outbuffer of %s is too large: %u vs %ld\n",
-              path, size, buf.st_size * 4);
-      exit(1);
+      if (size != 0 && size >= (size_t)(buf.st_size * 4))
+        {
+          fprintf(stderr, "Outbuffer of %s is too large: %u vs %ld\n",
+                  path, size, buf.st_size * 4);
+          exit(1);
+        }
     }
+  fclose(f);
 
   *out_size = size;
 
@@ -142,79 +146,79 @@ void *read_file(size_t *out_size, const char *fmt, ...)
   return data;
 }
 
-DIR *open_dir_fmt(const char *fmt, ...)
-{
-  char path[2048];
-  va_list ap;
-  int r;
+  DIR *open_dir_fmt(const char *fmt, ...)
+  {
+    char path[2048];
+    va_list ap;
+    int r;
 
-  /* Create the dirname */
-  assert ( fmt != NULL );
-  va_start(ap, fmt);
-  r = vsnprintf(path, 2048, fmt, ap);
-  va_end(ap);
+    /* Create the dirname */
+    assert ( fmt != NULL );
+    va_start(ap, fmt);
+    r = vsnprintf(path, 2048, fmt, ap);
+    va_end(ap);
 
-  return opendir(path);
-}
-
-
-FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode)
-{
-  int len = strlen(dir) + strlen(filename) + 4;
-  FILE *fp;
-  char *buf;
-
-  buf = (char*)xcalloc(len, 1);
-
-  snprintf(buf, len, "%s/%s", dir, filename);
-  fp = fopen(buf, mode);
-  free(buf);
-  if (!fp)
-    {
-      fprintf(stderr, "Cannot open file %s/%s\n", dir, filename);
-      exit(1);
-    }
-
-  return fp;
-}
-
-/* From tobin */
-static uint32_t swap32(uint32_t x)
-{
-  uint32_t out;
+    return opendir(path);
+  }
 
 
-  out = ( (x & 0xffull) << 24 ) |
-    ( ((x & 0xff00ull) >> 8) << 16) |
-    ( ((x & 0xff0000ull) >> 16) << 8) |
-    ( ((x & 0xff000000ull) >> 24) << 0);
+  FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode)
+  {
+    int len = strlen(dir) + strlen(filename) + 4;
+    FILE *fp;
+    char *buf;
 
-      return out;
-}
+    buf = (char*)xcalloc(len, 1);
 
-static uint64_t swap64(uint64_t x)
-{
-  uint64_t out;
+    snprintf(buf, len, "%s/%s", dir, filename);
+    fp = fopen(buf, mode);
+    free(buf);
+    if (!fp)
+      {
+        fprintf(stderr, "Cannot open file %s/%s\n", dir, filename);
+        exit(1);
+      }
 
-  out = ( ((x & 0xffull) << 56 ) |
-	  ( ((x & 0xff00ull) >> 8) << 48 ) |
-	  ( ((x & 0xff0000ull) >> 16) << 40 ) |
-	  ( ((x & 0xff000000ull) >> 24) << 32 ) |
-	  ( ((x & 0xff00000000ull) >> 32) << 24 ) |
-	  ( ((x & 0xff0000000000ull) >> 40)  << 16 ) |
-	  ( ((x & 0xff000000000000ull) >> 48) << 8 ) |
-	  ( ((x & 0xff00000000000000ull) >> 56) << 0 ) );
+    return fp;
+  }
 
-return out;
-}
+  /* From tobin */
+  static uint32_t swap32(uint32_t x)
+  {
+    uint32_t out;
 
-unsigned long be_to_host(unsigned long in)
-{
-  if (sizeof(unsigned long) == 4)
-    return (unsigned long)swap32((uint32_t)in);
-  else if (sizeof(unsigned long) == 8)
-    return (unsigned long)swap64((uint64_t)in);
 
-  fprintf(stderr, "ERROR: unsigned long must be 4 or 8 bytes!\n");
-  exit(1);
-}
+    out = ( (x & 0xffull) << 24 ) |
+      ( ((x & 0xff00ull) >> 8) << 16) |
+      ( ((x & 0xff0000ull) >> 16) << 8) |
+      ( ((x & 0xff000000ull) >> 24) << 0);
+
+    return out;
+  }
+
+  static uint64_t swap64(uint64_t x)
+  {
+    uint64_t out;
+
+    out = ( ((x & 0xffull) << 56 ) |
+            ( ((x & 0xff00ull) >> 8) << 48 ) |
+            ( ((x & 0xff0000ull) >> 16) << 40 ) |
+            ( ((x & 0xff000000ull) >> 24) << 32 ) |
+            ( ((x & 0xff00000000ull) >> 32) << 24 ) |
+            ( ((x & 0xff0000000000ull) >> 40)  << 16 ) |
+            ( ((x & 0xff000000000000ull) >> 48) << 8 ) |
+            ( ((x & 0xff00000000000000ull) >> 56) << 0 ) );
+
+    return out;
+  }
+
+  unsigned long be_to_host(unsigned long in)
+  {
+    if (sizeof(unsigned long) == 4)
+      return (unsigned long)swap32((uint32_t)in);
+    else if (sizeof(unsigned long) == 8)
+      return (unsigned long)swap64((uint64_t)in);
+
+    fprintf(stderr, "ERROR: unsigned long must be 4 or 8 bytes!\n");
+    exit(1);
+  }

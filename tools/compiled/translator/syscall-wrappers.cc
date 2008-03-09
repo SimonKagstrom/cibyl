@@ -79,7 +79,7 @@ void SyscallWrapperGenerator::doOneNonGenerated(const char *dir,
       fprintf(stderr, "Reading %s:%s failed\n", p->set, p->name);
       exit(1);
     }
-  emit->bc_generic("%s", data);
+  emit->output(data);
 
   free((void*)data);
 }
@@ -201,7 +201,7 @@ void SyscallWrapperGenerator::generateInits()
           data = (const char*)read_cpp(&size, this->defines, "%s/%s/init",
                                        dir, cur);
           if (data)
-            emit->bc_generic("%s", data);
+            emit->output(data);
         }
     }
 }
@@ -246,7 +246,7 @@ void SyscallWrapperGenerator::generateHelperClasses()
               if (data)
                 {
                   emit->setOutputFile(open_file_in_dir(this->dstdir, de->d_name, "w"));
-                  emit->bc_generic("%s", data);
+                  emit->output(data);
                 }
               de = readdir(dir);
             }

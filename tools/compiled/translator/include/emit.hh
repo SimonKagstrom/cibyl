@@ -114,14 +114,14 @@ public:
 
   void setOutputFile(FILE *fp);
 
+  void output(const char *what);
+
 private:
   void bc_load_store_helper(const char *type, int nr);
 
   void write(const char *dst, ...);
 
   void writeIndent(const char *dst, ...);
-
-  void output(const char *what);
 
   FILE *fp;
 };
