@@ -19,11 +19,30 @@ SyscallWrapperGenerator::SyscallWrapperGenerator(int n_syscall_dirs, char **sysc
                                                  int n_syscall_sets, char **syscall_sets,
                                                  ght_hash_table_t *used_syscalls)
 {
+  cibyl_db_entry_t *p;
+  ght_iterator_t it;
+  const void *key;
+
   this->n_syscall_dirs = n_syscall_dirs;
   this->syscall_dirs = syscall_dirs;
   this->n_syscall_sets = n_syscall_sets;
   this->syscall_sets = syscall_sets;
   this->used_syscalls = used_syscalls;
+
+  this->set_usage = (int*)xcalloc( n_syscall_sets, sizeof(int) );
+
+  /* Fixup set usage */
+  for (p = (cibyl_db_entry_t *)ght_first(this->used_syscalls, &it, &key);
+       p;
+       p = (cibyl_db_entry_t *)ght_next(this->used_syscalls, &it, &key))
+    {
+      /* Typically ~10 syscall sets, so this should be OK */
+      for (int i = 0; i < this->n_syscall_sets; i++)
+        {
+          if ( strcmp(p->set, this->syscall_sets[i]) == 0 )
+            this->set_usage[i]++;
+        }
+    }
 }
 
 const char *SyscallWrapperGenerator::getJavaReturnString(int r)
@@ -167,6 +186,9 @@ void SyscallWrapperGenerator::generateHeaders()
           char *cur = this->syscall_sets[j];
           const char* data;
           size_t size;
+
+          if (this->set_usage[j] == 0)
+            continue;
 
           data = (const char*)read_cpp(&size, "%s/%s/imports",
                                        dir, cur);

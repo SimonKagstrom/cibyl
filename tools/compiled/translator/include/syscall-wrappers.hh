@@ -48,6 +48,7 @@ private:
   char **syscall_dirs;
   int n_syscall_sets;
   char **syscall_sets;
+  int *set_usage;
   ght_hash_table_t *used_syscalls;
 };
 
