@@ -115,14 +115,18 @@ void Controller::readSyscallDatabase(const char *filename)
       cur->javaClass = strtab + be_to_host((unsigned long)cur->javaClass);
       cur->javaMethod = strtab + be_to_host((unsigned long)cur->javaMethod);
       cur->set = strtab + be_to_host((unsigned long)cur->set);
+      cur->returnType = strtab + be_to_host((unsigned long)cur->returnType);
       cur->args = (cibyl_db_arg_t*)(args_start + be_to_host((unsigned long)cur->args));
       cur->user = first_syscall_dir;
 
       for (unsigned int j = 0; j < cur->nrArgs; j++)
         {
-          unsigned long jt_offs = be_to_host((unsigned long)cur->args[j].javaType) & 0x00ffffff;
           unsigned long t_offs = be_to_host((unsigned long)cur->args[j].type) & 0x00ffffff;
+          unsigned long jt = be_to_host((unsigned long)cur->args[j].javaType);
+          unsigned long jt_offs = jt & 0x00ffffff;
+          unsigned long jt_flags = (jt & 0xff000000) >> 24;
 
+          cur->args[j].flags = jt_flags;
           cur->args[j].javaType = (char*)(strtab + jt_offs);
           cur->args[j].type = (char*)(strtab + t_offs);
           cur->args[j].name = (char*)(strtab +

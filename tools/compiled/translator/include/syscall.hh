@@ -45,6 +45,7 @@ typedef struct
   char *javaClass;
   char *javaMethod;
   char *set; /* The "syscall set" this belongs to */
+  char *returnType;
   cibyl_db_arg_t *args;
   unsigned long user;
 } cibyl_db_entry_t;

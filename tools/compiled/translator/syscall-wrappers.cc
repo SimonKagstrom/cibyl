@@ -45,26 +45,6 @@ SyscallWrapperGenerator::SyscallWrapperGenerator(int n_syscall_dirs, char **sysc
     }
 }
 
-const char *SyscallWrapperGenerator::getJavaReturnString(int r)
-{
-  static const char *table[] = {
-    "void",
-    "int",
-    "boolean",
-    "int" /* Object refrence */
-  };
-
-  if (r < 0 || r > 3)
-    {
-      fprintf(stderr,
-              "Error getting Java return argument, %d is out of bounds\n",
-              r);
-      exit(1);
-    }
-
-  return table[r];
-}
-
 void SyscallWrapperGenerator::doOneArgumentGet(cibyl_db_entry_t *p, cibyl_db_arg_t *a )
 {
   if ( strcmp(a->javaType, "void") == 0 || strcmp(a->javaType, a->type) == 0)
@@ -73,7 +53,7 @@ void SyscallWrapperGenerator::doOneArgumentGet(cibyl_db_entry_t *p, cibyl_db_arg
   if ( strcmp(a->javaType, "boolean") == 0 )
     emit->bc_generic("(boolean) (__%s == 0 ? false : true)",
                      a->name);
-  else if ( strcmp(a->javaType, "String") )
+  else if ( strcmp(a->javaType, "String") == 0 )
     emit->bc_generic("CRunTime.charPtrToString(__%s)",
                      a->name);
   else
@@ -124,8 +104,8 @@ void SyscallWrapperGenerator::doOne(cibyl_db_entry_t *p)
 
   if (p->returns)
     emit->bc_generic("    %s ret = (%s)",
-                     this->getJavaReturnString(p->returns),
-                     this->getJavaReturnString(p->returns));
+                     p->returnType,
+                     p->returnType);
   else
     emit->bc_generic("    ");
 
@@ -173,7 +153,7 @@ void SyscallWrapperGenerator::doOne(cibyl_db_entry_t *p)
   emit->bc_generic("  }\n");
 }
 
-void SyscallWrapperGenerator::generateHeaders()
+void SyscallWrapperGenerator::generateImports()
 {
   /* The syscall sets do not carry dir information, thus loop through
    * all dirs and all sets */
@@ -198,6 +178,31 @@ void SyscallWrapperGenerator::generateHeaders()
     }
 }
 
+void SyscallWrapperGenerator::generateInits()
+{
+  /* The syscall sets do not carry dir information, thus loop through
+   * all dirs and all sets */
+  for (int i = 0; i < this->n_syscall_dirs; i++)
+    {
+      char *dir = this->syscall_dirs[i];
+
+      for (int j = 0; j < this->n_syscall_sets; j++)
+        {
+          char *cur = this->syscall_sets[j];
+          const char* data;
+          size_t size;
+
+          if (this->set_usage[j] == 0)
+            continue;
+
+          data = (const char*)read_cpp(&size, "%s/%s/init",
+                                       dir, cur);
+          if (data)
+            emit->bc_generic("%s", data);
+        }
+    }
+}
+
 bool SyscallWrapperGenerator::pass2()
 {
   cibyl_db_entry_t *p;
@@ -205,8 +210,10 @@ bool SyscallWrapperGenerator::pass2()
   const void *key;
 
   emit->bc_generic("/* GENERATED, DON'T EDIT */\n");
-  this->generateHeaders();
+  this->generateImports();
   emit->bc_generic("public class Syscalls {\n");
+
+  this->generateInits();
 
   for (p = (cibyl_db_entry_t *)ght_first(this->used_syscalls, &it, &key);
        p;

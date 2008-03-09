@@ -39,7 +39,9 @@ private:
 
   void doOne(cibyl_db_entry_t *p);
 
-  void generateHeaders();
+  void generateImports();
+
+  void generateInits();
 
   void doOneNonGenerated(const char *dirname,
                          cibyl_db_entry_t *p);

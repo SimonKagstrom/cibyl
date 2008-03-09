@@ -275,15 +275,15 @@ class SyscallDatabaseGenerator(SyscallGenerator):
             javaMethod_offs = self.add_str(item.getJavaMethod())
             out.append( ( item.getNr(), self.encodeReturnType(item), item.getNrArgs(),
                           self.encodeQualifier(item), name_offs, javaClass_offs,
-                          javaMethod_offs, self.add_str(item.getSyscallSet()) ) )
+                          javaMethod_offs, self.add_str(item.getSyscallSet()), self.add_str(item.getJavaReturnType()) ) )
             if item.getNrArgs() != 0:
                 for arg in item.args:
                     args.append((self.encodeArgumentJavaType(arg),
                                  self.encodeArgumentType(arg),
                                  self.add_str(arg.getName())))
 
-        # Size of each struct is 10
-        arg_offs = 6 * 4 + 4 * len(self.dirs) + 4 * len(self.syscallSets) + 10 * len(out) * 4
+        # Size of each struct is 11
+        arg_offs = 6 * 4 + 4 * len(self.dirs) + 4 * len(self.syscallSets) + 11 * len(out) * 4
         strtab_offs = arg_offs + 4 * len(args) * 4
 
         # Write the header
@@ -307,8 +307,8 @@ class SyscallDatabaseGenerator(SyscallGenerator):
         # Write the out structures
         arg_count = 0
         for s in out:
-            of.write(struct.pack(">LLLLLLLLLL",
-                                 s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7],
+            of.write(struct.pack(">LLLLLLLLLLL",
+                                 s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7], s[8],
                                  arg_count, 0)) # Last is for usage outside
             arg_count = arg_count + 4 * 4 * s[2]
 
