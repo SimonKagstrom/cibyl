@@ -11,11 +11,10 @@
 ######################################################################
 SUBDIRS = c
 RESOURCES=res/program.data.bin
-SOURCES = src/CRunTime.java src/StandaloneMain.java src/Syscalls.java src/CibylConfig.java
 TARGET   =
 
 # The compilation options, set to e.g., -O to run all optimizations
-CIBYL_MIPS2JAVA_OPTS ?=-Iinclude
+CIBYL_MIPS2JAVA_OPTS ?=-Iinclude -DNOJ2ME
 CIBYL_SYSCALL_SETS ?= ansi hello
 CIBYL_GENERATE_JAVA_WRAPPERS_OPTS=-I include -S syscalls
 JAVA_OPTS=
