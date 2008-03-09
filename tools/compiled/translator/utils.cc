@@ -88,7 +88,6 @@ void *read_cpp(size_t *out_size, const char **defines, const char *fmt, ...)
       fprintf(stderr, "popen %s failed\n", path);
       exit(1);
     }
-  printf("Size of %s: %d\n", path + l, buf.st_size);
   data = xcalloc(buf.st_size * 4, 1);
 
   while ( (size = fread(data, 1, buf.st_size * 4, f)) != 0)
