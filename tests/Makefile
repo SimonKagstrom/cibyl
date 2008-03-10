@@ -17,7 +17,7 @@ CIBYL_SYSCALL_SETS ?= resource_manager softfloat command_mgr
 CIBYL_GENERATE_JAVA_WRAPPERS_OPTS=-DJSR075 -I include -S syscalls
 CIBYL_CLASSPATH=$(WTK_PATH)/lib/jsr75.jar
 # The compilation options, set to e.g., -O to run all optimizations
-CIBYL_MIPS2JAVA_OPTS +=-Iinclude
+CIBYL_MIPS2JAVA_OPTS +=-Iinclude -DJSR075
 
 all: include/ $(SUBDIRS)
 
