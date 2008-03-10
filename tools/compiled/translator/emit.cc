@@ -243,7 +243,7 @@ void Emit::writeIndent(const char *fmt, ...)
 
 void Emit::output(const char *what)
 {
-  fprintf(this->fp, what);
+  fprintf(this->fp, "%s", what);
 }
 
 void Emit::setOutputFile(FILE *fp)
