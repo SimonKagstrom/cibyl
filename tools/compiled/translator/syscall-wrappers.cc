@@ -118,7 +118,8 @@ void SyscallWrapperGenerator::doOne(cibyl_db_entry_t *p)
   else
     {
       if (p->nrArgs != 0 &&
-          (p->args[0].flags & CIBYL_DB_ARG_OBJREF))
+          (p->args[0].flags & CIBYL_DB_ARG_OBJREF) &&
+          (strcmp(p->javaClass, p->args[0].javaType) == 0))
         {
           /* Object call */
           emit->bc_generic("%s.%s(", p->args[0].name,
