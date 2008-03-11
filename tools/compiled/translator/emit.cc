@@ -24,6 +24,7 @@
   assert ( fmt != NULL ); \
   va_start(ap, fmt); \
   r = vsnprintf(buf, 2048, fmt, ap); \
+  assert(r < 2048); \
   va_end(ap); \
 } while(0)
 

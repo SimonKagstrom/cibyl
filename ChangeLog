@@ -1,7 +1,12 @@
 Cibyl (16)
+	* The syscall wrapper generator has now been integrated into the C++
+	translator and therefore in the cibyl-mips2java step. The Makefile
+	build rules have been changed to accomodate this, and the src/
+	directory is now deprecated
+
 	* Handle lables to instructions in delay slots safely and emit a
-	warning for it (should never happen). Thanks to Eran Netanel for
-	finding and debugging this
+	warning for it (should never happen). Still just in the C++
+	translator. Thanks to Eran Netanel for finding and debugging this
 
 	* Added code to handle tail-call optimizations (jumps to other
 	functions). This is still just in the C++ translator.
@@ -14,10 +19,9 @@ Cibyl (16)
 	the C++ version yet. cibyl-mips2java will automatically use the
 	C++ translator providing no optimizations are selected.
 
-	The translation step is no longer the bottleneck, Jasmin and the
-	Java syscall wrapper generation now takes most time. With the new
-	translator, Sarien compiles in around 30 seconds totally instead
-	of over one minute.
+	The translation step is no longer the bottleneck, Jasmin now takes
+	most time. With the new translator, Sarien compiles in around 20
+	seconds totally instead of over one minute.
 
 	* Add disabling of function pruning to workaround Cibyl bugs triggered
 	by some versions of GCC
