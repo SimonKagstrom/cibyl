@@ -257,6 +257,7 @@ class SyscallDatabaseGenerator(SyscallGenerator):
         strtab = {}
         self.strtab_offs = 0
         self.strs = []
+        sz = struct.calcsize(">L")
 
         # Read all syscall directories
         of = open(self.outfile, "w")
@@ -283,8 +284,8 @@ class SyscallDatabaseGenerator(SyscallGenerator):
                                  self.add_str(arg.getName())))
 
         # Size of each struct is 11
-        arg_offs = 6 * 4 + 4 * len(self.dirs) + 4 * len(self.syscallSets) + 11 * len(out) * 4
-        strtab_offs = arg_offs + 4 * len(args) * 4
+        arg_offs = sz * 6 + sz * len(self.dirs) + sz * len(self.syscallSets) + sz * 11 * len(out)
+        strtab_offs = arg_offs + sz * len(args) * 4
 
         # Write the header
         of.write(struct.pack(">L", 0xa1b1c1d1)) # magic
@@ -310,7 +311,7 @@ class SyscallDatabaseGenerator(SyscallGenerator):
             of.write(struct.pack(">LLLLLLLLLLL",
                                  s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7], s[8],
                                  arg_count, 0)) # Last is for usage outside
-            arg_count = arg_count + 4 * 4 * s[2]
+            arg_count = arg_count + sz * 4 * s[2]
 
         # Write the arguments
         for a in args:
