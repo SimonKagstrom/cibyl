@@ -96,14 +96,14 @@ bool JavaClass::pass2()
 {
   bool out = true;
 
-  emit->bc_generic(".class public %s\n"
-		   ".super java/lang/Object\n\n"
-		   ".method public <init>()V\n"
-		   "\taload_0\n"
-		   "\tinvokenonvirtual java/lang/Object.<init>()V\n"
-		   "\treturn\n"
-		   ".end method\n",
-		   this->getName());
+  emit->generic(".class public %s\n"
+                ".super java/lang/Object\n\n"
+                ".method public <init>()V\n"
+                "\taload_0\n"
+                "\tinvokenonvirtual java/lang/Object.<init>()V\n"
+                "\treturn\n"
+                ".end method\n",
+                this->getName());
 
   for (int i = 0; i < this->n_methods; i++)
     {

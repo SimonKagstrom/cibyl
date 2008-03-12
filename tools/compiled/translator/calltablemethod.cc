@@ -39,11 +39,11 @@ bool CallTableMethod::pass1()
 
 bool CallTableMethod::pass2()
 {
-  emit->bc_generic("class CibylCallTable {\n"
-                   "  public static final int call(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {\n"
-                   "    int v0 = 0;\n"
-                   "    switch(address) {\n"
-                   );
+  emit->generic("class CibylCallTable {\n"
+                "  public static final int call(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {\n"
+                "    int v0 = 0;\n"
+                "    switch(address) {\n"
+                );
 
   /* For each method, output a call to it */
   for (int i = 0; i < this->n_methods; i++)
@@ -51,31 +51,31 @@ bool CallTableMethod::pass2()
       JavaMethod *mt = this->methods[i];
       const char *comma = "";
 
-      emit->bc_generic("      case 0x%x:  ", mt->getAddress());
+      emit->generic("      case 0x%x:  ", mt->getAddress());
       if (mt->clobbersReg( R_V0 ))
-        emit->bc_generic("v0 = ");
-      emit->bc_generic("Cibyl.%s(", mt->getName()); /* FIXME! Don't use static class name */
+        emit->generic("v0 = ");
+      emit->generic("Cibyl.%s(", mt->getName()); /* FIXME! Don't use static class name */
 
       /* Pass registers */
       if (mt->clobbersReg( R_SP ))
-        { emit->bc_generic("sp"); comma = ","; }
+        { emit->generic("sp"); comma = ","; }
       if (mt->clobbersReg( R_A0 ))
-        { emit->bc_generic("%s a0", comma); comma = ","; }
+        { emit->generic("%s a0", comma); comma = ","; }
       if (mt->clobbersReg( R_A1 ))
-        { emit->bc_generic("%s a1", comma); comma = ","; }
+        { emit->generic("%s a1", comma); comma = ","; }
       if (mt->clobbersReg( R_A2 ))
-        { emit->bc_generic("%s a2", comma); comma = ","; }
+        { emit->generic("%s a2", comma); comma = ","; }
       if (mt->clobbersReg( R_A3 ))
-        emit->bc_generic("%s a3", comma);
-      emit->bc_generic("); break;\n");
+        emit->generic("%s a3", comma);
+      emit->generic("); break;\n");
     }
 
-  emit->bc_generic("      default:\n"
-                   "         throw new Exception(\"Call to unknown location \" + Integer.toHexString(address));\n"
-                   "    }\n"
-                   "    return v0;\n"
-                   "  }\n"
-                   "}\n"
-                   );
+  emit->generic("      default:\n"
+                "         throw new Exception(\"Call to unknown location \" + Integer.toHexString(address));\n"
+                "    }\n"
+                "    return v0;\n"
+                "  }\n"
+                "}\n"
+                );
   return true;
 }

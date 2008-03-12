@@ -82,7 +82,7 @@ public:
     uint32_t end = insn->getAddress();
     const char *handler = method->addExceptionHandler(start, end);
 
-    emit->bc_generic(".catch all from L_%x to L_%x using %s\n",
+    emit->generic(".catch all from L_%x to L_%x using %s\n",
                      start, end, handler);
     return true;
   }

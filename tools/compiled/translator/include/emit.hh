@@ -23,8 +23,6 @@ public:
 
   void bc_comment(const char *what) { this->output("; "); this->write(what); }
 
-  void bc_generic(const char *what, ...);
-
   void bc_generic_insn(const char *what) { this->writeIndent(what); }
 
   void bc_label(const char *what, ...);
@@ -115,6 +113,8 @@ public:
   void setOutputFile(FILE *fp);
 
   void output(const char *what);
+
+  void generic(const char *what, ...);
 
 private:
   void bc_load_store_helper(const char *type, int nr);

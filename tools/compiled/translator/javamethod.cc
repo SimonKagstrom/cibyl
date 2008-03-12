@@ -110,19 +110,19 @@ bool JavaMethod::pass2()
 
   regalloc->setAllocation(this->registerUsage);
 
-  emit->bc_generic("\n.method public static %s\n"
-		   ".limit stack 20\n"
-		   ".limit locals %d\n",
-		   this->getJavaMethodName(),
-		   regalloc->getNumberOfLocals());
+  emit->generic("\n.method public static %s\n"
+                ".limit stack 20\n"
+                ".limit locals %d\n",
+                this->getJavaMethodName(),
+                regalloc->getNumberOfLocals());
 
   /* Emit register mapping */
   for (int i = 0; i < N_REGS; i++)
     {
       if (this->registerUsage[i])
-        emit->bc_generic("; local %2d is register %s\n",
-                         regalloc->regToLocal((MIPS_register_t)i),
-                         mips_reg_strings[i]);
+        emit->generic("; local %2d is register %s\n",
+                      regalloc->regToLocal((MIPS_register_t)i),
+                      mips_reg_strings[i]);
     }
 
   /* Zero all used registers */
@@ -193,7 +193,7 @@ bool JavaMethod::pass2()
   else
     emit->bc_return();
 
-  emit->bc_generic(".end method ; %s\n", this->getJavaMethodName());
+  emit->generic(".end method ; %s\n", this->getJavaMethodName());
 
   return out;
 }

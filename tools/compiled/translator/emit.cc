@@ -167,7 +167,7 @@ void Emit::bc_condbranch(const char *fmt, ...)
   this->output("\n");
 }
 
-void Emit::bc_generic(const char *fmt, ...)
+void Emit::generic(const char *fmt, ...)
 {
   char buf[2048];
 

@@ -52,18 +52,18 @@ void SyscallWrapperGenerator::doOneArgumentGet(cibyl_db_entry_t *p, cibyl_db_arg
 {
   if ( strcmp(a->javaType, "void") == 0 || strcmp(a->javaType, a->type) == 0)
     return;
-  emit->bc_generic("    %s %s = ", a->javaType, a->name);
+  emit->generic("    %s %s = ", a->javaType, a->name);
   if ( strcmp(a->javaType, "boolean") == 0 )
-    emit->bc_generic("(boolean) (__%s == 0 ? false : true)",
-                     a->name);
+    emit->generic("(boolean) (__%s == 0 ? false : true)",
+                  a->name);
   else if ( strcmp(a->javaType, "String") == 0 )
-    emit->bc_generic("CRunTime.charPtrToString(__%s)",
-                     a->name);
+    emit->generic("CRunTime.charPtrToString(__%s)",
+                  a->name);
   else
-    emit->bc_generic("(%s)CRunTime.objectRepository[__%s]",
-                     a->javaType,
-                     a->name, a->name);
-  emit->bc_generic(";\n");
+    emit->generic("(%s)CRunTime.objectRepository[__%s]",
+                  a->javaType,
+                  a->name, a->name);
+  emit->generic(";\n");
 }
 
 void SyscallWrapperGenerator::doOneNonGenerated(const char *dir,
@@ -88,33 +88,33 @@ void SyscallWrapperGenerator::doOne(cibyl_db_entry_t *p)
 {
   unsigned int n = 0;
 
-  emit->bc_generic("  public static final %s %s(",
-                   p->returns ? "int" : "void", p->name);
+  emit->generic("  public static final %s %s(",
+                p->returns ? "int" : "void", p->name);
   for (unsigned int i = 0; i < p->nrArgs; i++)
     {
       cibyl_db_arg_t *a = &p->args[i];
 
-      emit->bc_generic("int %s%s%s",
-                       /* C and Java type the same? */
-                       strcmp(a->type, a->javaType) == 0 ? "" : "__",
-                       a->name,
-                       i == p->nrArgs-1 ? "" : ", ");
+      emit->generic("int %s%s%s",
+                    /* C and Java type the same? */
+                    strcmp(a->type, a->javaType) == 0 ? "" : "__",
+                    a->name,
+                    i == p->nrArgs-1 ? "" : ", ");
     }
-  emit->bc_generic(") %s {\n",
-                   (p->qualifier & CIBYL_DB_QUALIFIER_THROWS) != 0 ? "throws Exception" : "");
+  emit->generic(") %s {\n",
+                (p->qualifier & CIBYL_DB_QUALIFIER_THROWS) != 0 ? "throws Exception" : "");
   for (unsigned int i = 0; i < p->nrArgs; i++)
     this->doOneArgumentGet(p, &p->args[i]);
 
   if (p->returns)
-    emit->bc_generic("    %s ret = (%s)",
-                     p->returnType,
-                     p->returnType);
+    emit->generic("    %s ret = (%s)",
+                  p->returnType,
+                  p->returnType);
   else
-    emit->bc_generic("    ");
+    emit->generic("    ");
 
   /* Generate the call */
   if ( strcmp(p->javaMethod, "new") == 0 ) /* Constructor */
-    emit->bc_generic("new %s(", p->javaClass);
+    emit->generic("new %s(", p->javaClass);
   else
     {
       if (p->nrArgs != 0 &&
@@ -122,20 +122,20 @@ void SyscallWrapperGenerator::doOne(cibyl_db_entry_t *p)
           (strcmp(p->javaClass, p->args[0].javaType) == 0))
         {
           /* Object call */
-          emit->bc_generic("%s.%s(", p->args[0].name,
-                           p->javaMethod);
+          emit->generic("%s.%s(", p->args[0].name,
+                        p->javaMethod);
           n++; /* Skip the first argument */
         }
       else /* Static call */
-        emit->bc_generic("%s.%s(", p->javaClass,
-                         p->javaMethod);
+        emit->generic("%s.%s(", p->javaClass,
+                      p->javaMethod);
     }
 
   /* Pass all arguments */
   for ( ; n < p->nrArgs; n++ )
-    emit->bc_generic("%s%s", p->args[n].name,
-                     n == p->nrArgs-1 ? "" : ", ");
-  emit->bc_generic(");\n");
+    emit->generic("%s%s", p->args[n].name,
+                  n == p->nrArgs-1 ? "" : ", ");
+  emit->generic(");\n");
 
   if ( p->returns )
     {
@@ -143,18 +143,18 @@ void SyscallWrapperGenerator::doOne(cibyl_db_entry_t *p)
 
       if (p->returns == CIBYL_DB_RETURN_OBJREF)
         {
-          emit->bc_generic("    int registeredHandle = CRunTime.registerObject(%s);\n",
-                           rn);
+          emit->generic("    int registeredHandle = CRunTime.registerObject(%s);\n",
+                        rn);
           rn = "registeredHandle";
         }
 
       if (p->returns == CIBYL_DB_RETURN_BOOLEAN)
-        emit->bc_generic("    return %s ? 1 : 0;\n", rn);
+        emit->generic("    return %s ? 1 : 0;\n", rn);
       else
-        emit->bc_generic("    return %s;\n", rn);
+        emit->generic("    return %s;\n", rn);
     }
 
-  emit->bc_generic("  }\n");
+  emit->generic("  }\n");
 }
 
 void SyscallWrapperGenerator::generateImports()
@@ -177,7 +177,7 @@ void SyscallWrapperGenerator::generateImports()
           data = (const char*)read_cpp(&size, this->defines, "%s/%s/imports",
                                        dir, cur);
           if (data)
-            emit->bc_generic("%s", data);
+            emit->generic("%s", data);
         }
     }
 }
@@ -262,9 +262,9 @@ bool SyscallWrapperGenerator::pass2()
   const void *key;
 
   emit->setOutputFile(open_file_in_dir(this->dstdir, "Syscalls.java", "w"));
-  emit->bc_generic("/* GENERATED, DON'T EDIT */\n");
+  emit->generic("/* GENERATED, DON'T EDIT */\n");
   this->generateImports();
-  emit->bc_generic("public class Syscalls {\n");
+  emit->generic("public class Syscalls {\n");
 
   this->generateInits();
 
@@ -278,7 +278,7 @@ bool SyscallWrapperGenerator::pass2()
         this->doOneNonGenerated(this->syscall_dirs[p->user],
                                 p);
     }
-  emit->bc_generic("}\n");
+  emit->generic("}\n");
   this->generateHelperClasses();
 
   return true;
