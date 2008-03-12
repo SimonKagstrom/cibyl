@@ -34,6 +34,7 @@ static int symbol_cmp(const void *_a, const void *_b)
 CibylElf::CibylElf(const char *filename)
 {
   Elf_Scn *scn = NULL;
+  Elf32_Ehdr *ehdr;
   size_t shstrndx;
   int fd;
 
@@ -67,6 +68,13 @@ CibylElf::CibylElf(const char *filename)
       fprintf(stderr, "elf_begin failed on %s\n", filename);
       exit(1);
     }
+
+  if ( !(ehdr = elf32_getehdr(this->elf)) )
+    {
+      fprintf(stderr, "elf32_getehdr failed on %s\n", filename);
+      exit(1);
+    }
+  this->entryPoint = (uint32_t)ehdr->e_entry;
 
   if (elf_getshstrndx(this->elf, &shstrndx) < 0)
     {

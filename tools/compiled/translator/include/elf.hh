@@ -47,7 +47,7 @@ public:
 
   ElfSymbol **getFunctions();
 
-  uint32_t getEntryPoint() { return 0x01000000; }
+  uint32_t getEntryPoint() { return this->entryPoint; }
 
   int getNumberOfFunctions();
 
@@ -100,6 +100,8 @@ private:
   int n_dataSymbols;
 
   size_t textSize, dataSize, rodataSize, ctorsSize, dtorsSize, cibylstrtabSize;
+
+  uint32_t entryPoint;
 };
 
 #endif /* !__ELF_HH__ */
