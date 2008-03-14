@@ -146,6 +146,14 @@ typedef enum
   OP_COP3   = 77,
   OP_BREAK  = 78,
 
+  /* FPU ops */
+  OP_MFC_1  = 79,
+  OP_CFC_1  = 80,
+  OP_MTC_1  = 81,
+  OP_CTC_1  = 82,
+  OP_BC1F   = 83,
+  OP_BC1T   = 84,
+
   SPECIAL = 100,
   BCOND = 101,
   COP0 = 102,
@@ -175,6 +183,8 @@ typedef struct
 extern mips_op_entry_t mips_op_entries[];
 
 extern mips_opcode_t mips_special_table[];
+
+extern mips_opcode_t mips_cop0_table[];
 
 extern const char *mips_op_strings[];
 

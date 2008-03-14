@@ -43,6 +43,10 @@ mips_opcode_t mips_special_table[] =
   OP_RES,  OP_RES,   OP_RES,  OP_RES,  OP_RES,     OP_RES,   OP_RES,  OP_RES
 };
 
+mips_opcode_t mips_cop0_table[] =
+{
+};
+
 const char *mips_op_strings[] =
 {
   "Shouldn't happen", "add  ", "addi ", "addiu", "addu ", "and  ",

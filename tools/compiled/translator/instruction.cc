@@ -1325,6 +1325,11 @@ Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
 	  opcode = OP_UNIMP; break;
 	}
     }
+  else if ( opentry.type == COP0 ) /* FPU instructions */
+    {
+      /* FIXME! Actually implement this */
+      opcode = mips_cop0_table[(word >> 26) & 0x3f];
+    }
 
   /* Now we have extra, rs, rt, rd and opcode correctly setup! */
   switch(opcode)
