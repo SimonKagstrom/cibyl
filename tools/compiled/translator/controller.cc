@@ -400,11 +400,12 @@ Config *config;
 
 static void usage()
 {
-  printf("Usage: xcibyl-translator dst-dir elf-file syscall-database...\n"
+  printf("Usage: xcibyl-translator trace-start trace-end dst-dir elf-file syscall-database...\n"
          "\n"
-         "Where dst-dir is the destination directory to put translated files in, elf-file\n"
-         "the input MIPS binary file, syscall-database is a cibyl-syscalls.db file with\n"
-         "with possible syscalls (any number can be given)\n.");
+         "Where trace-start and trace-end are start and end addresses for instruction\n"
+         "tracing, dst-dir is the destination directory to put translated files in\n"
+         ", elf-file the input MIPS binary file, syscall-database is a cibyl-syscalls.db\n"
+         "file with with possible syscalls (any number can be given)\n");
 }
 
 int main(int argc, const char **argv)
