@@ -184,7 +184,7 @@ extern mips_op_entry_t mips_op_entries[];
 
 extern mips_opcode_t mips_special_table[];
 
-extern mips_opcode_t mips_cop0_table[];
+extern mips_opcode_t mips_cop1_table[];
 
 extern const char *mips_op_strings[];
 

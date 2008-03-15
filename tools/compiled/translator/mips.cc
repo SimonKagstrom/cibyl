@@ -43,7 +43,7 @@ mips_opcode_t mips_special_table[] =
   OP_RES,  OP_RES,   OP_RES,  OP_RES,  OP_RES,     OP_RES,   OP_RES,  OP_RES
 };
 
-mips_opcode_t mips_cop0_table[] =
+mips_opcode_t mips_cop1_table[] =
 {
 };
 
