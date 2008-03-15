@@ -14,8 +14,10 @@
 /* The run-the-tests function */
 void function_run(void)
 {
+#if 0
   implicit_declaration(1, 2, "tre", "fyra", "fem",
                        "sex", 7, 8, 9, "tio", "elva");
+#endif
 }
 
 void implicit_declaration(unsigned a1, long long a2, char *a3, char *a4, char *a5,
