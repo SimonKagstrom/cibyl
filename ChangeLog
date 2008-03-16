@@ -28,7 +28,7 @@ Cibyl (16)
 
 	* Check malloc return value in strdup
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sun Mar 16 08:38:42 CET 2008
 
 Cibyl (15)
 	* Fixed a bug with callbacks being published but not registered -
