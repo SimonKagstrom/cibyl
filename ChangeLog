@@ -1,3 +1,6 @@
+Cibyl (17)
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Cibyl (16)
 	* The syscall wrapper generator has now been integrated into the C++
 	translator and therefore in the cibyl-mips2java step. The Makefile

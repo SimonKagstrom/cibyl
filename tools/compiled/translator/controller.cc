@@ -193,8 +193,6 @@ bool Controller::pass0()
                                           (sym->addr - textBase + sym->size) / 4 - 1);
       /* 1-1 mapping */
       this->methods[i] = new JavaMethod(functions, i, i);
-      /* For now add all methods to the call table */
-      this->callTableMethod->addMethod(this->methods[i]);
     }
 
   /* And the (single) class */
@@ -293,6 +291,10 @@ void Controller::lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entrie
             continue;
 
           JavaMethod *mt = cl->getMethodByAddress(v);
+
+          /* Add to the call table */
+          if (mt->getAddress() == v)
+            this->callTableMethod->addMethod(mt);
 
           /* Something has an address in this method (which can be an address) */
           mt->addJumptabLabel(v);

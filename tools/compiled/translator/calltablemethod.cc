@@ -16,11 +16,24 @@ CallTableMethod::CallTableMethod(int maxMethods) : JavaMethod(NULL, 0, 0)
 {
   this->n_methods = 0;
   this->methods = (JavaMethod**)xcalloc(sizeof(JavaMethod*), maxMethods);
+  this->method_table = ght_create(maxMethods);
   memset(this->registerUsage, 0, sizeof(this->registerUsage));
 }
 
 void CallTableMethod::addMethod(JavaMethod *method)
 {
+  uint32_t addr = method->getAddress();
+
+  if ( ght_get(this->method_table,
+               sizeof(uint32_t), (void*)&addr) != NULL )
+    {
+      /* Already exists, don't insert again */
+      printf("Maboo: %x\n", method->getAddress());
+      return;
+    }
+  ght_insert(this->method_table, (void*)method,
+             sizeof(uint32_t), (void*)&addr);
+
   this->methods[this->n_methods++] = method;
 }
 

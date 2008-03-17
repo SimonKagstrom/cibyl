@@ -12,6 +12,8 @@
 #ifndef __JAVAMETHOD_HH__
 #define __JAVAMETHOD_HH__
 
+#include <ght_hash_table.h>
+
 #include <function.hh>
 #include <mips.hh>
 #include <utils.h>
@@ -117,6 +119,7 @@ public:
   }
 protected:
   JavaMethod **methods;
+  ght_hash_table_t *method_table;
   int n_methods;
 };
 
