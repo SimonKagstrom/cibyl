@@ -51,7 +51,7 @@ Controller::Controller(const char **defines,
 
 char *Controller::resolveStrtabAddress(char *strtab, char *offset)
 {
-  return strtab + be32_to_host((int)offset);
+  return strtab + be_to_host((unsigned long)offset);
 }
 
 unsigned long Controller::getSyscallFileLong(void *_p, int offset)
