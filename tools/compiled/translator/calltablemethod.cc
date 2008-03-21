@@ -28,7 +28,6 @@ void CallTableMethod::addMethod(JavaMethod *method)
                sizeof(uint32_t), (void*)&addr) != NULL )
     {
       /* Already exists, don't insert again */
-      printf("Maboo: %x\n", method->getAddress());
       return;
     }
   ght_insert(this->method_table, (void*)method,
