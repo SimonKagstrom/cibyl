@@ -22,6 +22,19 @@ public:
 
   JavaMethod *getMethodByAddress(uint32_t addr);
 
+  int getNumberOfMethods()
+  {
+    return this->n_methods;
+  }
+
+  JavaMethod *getMethodByIndex(int idx)
+  {
+    if (idx < 0 || idx > this->n_methods)
+      return NULL;
+
+    return this->methods[idx];
+  }
+
   bool pass1();
 
   bool pass2();
