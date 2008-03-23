@@ -65,6 +65,7 @@ private:
   unsigned long getSyscallFileLong(void *_p, int offset);
   void readSyscallDatabase(const char *filename);
   void lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entries);
+  void lookupRelocations(JavaClass *cl);
 
   uint32_t addAlignedSection(uint32_t addr, FILE *fp, void *data,
                              size_t data_len, int alignment);

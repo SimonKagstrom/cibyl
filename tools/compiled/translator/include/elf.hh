@@ -16,25 +16,45 @@
 #include <stdlib.h>
 
 #include <libelf.h>
+#include <ght_hash_table.h>
 
 class CibylElf;
 
 class ElfSymbol
 {
 public:
-  ElfSymbol(uint32_t addr, uint32_t size, int type, const char *name)
+  ElfSymbol(int index, uint32_t addr, uint32_t size, int type, const char *name)
   {
+    this->index = index;
     this->addr = addr;
     this->size = size;
     this->type = type;
     this->name = name;
   }
 
+  int index;
   uint32_t addr;
   uint32_t size;
   int type;
   const char *name;
 };
+
+
+class ElfReloc
+{
+public:
+  ElfReloc(uint32_t addr, int type, ElfSymbol *sym)
+  {
+    this->addr = addr;
+    this->type = type;
+    this->sym = sym;
+  }
+
+  uint32_t addr;
+  int type;
+  ElfSymbol *sym;
+};
+
 
 class CibylElf
 {
@@ -47,9 +67,13 @@ public:
 
   ElfSymbol **getFunctions();
 
-  uint32_t getEntryPoint() { return this->entryPoint; }
-
   int getNumberOfFunctions();
+
+  ElfReloc **getRelocations();
+
+  int getNumberOfRelocations();
+
+  uint32_t getEntryPoint() { return this->entryPoint; }
 
   uint8_t *getText() { return this->text; };
 
@@ -79,13 +103,14 @@ public:
   }
 
 private:
+  void handleSymtab(Elf_Scn *scn);
   void fixupSymbolSize(ElfSymbol **table, int n);
 
   static CibylElf *instance;
 
   Elf *elf; /* from libelf */
 
-  ElfSymbol *symbols;
+  ElfSymbol **symbols;
   ElfSymbol **functionSymbols;
   ElfSymbol **dataSymbols;
 
@@ -96,8 +121,13 @@ private:
   uint8_t *dtors;
   uint8_t *cibylstrtab;
 
+  int n_symbols;
   int n_functionSymbols;
   int n_dataSymbols;
+  ght_hash_table_t *symtable;
+
+  ElfReloc **relocs;
+  int n_relocs;
 
   size_t textSize, dataSize, rodataSize, ctorsSize, dtorsSize, cibylstrtabSize;
 

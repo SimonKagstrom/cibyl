@@ -292,6 +292,8 @@ void Controller::lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entrie
 
           JavaMethod *mt = cl->getMethodByAddress(v);
 
+          assert(mt);
+
           /* Add to the call table */
           if (mt->getAddress() == v)
             this->callTableMethod->addMethod(mt);
@@ -332,6 +334,29 @@ uint32_t Controller::addAlignedSection(uint32_t addr, FILE *fp, void *data,
   return out + data_len;
 }
 
+void Controller::lookupRelocations(JavaClass *cl)
+{
+  ElfReloc **relocs = this->elf->getRelocations();
+  int n = this->elf->getNumberOfRelocations();
+
+  for (int i = 0; i < n; i++)
+    {
+      ElfReloc *rel = relocs[i];
+
+      /* If we have a relocation to a function object, add that to
+       * the call table */
+      if (rel->sym->type == STT_FUNC && rel->type != R_MIPS_26)
+        {
+          JavaMethod *mt = cl->getMethodByAddress(rel->sym->addr);
+
+          assert(mt);
+
+          if (mt->getAddress() == rel->sym->addr)
+            this->callTableMethod->addMethod(mt);
+        }
+    }
+}
+
 bool Controller::pass1()
 {
   bool out = true;
@@ -349,6 +374,9 @@ bool Controller::pass1()
                                 this->elf->getCtorsSize() / sizeof(uint32_t));
       this->lookupDataAddresses(cl, (uint32_t*)this->elf->getDtors(),
                                 this->elf->getDtorsSize() / sizeof(uint32_t));
+
+      /* And loop through the relocations and add these */
+      this->lookupRelocations(cl);
 
       if (cl->pass1() != true)
 	out = false;
