@@ -34,7 +34,6 @@ typedef struct
   char *name;
 } cibyl_db_arg_t;
 
-/* The syscall database. Everything in big-endian order */
 typedef struct
 {
   unsigned long nr;

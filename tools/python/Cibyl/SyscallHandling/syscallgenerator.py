@@ -257,7 +257,7 @@ class SyscallDatabaseGenerator(SyscallGenerator):
         strtab = {}
         self.strtab_offs = 0
         self.strs = []
-        sz = struct.calcsize(">L")
+        sz = struct.calcsize("P")
 
         # Read all syscall directories
         of = open(self.outfile, "w")
@@ -288,34 +288,34 @@ class SyscallDatabaseGenerator(SyscallGenerator):
         strtab_offs = arg_offs + sz * len(args) * 4
 
         # Write the header
-        of.write(struct.pack(">L", 0xa1b1c1d1)) # magic
-        of.write(struct.pack(">L", len(self.dirs))) # Nr syscall directories
-        of.write(struct.pack(">L", len(self.syscallSets))) # Nr syscall sets
-        of.write(struct.pack(">L", len(out)) )      # Nr items
-        of.write(struct.pack(">L", arg_offs))
-        of.write(struct.pack(">L", strtab_offs))
+        of.write(struct.pack("P", 0xa1b1c1d1)) # magic
+        of.write(struct.pack("P", len(self.dirs))) # Nr syscall directories
+        of.write(struct.pack("P", len(self.syscallSets))) # Nr syscall sets
+        of.write(struct.pack("P", len(out)) )      # Nr items
+        of.write(struct.pack("P", arg_offs))
+        of.write(struct.pack("P", strtab_offs))
 
         # The path names, as strtab offsets
         for d in self.dirs:
             offs = self.add_str(os.path.abspath(d))
-            of.write(struct.pack(">L", offs))
+            of.write(struct.pack("P", offs))
 
         # The syscall set names, as strtab offsets
         for s in self.syscallSets:
             offs = self.add_str(s)
-            of.write(struct.pack(">L", offs))
+            of.write(struct.pack("P", offs))
 
         # Write the out structures
         arg_count = 0
         for s in out:
-            of.write(struct.pack(">LLLLLLLLLLL",
+            of.write(struct.pack("PPPPPPPPPPP",
                                  s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7], s[8],
                                  arg_count, 0)) # Last is for usage outside
             arg_count = arg_count + sz * 4 * s[2]
 
         # Write the arguments
         for a in args:
-            of.write(struct.pack(">LLLL", 0, a[0], a[1], a[2]))
+            of.write(struct.pack("PPPP", 0, a[0], a[1], a[2]))
 
         # Write the string table
         for item in self.strs:
