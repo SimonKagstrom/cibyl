@@ -74,6 +74,20 @@ void CibylElf::handleSymtab(Elf_Scn *scn)
     }
 }
 
+static int reloc_cmp(const void *_a, const void *_b)
+{
+  ElfReloc *a = *(ElfReloc**)_a;
+  ElfReloc *b = *(ElfReloc**)_b;
+  int type_diff = a->type - b->type;
+  int addr_diff = a->addr - b->addr;
+
+  /* First sort by type, then address */
+  if (type_diff != 0)
+    return type_diff;
+
+  return addr_diff;
+}
+
 CibylElf::CibylElf(const char *filename)
 {
   Elf_Scn *scn = NULL;
@@ -223,16 +237,16 @@ CibylElf::CibylElf(const char *filename)
               ElfSymbol *sym = (ElfSymbol*)ght_get(this->symtable, sizeof(uint32_t),
                                                    (void*)&sym_idx);
 
-              if (sym)
-                {
-                  assert(cur < max_relocs);
-                  this->relocs[cur++] = new ElfReloc(s->r_offset, type, sym);
-                }
+              assert(cur < max_relocs);
+              this->relocs[cur++] = new ElfReloc(s->r_offset, type, sym);
               s++;
             }
         }
     }
   this->n_relocs = cur;
+
+  /* Sort relocs */
+  qsort((void*)this->relocs, this->n_relocs, sizeof(ElfReloc*),	reloc_cmp);
 
   /* Sort the symbols and fixup addresses */
   this->fixupSymbolSize(this->functionSymbols,

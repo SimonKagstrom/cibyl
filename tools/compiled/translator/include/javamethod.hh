@@ -79,7 +79,7 @@ public:
    * @param start the start address
    * @param end the end address
    *
-   * @return the name of the exception handler
+   * @return the name of the exception handler
    */
   char *addExceptionHandler(uint32_t start, uint32_t end);
 

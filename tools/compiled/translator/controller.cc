@@ -51,7 +51,7 @@ Controller::Controller(const char **defines,
 
 char *Controller::resolveStrtabAddress(char *strtab, char *offset)
 {
-  return strtab + be_to_host((unsigned long)offset);
+  return strtab + (unsigned long)offset;
 }
 
 unsigned long Controller::getSyscallFileLong(void *_p, int offset)
@@ -80,27 +80,27 @@ void Controller::readSyscallDatabase(const char *filename)
 
   /* This is oh-so-ugly... */
   idx = 0;
-  magic = be_to_host(this->getSyscallFileLong(data, idx++));
-  n_dirs = be_to_host(this->getSyscallFileLong(data, idx++));
-  n_sets = be_to_host(this->getSyscallFileLong(data, idx++));
-  n = be_to_host(this->getSyscallFileLong(data, idx++));
+  magic = this->getSyscallFileLong(data, idx++);
+  n_dirs = this->getSyscallFileLong(data, idx++);
+  n_sets = this->getSyscallFileLong(data, idx++);
+  n = this->getSyscallFileLong(data, idx++);
   args_start = (unsigned long)data +
-    be_to_host(this->getSyscallFileLong(data, idx++));
+    this->getSyscallFileLong(data, idx++);
   strtab = (char*)data +
-    be_to_host(this->getSyscallFileLong(data, idx++));
+    this->getSyscallFileLong(data, idx++);
 
   /* Add to the syscall directories and sets */
   this->n_syscall_dirs += n_dirs;
   this->syscall_dirs = (char**)xrealloc(this->syscall_dirs, this->n_syscall_dirs * sizeof(char**));
   for (int i = first_syscall_dir; i < this->n_syscall_dirs; i++)
       this->syscall_dirs[i] = ((char*)strtab) +
-        be_to_host(this->getSyscallFileLong(data, idx++));
+        this->getSyscallFileLong(data, idx++);
 
   this->n_syscall_sets += n_sets;
   this->syscall_sets = (char**)xrealloc(this->syscall_sets, this->n_syscall_sets * sizeof(char**));
   for (int i = first_syscall_set; i < this->n_syscall_sets; i++)
       this->syscall_sets[i] = ((char*)strtab) +
-        be_to_host(this->getSyscallFileLong(data, idx++));
+        this->getSyscallFileLong(data, idx++);
 
   syscall_entries = (cibyl_db_entry_t*)(((unsigned long*)data) + idx++);
 
@@ -109,22 +109,22 @@ void Controller::readSyscallDatabase(const char *filename)
     {
       cibyl_db_entry_t *cur = &syscall_entries[i];
 
-      cur->nr = be_to_host(cur->nr);
-      cur->returns = be_to_host(cur->returns);
-      cur->nrArgs = be_to_host(cur->nrArgs);
-      cur->qualifier = be_to_host(cur->qualifier);
-      cur->name = strtab + be_to_host((unsigned long)cur->name);
-      cur->javaClass = strtab + be_to_host((unsigned long)cur->javaClass);
-      cur->javaMethod = strtab + be_to_host((unsigned long)cur->javaMethod);
-      cur->set = strtab + be_to_host((unsigned long)cur->set);
-      cur->returnType = strtab + be_to_host((unsigned long)cur->returnType);
-      cur->args = (cibyl_db_arg_t*)(args_start + be_to_host((unsigned long)cur->args));
+      cur->nr = cur->nr;
+      cur->returns = cur->returns;
+      cur->nrArgs = cur->nrArgs;
+      cur->qualifier = cur->qualifier;
+      cur->name = strtab + (unsigned long)cur->name;
+      cur->javaClass = strtab + (unsigned long)cur->javaClass;
+      cur->javaMethod = strtab + (unsigned long)cur->javaMethod;
+      cur->set = strtab + (unsigned long)cur->set;
+      cur->returnType = strtab + (unsigned long)cur->returnType;
+      cur->args = (cibyl_db_arg_t*)(args_start + (unsigned long)cur->args);
       cur->user = first_syscall_dir;
 
       for (unsigned int j = 0; j < cur->nrArgs; j++)
         {
-          unsigned long t_offs = be_to_host((unsigned long)cur->args[j].type) & 0x00ffffff;
-          unsigned long jt = be_to_host((unsigned long)cur->args[j].javaType);
+          unsigned long t_offs = (unsigned long)cur->args[j].type & 0x00ffffff;
+          unsigned long jt = (unsigned long)cur->args[j].javaType;
           unsigned long jt_offs = jt & 0x00ffffff;
           unsigned long jt_flags = (jt & 0xff000000) >> 24;
 
@@ -132,7 +132,7 @@ void Controller::readSyscallDatabase(const char *filename)
           cur->args[j].javaType = (char*)(strtab + jt_offs);
           cur->args[j].type = (char*)(strtab + t_offs);
           cur->args[j].name = (char*)(strtab +
-                                      be32_to_host((unsigned long)cur->args[j].name));
+                                      (unsigned long)cur->args[j].name);
         }
 
       /* Add to the hash table */
@@ -334,10 +334,25 @@ uint32_t Controller::addAlignedSection(uint32_t addr, FILE *fp, void *data,
   return out + data_len;
 }
 
+typedef struct
+{
+  int hi_start;
+  int hi_end;
+  int lo_start;
+  int lo_end;
+} hilo_reloc_limit_t;
+
 void Controller::lookupRelocations(JavaClass *cl)
 {
   ElfReloc **relocs = this->elf->getRelocations();
   int n = this->elf->getNumberOfRelocations();
+  hilo_reloc_limit_t *hilos_per_method;
+
+  /* Initialize hi/lo pairs to -1 */
+  hilos_per_method = (hilo_reloc_limit_t *)xcalloc(cl->getNumberOfMethods(),
+                                                   sizeof(hilo_reloc_limit_t));
+  memset(hilos_per_method, -1,
+         cl->getNumberOfMethods() * sizeof(hilo_reloc_limit_t));
 
   for (int i = 0; i < n; i++)
     {
@@ -345,148 +360,166 @@ void Controller::lookupRelocations(JavaClass *cl)
 
       /* If we have a relocation to a function object, add that to
        * the call table */
-      if (rel->sym->type == STT_FUNC && rel->type != R_MIPS_26)
+      if (rel->sym)
         {
-          JavaMethod *mt = cl->getMethodByAddress(rel->sym->addr);
+          if (rel->sym->type == STT_FUNC && rel->type != R_MIPS_26)
+            {
+              JavaMethod *mt = cl->getMethodByAddress(rel->sym->addr);
 
-          assert(mt);
+              assert(mt);
 
-          if (mt->getAddress() == rel->sym->addr)
-            this->callTableMethod->addMethod(mt);
+              if (mt->getAddress() == rel->sym->addr)
+                this->callTableMethod->addMethod(mt);
+            }
+        }
+      else if (rel->type == R_MIPS_HI16 || rel->type == R_MIPS_LO16)
+        {
+          int idx;
+          JavaMethod *reloc_mt = cl->getMethodByAddress(rel->addr, &idx);
+
+          if (reloc_mt)
+            {
+              hilo_reloc_limit_t *hilo = &hilos_per_method[idx];
+
+              if (rel->type == R_MIPS_HI16 &&
+                  hilo->hi_start == -1)
+                ;
+            }
         }
     }
+  free(hilos_per_method);
 }
 
-bool Controller::pass1()
-{
-  bool out = true;
+  bool Controller::pass1()
+  {
+    bool out = true;
 
-  for (int i = 0; i < this->n_classes; i++)
-    {
-      JavaClass *cl = this->classes[i];
+    for (int i = 0; i < this->n_classes; i++)
+      {
+        JavaClass *cl = this->classes[i];
 
-      /* Add addresses in the different ELF sections to the lookup tables */
-      this->lookupDataAddresses(cl, (uint32_t*)this->elf->getData(),
-                                this->elf->getDataSize() / sizeof(uint32_t));
-      this->lookupDataAddresses(cl, (uint32_t*)this->elf->getRodata(),
-                                this->elf->getRodataSize() / sizeof(uint32_t));
-      this->lookupDataAddresses(cl, (uint32_t*)this->elf->getCtors(),
-                                this->elf->getCtorsSize() / sizeof(uint32_t));
-      this->lookupDataAddresses(cl, (uint32_t*)this->elf->getDtors(),
-                                this->elf->getDtorsSize() / sizeof(uint32_t));
+        /* Add addresses in the different ELF sections to the lookup tables */
+        this->lookupDataAddresses(cl, (uint32_t*)this->elf->getData(),
+                                  this->elf->getDataSize() / sizeof(uint32_t));
+        this->lookupDataAddresses(cl, (uint32_t*)this->elf->getRodata(),
+                                  this->elf->getRodataSize() / sizeof(uint32_t));
+        this->lookupDataAddresses(cl, (uint32_t*)this->elf->getCtors(),
+                                  this->elf->getCtorsSize() / sizeof(uint32_t));
+        this->lookupDataAddresses(cl, (uint32_t*)this->elf->getDtors(),
+                                  this->elf->getDtorsSize() / sizeof(uint32_t));
 
-      /* And loop through the relocations and add these */
-      this->lookupRelocations(cl);
+        /* And loop through the relocations and add these */
+        this->lookupRelocations(cl);
 
-      if (cl->pass1() != true)
-	out = false;
-    }
-  this->callTableMethod->pass1();
-  this->sortJumptabLabels();
+        if (cl->pass1() != true)
+          out = false;
+      }
+    this->callTableMethod->pass1();
+    this->sortJumptabLabels();
 
-  return out;
-}
-
-
-bool Controller::pass2()
-{
-  SyscallWrapperGenerator *syscallWrappers;
-  bool out = true;
-  uint32_t addr = 0;
-  FILE *fp;
-
-  /* Output the data sections to a file */
-  fp = open_file_in_dir(this->dstdir, "program.data.bin", "w");
-  addr = this->addAlignedSection(addr, fp, this->elf->getData(),
-                                 this->elf->getDataSize(), 16);
-  addr = this->addAlignedSection(addr, fp, this->elf->getRodata(),
-                                 this->elf->getRodataSize(), 16);
-  addr = this->addAlignedSection(addr, fp, this->elf->getCtors(),
-                                 this->elf->getCtorsSize(), 16);
-  addr = this->addAlignedSection(addr, fp, this->elf->getDtors(),
-                                 this->elf->getDtorsSize(), 16);
-  fclose(fp);
-
-  for (int i = 0; i < this->n_classes; i++)
-    {
-      if (this->classes[i]->pass2() != true)
-	out = false;
-    }
-  emit->setOutputFile(open_file_in_dir(this->dstdir, "CibylCallTable.java", "w"));
-  this->callTableMethod->pass2();
-
-  syscallWrappers = new SyscallWrapperGenerator(this->defines, this->dstdir,
-                                                this->n_syscall_dirs, this->syscall_dirs,
-                                                this->n_syscall_sets, this->syscall_sets,
-                                                this->syscall_used_table);
-  syscallWrappers->pass2();
-
-  return out;
-}
+    return out;
+  }
 
 
-Controller *controller;
-Config *config;
+  bool Controller::pass2()
+  {
+    SyscallWrapperGenerator *syscallWrappers;
+    bool out = true;
+    uint32_t addr = 0;
+    FILE *fp;
 
-static void usage()
-{
-  printf("Usage: xcibyl-translator trace-start trace-end dst-dir elf-file syscall-database...\n"
-         "\n"
-         "Where trace-start and trace-end are start and end addresses for instruction\n"
-         "tracing, dst-dir is the destination directory to put translated files in\n"
-         ", elf-file the input MIPS binary file, syscall-database is a cibyl-syscalls.db\n"
-         "file with with possible syscalls (any number can be given)\n");
-}
+    /* Output the data sections to a file */
+    fp = open_file_in_dir(this->dstdir, "program.data.bin", "w");
+    addr = this->addAlignedSection(addr, fp, this->elf->getData(),
+                                   this->elf->getDataSize(), 16);
+    addr = this->addAlignedSection(addr, fp, this->elf->getRodata(),
+                                   this->elf->getRodataSize(), 16);
+    addr = this->addAlignedSection(addr, fp, this->elf->getCtors(),
+                                   this->elf->getCtorsSize(), 16);
+    addr = this->addAlignedSection(addr, fp, this->elf->getDtors(),
+                                   this->elf->getDtorsSize(), 16);
+    fclose(fp);
 
-int main(int argc, const char **argv)
-{
-  uint32_t trace_start = 0;
-  uint32_t trace_end = 0;
-  const char **defines = (const char **)xcalloc(argc, sizeof(const char*));
-  int n, n_defines = 0;
-  char *endp;
+    for (int i = 0; i < this->n_classes; i++)
+      {
+        if (this->classes[i]->pass2() != true)
+          out = false;
+      }
+    emit->setOutputFile(open_file_in_dir(this->dstdir, "CibylCallTable.java", "w"));
+    this->callTableMethod->pass2();
 
-  if (argc < 6)
-    {
-      fprintf(stderr, "Too few arguments\n");
+    syscallWrappers = new SyscallWrapperGenerator(this->defines, this->dstdir,
+                                                  this->n_syscall_dirs, this->syscall_dirs,
+                                                  this->n_syscall_sets, this->syscall_sets,
+                                                  this->syscall_used_table);
+    syscallWrappers->pass2();
 
-      usage();
-      return 1;
-    }
+    return out;
+  }
 
-  trace_start = strtol(argv[1], &endp, 0);
-  if (endp == argv[1])
-    {
-      fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
-              argv[1]);
-      exit(1);
-    }
-  trace_end = strtol(argv[2], &endp, 0);
-  if (endp == argv[2])
-    {
-      fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
-              argv[2]);
-      exit(1);
-    }
 
-  /* Setup defines */
-  for (n = 3; n < argc && strncmp(argv[n], "-D", 2) == 0; n++)
-    {
-      defines[n_defines++] = argv[n];
-    }
+  Controller *controller;
+  Config *config;
 
-  emit = new Emit();
-  config = new Config();
-  config->traceRange[0] = trace_start;
-  config->traceRange[1] = trace_end;
+  static void usage()
+  {
+    printf("Usage: xcibyl-translator trace-start trace-end dst-dir elf-file syscall-database...\n"
+           "\n"
+           "Where trace-start and trace-end are start and end addresses for instruction\n"
+           "tracing, dst-dir is the destination directory to put translated files in\n"
+           ", elf-file the input MIPS binary file, syscall-database is a cibyl-syscalls.db\n"
+           "file with with possible syscalls (any number can be given)\n");
+  }
 
-  regalloc = new RegisterAllocator();
-  controller = new Controller(defines, argv[n], argv[n+1],
-                              argc - n - 2, &argv[n + 2]);
+  int main(int argc, const char **argv)
+  {
+    uint32_t trace_start = 0;
+    uint32_t trace_end = 0;
+    const char **defines = (const char **)xcalloc(argc, sizeof(const char*));
+    int n, n_defines = 0;
+    char *endp;
 
-  controller->pass0();
-  controller->pass1();
-  controller->pass2();
+    if (argc < 6)
+      {
+        fprintf(stderr, "Too few arguments\n");
 
-  return 0;
-}
+        usage();
+        return 1;
+      }
+
+    trace_start = strtol(argv[1], &endp, 0);
+    if (endp == argv[1])
+      {
+        fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
+                argv[1]);
+        exit(1);
+      }
+    trace_end = strtol(argv[2], &endp, 0);
+    if (endp == argv[2])
+      {
+        fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
+                argv[2]);
+        exit(1);
+      }
+
+    /* Setup defines */
+    for (n = 3; n < argc && strncmp(argv[n], "-D", 2) == 0; n++)
+      {
+        defines[n_defines++] = argv[n];
+      }
+
+    emit = new Emit();
+    config = new Config();
+    config->traceRange[0] = trace_start;
+    config->traceRange[1] = trace_end;
+
+    regalloc = new RegisterAllocator();
+    controller = new Controller(defines, argv[n], argv[n+1],
+                                argc - n - 2, &argv[n + 2]);
+
+    controller->pass0();
+    controller->pass1();
+    controller->pass2();
+
+    return 0;
+  }

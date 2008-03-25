@@ -20,6 +20,8 @@ class JavaClass : public CodeBlock
 public:
   JavaClass(JavaMethod **methods, int first, int last);
 
+  JavaMethod *getMethodByAddress(uint32_t addr, int *idx);
+
   JavaMethod *getMethodByAddress(uint32_t addr);
 
   int getNumberOfMethods()

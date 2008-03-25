@@ -54,22 +54,27 @@ JavaClass::JavaClass(JavaMethod **in_methods, int first, int last) : CodeBlock()
 	method_cmp);
 }
 
-JavaMethod *JavaClass::getMethodByAddress(uint32_t addr)
+JavaMethod *JavaClass::getMethodByAddress(uint32_t addr, int *idx)
 {
   uint32_t tmp = addr;
   JavaMethod **ret;
 
+  *idx = -1; /* Assume not found */
   ret = (JavaMethod**)bsearch(&tmp, this->methods, this->n_methods,
                               sizeof(JavaMethod*), method_search_cmp);
 
   if (ret == NULL)
-    {
-      emit->error("Could not find method with address 0x%x\n",
-                  addr);
-      exit(1);
-    }
+    return NULL;
 
+  *idx = ret - this->methods;
   return *ret;
+}
+
+JavaMethod *JavaClass::getMethodByAddress(uint32_t addr)
+{
+  int dummy;
+
+  return this->getMethodByAddress(addr, &dummy);
 }
 
 const char *JavaClass::getName()
