@@ -288,7 +288,7 @@ class SyscallDatabaseGenerator(SyscallGenerator):
         strtab_offs = arg_offs + sz * len(args) * 4
 
         # Write the header
-        of.write(struct.pack("P", 0xa1b1c1d1)) # magic
+        of.write(struct.pack("P", 0x11b1c1d1)) # magic
         of.write(struct.pack("P", len(self.dirs))) # Nr syscall directories
         of.write(struct.pack("P", len(self.syscallSets))) # Nr syscall sets
         of.write(struct.pack("P", len(out)) )      # Nr items
