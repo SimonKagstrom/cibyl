@@ -250,14 +250,16 @@ CibylElf::CibylElf(const char *filename)
 
   /* Sort the symbols and fixup addresses */
   this->fixupSymbolSize(this->functionSymbols,
-                        this->n_functionSymbols);
+                        this->n_functionSymbols,
+                        this->getEntryPoint() + this->textSize);
   this->fixupSymbolSize(this->dataSymbols,
-                        this->n_dataSymbols);
+                        this->n_dataSymbols,
+                        this->dataSize);
 
   close(fd);
 }
 
-void CibylElf::fixupSymbolSize(ElfSymbol **table, int n)
+void CibylElf::fixupSymbolSize(ElfSymbol **table, int n, uint32_t sectionEnd)
 {
   /* Sort the symbols by address */
   qsort((void*)table, n, sizeof(ElfSymbol*), symbol_cmp);
@@ -269,9 +271,14 @@ void CibylElf::fixupSymbolSize(ElfSymbol **table, int n)
       ElfSymbol *last = table[i-1];
 
       if (last->addr + last->size <
-          cur->addr - 4)
-        last->size = cur->addr - last->addr - 4;
+          cur->addr)
+        last->size = cur->addr - last->addr;
     }
+  /* And the very last one */
+  ElfSymbol *last = table[n-1];
+  if ( last->addr + last->size < sectionEnd )
+    last->size = sectionEnd - last->addr;
+
 }
 
 ElfSymbol **CibylElf::getFunctions()
