@@ -837,6 +837,8 @@ public:
   {
     this->dstMethod = controller->getCallTableMethod();
 
+    assert(this->dstMethod);
+
     if (this->delayed)
       this->delayed->pass1();
 
@@ -899,16 +901,17 @@ public:
     if (this->delayed)
       this->delayed->pass1();
 
+    if (!this->dstMethod)
+      {
+	emit->error("Jal from 0x%x to 0x%x: Target address not found\n",
+		    this->address, this->extra << 2);
+	return false;
+      }
+
     this->builtin = controller->matchBuiltin(this->dstMethod->getName());
     if (this->builtin)
       return this->builtin->pass1(this);
 
-    if (!this->dstMethod)
-      {
-	emit->error("Jal from 0x%x to 0x%x: Target address found or a function\n",
-		    this->address, this->extra);
-	return false;
-      }
     return true;
   }
 
