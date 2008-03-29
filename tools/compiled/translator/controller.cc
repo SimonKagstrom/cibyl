@@ -11,6 +11,7 @@
  ********************************************************************/
 #include <assert.h>
 #include <unistd.h>
+#include <limits.h>
 #include <stdio.h>
 
 #include <utils.h>
@@ -167,6 +168,7 @@ bool Controller::pass0()
       this->instructions[i] = insn;
       last = insn;
     }
+  this->n_instructions = n_insns;
 
   this->functions = (Function**)xcalloc(n_functions + 1, sizeof(Function*));
   this->methods = (JavaMethod**)xcalloc(n_functions + 1, sizeof(JavaMethod*));
@@ -334,25 +336,35 @@ uint32_t Controller::addAlignedSection(uint32_t addr, FILE *fp, void *data,
   return out + data_len;
 }
 
-typedef struct
+class HiloRelocLimit
 {
-  int hi_start;
-  int hi_end;
-  int lo_start;
-  int lo_end;
-} hilo_reloc_limit_t;
+public:
+  HiloRelocLimit()
+  {
+    this->hi_start = INT_MAX;
+    this->hi_end = -1;
+    this->lo_start = INT_MAX;
+    this->lo_end = -1;
+  }
+
+  bool isValid()
+  {
+    return (this->hi_start != INT_MAX && this->hi_end != -1 &&
+            this->lo_start != INT_MAX && this->lo_end != -1);
+  }
+
+  int hi_start, hi_end;
+  int lo_start, lo_end;
+};
 
 void Controller::lookupRelocations(JavaClass *cl)
 {
   ElfReloc **relocs = this->elf->getRelocations();
   int n = this->elf->getNumberOfRelocations();
-  hilo_reloc_limit_t *hilos_per_method;
+  HiloRelocLimit *hilos_per_method;
 
   /* Initialize hi/lo pairs to -1 */
-  hilos_per_method = (hilo_reloc_limit_t *)xcalloc(cl->getNumberOfMethods(),
-                                                   sizeof(hilo_reloc_limit_t));
-  memset(hilos_per_method, -1,
-         cl->getNumberOfMethods() * sizeof(hilo_reloc_limit_t));
+  hilos_per_method = new HiloRelocLimit[cl->getNumberOfMethods()];
 
   for (int i = 0; i < n; i++)
     {
@@ -379,15 +391,96 @@ void Controller::lookupRelocations(JavaClass *cl)
 
           if (reloc_mt)
             {
-              hilo_reloc_limit_t *hilo = &hilos_per_method[idx];
+              HiloRelocLimit *hilo = &hilos_per_method[idx];
 
-              if (rel->type == R_MIPS_HI16 &&
-                  hilo->hi_start == -1)
-                ;
+              if (rel->type == R_MIPS_HI16)
+                {
+                  if (hilo->hi_start > i)
+                    hilo->hi_start = i;
+                  if (hilo->hi_end < i)
+                    hilo->hi_end = i;
+                }
+              else if (rel->type == R_MIPS_LO16)
+                {
+                  if (hilo->lo_start > i)
+                    hilo->lo_start = i;
+                  if (hilo->lo_end < i)
+                    hilo->lo_end = i;
+                }
             }
         }
     }
-  free(hilos_per_method);
+
+  /* Check all possible hi/lo pairs. This might look like a lot of
+   * code (and it is!), but the purpose of doing it this complicated
+   * is to avoid having to loop through _all_ HI16 and LO16 pairs of
+   * relocations for the entire program, which could easily be quite
+   * time-consuming.
+   *
+   * The code (and the above part) instead only loops through all
+   * hi/lo pairs in a particular method. There are usually not more
+   * than at most 20 of each, which is quite feasible.
+   */
+  for (int i = 0; i < cl->getNumberOfMethods(); i++)
+    {
+      HiloRelocLimit *hilo = &hilos_per_method[i];
+
+      if (!hilo->isValid())
+        continue;
+
+      /* Loop through each HI/LO pair for this method */
+      for (int h = hilo->hi_start; h <= hilo->hi_end; h++)
+        {
+          ElfReloc *rel_hi = relocs[h];
+          int idx_hi = (rel_hi->addr - this->elf->getEntryPoint()) / 4;
+          Instruction *a, *b;
+
+          assert(idx_hi < this->n_instructions);
+          a = this->instructions[idx_hi];
+
+          for (int l = hilo->lo_start; l <= hilo->lo_end; l++)
+            {
+              ElfReloc *rel_lo = relocs[l];
+              int idx_lo = (rel_lo->addr - this->elf->getEntryPoint()) / 4;
+              int32_t addr;
+
+              assert(idx_lo < this->n_instructions);
+              b = this->instructions[idx_lo];
+
+              if (b->isDelaySlotNop())
+                b = this->instructions[idx_lo - 1]->getDelayed();
+
+              addr = ((uint32_t)a->getExtra()) << 16;
+              switch (b->getOpcode())
+                {
+                case OP_SW:
+                case OP_SB:
+                case OP_SH:
+                case OP_LB:
+                case OP_LBU:
+                case OP_LH:
+                case OP_LHU:
+                case OP_LW: /* Assume adds for these */
+                case OP_ADDI:
+                case OP_ADDIU:
+                  addr += b->getExtra();
+                  break;
+                case OP_ORI:
+                  addr |= b->getExtra();
+                  break;
+                default:
+                  emit->warning("Warning: Unknown opcode %d in hilo pair at 0x%08x : 0x%08x\n",
+                         b->getOpcode(), rel_hi->addr, rel_lo->addr);
+                  break;
+                }
+              JavaMethod *dst_mt = cl->getMethodByAddress(addr);
+              if (dst_mt)
+                this->callTableMethod->addMethod(dst_mt);
+            }
+        }
+    }
+
+  delete hilos_per_method;
 }
 
   bool Controller::pass1()

@@ -1,4 +1,8 @@
 Cibyl (17)
+	* Implemented less pessimistic adding of functions to the call
+	table. Relocation information is now used to add only functions which
+	can be in the call table
+
 	* Some bugs in the fixup of the ELF symbol sizes has been fixed: it was
 	always done on the functions, and the last function was not fixed
 	up. The size has also been corrected to include the last instruction
