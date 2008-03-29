@@ -1,6 +1,8 @@
 Cibyl (17)
-	* Bug in fixup of the ELF symbol sizes has been fixed (was always done
-	on the functions)
+	* Some bugs in the fixup of the ELF symbol sizes has been fixed: it was
+	always done on the functions, and the last function was not fixed
+	up. The size has also been corrected to include the last instruction
+	(usually a delay slot instruction)
 
 	* 64-bit compile fixes: cibyl-syscalls.db is now in native byteorder
 	and also different-sized on 32- and 64-bit platforms
