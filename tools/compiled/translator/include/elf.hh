@@ -104,7 +104,7 @@ public:
 
 private:
   void handleSymtab(Elf_Scn *scn);
-  void fixupSymbolSize(ElfSymbol **table, int n);
+  void fixupSymbolSize(ElfSymbol **table, int n, uint32_t sectionEnd);
 
   static CibylElf *instance;
 
