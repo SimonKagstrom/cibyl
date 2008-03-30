@@ -243,9 +243,7 @@ Syscall *Controller::getSyscall(uint32_t value)
 JavaMethod *Controller::getMethodByAddress(uint32_t addr)
 {
   /* We only have a couple of classes anyway */
-  for (int i = 0;
-       i < this->n_classes;
-       i++)
+  for (int i = 0; i < this->n_classes; i++)
     {
       JavaMethod *out = this->classes[i]->getMethodByAddress(addr);
 
@@ -432,23 +430,25 @@ void Controller::lookupRelocations(JavaClass *cl)
       for (int h = hilo->hi_start; h <= hilo->hi_end; h++)
         {
           ElfReloc *rel_hi = relocs[h];
-          int idx_hi = (rel_hi->addr - this->elf->getEntryPoint()) / 4;
           Instruction *a, *b;
 
-          assert(idx_hi < this->n_instructions);
-          a = this->instructions[idx_hi];
+          a = this->getInstructionByAddress(rel_hi->addr);
+          assert(a);
 
           for (int l = hilo->lo_start; l <= hilo->lo_end; l++)
             {
               ElfReloc *rel_lo = relocs[l];
-              int idx_lo = (rel_lo->addr - this->elf->getEntryPoint()) / 4;
               int32_t addr;
 
-              assert(idx_lo < this->n_instructions);
-              b = this->instructions[idx_lo];
+              b = this->getInstructionByAddress(rel_lo->addr);
+              assert(b);
 
               if (b->isDelaySlotNop())
-                b = this->instructions[idx_lo - 1]->getDelayed();
+                {
+                  Instruction *parent = this->getInstructionByAddress(rel_lo->addr - 4);
+                  assert(parent);
+                  b = parent->getDelayed();
+                }
 
               addr = ((uint32_t)a->getExtra()) << 16;
               switch (b->getOpcode())
