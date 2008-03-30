@@ -483,136 +483,136 @@ void Controller::lookupRelocations(JavaClass *cl)
   delete hilos_per_method;
 }
 
-  bool Controller::pass1()
-  {
-    bool out = true;
+bool Controller::pass1()
+{
+  bool out = true;
 
-    for (int i = 0; i < this->n_classes; i++)
-      {
-        JavaClass *cl = this->classes[i];
+  for (int i = 0; i < this->n_classes; i++)
+    {
+      JavaClass *cl = this->classes[i];
 
-        /* Add addresses in the different ELF sections to the lookup tables */
-        this->lookupDataAddresses(cl, (uint32_t*)this->elf->getData(),
-                                  this->elf->getDataSize() / sizeof(uint32_t));
-        this->lookupDataAddresses(cl, (uint32_t*)this->elf->getRodata(),
-                                  this->elf->getRodataSize() / sizeof(uint32_t));
-        this->lookupDataAddresses(cl, (uint32_t*)this->elf->getCtors(),
-                                  this->elf->getCtorsSize() / sizeof(uint32_t));
-        this->lookupDataAddresses(cl, (uint32_t*)this->elf->getDtors(),
-                                  this->elf->getDtorsSize() / sizeof(uint32_t));
+      /* Add addresses in the different ELF sections to the lookup tables */
+      this->lookupDataAddresses(cl, (uint32_t*)this->elf->getData(),
+                                this->elf->getDataSize() / sizeof(uint32_t));
+      this->lookupDataAddresses(cl, (uint32_t*)this->elf->getRodata(),
+                                this->elf->getRodataSize() / sizeof(uint32_t));
+      this->lookupDataAddresses(cl, (uint32_t*)this->elf->getCtors(),
+                                this->elf->getCtorsSize() / sizeof(uint32_t));
+      this->lookupDataAddresses(cl, (uint32_t*)this->elf->getDtors(),
+                                this->elf->getDtorsSize() / sizeof(uint32_t));
 
-        /* And loop through the relocations and add these */
-        this->lookupRelocations(cl);
+      /* And loop through the relocations and add these */
+      this->lookupRelocations(cl);
 
-        if (cl->pass1() != true)
-          out = false;
-      }
-    this->callTableMethod->pass1();
-    this->sortJumptabLabels();
+      if (cl->pass1() != true)
+        out = false;
+    }
+  this->callTableMethod->pass1();
+  this->sortJumptabLabels();
 
-    return out;
-  }
-
-
-  bool Controller::pass2()
-  {
-    SyscallWrapperGenerator *syscallWrappers;
-    bool out = true;
-    uint32_t addr = 0;
-    FILE *fp;
-
-    /* Output the data sections to a file */
-    fp = open_file_in_dir(this->dstdir, "program.data.bin", "w");
-    addr = this->addAlignedSection(addr, fp, this->elf->getData(),
-                                   this->elf->getDataSize(), 16);
-    addr = this->addAlignedSection(addr, fp, this->elf->getRodata(),
-                                   this->elf->getRodataSize(), 16);
-    addr = this->addAlignedSection(addr, fp, this->elf->getCtors(),
-                                   this->elf->getCtorsSize(), 16);
-    addr = this->addAlignedSection(addr, fp, this->elf->getDtors(),
-                                   this->elf->getDtorsSize(), 16);
-    fclose(fp);
-
-    for (int i = 0; i < this->n_classes; i++)
-      {
-        if (this->classes[i]->pass2() != true)
-          out = false;
-      }
-    emit->setOutputFile(open_file_in_dir(this->dstdir, "CibylCallTable.java", "w"));
-    this->callTableMethod->pass2();
-
-    syscallWrappers = new SyscallWrapperGenerator(this->defines, this->dstdir,
-                                                  this->n_syscall_dirs, this->syscall_dirs,
-                                                  this->n_syscall_sets, this->syscall_sets,
-                                                  this->syscall_used_table);
-    syscallWrappers->pass2();
-
-    return out;
-  }
+  return out;
+}
 
 
-  Controller *controller;
-  Config *config;
+bool Controller::pass2()
+{
+  SyscallWrapperGenerator *syscallWrappers;
+  bool out = true;
+  uint32_t addr = 0;
+  FILE *fp;
 
-  static void usage()
-  {
-    printf("Usage: xcibyl-translator trace-start trace-end dst-dir elf-file syscall-database...\n"
-           "\n"
-           "Where trace-start and trace-end are start and end addresses for instruction\n"
-           "tracing, dst-dir is the destination directory to put translated files in\n"
-           ", elf-file the input MIPS binary file, syscall-database is a cibyl-syscalls.db\n"
-           "file with with possible syscalls (any number can be given)\n");
-  }
+  /* Output the data sections to a file */
+  fp = open_file_in_dir(this->dstdir, "program.data.bin", "w");
+  addr = this->addAlignedSection(addr, fp, this->elf->getData(),
+                                 this->elf->getDataSize(), 16);
+  addr = this->addAlignedSection(addr, fp, this->elf->getRodata(),
+                                 this->elf->getRodataSize(), 16);
+  addr = this->addAlignedSection(addr, fp, this->elf->getCtors(),
+                                 this->elf->getCtorsSize(), 16);
+  addr = this->addAlignedSection(addr, fp, this->elf->getDtors(),
+                                 this->elf->getDtorsSize(), 16);
+  fclose(fp);
 
-  int main(int argc, const char **argv)
-  {
-    uint32_t trace_start = 0;
-    uint32_t trace_end = 0;
-    const char **defines = (const char **)xcalloc(argc, sizeof(const char*));
-    int n, n_defines = 0;
-    char *endp;
+  for (int i = 0; i < this->n_classes; i++)
+    {
+      if (this->classes[i]->pass2() != true)
+        out = false;
+    }
+  emit->setOutputFile(open_file_in_dir(this->dstdir, "CibylCallTable.java", "w"));
+  this->callTableMethod->pass2();
 
-    if (argc < 6)
-      {
-        fprintf(stderr, "Too few arguments\n");
+  syscallWrappers = new SyscallWrapperGenerator(this->defines, this->dstdir,
+                                                this->n_syscall_dirs, this->syscall_dirs,
+                                                this->n_syscall_sets, this->syscall_sets,
+                                                this->syscall_used_table);
+  syscallWrappers->pass2();
 
-        usage();
-        return 1;
-      }
+  return out;
+}
 
-    trace_start = strtol(argv[1], &endp, 0);
-    if (endp == argv[1])
-      {
-        fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
-                argv[1]);
-        exit(1);
-      }
-    trace_end = strtol(argv[2], &endp, 0);
-    if (endp == argv[2])
-      {
-        fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
-                argv[2]);
-        exit(1);
-      }
 
-    /* Setup defines */
-    for (n = 3; n < argc && strncmp(argv[n], "-D", 2) == 0; n++)
-      {
-        defines[n_defines++] = argv[n];
-      }
+Controller *controller;
+Config *config;
 
-    emit = new Emit();
-    config = new Config();
-    config->traceRange[0] = trace_start;
-    config->traceRange[1] = trace_end;
+static void usage()
+{
+  printf("Usage: xcibyl-translator trace-start trace-end dst-dir elf-file syscall-database...\n"
+         "\n"
+         "Where trace-start and trace-end are start and end addresses for instruction\n"
+         "tracing, dst-dir is the destination directory to put translated files in\n"
+         ", elf-file the input MIPS binary file, syscall-database is a cibyl-syscalls.db\n"
+         "file with with possible syscalls (any number can be given)\n");
+}
 
-    regalloc = new RegisterAllocator();
-    controller = new Controller(defines, argv[n], argv[n+1],
-                                argc - n - 2, &argv[n + 2]);
+int main(int argc, const char **argv)
+{
+  uint32_t trace_start = 0;
+  uint32_t trace_end = 0;
+  const char **defines = (const char **)xcalloc(argc, sizeof(const char*));
+  int n, n_defines = 0;
+  char *endp;
 
-    controller->pass0();
-    controller->pass1();
-    controller->pass2();
+  if (argc < 6)
+    {
+      fprintf(stderr, "Too few arguments\n");
 
-    return 0;
-  }
+      usage();
+      return 1;
+    }
+
+  trace_start = strtol(argv[1], &endp, 0);
+  if (endp == argv[1])
+    {
+      fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
+              argv[1]);
+      exit(1);
+    }
+  trace_end = strtol(argv[2], &endp, 0);
+  if (endp == argv[2])
+    {
+      fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
+              argv[2]);
+      exit(1);
+    }
+
+  /* Setup defines */
+  for (n = 3; n < argc && strncmp(argv[n], "-D", 2) == 0; n++)
+    {
+      defines[n_defines++] = argv[n];
+    }
+
+  emit = new Emit();
+  config = new Config();
+  config->traceRange[0] = trace_start;
+  config->traceRange[1] = trace_end;
+
+  regalloc = new RegisterAllocator();
+  controller = new Controller(defines, argv[n], argv[n+1],
+                              argc - n - 2, &argv[n + 2]);
+
+  controller->pass0();
+  controller->pass1();
+  controller->pass2();
+
+  return 0;
+}
