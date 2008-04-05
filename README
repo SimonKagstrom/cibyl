@@ -10,7 +10,7 @@ You need the following to use Cibyl:
 
 - Python (2.3, 2.4 tested)
 - The Jasmin assembler (http://jasmin.sourceforge.net)
-- A GCC MIPS cross-compiler, >= 3.3
+- A GCC MIPS cross-compiler, >= 3.3 (e.g., ELDK: http://spel.bth.se/index.php/Install_the_ELDK_MIPS_tools)
 - A Java compiler / runtime environment
 - The jasmin java assembler (http://jasmin.sourceforge.net)
 - For J2ME support, MIDPath (http://midpath.thenesis.org) or the Sun
