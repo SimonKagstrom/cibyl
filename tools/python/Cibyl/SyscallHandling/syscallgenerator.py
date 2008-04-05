@@ -247,14 +247,21 @@ class SyscallDatabaseGenerator(SyscallGenerator):
         # Add the string including null-termination
         if s == None:
             s = ""
+        try:
+            # If we already have this key, just return the offset
+            return self.strtab_by_contents[s]
+        except:
+            pass
         out = self.strtab_offs
         self.strtab_offs = self.strtab_offs + len(s) + 1
         self.strs.append(s)
+        self.strtab_by_contents[s] = out
         return out
 
     def run(self):
         items = []
         strtab = {}
+        self.strtab_by_contents = {}
         self.strtab_offs = 0
         self.strs = []
         sz = struct.calcsize("P")

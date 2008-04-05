@@ -1,4 +1,10 @@
 Cibyl (17)
+	* Generate the string table in cibyl-syscalls.db with unique strings,
+	i.e., reuse string offsets for strings which are already present
+
+	* Fixed C++ build issue, .gnu.linkonce.r.* sections were ignored by
+	the linker script (thanks Susmith M R!)
+
 	* Implemented less pessimistic adding of functions to the call
 	table. Relocation information is now used to add only functions which
 	can be in the call table
