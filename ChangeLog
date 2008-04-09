@@ -1,4 +1,8 @@
 Cibyl (17)
+	* Refactored the instruction implementation. The instruction parser
+	also recognises MIPS32 FPU instructions although these do not yet
+	generate working code
+
 	* Generate the string table in cibyl-syscalls.db with unique strings,
 	i.e., reuse string offsets for strings which are already present
 
