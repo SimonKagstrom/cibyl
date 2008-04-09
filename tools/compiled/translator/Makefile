@@ -25,6 +25,10 @@ all: xcibyl-translator
 clean:
 	rm -rf *.oo *~ xcibyl-translator lib/libghthash-0.6.2 lib/.libghthash
 
+instruction.oo: instructions/fpu.cc instructions/memory.cc instructions/rfmt.cc \
+                instructions/ifmt.cc instructions/muldiv.cc instructions/set.cc \
+                instructions/jfmt.cc instructions/nop.cc instructions/syscall.cc
+
 %.oo: %.cc
 	$(HOST_CXX) -Ilib/libghthash-0.6.2/src/ $(HOST_CFLAGS) -c -o $@ $<
 

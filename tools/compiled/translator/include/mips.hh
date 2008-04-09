@@ -51,24 +51,57 @@ typedef enum
   R_HI = 32,
   R_LO = 33,
 
+  R_F0  = 40,
+  R_F1  = 41,
+  R_F2  = 42,
+  R_F3  = 43,
+  R_F4  = 44,
+  R_F5  = 45,
+  R_F6  = 46,
+  R_F7  = 47,
+  R_F8  = 48,
+  R_F9  = 49,
+  R_F10 = 50,
+  R_F11 = 51,
+  R_F12 = 52,
+  R_F13 = 53,
+  R_F14 = 54,
+  R_F15 = 55,
+  R_F16 = 56,
+  R_F17 = 57,
+  R_F18 = 58,
+  R_F19 = 59,
+  R_F20 = 60,
+  R_F21 = 61,
+  R_F22 = 62,
+  R_F23 = 63,
+  R_F24 = 64,
+  R_F25 = 65,
+  R_F26 = 66,
+  R_F27 = 67,
+  R_F28 = 68,
+  R_F29 = 69,
+  R_F30 = 70,
+  R_F31 = 71,
+
   /* Special registers */
-  R_CPC = 34,
-  R_CM0 = 35,
-  R_CM1 = 36,
-  R_CM2 = 37,
-  R_CM3 = 38,
-  R_CM4 = 39,
-  R_CM5 = 40,
-  R_CM6 = 41,
-  R_CM7 = 42,
-  R_CM8 = 43,
-  R_ECB = 44,
-  R_EAR = 45,
-  R_FNA = 46,
-  R_MEM = 47
+  R_CPC = 72,
+  R_CM0 = 73,
+  R_CM1 = 74,
+  R_CM2 = 75,
+  R_CM3 = 76,
+  R_CM4 = 77,
+  R_CM5 = 78,
+  R_CM6 = 79,
+  R_CM7 = 80,
+  R_CM8 = 81,
+  R_ECB = 82,
+  R_EAR = 83,
+  R_FNA = 84,
+  R_MEM = 85
 } MIPS_register_t;
 
-#define N_REGS 48
+#define N_REGS 86
 
 typedef enum
 {
@@ -153,19 +186,57 @@ typedef enum
   OP_CTC_1  = 82,
   OP_BC1F   = 83,
   OP_BC1T   = 84,
+  OP_LWC1   = 85,
+  OP_SWC1   = 86,
+  OP_FADD   = 87,
+  OP_FSUB   = 88,
+  OP_FMUL   = 89,
+  OP_FDIV   = 90,
+  OP_FSQRT  = 91,
+  OP_FABS   = 92,
+  OP_FMOV   = 93,
+  OP_FNEG   = 94,
+  OP_ROUND_L= 95,
+  OP_TRUNC_L= 96,
+  OP_CEIL_L = 98,
+  OP_FLOOR_L= 99,
+  OP_CEIL_W = 100,
+  OP_FLOOR_W= 101,
+  OP_ROUND_W= 102,
+  OP_TRUNC_W= 103,
+  OP_CVT_S  = 104,
+  OP_CVT_D  = 105,
+  OP_CVT_W  = 106,
+  OP_CVT_L  = 107,
+  OP_C_F    = 108,
+  OP_C_UN   = 109,
+  OP_C_EQ   = 110,
+  OP_C_UEQ  = 111,
+  OP_C_OLT  = 112,
+  OP_C_ULT  = 113,
+  OP_C_OLE  = 114,
+  OP_C_ULE  = 115,
+  OP_C_SF   = 116,
+  OP_C_NGLE = 117,
+  OP_C_SEQ  = 118,
+  OP_C_NGL  = 119,
+  OP_C_LT   = 120,
+  OP_C_NGE  = 121,
+  OP_C_LE   = 122,
+  OP_C_NGT  = 123,
 
-  SPECIAL = 100,
-  BCOND = 101,
-  COP0 = 102,
-  COP1 = 103,
-  COP2 = 104,
-  COP3 = 105,
+  SPECIAL = 800,
+  BCOND = 801,
+  COP0 = 802,
+  COP1 = 803,
+  COP2 = 804,
+  COP3 = 805,
   CIBYL_SYSCALL = 999, /* Needed? */
   CIBYL_REGISTER_ARGUMENT = 1000,
   CIBYL_ASSIGN_MEMREG = 1001,
 } mips_opcode_t;
 
-#define N_INSNS 79
+#define N_INSNS 124
 
 typedef enum
 {
@@ -210,6 +281,36 @@ static inline MIPS_register_t mips_encoding_get_rt(uint32_t word)
 static inline MIPS_register_t mips_encoding_get_rd(uint32_t word)
 {
   return (MIPS_register_t)((word >> 11) & 0x1f);
+}
+
+static inline MIPS_register_t mips_encoding_get_fs(uint32_t word)
+{
+  return (MIPS_register_t)( ((int)mips_encoding_get_rs(word)) + R_F0);
+}
+
+static inline MIPS_register_t mips_encoding_get_ft(uint32_t word)
+{
+  return (MIPS_register_t)( ((int)mips_encoding_get_rt(word)) + R_F0);
+}
+
+static inline MIPS_register_t mips_encoding_get_fd(uint32_t word)
+{
+  return (MIPS_register_t)( ((word >> 6) & 0x1f) + R_F0);
+}
+
+static inline int mips_encoding_get_cp1_fmt(uint32_t word)
+{
+  return (word >> 21) & 0x1f;
+}
+
+static inline int mips_encoding_get_cp1_func(uint32_t word)
+{
+  return word & 0x3f;
+}
+
+static inline MIPS_register_t mips_int_to_fpu_reg(int v)
+{
+  return (MIPS_register_t)(v + R_F0);
 }
 
 #endif /* !__MIPS_HH__ */
