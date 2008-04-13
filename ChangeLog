@@ -21,7 +21,7 @@ Cibyl (17)
 	* 64-bit compile fixes: cibyl-syscalls.db is now in native byteorder
 	and also different-sized on 32- and 64-bit platforms
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sun Apr 13 13:16:12 CEST 2008
 
 Cibyl (16)
 	* The syscall wrapper generator has now been integrated into the C++
