@@ -287,7 +287,7 @@ void Controller::lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entrie
       if (v >= text_start && v < text_end)
         {
           /* Skip things which can not be code addresses */
-          if (v & 0x3 != 0)
+          if ((v & 0x3) != 0)
             continue;
 
           JavaMethod *mt = cl->getMethodByAddress(v);
@@ -453,14 +453,18 @@ void Controller::lookupRelocations(JavaClass *cl)
               addr = ((uint32_t)a->getExtra()) << 16;
               switch (b->getOpcode())
                 {
-                case OP_SW:
+                case OP_SW: /* Assume adds for these */
                 case OP_SB:
                 case OP_SH:
                 case OP_LB:
                 case OP_LBU:
                 case OP_LH:
                 case OP_LHU:
-                case OP_LW: /* Assume adds for these */
+                case OP_LW:
+                case OP_LWL:
+                case OP_SWL:
+                case OP_LWR:
+                case OP_SWR:
                 case OP_ADDI:
                 case OP_ADDIU:
                   addr += b->getExtra();
@@ -473,6 +477,9 @@ void Controller::lookupRelocations(JavaClass *cl)
                          b->getOpcode(), rel_hi->addr, rel_lo->addr);
                   break;
                 }
+              /* Skip things which can not be code addresses */
+              if ((addr & 0x3) != 0)
+                continue;
               JavaMethod *dst_mt = cl->getMethodByAddress(addr);
               if (dst_mt)
                 this->callTableMethod->addMethod(dst_mt);
