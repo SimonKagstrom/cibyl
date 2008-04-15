@@ -1,4 +1,8 @@
 Cibyl (18)
+	* Handle LWL/SWL/LWR/SWR for relocations (adding to the call table)
+
+	* Fix for bug when adding things to the call table: The statement
+	if (v & 3 != 0) was changed to if ( (v & 3) != 0 ) ...
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
 
