@@ -1,8 +1,12 @@
 Cibyl (18)
+	* Added --force-python-translator / --force-cpp-translator to
+	cibyl-mips2java to force which translator to use
+
 	* Handle LWL/SWL/LWR/SWR for relocations (adding to the call table)
 
 	* Fix for bug when adding things to the call table: The statement
-	if (v & 3 != 0) was changed to if ( (v & 3) != 0 ) ...
+	if (v & 3 != 0) was changed to if ( (v & 3) != 0 ). Thanks to Eran
+	Netanel
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
 
