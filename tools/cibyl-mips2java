@@ -74,6 +74,12 @@ parser.add_option("--trace-range", dest="traceRange", default=None,
 parser.add_option("--memory-debug", action="store_true", default=False,
 				  help="Enable memory debugging (setup in CRunTime.java)",
 		  dest="memoryDebug")
+parser.add_option("--use-python-translator", action="store_true", default=False,
+				  help="Force usage of the Python translator",
+		  dest="usePythonTranslator")
+parser.add_option("--use-cpp-translator", action="store_true", default=False,
+				  help="Force usage of the new C++ translator (the C++ translator is used by default)",
+		  dest="useCppTranslator")
 parser.add_option("--save-temps", action="store_true", default=False,
 				  help="Do not remove temporary files",
 		  dest="saveTemps")
@@ -230,8 +236,11 @@ if config.memoryDebug:
 usePythonCompiler = False
 
 # The C++ compiler cannot be used with some options
-if config.doRegisterValueTracking or config.colocateFunctions or options.inlineBuiltinFunctions or options.debug:
-    usePythonCompiler = True
+if options.usePythonTranslator or config.doRegisterValueTracking or config.colocateFunctions or options.inlineBuiltinFunctions or options.debug:
+        usePythonCompiler = True
+
+if options.useCppTranslator:
+        usePythonCompiler = False
 
 def doCompile():
 	global controller
