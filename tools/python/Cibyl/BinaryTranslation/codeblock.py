@@ -116,6 +116,11 @@ class CodeBlock:
 					self.optimizer.invalidateAllRegisters()
 			self.controller.emit("; " + str(insn))
 			if insn.delayed:
+                                # ERAN: Added a bug fix. The delayed function was showing up in the
+                                #       lookup table but were never emit a label to the instrunction
+                                if self.labels.has_key(insn.delayed.address):
+                                        l = self.labels[insn.delayed.address];
+                                        self.controller.emit( str(self.labels[insn.delayed.address]) + ":" )
 				self.controller.emit("; " + str(insn.delayed))
 			if self.useTracing:
 				insn.trace()
