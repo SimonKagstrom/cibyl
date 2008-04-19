@@ -23,11 +23,12 @@ public:
     this->traceRange[1] = 0;
 
     this->traceStores = false;
+    this->optimizeCallTable = false;
   }
 
   uint32_t traceRange[2]; /* start, end */
-
   bool traceStores;
+  bool optimizeCallTable;
 };
 
 extern Config *config;
