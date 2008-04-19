@@ -1,4 +1,12 @@
 Cibyl (18)
+	* The configuration handling of the C++ translator has been improved
+
+	* Optimization of the call table is now *off* by default for both the
+	Python and the C++ translator
+
+	* The Python translator will now also handle labels pointing to
+	instructions in delay slots (patch from Eran Netanel)
+
 	* Added --force-python-translator / --force-cpp-translator to
 	cibyl-mips2java to force which translator to use
 
