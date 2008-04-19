@@ -195,6 +195,10 @@ bool Controller::pass0()
                                           (sym->addr - textBase + sym->size) / 4 - 1);
       /* 1-1 mapping */
       this->methods[i] = new JavaMethod(functions, i, i);
+
+      /* Add all methods to the call table if we don't optimize this */
+      if (!config->optimizeCallTable)
+        this->callTableMethod->addMethod(this->methods[i]);
     }
 
   /* And the (single) class */
@@ -563,55 +567,97 @@ Config *config;
 
 static void usage()
 {
-  printf("Usage: xcibyl-translator trace-start trace-end dst-dir elf-file syscall-database...\n"
+  printf("\nUsage: xcibyl-translator config:<...> dst-dir elf-file syscall-database...\n"
          "\n"
-         "Where trace-start and trace-end are start and end addresses for instruction\n"
-         "tracing, dst-dir is the destination directory to put translated files in\n"
-         ", elf-file the input MIPS binary file, syscall-database is a cibyl-syscalls.db\n"
-         "file with with possible syscalls (any number can be given)\n");
+         "Where config is the configuration to use, dst-dir is the destination\n"
+         "directory to put translated files in, elf-file the input MIPS binary file,\n"
+         "syscall-database is one or more cibyl-syscalls.db files. The config options\n"
+         "are:\n\n"
+
+         "   trace_start=0x...      The first address of instruction tracing\n"
+         "   trace_end=0x...        The last address of instruction tracing\n"
+         "   trace_stores=0/1       Set to 1 to trace memory stores\n"
+         "   prune_call_table=0/1   Set to 1 to prune unused indirect function calls\n"
+         );
+  exit(1);
+}
+
+static void parse_config(Config *cfg, const char *config_str)
+{
+  char *cpy = strdup(config_str);
+  char *p;
+
+  /* A series of "trace_start=0x12414,trace_end=0x15551,..." No spaces */
+  p = strtok(cpy, ",");
+  while (p)
+    {
+      char *value = strstr(p, "=");
+      char *endp;
+      int int_val;
+
+      if (!value || strlen(value) < 2)
+        usage();
+      value[0] = '\0'; /* p is now the key */
+      value++;         /* And value points to the value */
+
+      int_val = strtol(value, &endp, 0);
+      if (endp == value)
+        {
+          fprintf(stderr, "Error: Argument for key '%s' (%s) cannot be converted to a number\n",
+                  p, value);
+          usage();
+        }
+
+      /* Now match the keys*/
+      if (strcmp(p, "trace_start") == 0)
+        cfg->traceRange[0] = int_val;
+      if (strcmp(p, "trace_end") == 0)
+        cfg->traceRange[1] = int_val;
+      if (strcmp(p, "trace_stores") == 0)
+        cfg->traceStores = int_val == 0 ? false : true;
+      if (strcmp(p, "prune_call_table") == 0)
+        cfg->optimizeCallTable = int_val == 0 ? false : true;
+
+      p = strtok(NULL, ",");
+    }
+
+  if (cfg->traceRange[1] < cfg->traceRange[0])
+    {
+      fprintf(stderr, "Trace start is after trace end!\n");
+      usage();
+    }
+
+  free(p);
 }
 
 int main(int argc, const char **argv)
 {
-  uint32_t trace_start = 0;
-  uint32_t trace_end = 0;
   const char **defines = (const char **)xcalloc(argc, sizeof(const char*));
   int n, n_defines = 0;
-  char *endp;
 
-  if (argc < 6)
+  if (argc < 5)
     {
       fprintf(stderr, "Too few arguments\n");
 
       usage();
       return 1;
     }
-
-  trace_start = strtol(argv[1], &endp, 0);
-  if (endp == argv[1])
+  if (!strstr(argv[1], "config:"))
     {
-      fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
-              argv[1]);
+      fprintf(stderr, "Error: expecting configuration first in argument list\n");
       exit(1);
     }
-  trace_end = strtol(argv[2], &endp, 0);
-  if (endp == argv[2])
-    {
-      fprintf(stderr, "Error: Argument '%s' to -t cannot be converted to a number\n",
-              argv[2]);
-      exit(1);
-    }
+  /* Setup configuration */
+  config = new Config();
+  parse_config(config, argv[1] + strlen("config:"));
 
   /* Setup defines */
-  for (n = 3; n < argc && strncmp(argv[n], "-D", 2) == 0; n++)
+  for (n = 2; n < argc && strncmp(argv[n], "-D", 2) == 0; n++)
     {
       defines[n_defines++] = argv[n];
     }
 
   emit = new Emit();
-  config = new Config();
-  config->traceRange[0] = trace_start;
-  config->traceRange[1] = trace_end;
 
   regalloc = new RegisterAllocator();
   controller = new Controller(defines, argv[n], argv[n+1],
