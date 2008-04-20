@@ -45,7 +45,6 @@ def doTranslation(filename, syscallDirectories):
     for d in syscallDirectories:
         dbs = dbs + d + "/cibyl-syscalls.db "
 
-    print conf
     ret = os.system(config.xcibyl_translator + " " + conf + " " + defines + config.outDirectory
                     + " " + config.infile + " " + dbs)
     if ret != 0:
