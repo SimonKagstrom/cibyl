@@ -313,4 +313,9 @@ static inline MIPS_register_t mips_int_to_fpu_reg(int v)
   return (MIPS_register_t)(v + R_F0);
 }
 
+static inline bool mips_cp1_fmt_is_double(int fmt)
+{
+  return (fmt & 1) == 1;
+}
+
 #endif /* !__MIPS_HH__ */

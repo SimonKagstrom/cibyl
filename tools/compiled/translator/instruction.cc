@@ -233,29 +233,18 @@ Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
 				  mips_int_to_fpu_reg(rt), extra);
     case OP_SWC1: return new SWc1(address, opcode, rs,
 				  mips_int_to_fpu_reg(rt), extra);
-    case OP_FADD: return new CompFmt("fadd", "dadd", cp1_fmt, address, opcode,
-				     cp1_fs, cp1_ft, cp1_fd);
-    case OP_FSUB: return new CompFmt("fsub", "dsub", cp1_fmt, address, opcode,
-				     cp1_fs, cp1_ft, cp1_fd);
-    case OP_FMUL: return new CompFmt("fmul", "dmul", cp1_fmt, address, opcode,
-				     cp1_fs, cp1_ft, cp1_fd);
-    case OP_FDIV: return new CompFmt("fdiv", "ddiv", cp1_fmt, address, opcode,
-				     cp1_fs, cp1_ft, cp1_fd);
     case OP_CVT_W: return new Cvt_w(address, opcode, cp1_fmt,
                                     cp1_fs, cp1_fd);
-    case OP_MFC_1:
-    case OP_CFC_1:
-    case OP_MTC_1:
-    case OP_CTC_1:
-    case OP_BC1F:
-    case OP_BC1T:
-    case OP_FSQRT:
-    case OP_FABS:
-    case OP_FMOV:
-    case OP_FNEG:
-    case OP_CVT_S:
-    case OP_CVT_D:
-    case OP_CVT_L:
+    case OP_FADD:
+    case OP_FSUB:
+    case OP_FMUL:
+    case OP_FDIV:
+      if ( mips_cp1_fmt_is_double(cp1_fmt) )
+        return new CompFmtDouble(cp1_fmt, address, opcode,
+                                 cp1_fs, cp1_ft, cp1_fd);
+      else
+        return new CompFmtFloat(cp1_fmt, address, opcode,
+                                cp1_fs, cp1_ft, cp1_fd);
     case OP_C_F:
     case OP_C_UN:
     case OP_C_EQ:
@@ -272,6 +261,23 @@ Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
     case OP_C_NGE:
     case OP_C_LE:
     case OP_C_NGT:
+      if ( mips_cp1_fmt_is_double(cp1_fmt) )
+        return new CmpFmtDouble(address, opcode, cp1_fs, cp1_ft);
+      else
+        return new CmpFmtFloat(address, opcode, cp1_fs, cp1_ft);
+    case OP_MFC_1:
+    case OP_CFC_1:
+    case OP_MTC_1:
+    case OP_CTC_1:
+    case OP_BC1F:
+    case OP_BC1T:
+    case OP_FSQRT:
+    case OP_FABS:
+    case OP_FMOV:
+    case OP_FNEG:
+    case OP_CVT_S:
+    case OP_CVT_D:
+    case OP_CVT_L:
     case OP_ROUND_L: /* I think these are from MIPS II and up */
     case OP_TRUNC_L:
     case OP_CEIL_L:
