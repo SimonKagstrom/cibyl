@@ -52,7 +52,7 @@ extern void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), 
 #define NOPH_try(callback, arg) do { \
   asm volatile("");                  \
   __NOPH_try(callback, arg);         \
-} while(0); do
+} while(0); if ( *(int*)0 != 0 ) {
 
 /**
  * End a Java exception-catching block, catching all exceptions. Must
@@ -61,7 +61,7 @@ extern void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), 
  * @see NOPH_try
  */
 extern void __NOPH_catch(void);
-#define NOPH_catch() while(0); do {  \
+#define NOPH_catch() } do {          \
   asm volatile("");                  \
   __NOPH_catch();                    \
 } while(0)
