@@ -101,8 +101,12 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
       return NULL;
     }
 
+  if (NOPH_InputStream_markSupported(p->is_file.is))
+    NOPH_InputStream_mark(p->is_file.is, 0x7fffffff);
+
   p->path = strdup(path);
   p->fc = fc;
+
   fp->file_size = NOPH_FileConnection_fileSize(fc);
 
   return fp;

@@ -1,9 +1,12 @@
 Cibyl (18)
+	* Inputstreams are now marked upon open (if mark is available). This
+	fixes a problem occuring in the newer Sun emulators
+
+	* Fixed NOPH_InputStream_markSupported prototype
+
 	* Fixed potential bug in NOPH_try/NOPH_catch - GCC could sometimes
 	optimze away usage of addresses computed within the try/catch block
 	(and if the exception occurs, these might never happen).
-
-	* Fixed NOPH_InputStream_markSupported prototype
 
 	* The configuration handling of the C++ translator has been improved
 	and xcibyl-translator now accepts arbitrary configuration on the

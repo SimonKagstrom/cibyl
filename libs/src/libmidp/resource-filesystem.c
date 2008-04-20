@@ -37,6 +37,9 @@ static FILE *open(const char *path,
   p->is_file.is = is;
   fp->file_size = NOPH_InputStream_available(is);
 
+  if (NOPH_InputStream_markSupported(p->is_file.is))
+    NOPH_InputStream_mark(p->is_file.is, 0x7fffffff);
+
   return fp;
 }
 
