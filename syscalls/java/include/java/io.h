@@ -33,7 +33,7 @@ int NOPH_InputStream_read(NOPH_InputStream_t is); /* Throws */
 int NOPH_InputStream_read_into(NOPH_InputStream_t is, char* vec, int size, short* eof_ptr); /* Not generated */
 void NOPH_InputStream_reset(NOPH_InputStream_t is); /* Throws */
 void NOPH_InputStream_mark(NOPH_InputStream_t is, int readLimit);
-void NOPH_InputStream_markSupported(NOPH_InputStream_t is); /* Throws */
+bool_t NOPH_InputStream_markSupported(NOPH_InputStream_t is); /* Throws */
 void NOPH_InputStream_close(NOPH_InputStream_t is); /* Throws */
 int NOPH_InputStream_skip(NOPH_InputStream_t is, int n); /* Throws */
 
