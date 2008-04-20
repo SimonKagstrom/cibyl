@@ -1,5 +1,13 @@
 Cibyl (18)
+	* Fixed potential bug in NOPH_try/NOPH_catch - GCC could sometimes
+	optimze away usage of addresses computed within the try/catch block
+	(and if the exception occurs, these might never happen).
+
+	* Fixed NOPH_InputStream_markSupported prototype
+
 	* The configuration handling of the C++ translator has been improved
+	and xcibyl-translator now accepts arbitrary configuration on the
+	command line
 
 	* Optimization of the call table is now *off* by default for both the
 	Python and the C++ translator
