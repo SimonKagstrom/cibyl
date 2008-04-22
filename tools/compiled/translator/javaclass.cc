@@ -31,7 +31,7 @@ static int method_search_cmp(const void *_a, const void *_b)
   uint32_t *key = (uint32_t*)_a;
   JavaMethod *b = *(JavaMethod**)_b;
 
-  if ( *key >= b->getAddress() && *key < b->getAddress() + b->getSize() )
+  if ( *key >= b->getAddress() && *key <= b->getAddress() + b->getSize() )
     return 0;
 
   if ( *key < b->getAddress() )
