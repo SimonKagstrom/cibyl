@@ -1,4 +1,9 @@
 Cibyl (18)
+	* Fixed the ELF symbol size fixup also in the Python translator
+	(thanks Ehud)
+
+	* Extended ctype.h with isgraph, ispunct, isxdigit, iscntrl
+
 	* Inputstreams are now marked upon open (if mark is available). This
 	fixes a problem occuring in the newer Sun emulators
 

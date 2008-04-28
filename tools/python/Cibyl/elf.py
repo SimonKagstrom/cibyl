@@ -131,7 +131,7 @@ class Elf:
 	# Fixup the symbol sizes
 	for sym in tmp[1:]:
 	    last = tmp[tmp.index(sym) - 1]
-	    if last.size == 0:
+            if last.address + last.size < sym.address:
 		last.size = sym.address - last.address
 	last = tmp[-1]
 	if last.inTextSection():
