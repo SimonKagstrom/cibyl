@@ -1,10 +1,16 @@
 Cibyl (18)
+	* Re-implemented sscanf due to a license incompatibility. The previous
+	sscanf was taken from dietlibc, which is GPLed. I reimplemented the
+	functionality here, to replace it with a LGPLed implementation like
+	the rest of the Cibyl libraries (sans some BSD code)
+
 	* Emit warning on missing syscalls in Python
 
 	* Fixed the ELF symbol size fixup also in the Python translator
 	(thanks to Ehud Shabtai)
 
-	* Extended ctype.h with isgraph, ispunct, isxdigit, iscntrl
+	* Extended ctype.h with isgraph, ispunct, isxdigit, iscntrl and
+	stdlib.h with strtoll and strtoull
 
 	* Inputstreams are now marked upon open (if mark is available). This
 	fixes a problem occuring in the newer Sun emulators

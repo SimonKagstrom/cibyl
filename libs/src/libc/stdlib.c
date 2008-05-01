@@ -13,10 +13,10 @@
 #include <ctype.h>
 #include <assert.h>
 
-long int strtol(const char *nptr, char **endptr, int base)
+long long int strtoll(const char *nptr, char **endptr, int base)
 {
   int negative = 0;
-  int num = 0;
+  long long int num = 0;
 
   assert(base == 10 || base == 16 || base == 0);
 
@@ -60,10 +60,22 @@ long int strtol(const char *nptr, char **endptr, int base)
     return num;
 }
 
+long int strtol(const char *nptr, char **endptr, int base)
+{
+  /* FIXME: not quite correct */
+  return (long int)strtoll(nptr, endptr, base);
+}
+
+unsigned long long int strtoull(const char *nptr, char **endptr, int base)
+{
+  /* FIXME: not quite correct */
+  return (unsigned long long int)strtoll(nptr, endptr, base);
+}
+
 unsigned long int strtoul(const char *nptr, char **endptr, int base)
 {
   /* FIXME: not quite correct */
-  return (unsigned long int)strtol(nptr, endptr, base);
+  return (unsigned long int)strtoll(nptr, endptr, base);
 }
 
 int atoi(const char *nptr)

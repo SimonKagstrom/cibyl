@@ -10,8 +10,9 @@
 ##
 ######################################################################
 SUBDIRS =
-OBJS    = ansi.o smalloc.o printf.o vsnprintf.o string.o \
-          stdlib.o time.o scanf.o
+OBJS    = ansi.o smalloc.o stdlib.o time.o scanf_ska.o \
+	  printf.o vsnprintf.o string.o
+
 ALL_TARGETS=install
 EXTRA_CLEAN=libc.a
 

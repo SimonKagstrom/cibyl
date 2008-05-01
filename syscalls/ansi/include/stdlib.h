@@ -29,7 +29,9 @@ extern int atexit(void (*function)(void));
 
 extern void* malloc(size_t size);
 extern void free(void* ptr);
+extern long long int strtoll(const char *nptr, char **endptr, int base);
 extern long int strtol(const char *nptr, char **endptr, int base);
+extern unsigned long long int strtoull(const char *nptr, char **endptr, int base);
 extern unsigned long int strtoul(const char *nptr, char **endptr, int base);
 extern float atof(const char *nptr);
 extern int atoi(const char *nptr);

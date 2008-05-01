@@ -117,6 +117,8 @@ void NOPH_panic(const char *fmt, ...);
 
 void NOPH_panic_if(int cond, const char *fmt, ...);
 
+#define CIBYL_EXPORT_SYMBOL(name)
+
 #endif /* __ASSEMBLER__ */
 
 #if defined(__cplusplus)
