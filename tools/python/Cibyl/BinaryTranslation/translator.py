@@ -163,7 +163,11 @@ class Controller(codeblock.CodeBlock):
 	def hasSyscall(self, address):
 		"Return the syscall on the address @a address"
 		name = self.addressesToName[address]
-		return self.syscalls[name]
+                try:
+                        return self.syscalls[name]
+                except:
+                        print "Syscall",name,"not found. Are all syscall include directories added on the command line?"
+                        sys.exit(1)
 
 	def usesSyscall(self, name):
 		"Check if a named syscall is actually used"

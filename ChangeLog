@@ -1,6 +1,8 @@
 Cibyl (18)
+	* Emit warning on missing syscalls in Python
+
 	* Fixed the ELF symbol size fixup also in the Python translator
-	(thanks Ehud)
+	(thanks to Ehud Shabtai)
 
 	* Extended ctype.h with isgraph, ispunct, isxdigit, iscntrl
 
