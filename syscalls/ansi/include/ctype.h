@@ -58,6 +58,27 @@ static inline int isprint(int c)
   return (c >= 32 && c < 127);
 }
 
+static inline int isgraph(int c)
+{
+  return isprint(c) && c != ' ';
+}
+
+static inline int iscntrl(int c)
+{
+  return c <= 0x1f || c == 0x7f;
+}
+
+static inline int isxdigit(int c)
+{
+  return isdigit(c) || (c >= 'A' && c <= 'F') ||
+    (c >= 'a' && c <= 'f');
+}
+
+static inline int ispunct(int c)
+{
+  return isprint(c) && !isspace(c) && !isalnum(c);
+}
+
 extern int tolower (int c);
 extern int toupper (int c);
 
