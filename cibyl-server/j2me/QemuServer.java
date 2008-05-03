@@ -11,7 +11,7 @@
  ********************************************************************/
 import java.io.*;
 import java.util.*;
-import javax.microedition.io.*;
+import javax.microedition.io.*; /* Connector */
 
 class QemuServer
 {
@@ -44,7 +44,7 @@ class QemuServer
 			this.args[i] = is.readInt();
 		    }
 	    } catch (Exception e) {
-		System.out.println("blä" + e);
+		System.out.println("ble" + e);
 	    }
 	}
 
@@ -58,22 +58,16 @@ class QemuServer
 			os.writeInt(this.args[i]);
 		    }
 	    } catch (Exception e) {
-		System.out.println("blä" + e);
+		System.out.println("ble" + e);
 	    }
 	}
     }
 
-    private ServerSocketConnection connection;
     private DataInputStream is;
     private DataOutputStream os;
 
     public QemuServer()
     {
-	try {
-	    this.connection = (ServerSocketConnection)Connector.open("socket://:9788");
-	} catch(Exception e) {
-	    System.err.println("Threw " + e);
-	}
     }
 
     private void error(String s)
@@ -171,14 +165,11 @@ class QemuServer
 
     public void run()
     {
-	SocketConnection socket;
 	Packet p = new Packet();
 
 	try {
-	    socket = (SocketConnection)this.connection.acceptAndOpen();
-
-	    this.is = socket.openDataInputStream();
-	    this.os = socket.openDataOutputStream();
+	    this.os = Connector.openDataOutputStream("file:///tmp/qemu-server-in");
+	    this.is = Connector.openDataInputStream("file:///tmp/qemu-server-out");
 	} catch(Exception e) {
 	    System.err.println("Threw exception " + e);
 	}
