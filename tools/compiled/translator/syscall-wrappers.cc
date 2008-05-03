@@ -74,11 +74,7 @@ void SyscallWrapperGenerator::doOneNonGenerated(const char *dir,
 
   data = (const char*)read_cpp(&size, this->defines, "%s/%s/implementation/%s.java",
                                dir, p->set, p->name);
-  if (!data)
-    {
-      fprintf(stderr, "Reading %s:%s failed\n", p->set, p->name);
-      exit(1);
-    }
+  panic_if(!data, "Reading %s:%s failed\n", p->set, p->name);
   emit->output(data);
 
   free((void*)data);

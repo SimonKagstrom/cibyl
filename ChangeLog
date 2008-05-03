@@ -1,4 +1,7 @@
 Cibyl (18)
+	* Refactoring: Added a panic_if statement to replace some assertions
+	and regular errors with more descriptive messages
+
 	* Re-implemented sscanf due to a license incompatibility. The previous
 	sscanf was taken from dietlibc, which is GPLed. I reimplemented the
 	functionality here, to replace it with a LGPLed implementation like

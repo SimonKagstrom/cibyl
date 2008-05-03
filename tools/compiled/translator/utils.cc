@@ -58,11 +58,8 @@ void *read_cpp(size_t *out_size, const char **defines, const char *fmt, ...)
   if (!cpp)
     cpp = "cpp";
 
-  if (strlen(cpp) > 2048)
-    {
-      fprintf(stderr, "Strlen too large in CPP pipe\n");
-      exit(1);
-    }
+  panic_if(strlen(cpp) > 2048,
+           "Strlen too large in CPP pipe\n");
 
   /* pipe cpp, -C menas keep comments, -P means emit no line information */
   l = snprintf(path, 2048, "%s -C -P ", cpp);
@@ -83,21 +80,14 @@ void *read_cpp(size_t *out_size, const char **defines, const char *fmt, ...)
     return NULL;
 
   f = popen(path, "r");
-  if (!f)
-    {
-      fprintf(stderr, "popen %s failed\n", path);
-      exit(1);
-    }
+  panic_if(!f, "popen %s failed\n", path);
   data = xcalloc(buf.st_size * 4, 1);
 
   while ( (size = fread(data, 1, buf.st_size * 4, f)) != 0)
     {
-      if (size != 0 && size >= (size_t)(buf.st_size * 4))
-        {
-          fprintf(stderr, "Outbuffer of %s is too large: %u vs %ld\n",
-                  path, size, buf.st_size * 4);
-          exit(1);
-        }
+      panic_if (size != 0 && size >= (size_t)(buf.st_size * 4),
+                "Outbuffer of %s is too large: %u vs %ld\n",
+                path, size, buf.st_size * 4);
     }
   fclose(f);
 
@@ -172,11 +162,7 @@ void *read_file(size_t *out_size, const char *fmt, ...)
     snprintf(buf, len, "%s/%s", dir, filename);
     fp = fopen(buf, mode);
     free(buf);
-    if (!fp)
-      {
-        fprintf(stderr, "Cannot open file %s/%s\n", dir, filename);
-        exit(1);
-      }
+    panic_if(!fp, "Cannot open file %s/%s\n", dir, filename);
 
     return fp;
   }
@@ -218,6 +204,5 @@ void *read_file(size_t *out_size, const char *fmt, ...)
     else if (sizeof(unsigned long) == 8)
       return (unsigned long)swap64((uint64_t)in);
 
-    fprintf(stderr, "ERROR: unsigned long must be 4 or 8 bytes!\n");
-    exit(1);
+    panic("ERROR: unsigned long must be 4 or 8 bytes!\n");
   }

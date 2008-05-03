@@ -73,11 +73,7 @@ void Controller::readSyscallDatabase(const char *filename)
   void *data;
 
   data = read_file(&size, filename);
-  if (!data)
-    {
-      fprintf(stderr, "Cannot read %s\n", filename);
-      exit(1);
-    }
+  panic_if(!data, "Cannot read %s\n", filename);
 
   /* This is oh-so-ugly... */
   idx = 0;
@@ -228,11 +224,9 @@ Syscall *Controller::getSyscall(uint32_t value)
       char *name = this->elf->getCibylStrtabString(value);
       cibyl_db_entry_t *p = (cibyl_db_entry_t*)ght_get(this->syscall_db_table,
                                                        strlen(name), name);
-      if (!p)
-        {
-          fprintf(stderr, "No syscall %s:\n  Are all syscall databases added on the command line (cibyl-syscalls.db)?\n", name);
-          exit(1);
-        }
+      panic_if(!p, "No syscall %s:\n"
+               "  Are all syscall databases added on the command line (cibyl-syscalls.db)?\n",
+               name);
 
       this->syscalls[value] = new Syscall(p->name, p->nrArgs,
                                           p->returns ? 'I' : 'V' );
@@ -296,7 +290,9 @@ void Controller::lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entrie
 
           JavaMethod *mt = cl->getMethodByAddress(v);
 
-          assert(mt);
+          panic_if(!mt, "Could not find method for address 0x%08x, which is within\n"
+                   "text start and text end (0x%08x...0x%08x)\n",
+                   v, text_start, text_end);
 
           /* Add to the call table */
           if (mt->getAddress() == v)
@@ -321,19 +317,12 @@ uint32_t Controller::addAlignedSection(uint32_t addr, FILE *fp, void *data,
   while (pad != 0)
     {
       int v = fputc('\0', fp);
-      if (v < 0)
-        {
-          fprintf(stderr, "Cannot write padding to outfile in aligned section\n");
-          exit(1);
-        }
+      panic_if(v < 0, "Cannot write padding to outfile in aligned section\n");
       pad--;
     }
 
-  if (fwrite(data, 1, data_len, fp) != data_len)
-    {
-      fprintf(stderr, "Cannot write data to outfile in aligned section\n");
-      exit(1);
-    }
+  panic_if(fwrite(data, 1, data_len, fp) != data_len,
+           "Cannot write data to outfile in aligned section\n");
 
   return out + data_len;
 }
@@ -380,7 +369,8 @@ void Controller::lookupRelocations(JavaClass *cl)
             {
               JavaMethod *mt = cl->getMethodByAddress(rel->sym->addr);
 
-              assert(mt);
+              panic_if(!mt, "Cannot find method for relocation: 0x%x\n",
+                       rel->sym->addr);
 
               if (mt->getAddress() == rel->sym->addr)
                 this->callTableMethod->addMethod(mt);
@@ -437,7 +427,8 @@ void Controller::lookupRelocations(JavaClass *cl)
           Instruction *a, *b;
 
           a = this->getInstructionByAddress(rel_hi->addr);
-          assert(a);
+          panic_if(!a, "Cannot find instruction for REL_HI at address 0x%x\n",
+                   rel_hi->addr);
 
           for (int l = hilo->lo_start; l <= hilo->lo_end; l++)
             {
@@ -445,12 +436,13 @@ void Controller::lookupRelocations(JavaClass *cl)
               int32_t addr;
 
               b = this->getInstructionByAddress(rel_lo->addr);
-              assert(b);
+              panic_if(!b, "Cannot find instruction for REL_LO at address 0x%x\n",
+                       rel_lo->addr);
 
               if (b->isDelaySlotNop())
                 {
                   Instruction *parent = this->getInstructionByAddress(rel_lo->addr - 4);
-                  assert(parent);
+
                   b = parent->getDelayed();
                 }
 
@@ -478,7 +470,7 @@ void Controller::lookupRelocations(JavaClass *cl)
                   break;
                 default:
                   emit->warning("Warning: Unknown opcode %d in hilo pair at 0x%08x : 0x%08x\n",
-                         b->getOpcode(), rel_hi->addr, rel_lo->addr);
+                                b->getOpcode(), rel_hi->addr, rel_lo->addr);
                   break;
                 }
               /* Skip things which can not be code addresses */
@@ -645,7 +637,7 @@ int main(int argc, const char **argv)
   if (!strstr(argv[1], "config:"))
     {
       fprintf(stderr, "Error: expecting configuration first in argument list\n");
-      exit(1);
+      usage();
     }
   /* Setup configuration */
   config = new Config();

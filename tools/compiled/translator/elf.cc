@@ -15,10 +15,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-#include <utils.h>
 #include <fcntl.h>
 
-
+#include <utils.h>
 #include <elf.hh>
 
 
@@ -110,36 +109,21 @@ CibylElf::CibylElf(const char *filename)
 
   this->symtable = ght_create(1024);
 
-  if (elf_version(EV_CURRENT) == EV_NONE)
-    {
-      fprintf(stderr, "ELF version failed on %s\n", filename);
-      exit(1);
-    }
+  panic_if(elf_version(EV_CURRENT) == EV_NONE,
+           "ELF version failed on %s\n", filename);
 
-  if ( (fd = open(filename, O_RDONLY, 0)) < 0)
-    {
-      fprintf(stderr, "Cannot open %s\n", filename);
-      exit(1);
-    }
+  panic_if((fd = open(filename, O_RDONLY, 0)) < 0,
+           "Cannot open %s\n", filename);
 
-  if ( !(this->elf = elf_begin(fd, ELF_C_READ, NULL)) )
-    {
-      fprintf(stderr, "elf_begin failed on %s\n", filename);
-      exit(1);
-    }
+  panic_if( !(this->elf = elf_begin(fd, ELF_C_READ, NULL)),
+            "elf_begin failed on %s\n", filename);
 
-  if ( !(ehdr = elf32_getehdr(this->elf)) )
-    {
-      fprintf(stderr, "elf32_getehdr failed on %s\n", filename);
-      exit(1);
-    }
+  panic_if( !(ehdr = elf32_getehdr(this->elf)),
+            "elf32_getehdr failed on %s\n", filename);
   this->entryPoint = (uint32_t)ehdr->e_entry;
 
-  if (elf_getshstrndx(this->elf, &shstrndx) < 0)
-    {
-      fprintf(stderr, "elf_getshstrndx failed on %s\n", filename);
-      exit(1);
-    }
+  panic_if(elf_getshstrndx(this->elf, &shstrndx) < 0,
+           "elf_getshstrndx failed on %s\n", filename);
 
   /* Iterate through sections, pass 1 */
   int max_relocs = 0;
@@ -150,12 +134,9 @@ CibylElf::CibylElf(const char *filename)
       char *name;
 
       name = elf_strptr(this->elf, shstrndx, shdr->sh_name);
-      if (!data)
-        {
-          fprintf(stderr, "elf_getdata failed on section %s in %s\n",
-                  name, filename);
-          exit(1);
-        }
+      panic_if(!data,
+               "elf_getdata failed on section %s in %s\n",
+               name, filename);
 
       if ( strcmp(name, ".text") == 0 )
         {
@@ -214,12 +195,9 @@ CibylElf::CibylElf(const char *filename)
       char *name;
 
       name = elf_strptr(this->elf, shstrndx, shdr->sh_name);
-      if (!data)
-        {
-          fprintf(stderr, "elf_getdata failed on section %s in %s\n",
-                  name, filename);
-          exit(1);
-        }
+      panic_if(!data,
+               "elf_getdata failed on section %s in %s\n",
+               name, filename);
 
       if (shdr->sh_type == SHT_REL)
         {

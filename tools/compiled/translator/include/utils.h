@@ -50,4 +50,15 @@ DIR *open_dir_fmt(const char *fmt, ...);
 
 FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode);
 
+#define panic(x...) do \
+  { \
+    fprintf(stderr, "============Translator panic===========\n"); \
+    fprintf(stderr, x); \
+    fprintf(stderr, "=======================================\n"); \
+    exit(1); \
+  } while(0)
+
+#define panic_if(cond, x...) \
+  do { if (cond) panic(x); } while(0)
+
 #endif /* !__UTILS_H__ */

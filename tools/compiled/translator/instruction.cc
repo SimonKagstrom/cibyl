@@ -286,16 +286,14 @@ Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
     case OP_FLOOR_W:
     case OP_ROUND_W:
     case OP_TRUNC_W:
-      fprintf(stderr, "Instruction %s on address 0x%08x not yet implemented\n:",
-	      mips_op_strings[opcode], address);
-      exit(1);
+      panic("Instruction %s on address 0x%08x not yet implemented\n:",
+            mips_op_strings[opcode], address);
     default:
       break;
     }
 
-  fprintf(stderr, "Pattern 0x%x on address 0x%x is not an instruction\n",
-	  word, address);
-  exit(1);
+  panic("Pattern 0x%x on address 0x%x is not an instruction\n",
+        word, address);
 
   return NULL;
 }
