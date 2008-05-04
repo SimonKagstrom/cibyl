@@ -531,9 +531,9 @@ bool Controller::pass2()
   addr = this->addAlignedSection(addr, fp, this->elf->getRodata(),
                                  this->elf->getRodataSize(), 16);
   addr = this->addAlignedSection(addr, fp, this->elf->getCtors(),
-                                 this->elf->getCtorsSize(), 16);
+                                 this->elf->getCtorsSize(), 4);
   addr = this->addAlignedSection(addr, fp, this->elf->getDtors(),
-                                 this->elf->getDtorsSize(), 16);
+                                 this->elf->getDtorsSize(), 4);
   fclose(fp);
 
   for (int i = 0; i < this->n_classes; i++)

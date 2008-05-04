@@ -1,4 +1,6 @@
 Cibyl (18)
+	* Fixed alignment bug for the ctors and dtors sections
+
 	* Refactoring: Added a panic_if statement to replace some assertions
 	and regular errors with more descriptive messages
 
