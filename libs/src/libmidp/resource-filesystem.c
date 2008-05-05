@@ -16,7 +16,7 @@ static FILE *open(const char *path,
                   cibyl_fops_open_mode_t mode)
 {
   FILE *fp;
-  NOPH_InputStream_t is;
+  NOPH_InputStream_t is = 0;
   resource_file_t *p;
   int error = 0;
 
