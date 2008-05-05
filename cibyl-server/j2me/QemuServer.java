@@ -12,6 +12,8 @@
 import java.io.*;
 import java.util.*;
 import javax.microedition.io.*; /* Connector */
+import javax.microedition.midlet.*;
+import javax.microedition.io.file.*;
 
 class QemuServer
 {
@@ -163,15 +165,33 @@ class QemuServer
 	this.parseStrTab(strs);
     }
 
+    private void getRoots() {
+        Enumeration drives = FileSystemRegistry.listRoots();
+        System.out.println("The valid roots found are: ");
+        while(drives.hasMoreElements()) {
+            String root = (String) drives.nextElement();
+            System.out.println("\t"+root);
+        }
+    }
+
+
     public void run()
     {
 	Packet p = new Packet();
+	try {
+            FileConnection fc = (FileConnection)Connector.open("file:////tmp/qemu-server-out");
+	    this.is = fc.openDataInputStream();
+	} catch(Exception e) {
+	    System.err.println("Threw exception is " + e);
+            return;
+	}
 
 	try {
-	    this.os = Connector.openDataOutputStream("file:///tmp/qemu-server-in");
-	    this.is = Connector.openDataInputStream("file:///tmp/qemu-server-out");
+            FileConnection fc = (FileConnection)Connector.open("file:////tmp/qemu-server-in");
+            fc.openOutputStream(0);
 	} catch(Exception e) {
-	    System.err.println("Threw exception " + e);
+	    System.err.println("Threw exception os " + e);
+            return;
 	}
 
 	/* Read packets */
