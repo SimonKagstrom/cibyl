@@ -166,7 +166,7 @@ FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *in_mode)
               fclose(tmp);
               return NULL;
             }
-          n = fread(data, 1, bufsize, tmp);
+          n = fread((unsigned char*)data + file_size, 1, bufsize, tmp);
           file_size += n;
         } while(n == bufsize);
       fclose(tmp);
