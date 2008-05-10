@@ -1,4 +1,6 @@
 Cibyl (18)
+	* Error handling in strtoull has been improved
+
 	* Fixed bug in NOPH_MemoryFile_openIndirect - the data was overwritten
 	on initial read if the file was larger than the bufsize (4096)
 
