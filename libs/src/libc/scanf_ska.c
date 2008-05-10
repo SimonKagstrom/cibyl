@@ -88,9 +88,6 @@ static const char *convert_number(const char *s, int is_signed, size_t size, int
         }
     }
 
-  if (endp == s) /* Something was wrong! */
-    return NULL;
-
   return endp; /* First character after */
 }
 
@@ -230,7 +227,14 @@ static int run_scanf(scanf_struct_t *sp)
         }
 
       if (*sp->fmt == '%' && !is_backspaced)
-        n += parse_fmt(sp);
+        {
+          int old = n;
+
+          n += parse_fmt(sp);
+
+          if (n == old)
+            return n;
+        }
       else
         {
           char cf = *sp->fmt;
