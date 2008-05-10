@@ -15,6 +15,8 @@
 
 long long int strtoll(const char *nptr, char **endptr, int base)
 {
+  const char *start = nptr;
+  int is_converted = 0;
   int negative = 0;
   long long int num = 0;
 
@@ -36,7 +38,7 @@ long long int strtoll(const char *nptr, char **endptr, int base)
       nptr += 2;
     }
 
-  while (isdigit(*nptr) || (*nptr >= 'a' && *nptr < 'a' + (base-10)) || (*nptr >= 'A' && *nptr < 'A' + (base-10)) )
+  while (isxdigit(*nptr))
     {
       if (base == 10 && !isdigit(*nptr))
         break;
@@ -49,7 +51,11 @@ long long int strtoll(const char *nptr, char **endptr, int base)
       else
         num += *nptr - '0';
       nptr++;
+      is_converted = 1;
     }
+
+  if (!is_converted)
+      nptr = start; /* This is not a string */
 
   if (endptr)
     *endptr = (char *)nptr;
