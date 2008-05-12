@@ -135,7 +135,7 @@ FILE *NOPH_MemoryFile_open(void *ptr, size_t size, int allocate)
   return out;
 }
 
-FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *in_mode)
+FILE *NOPH_MemoryFile_openIndirectSizeHint(const char *name, const char *in_mode, size_t sizeHint)
 {
   cibyl_fops_open_mode_t mode = cibyl_file_get_mode(in_mode);
   FILE *tmp;
@@ -150,7 +150,7 @@ FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *in_mode)
     {
       size_t n = 0;
       size_t file_size = 0;
-      const size_t bufsize = 4096;
+      const size_t bufsize = sizeHint;
 
       tmp = fopen(name, "r");
       if (!tmp)
@@ -170,9 +170,6 @@ FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *in_mode)
           file_size += n;
         } while(n == bufsize);
       fclose(tmp);
-      /* Make the size match the file size */
-      if (size != file_size)
-        data = realloc(data, file_size);
       size = file_size;
     }
 
@@ -187,6 +184,12 @@ FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *in_mode)
       p->mode = strdup(in_mode);
     }
 
-  NOPH_panic_if(!out, "MemoryFile_open failed!"); /* Should never happen, but OK */
+  NOPH_panic_if(!out, "MemoryFile_openIndirectSizeHint failed!"); /* Should never happen, but OK */
   return out;
+}
+
+
+FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *in_mode)
+{
+  return NOPH_MemoryFile_openIndirectSizeHint(name, in_mode, 4096);
 }
