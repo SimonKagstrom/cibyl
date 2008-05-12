@@ -57,7 +57,7 @@ Cibyl (18)
 	if (v & 3 != 0) was changed to if ( (v & 3) != 0 ). Thanks to Eran
 	Netanel
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Mon May 12 18:30:43 CEST 2008
 
 Cibyl (17)
 	* Refactored the instruction implementation. The instruction parser
