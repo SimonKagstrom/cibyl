@@ -1,5 +1,12 @@
 Cibyl (18)
+	* Peephole optimization is now possible for the C++ translator
+
+	* Micro optimizations of lb/lh/sb/sh in CRunTime.java
+
 	* Error handling in strtoull has been improved
+
+	* Added NOPH_MemoryFile_openIndirectSizeHint to provide more efficient
+	allocation
 
 	* Fixed bug in NOPH_MemoryFile_openIndirect - the data was overwritten
 	on initial read if the file was larger than the bufsize (4096)
