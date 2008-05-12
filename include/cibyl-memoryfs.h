@@ -70,6 +70,20 @@ void NOPH_MemoryFile_setup(FILE *fp, void *ptr, size_t size, int allocate);
  */
 FILE *NOPH_MemoryFile_openIndirect(const char *name, const char *mode);
 
+
+/**
+ * Open a memory file indirectly. This will open a regular file with
+ * the standard fopen, read in all of it into memory and create a
+ * memory file from the allocated memory.
+ *
+ * @param name the name of the file to open (passed to fopen)
+ * @param mode the open mode (pass to fopen)
+ * @param sizeHint hinted size of the file (will be enlarged if needed)
+ *
+ * @return a pointer the opened memory file or NULL if the open failed
+ */
+FILE *NOPH_MemoryFile_openIndirectSizeHint(const char *name, const char *mode, size_t sizeHint);
+
 /**
  * Return the pointer to the beginning of the data in the file
  *
