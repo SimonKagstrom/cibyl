@@ -356,21 +356,23 @@ public class CRunTime
 
   public static final int memoryReadWord(int address)
   {
-    return CRunTime.memory[address / 4];
+    return CRunTime.memory[address >> 2];
   }
 
   public static final int memoryReadByteUnsigned(int address)
   {
-    int val = CRunTime.memory[address / 4];
-    int b = 3 - (address & 3);
+    int val = CRunTime.memory[address >> 2];
+    int b = (3 - (address & 3)) << 3;
 
-    return (val >>> (b*8)) & 0xff;
+    return (val >>> b) & 0xff;
   }
 
 
   public static final int memoryReadByte(int address)
   {
-    int out = CRunTime.memoryReadByteUnsigned(address);
+    int val = CRunTime.memory[address >> 2];
+    int b = (3 - (address & 3)) << 3;
+    int out = (val >>> b) & 0xff;
 
     /* Sign-extend */
     if ( (out & (1<<7)) != 0 )
@@ -381,10 +383,10 @@ public class CRunTime
 
   public static final int memoryReadShortUnsigned(int address)
   {
-    int val = CRunTime.memory[address / 4];
-    int b = 2 - (address & 2);
+    int val = CRunTime.memory[address >> 2];
+    int b = (2 - (address & 2)) << 3;
 
-    return (val >>> (b*8)) & 0xffff;
+    return (val >>> b) & 0xffff;
   }
 
   public static final int memoryReadShort(int address)
