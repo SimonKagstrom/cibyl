@@ -10,11 +10,15 @@
 ##
 ######################################################################
 import os, sys
+import Cibyl.PeepholeOptimizer.parse
 
 from Cibyl.BinaryTranslation.translator import config
 
 def doJasmin(filename):
-    ret = os.system(config.jasmin + " -d " + config.outDirectory + " " + filename)
+    f = filename
+    if config.doPeepholeOptimize:
+        Cibyl.PeepholeOptimizer.parse.run(config.peepholeIterations, f, f)
+    ret = os.system(config.jasmin + " -d " + config.outDirectory + " " + f)
     if ret != 0:
         sys.exit(ret)
 
