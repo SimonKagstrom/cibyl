@@ -1,3 +1,9 @@
+Cibyl (19)
+	* Refactored the implementation of ELF section handling - much more
+	general now
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Cibyl (18)
 	* Peephole optimization is now possible for the C++ translator
 

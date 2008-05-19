@@ -86,6 +86,8 @@ private:
   int n_syscall_dirs;
   int n_syscall_sets;
 
+  size_t textSize;
+
   const char *dstdir;
 
   CibylElf *elf;

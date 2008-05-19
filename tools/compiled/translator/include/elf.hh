@@ -55,6 +55,25 @@ public:
   ElfSymbol *sym;
 };
 
+class ElfSection
+{
+public:
+  ElfSection(const char *name, uint8_t *data, size_t size,
+             int type, uint32_t align)
+  {
+    this->name = name;
+    this->data = data;
+    this->size = size;
+    this->type = type;
+    this->align = align;
+  }
+
+  uint8_t *data;
+  size_t   size;
+  int      type;
+  uint32_t align;
+  const char *name;
+};
 
 class CibylElf
 {
@@ -75,35 +94,22 @@ public:
 
   uint32_t getEntryPoint() { return this->entryPoint; }
 
-  uint8_t *getText() { return this->text; };
-
-  uint8_t *getData() { return this->data; };
-
-  uint8_t *getRodata() { return this->rodata; };
-
-  uint8_t *getCtors() { return this->ctors; };
-
-  uint8_t *getDtors() { return this->dtors; };
-
-  size_t getTextSize() { return this->textSize; };
-
-  size_t getDataSize() { return this->dataSize; };
-
-  size_t getRodataSize() { return this->rodataSize; };
-
-  size_t getCtorsSize() { return this->ctorsSize; };
-
-  size_t getDtorsSize() { return this->dtorsSize; };
-
-  size_t getCibylStrtabSize() { return this->cibylstrtabSize; };
-
-  char *getCibylStrtabString(uint32_t offset)
+  const char *getCibylStrtabString(uint32_t offset)
   {
-    return ((char*)this->cibylstrtab) + offset;
+    return ((const char*)this->getSection(".cibylstrtab")->data) + offset;
+  }
+
+  ElfSection *getSection(const char *name)
+  {
+    return (ElfSection*)ght_get(this->sections_by_name,
+                                strlen(name), name);
   }
 
 private:
+  void addSection(ElfSection *section);
+
   void handleSymtab(Elf_Scn *scn);
+
   void fixupSymbolSize(ElfSymbol **table, int n, uint32_t sectionEnd);
 
   static CibylElf *instance;
@@ -114,22 +120,15 @@ private:
   ElfSymbol **functionSymbols;
   ElfSymbol **dataSymbols;
 
-  uint8_t *text;
-  uint8_t *data;
-  uint8_t *rodata;
-  uint8_t *ctors;
-  uint8_t *dtors;
-  uint8_t *cibylstrtab;
-
   int n_symbols;
   int n_functionSymbols;
   int n_dataSymbols;
   ght_hash_table_t *symtable;
 
+  ght_hash_table_t *sections_by_name;
+
   ElfReloc **relocs;
   int n_relocs;
-
-  size_t textSize, dataSize, rodataSize, ctorsSize, dtorsSize, cibylstrtabSize;
 
   uint32_t entryPoint;
 };

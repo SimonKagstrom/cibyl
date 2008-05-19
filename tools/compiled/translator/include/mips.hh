@@ -94,7 +94,7 @@ typedef enum
   R_CM5 = 78,
   R_CM6 = 79,
   R_CM7 = 80,
-  R_CM8 = 81,
+  R_MADR= 81,
   R_ECB = 82,
   R_EAR = 83,
   R_FNA = 84,

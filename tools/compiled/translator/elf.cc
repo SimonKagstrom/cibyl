@@ -94,20 +94,8 @@ CibylElf::CibylElf(const char *filename)
   size_t shstrndx;
   int fd;
 
-  this->text = NULL;
-  this->textSize = 0;
-  this->data = NULL;
-  this->dataSize = 0;
-  this->rodata = NULL;
-  this->rodataSize = 0;
-  this->ctors = NULL;
-  this->ctorsSize = 0;
-  this->dtors = NULL;
-  this->dtorsSize = 0;
-  this->cibylstrtab = NULL;
-  this->cibylstrtabSize = 0;
-
   this->symtable = ght_create(1024);
+  this->sections_by_name = ght_create(32);
 
   panic_if(elf_version(EV_CURRENT) == EV_NONE,
            "ELF version failed on %s\n", filename);
@@ -138,36 +126,9 @@ CibylElf::CibylElf(const char *filename)
                "elf_getdata failed on section %s in %s\n",
                name, filename);
 
-      if ( strcmp(name, ".text") == 0 )
-        {
-          this->text = (uint8_t*)data->d_buf;
-          this->textSize = data->d_size;
-        }
-      if ( strcmp(name, ".data") == 0 )
-        {
-          this->data = (uint8_t*)data->d_buf;
-          this->dataSize = data->d_size;
-        }
-      if ( strcmp(name, ".rodata") == 0 )
-        {
-          this->rodata = (uint8_t*)data->d_buf;
-          this->rodataSize = data->d_size;
-        }
-      if ( strcmp(name, ".ctors") == 0 )
-        {
-          this->ctors = (uint8_t*)data->d_buf;
-          this->ctorsSize = data->d_size;
-        }
-      if ( strcmp(name, ".dtors") == 0 )
-        {
-          this->dtors = (uint8_t*)data->d_buf;
-          this->dtorsSize = data->d_size;
-        }
-      if ( strcmp(name, ".cibylstrtab") == 0 )
-        {
-          this->cibylstrtab = (uint8_t*)data->d_buf;
-          this->cibylstrtabSize = data->d_size;
-        }
+      this->addSection(new ElfSection(name, (uint8_t*)data->d_buf,
+                                      data->d_size, shdr->sh_type,
+                                      shdr->sh_addralign));
 
       /* Handle symbols */
       if (shdr->sh_type == SHT_SYMTAB)
@@ -183,6 +144,13 @@ CibylElf::CibylElf(const char *filename)
             max_relocs += n;
         }
     }
+
+  /* Some sections MUST be in the Cibyl elf */
+  panic_if( !this->getSection(".text") ||
+            !this->getSection(".cibylstrtab") ||
+            !this->getSection(".data"),
+            "An essential ELF section is missing in the input file. Is this\n"
+            "a valid statically linked MIPS ELF?\n");
 
   /* Again iterate through the sections, handle relocations this time */
   this->relocs = (ElfReloc**)xcalloc(max_relocs, sizeof(ElfReloc*));
@@ -229,10 +197,11 @@ CibylElf::CibylElf(const char *filename)
   /* Sort the symbols and fixup addresses */
   this->fixupSymbolSize(this->functionSymbols,
                         this->n_functionSymbols,
-                        this->getEntryPoint() + this->textSize);
-  this->fixupSymbolSize(this->dataSymbols,
-                        this->n_dataSymbols,
-                        this->dataSize);
+                        this->getEntryPoint() + this->getSection(".text")->size);
+  if (this->getSection(".data"))
+    this->fixupSymbolSize(this->dataSymbols,
+                          this->n_dataSymbols,
+                          this->getSection(".data")->size);
 
   close(fd);
 }
@@ -262,6 +231,12 @@ void CibylElf::fixupSymbolSize(ElfSymbol **table, int n, uint32_t sectionEnd)
 ElfSymbol **CibylElf::getFunctions()
 {
   return this->functionSymbols;
+}
+
+void CibylElf::addSection(ElfSection *section)
+{
+  ght_insert(this->sections_by_name, (void*)section,
+             strlen(section->name), (void*)section->name);
 }
 
 int CibylElf::getNumberOfFunctions()

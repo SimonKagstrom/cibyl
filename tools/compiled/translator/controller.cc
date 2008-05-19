@@ -42,6 +42,11 @@ Controller::Controller(const char **defines,
   this->syscall_sets = NULL;
   this->defines = defines;
 
+  /* Get the .text section size (a small optimization) */
+  ElfSection *textSection = this->elf->getSection(".text");
+  panic_if(!textSection, "No .text section\n");
+  this->textSize = textSection->size;
+
   for (int i = 0; i < n_dbs; i++)
     this->readSyscallDatabase(database_filenames[i]);
 
@@ -142,8 +147,9 @@ bool Controller::pass0()
 {
   ElfSymbol **fn_syms;
   Instruction *last = NULL;
-  uint32_t *textSegment = (uint32_t*)this->elf->getText();
-  int n_insns = this->elf->getTextSize() / 4;
+  ElfSection *textSection = this->elf->getSection(".text");
+  uint32_t *text = (uint32_t*)textSection->data; /* Would have panic:ed in the constructor otherwise */
+  int n_insns = textSection->size / 4;
   int n_functions = this->elf->getNumberOfFunctions();
   uint32_t textBase = this->elf->getEntryPoint();
   int i;
@@ -153,7 +159,7 @@ bool Controller::pass0()
   for (int i = 0; i < n_insns; i++)
     {
       Instruction *insn = InstructionFactory::getInstance()->create(textBase + i*4,
-								    textSegment[i]);
+								    text[i]);
 
       /* Append to the delay slot of last instruction, if there is one */
       if (i >= 1 && last->hasDelaySlot())
@@ -202,7 +208,7 @@ bool Controller::pass0()
   this->classes[0] = new JavaClass(this->methods, 0, i-1);
 
   this->syscalls = (Syscall**)xcalloc(sizeof(Syscall*),
-                                      this->elf->getCibylStrtabSize());
+                                      this->elf->getSection(".cibylstrtab")->size);
 
   this->n_classes = 1;
 
@@ -211,7 +217,7 @@ bool Controller::pass0()
 
 Syscall *Controller::getSyscall(uint32_t value)
 {
-  assert(value < this->elf->getCibylStrtabSize() * sizeof(Syscall*));
+  assert(value < this->elf->getSection(".cibylstrtab")->size * sizeof(Syscall*));
 
   /*
    * this->syscalls is a sparse "table" of cached syscalls. It uses
@@ -221,7 +227,7 @@ Syscall *Controller::getSyscall(uint32_t value)
    */
   if (!this->syscalls[value])
     {
-      char *name = this->elf->getCibylStrtabString(value);
+      const char *name = this->elf->getCibylStrtabString(value);
       cibyl_db_entry_t *p = (cibyl_db_entry_t*)ght_get(this->syscall_db_table,
                                                        strlen(name), name);
       panic_if(!p, "No syscall %s:\n"
@@ -260,7 +266,7 @@ JavaMethod *Controller::getCallTableMethod()
 Instruction *Controller::getInstructionByAddress(uint32_t address)
 {
   if (address < this->elf->getEntryPoint() ||
-      address > this->elf->getEntryPoint() + this->elf->getTextSize())
+      address > this->elf->getEntryPoint() + this->textSize)
     return NULL;
 
   return this->instructions[(address - this->elf->getEntryPoint()) / 4];
@@ -275,7 +281,7 @@ Instruction *Controller::getBranchTarget(uint32_t address)
 void Controller::lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entries)
 {
   uint32_t text_start = this->elf->getEntryPoint();
-  uint32_t text_end = text_start + this->elf->getTextSize();
+  uint32_t text_end = text_start + this->textSize;
 
   /* Add labels for data pointing to the text segment */
   for (int n = 0; n < n_entries; n++)
@@ -488,21 +494,25 @@ void Controller::lookupRelocations(JavaClass *cl)
 
 bool Controller::pass1()
 {
+  ElfSection *scns[4];
   bool out = true;
+
+  scns[0] = elf->getSection(".data");
+  scns[1] = elf->getSection(".rodata");
+  scns[2] = elf->getSection(".ctors");
+  scns[3] = elf->getSection(".dtors");
 
   for (int i = 0; i < this->n_classes; i++)
     {
       JavaClass *cl = this->classes[i];
 
       /* Add addresses in the different ELF sections to the lookup tables */
-      this->lookupDataAddresses(cl, (uint32_t*)this->elf->getData(),
-                                this->elf->getDataSize() / sizeof(uint32_t));
-      this->lookupDataAddresses(cl, (uint32_t*)this->elf->getRodata(),
-                                this->elf->getRodataSize() / sizeof(uint32_t));
-      this->lookupDataAddresses(cl, (uint32_t*)this->elf->getCtors(),
-                                this->elf->getCtorsSize() / sizeof(uint32_t));
-      this->lookupDataAddresses(cl, (uint32_t*)this->elf->getDtors(),
-                                this->elf->getDtorsSize() / sizeof(uint32_t));
+      for (unsigned int j = 0; j < sizeof(scns) / sizeof(ElfSection*); j++)
+        {
+          if (scns[j])
+            this->lookupDataAddresses(cl, (uint32_t*)scns[j]->data,
+                                      scns[j]->size / sizeof(uint32_t));
+        }
 
       /* And loop through the relocations and add these */
       this->lookupRelocations(cl);
@@ -519,21 +529,25 @@ bool Controller::pass1()
 
 bool Controller::pass2()
 {
+  ElfSection *scns[4];
   SyscallWrapperGenerator *syscallWrappers;
   bool out = true;
   uint32_t addr = 0;
   FILE *fp;
 
+  scns[0] = elf->getSection(".data");
+  scns[1] = elf->getSection(".rodata");
+  scns[2] = elf->getSection(".ctors");
+  scns[3] = elf->getSection(".dtors");
+
   /* Output the data sections to a file */
   fp = open_file_in_dir(this->dstdir, "program.data.bin", "w");
-  addr = this->addAlignedSection(addr, fp, this->elf->getData(),
-                                 this->elf->getDataSize(), 16);
-  addr = this->addAlignedSection(addr, fp, this->elf->getRodata(),
-                                 this->elf->getRodataSize(), 16);
-  addr = this->addAlignedSection(addr, fp, this->elf->getCtors(),
-                                 this->elf->getCtorsSize(), 4);
-  addr = this->addAlignedSection(addr, fp, this->elf->getDtors(),
-                                 this->elf->getDtorsSize(), 4);
+  for (unsigned int j = 0; j < sizeof(scns) / sizeof(ElfSection*); j++)
+    {
+      if (scns[j])
+        addr = this->addAlignedSection(addr, fp, scns[j]->data,
+                                       scns[j]->size, scns[j]->align);
+    }
   fclose(fp);
 
   for (int i = 0; i < this->n_classes; i++)
