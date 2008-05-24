@@ -108,8 +108,6 @@ bool JavaMethod::pass1()
 
 void JavaMethod::emitStoreSubroutine(mips_opcode_t op)
 {
-  emit->warning("A store subroutine for %s are not yet implemented\n",
-                mips_op_strings[op]);
 }
 
 void JavaMethod::emitLoadSubroutine(mips_opcode_t op)

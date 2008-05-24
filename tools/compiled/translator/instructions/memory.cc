@@ -28,7 +28,8 @@ public:
   {
     emit->bc_pushaddress( this->rs, this->extra );
     /* Either a call to a subroutine or a regular function call */
-    if ( config->optimizePartialMemoryOps )
+    if ( config->optimizePartialMemoryOps &&
+         this->opcode != OP_LWL && this->opcode != OP_LWR)
       emit->bc_jsr("__CIBYL_memoryRead%s", this->bc);
     else
       emit->bc_invokestatic("CRunTime/memoryRead%s(I)I", this->bc);
