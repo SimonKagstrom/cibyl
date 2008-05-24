@@ -31,11 +31,17 @@ public:
 
   void bc_goto(const char *what, ...);
 
+  void bc_jsr(const char *what, ...);
+
   void bc_condbranch(const char *what, ...);
 
   void bc_pushconst(int32_t nr);
 
   void bc_pushconst_u(uint32_t nr);
+
+  void bc_ret(MIPS_register_t reg);
+
+  void bc_astore(MIPS_register_t reg);
 
   void bc_pushregister(MIPS_register_t reg);
 
@@ -67,6 +73,10 @@ public:
 
   void bc_iushr() { this->writeIndent("iushr"); }
 
+  void bc_ishr() { this->writeIndent("ishr"); }
+
+  void bc_ishl() { this->writeIndent("ishl"); }
+
   void bc_lushr() { this->writeIndent("lushr"); }
 
   void bc_imul() { this->writeIndent("imul"); }
@@ -76,6 +86,8 @@ public:
   void bc_irem() { this->writeIndent("irem"); }
 
   void bc_ineg() { this->writeIndent("ineg"); }
+
+  void bc_iand() { this->writeIndent("iand"); }
 
   void bc_ior() { this->writeIndent("ior"); }
 
@@ -94,6 +106,10 @@ public:
   void bc_i2l() { this->writeIndent("i2l"); }
 
   void bc_l2i() { this->writeIndent("l2i"); }
+
+  void bc_i2b() { this->writeIndent("i2b"); }
+
+  void bc_i2c() { this->writeIndent("i2c"); }
 
   void bc_swap() { this->writeIndent("swap"); }
 

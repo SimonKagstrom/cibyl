@@ -14,6 +14,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <utils.h>
 
 #include <emit.hh>
 #include <controller.hh>
@@ -24,7 +25,7 @@
   assert ( fmt != NULL ); \
   va_start(ap, fmt); \
   r = vsnprintf(buf, 2048, fmt, ap); \
-  assert(r < 2048); \
+  panic_if(r >= 2048, "Too long string passed in %s", __FUNCTION__); \
   va_end(ap); \
 } while(0)
 
@@ -108,6 +109,28 @@ void Emit::bc_istore(int nr)
   this->bc_load_store_helper("istore", nr);
 }
 
+void Emit::bc_astore(MIPS_register_t reg)
+{
+  panic_if(regalloc->regIsStatic(reg),
+           "Astore to static reg %d is not allowed",
+           (int)reg);
+  panic_if(reg == R_ZERO || !regalloc->regIsAllocated(reg),
+           "Astore to R_ZERO or unallocated reg %d is not allowed",
+           (int)reg);
+  this->bc_load_store_helper("astore", regalloc->regToLocal(reg));
+}
+
+void Emit::bc_ret(MIPS_register_t reg)
+{
+  panic_if(regalloc->regIsStatic(reg),
+           "ret to static reg %d is not allowed",
+           (int)reg);
+  panic_if(reg == R_ZERO || !regalloc->regIsAllocated(reg),
+           "ret to R_ZERO or unallocated reg %d is not allowed",
+           (int)reg);
+  this->writeIndent("ret %d", regalloc->regToLocal(reg));
+}
+
 void Emit::bc_pushregister(MIPS_register_t reg)
 {
   if (regalloc->regIsStatic(reg))
@@ -152,6 +175,16 @@ void Emit::bc_goto(const char *fmt, ...)
   char buf[2048];
 
   this->output("\tgoto ");
+  do_vsnprintf(buf, fmt);
+  this->output(buf);
+  this->output("\n");
+}
+
+void Emit::bc_jsr(const char *fmt, ...)
+{
+  char buf[2048];
+
+  this->output("\tjsr ");
   do_vsnprintf(buf, fmt);
   this->output(buf);
   this->output("\n");
