@@ -94,7 +94,7 @@ const char *mips_reg_strings[] =
   "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12", "f13",
   "f14", "f15", "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23", "f24", "f25",
   "f26", "f27", "f28", "f29", "f30", "f31",
-  "cpc", "cm0", "cm1", "cm2", "cm3", "cm4", "cm5", "cm6", "cm7", "cm8", "ecb", "ear",
+  "cpc", "cm0", "cm1", "cm2", "cm3", "cm4", "cm5", "cm6", "cm7", "madr", "ecb", "ear",
   "fna", "mem",
 };
 

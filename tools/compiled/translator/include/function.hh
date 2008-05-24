@@ -40,14 +40,31 @@ public:
     return this->registerIndirectJumps;
   }
 
+  bool opcodeIsUsed(mips_opcode_t op)
+  {
+    panic_if(op < 0 || op > N_INSNS,
+             "Opcode %d is outside the range of valid values\n", op);
+    return this->usedInsns[op];
+  }
+
   JavaMethod *parent;
 protected:
+  void markOpcodeUsed(mips_opcode_t op)
+  {
+    panic_if(op < 0 || op > N_INSNS,
+             "Opcode %d is outside the range of valid values\n", op);
+    this->usedInsns[op] = 1;
+  }
+
   int registerDestinations[N_REGS];
   int registerSources[N_REGS];
   int n_bbs;
+
   BasicBlock **bbs;
   char *name;
   bool registerIndirectJumps;
+
+  uint8_t usedInsns[N_INSNS];
 };
 
 class StartFunction : public Function

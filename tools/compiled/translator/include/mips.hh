@@ -236,7 +236,7 @@ typedef enum
   CIBYL_ASSIGN_MEMREG = 132,
 } mips_opcode_t;
 
-#define N_INSNS 124
+#define N_INSNS 133
 
 typedef enum
 {

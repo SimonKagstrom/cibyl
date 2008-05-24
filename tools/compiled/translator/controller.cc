@@ -656,6 +656,8 @@ static void parse_config(Config *cfg, const char *config_str)
         cfg->traceStores = int_val == 0 ? false : true;
       if (strcmp(p, "prune_call_table") == 0)
         cfg->optimizeCallTable = int_val == 0 ? false : true;
+      if (strcmp(p, "optimize_partial_memory_operations") == 0)
+        cfg->optimizePartialMemoryOps = int_val == 0 ? false : true;
 
       p = strtok(NULL, ",");
     }
@@ -689,6 +691,7 @@ int main(int argc, const char **argv)
   /* Setup configuration */
   config = new Config();
   parse_config(config, argv[1] + strlen("config:"));
+  config->optimizePartialMemoryOps = true;
 
   /* Setup defines */
   for (n = 2; n < argc && strncmp(argv[n], "-D", 2) == 0; n++)

@@ -85,6 +85,11 @@ public:
   char *addExceptionHandler(uint32_t start, uint32_t end);
 
 protected:
+  void emitLoadSubroutine(mips_opcode_t op);
+  void emitStoreSubroutine(mips_opcode_t op);
+  void emitSubroutineForOp(mips_opcode_t op);
+  void emitSubroutines();
+
   Function **functions;
   int n_functions;
   int registerUsage[N_REGS];

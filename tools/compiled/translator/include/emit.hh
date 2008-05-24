@@ -111,6 +111,8 @@ public:
 
   void bc_i2c() { this->writeIndent("i2c"); }
 
+  void bc_i2s() { this->writeIndent("i2s"); }
+
   void bc_swap() { this->writeIndent("swap"); }
 
   void bc_iaload() { this->writeIndent("iaload"); }

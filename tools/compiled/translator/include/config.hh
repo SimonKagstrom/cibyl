@@ -24,11 +24,15 @@ public:
 
     this->traceStores = false;
     this->optimizeCallTable = false;
+
+    this->optimizePartialMemoryOps = false;
   }
 
   uint32_t traceRange[2]; /* start, end */
   bool traceStores;
   bool optimizeCallTable;
+
+  bool optimizePartialMemoryOps;
 };
 
 extern Config *config;

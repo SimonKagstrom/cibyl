@@ -27,13 +27,20 @@ public:
   bool pass2()
   {
     emit->bc_pushaddress( this->rs, this->extra );
-    emit->bc_invokestatic("CRunTime/memoryRead%s(I)I", this->bc);
+    /* Either a call to a subroutine or a regular function call */
+    if ( config->optimizePartialMemoryOps )
+      emit->bc_jsr("__CIBYL_memoryRead%s", this->bc);
+    else
+      emit->bc_invokestatic("CRunTime/memoryRead%s(I)I", this->bc);
     emit->bc_popregister( this->rt );
     return true;
   }
 
   int fillDestinations(int *p)
   {
+    if ( config->optimizePartialMemoryOps )
+      return this->addToRegisterUsage(this->rt, p) + this->addToRegisterUsage(R_MADR, p);
+
     return this->addToRegisterUsage(this->rt, p);
   }
 

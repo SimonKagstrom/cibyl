@@ -109,6 +109,11 @@ public:
     this->prefix = prefix;
   }
 
+  bool hasPrefix()
+  {
+    return this->prefix != NULL;
+  }
+
   Instruction *getPrefix()
   {
     return this->prefix;

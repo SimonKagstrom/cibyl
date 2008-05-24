@@ -24,6 +24,7 @@ Function::Function(const char *name, Instruction **insns,
 
   memset(this->registerSources, 0, sizeof(this->registerSources));
   memset(this->registerDestinations, 0, sizeof(this->registerDestinations));
+  memset(this->usedInsns, 0, sizeof(this->usedInsns));
 
   this->bbs = (BasicBlock**)xcalloc(1, sizeof(BasicBlock*));
   this->address = insns[first_insn]->getAddress();
@@ -40,6 +41,13 @@ Function::Function(const char *name, Instruction **insns,
 
       if (insn->isRegisterIndirectJump())
         this->registerIndirectJumps = true;
+
+      /* Mark this opcode as used */
+      this->markOpcodeUsed(insn->getOpcode());
+      if (insn->hasDelaySlot())
+        this->markOpcodeUsed(insn->getDelayed()->getOpcode());
+      if (insn->hasPrefix())
+        this->markOpcodeUsed(insn->getPrefix()->getOpcode());
 
       last = last + 1;
       if ( insn->isReturnJump() )
