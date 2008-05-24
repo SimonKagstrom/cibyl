@@ -10,7 +10,7 @@
 ##
 ######################################################################
 SUBDIRS = src/
-ALL_TARGETS = crt0.o crt0-android.o crt0-qemu-debug.o
+ALL_TARGETS = crt0.o crt0-lib.o crt0-android.o crt0-qemu-debug.o
 EXTRA_CLEAN=lib/*.a *.o
 
 include $(CIBYL_BASE)/build/Rules.mk
