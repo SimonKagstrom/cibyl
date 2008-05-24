@@ -17,6 +17,7 @@
 #include <function.hh>
 #include <mips.hh>
 #include <utils.h>
+#include <elf.hh>
 #include <registerallocator.hh>
 
 class JavaClass;
@@ -100,7 +101,7 @@ protected:
 class CallTableMethod : public JavaMethod
 {
 public:
-  CallTableMethod(int maxMethods);
+  CallTableMethod(int maxMethods, cibyl_exported_symbol_t *exp_syms, size_t n_exp_syms);
 
   void addMethod(JavaMethod *method);
 
@@ -119,7 +120,9 @@ public:
   }
 protected:
   JavaMethod **methods;
+  cibyl_exported_symbol_t *exp_syms;
   ght_hash_table_t *method_table;
+  size_t n_exp_syms;
   int n_methods;
 };
 

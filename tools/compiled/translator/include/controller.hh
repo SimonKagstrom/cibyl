@@ -72,6 +72,8 @@ private:
 
   Instruction *getInstructionByAddress(uint32_t addr);
 
+  void fixupExportedSymbols(cibyl_exported_symbol_t *exp_syms, size_t n);
+
   JavaClass **classes;
   JavaMethod **methods;
   Function **functions;
@@ -90,7 +92,6 @@ private:
 
   const char *dstdir;
 
-  CibylElf *elf;
   Syscall **syscalls; /* Sparse table of syscalls */
 
   ght_hash_table_t *syscall_db_table;

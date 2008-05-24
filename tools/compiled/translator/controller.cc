@@ -25,8 +25,7 @@ Controller::Controller(const char **defines,
                        const char *dstdir, const char *elf_filename,
                        int n_dbs, const char **database_filenames) : CodeBlock()
 {
-  this->elf = new CibylElf(elf_filename);
-  elf = this->elf;
+  elf = new CibylElf(elf_filename);
 
   this->syscall_db_table = ght_create(1024);
   this->syscall_used_table = ght_create(1024);
@@ -43,7 +42,7 @@ Controller::Controller(const char **defines,
   this->defines = defines;
 
   /* Get the .text section size (a small optimization) */
-  ElfSection *textSection = this->elf->getSection(".text");
+  ElfSection *textSection = elf->getSection(".text");
   panic_if(!textSection, "No .text section\n");
   this->textSize = textSection->size;
 
@@ -143,15 +142,30 @@ void Controller::readSyscallDatabase(const char *filename)
     }
 }
 
+void Controller::fixupExportedSymbols(cibyl_exported_symbol_t *exp_syms, size_t n)
+{
+  panic_if(!exp_syms, "fixupExportedSymbols called without exp_syms!\n");
+
+  /* Fixup the string offsets */
+  for (unsigned int i = 0; i < n; i++)
+    {
+      uint32_t name = be32_to_host(exp_syms[i].name) & 0x00ffffff;
+      uint32_t addr = be32_to_host(exp_syms[i].addr);
+
+      exp_syms[i].name = name;
+      exp_syms[i].addr = addr;
+    }
+}
+
 bool Controller::pass0()
 {
   ElfSymbol **fn_syms;
   Instruction *last = NULL;
-  ElfSection *textSection = this->elf->getSection(".text");
+  ElfSection *textSection = elf->getSection(".text");
   uint32_t *text = (uint32_t*)textSection->data; /* Would have panic:ed in the constructor otherwise */
   int n_insns = textSection->size / 4;
-  int n_functions = this->elf->getNumberOfFunctions();
-  uint32_t textBase = this->elf->getEntryPoint();
+  int n_functions = elf->getNumberOfFunctions();
+  uint32_t textBase = elf->getEntryPoint();
   int i;
 
   this->instructions = (Instruction**)xcalloc(n_insns + 1, sizeof(Instruction*));
@@ -175,10 +189,28 @@ bool Controller::pass0()
   this->functions = (Function**)xcalloc(n_functions + 1, sizeof(Function*));
   this->methods = (JavaMethod**)xcalloc(n_functions + 1, sizeof(JavaMethod*));
 
-  this->callTableMethod = new CallTableMethod(n_functions + 1);
+  /* Setup exported symbols, if they exist */
+  ElfSection *expsymsSection = elf->getSection(".cibylexpsyms");
+  cibyl_exported_symbol_t *exp_syms = NULL;
+  size_t n = 0;
+
+  if (expsymsSection)
+    {
+      n = expsymsSection->size / sizeof(cibyl_exported_symbol_t);
+      exp_syms = (cibyl_exported_symbol_t *)expsymsSection->data;
+
+      panic_if(expsymsSection->size % sizeof(cibyl_exported_symbol_t) != 0,
+               "Size of the exported symbols section is wrong: %d\n",
+               expsymsSection->size);
+
+      this->fixupExportedSymbols(exp_syms, n);
+    }
+
+  this->callTableMethod = new CallTableMethod(n_functions + 1,
+                                              exp_syms, n);
 
   /* Create all functions and methods */
-  fn_syms = this->elf->getFunctions();
+  fn_syms = elf->getFunctions();
   assert(fn_syms);
   for (i = 0; fn_syms[i]; i++)
     {
@@ -187,7 +219,7 @@ bool Controller::pass0()
       /* Create a new function with a set of instructions, this
        * will in turn create basic blocks
        */
-      if (sym->addr == this->elf->getEntryPoint())
+      if (sym->addr == elf->getEntryPoint())
         this->functions[i] = new StartFunction(sym->name, this->instructions,
                                                (sym->addr - textBase) / 4,
                                                (sym->addr - textBase + sym->size) / 4 - 1);
@@ -208,7 +240,7 @@ bool Controller::pass0()
   this->classes[0] = new JavaClass(this->methods, 0, i-1);
 
   this->syscalls = (Syscall**)xcalloc(sizeof(Syscall*),
-                                      this->elf->getSection(".cibylstrtab")->size);
+                                      elf->getSection(".cibylstrtab")->size);
 
   this->n_classes = 1;
 
@@ -217,7 +249,7 @@ bool Controller::pass0()
 
 Syscall *Controller::getSyscall(uint32_t value)
 {
-  assert(value < this->elf->getSection(".cibylstrtab")->size * sizeof(Syscall*));
+  assert(value < elf->getSection(".cibylstrtab")->size * sizeof(Syscall*));
 
   /*
    * this->syscalls is a sparse "table" of cached syscalls. It uses
@@ -227,7 +259,7 @@ Syscall *Controller::getSyscall(uint32_t value)
    */
   if (!this->syscalls[value])
     {
-      const char *name = this->elf->getCibylStrtabString(value);
+      const char *name = elf->getCibylStrtabString(value);
       cibyl_db_entry_t *p = (cibyl_db_entry_t*)ght_get(this->syscall_db_table,
                                                        strlen(name), name);
       panic_if(!p, "No syscall %s:\n"
@@ -265,11 +297,11 @@ JavaMethod *Controller::getCallTableMethod()
 
 Instruction *Controller::getInstructionByAddress(uint32_t address)
 {
-  if (address < this->elf->getEntryPoint() ||
-      address > this->elf->getEntryPoint() + this->textSize)
+  if (address < elf->getEntryPoint() ||
+      address > elf->getEntryPoint() + this->textSize)
     return NULL;
 
-  return this->instructions[(address - this->elf->getEntryPoint()) / 4];
+  return this->instructions[(address - elf->getEntryPoint()) / 4];
 }
 
 
@@ -280,7 +312,7 @@ Instruction *Controller::getBranchTarget(uint32_t address)
 
 void Controller::lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entries)
 {
-  uint32_t text_start = this->elf->getEntryPoint();
+  uint32_t text_start = elf->getEntryPoint();
   uint32_t text_end = text_start + this->textSize;
 
   /* Add labels for data pointing to the text segment */
@@ -356,8 +388,8 @@ public:
 
 void Controller::lookupRelocations(JavaClass *cl)
 {
-  ElfReloc **relocs = this->elf->getRelocations();
-  int n = this->elf->getNumberOfRelocations();
+  ElfReloc **relocs = elf->getRelocations();
+  int n = elf->getNumberOfRelocations();
   HiloRelocLimit *hilos_per_method;
 
   /* Initialize hi/lo pairs to -1 */
@@ -570,6 +602,7 @@ bool Controller::pass2()
 
 Controller *controller;
 Config *config;
+CibylElf *elf;
 
 static void usage()
 {

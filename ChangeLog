@@ -1,4 +1,7 @@
 Cibyl (19)
+	* Implemented symbol exporting to Java with the CIBYL_EXPORT_SYMBOL
+	macro and allow generation of these interfaces by the translator
+
 	* Refactored the implementation of ELF section handling - much more
 	general now
 

@@ -75,6 +75,13 @@ public:
   const char *name;
 };
 
+/* Found in the special .cibylexpsyms function */
+typedef struct
+{
+  uint32_t name;
+  uint32_t addr;
+} cibyl_exported_symbol_t;
+
 class CibylElf
 {
 public:
@@ -96,6 +103,8 @@ public:
 
   const char *getCibylStrtabString(uint32_t offset)
   {
+    /* This is safe since we assert that this section is there in
+     * the constructor */
     return ((const char*)this->getSection(".cibylstrtab")->data) + offset;
   }
 
@@ -132,5 +141,7 @@ private:
 
   uint32_t entryPoint;
 };
+
+extern CibylElf *elf;
 
 #endif /* !__ELF_HH__ */

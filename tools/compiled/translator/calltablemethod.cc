@@ -10,13 +10,20 @@
  *
  ********************************************************************/
 #include <javamethod.hh>
+#include <javamethod.hh>
 #include <emit.hh>
 
-CallTableMethod::CallTableMethod(int maxMethods) : JavaMethod(NULL, 0, 0)
+CallTableMethod::CallTableMethod(int maxMethods, cibyl_exported_symbol_t *exp_syms,
+                                 size_t n_exp_syms) : JavaMethod(NULL, 0, 0)
 {
   this->n_methods = 0;
   this->methods = (JavaMethod**)xcalloc(sizeof(JavaMethod*), maxMethods);
   this->method_table = ght_create(maxMethods);
+
+  /* Exported symbols */
+  this->exp_syms = exp_syms;
+  this->n_exp_syms = n_exp_syms;
+
   memset(this->registerUsage, 0, sizeof(this->registerUsage));
 }
 
@@ -51,8 +58,25 @@ bool CallTableMethod::pass1()
 
 bool CallTableMethod::pass2()
 {
-  emit->generic("class CibylCallTable {\n"
-                "  public static final int call(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {\n"
+  emit->generic("class CibylCallTable {\n");
+
+  /* If it exists, generate a table of exported symbols */
+  if (this->exp_syms)
+    {
+      emit->generic(" public static final int getAddressByName(String name) throws Exception {\n");
+
+      for (unsigned int i = 0; i < this->n_exp_syms; i++)
+        {
+          emit->generic("    if ( name == \"%s\") return 0x%x;\n",
+                        elf->getCibylStrtabString(this->exp_syms[i].name),
+                        this->exp_syms[i].addr);
+        }
+
+      emit->generic("    else throw new Exception(name + \" is not exported \");\n"
+                    " }\n\n");
+    }
+
+  emit->generic("  public static final int call(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {\n"
                 "    int v0 = 0;\n"
                 "    switch(address) {\n"
                 );

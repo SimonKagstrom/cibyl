@@ -17,6 +17,9 @@ SECTIONS
        	.bss  ALIGN(16) : { *(.bss) *(.scommon) *(.sbss) }
        	PROVIDE(__edata = .);
 
+        /* Exported symbols (to Java) */
+       	.cibylexpsyms : { *(.cibylexpsyms) }
+
 	/* The string table with the system call names */
 	. = 0xff000000;
        	.cibylstrtab : { *(.cibylstrtab) }

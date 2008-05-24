@@ -117,7 +117,17 @@ void NOPH_panic(const char *fmt, ...);
 
 void NOPH_panic_if(int cond, const char *fmt, ...);
 
-#define CIBYL_EXPORT_SYMBOL(name)
+/**
+ * Export function to Java
+ */
+#define CIBYL_EXPORT_SYMBOL(symbol_name)        \
+  asm(".pushsection .cibylstrtab, \"aS\"\n"     \
+      "1: .asciz \"" #symbol_name "\"\n"        \
+      ".popsection\n"                           \
+      ".pushsection .cibylexpsyms\n"            \
+      ".long 1b\n" /* String Adr */             \
+      ".long " #symbol_name "\n" /* Adr */      \
+      ".popsection\n")
 
 #endif /* __ASSEMBLER__ */
 

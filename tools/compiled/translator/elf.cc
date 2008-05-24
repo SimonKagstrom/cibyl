@@ -253,5 +253,3 @@ int CibylElf::getNumberOfRelocations()
 {
   return this->n_relocs;
 }
-
-Elf *elf;
