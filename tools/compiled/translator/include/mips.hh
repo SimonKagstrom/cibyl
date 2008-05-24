@@ -225,15 +225,15 @@ typedef enum
   OP_C_LE   = 122,
   OP_C_NGT  = 123,
 
-  SPECIAL = 800,
-  BCOND = 801,
-  COP0 = 802,
-  COP1 = 803,
-  COP2 = 804,
-  COP3 = 805,
-  CIBYL_SYSCALL = 999, /* Needed? */
-  CIBYL_REGISTER_ARGUMENT = 1000,
-  CIBYL_ASSIGN_MEMREG = 1001,
+  SPECIAL   = 124,
+  BCOND     = 125,
+  COP0      = 126,
+  COP1      = 127,
+  COP2      = 128,
+  COP3      = 129,
+  CIBYL_SYSCALL = 130, /* Needed? */
+  CIBYL_REGISTER_ARGUMENT = 131,
+  CIBYL_ASSIGN_MEMREG = 132,
 } mips_opcode_t;
 
 #define N_INSNS 124
