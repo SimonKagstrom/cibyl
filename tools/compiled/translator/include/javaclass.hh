@@ -18,7 +18,7 @@
 class JavaClass : public CodeBlock
 {
 public:
-  JavaClass(JavaMethod **methods, int first, int last);
+  JavaClass(const char *name, JavaMethod **methods, int first, int last);
 
   JavaMethod *getMethodByAddress(uint32_t addr, int *idx);
 
@@ -46,6 +46,7 @@ public:
 private:
   int n_methods;
   JavaMethod **methods;
+  const char *name;
 };
 
 #endif /* !__JAVACLASS_HH__ */
