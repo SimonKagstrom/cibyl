@@ -16,6 +16,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 void *xcalloc(size_t nmemb, size_t size);
@@ -60,5 +61,14 @@ FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode);
 
 #define panic_if(cond, x...) \
   do { if (cond) panic(x); } while(0)
+
+static inline char *xstrdup(const char *s)
+{
+  char *out = strdup(s);
+
+  panic_if(!out, "strdup failed");
+
+  return out;
+}
 
 #endif /* !__UTILS_H__ */
