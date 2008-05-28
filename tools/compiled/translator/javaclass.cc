@@ -42,12 +42,14 @@ static int method_search_cmp(const void *_a, const void *_b)
 }
 
 /* Class members */
-JavaClass::JavaClass(JavaMethod **in_methods, int first, int last) : CodeBlock()
+JavaClass::JavaClass(const char *name, JavaMethod **in_methods, int first, int last) : CodeBlock()
 {
   assert( last >= first );
 
   this->methods = &(in_methods[first]);
   this->n_methods = last - first + 1;
+
+  this->name = xstrdup(name);
 
   /* Sort the methods */
   qsort((void*)this->methods, this->n_methods, sizeof(JavaMethod*),
@@ -79,7 +81,7 @@ JavaMethod *JavaClass::getMethodByAddress(uint32_t addr)
 
 const char *JavaClass::getName()
 {
-  return "Cibyl";
+  return this->name;
 }
 
 
