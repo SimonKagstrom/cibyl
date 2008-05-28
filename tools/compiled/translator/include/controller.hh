@@ -60,6 +60,14 @@ public:
     return this->builtins->match(name);
   }
 
+  JavaClass *getClassByMethodName(const char *name)
+  {
+    panic_if(!name, "method name is NULL");
+
+    return (JavaClass *)ght_get(this->method_to_class,
+                                strlen(name), name);
+  }
+
 private:
   char *resolveStrtabAddress(char *strtab, char *offset);
   unsigned long getSyscallFileLong(void *_p, int offset);
@@ -78,6 +86,8 @@ private:
   JavaMethod **methods;
   Function **functions;
   Instruction **instructions;
+
+  ght_hash_table_t *method_to_class;
 
   CallTableMethod *callTableMethod;
 

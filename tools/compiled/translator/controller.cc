@@ -30,6 +30,8 @@ Controller::Controller(const char **defines,
   this->syscall_db_table = ght_create(1024);
   this->syscall_used_table = ght_create(1024);
 
+  this->method_to_class = ght_create(128);
+
   this->dstdir = dstdir;
   this->instructions = NULL;
   this->functions = NULL;
@@ -188,6 +190,7 @@ bool Controller::pass0()
 
   this->functions = (Function**)xcalloc(n_functions + 1, sizeof(Function*));
   this->methods = (JavaMethod**)xcalloc(n_functions + 1, sizeof(JavaMethod*));
+  this->n_methods = n_functions;
 
   /* Setup exported symbols, if they exist */
   ElfSection *expsymsSection = elf->getSection(".cibylexpsyms");
@@ -236,13 +239,21 @@ bool Controller::pass0()
     }
 
   /* And the (single) class */
-  this->classes = (JavaClass**)xcalloc(1, sizeof(JavaClass*));
+  this->n_classes = 1;
+  this->classes = (JavaClass**)xcalloc(this->n_classes, sizeof(JavaClass*));
   this->classes[0] = new JavaClass("Cibyl", this->methods, 0, i-1);
+
+  /* Setup the mapping between methods and classes */
+  for (int i = 0; i < this->n_methods; i++)
+    {
+      JavaMethod *mt = this->methods[i];
+
+      ght_insert(this->method_to_class, this->classes[0],
+                 strlen(mt->getName()), mt->getName());
+    }
 
   this->syscalls = (Syscall**)xcalloc(sizeof(Syscall*),
                                       elf->getSection(".cibylstrtab")->size);
-
-  this->n_classes = 1;
 
   return true;
 }

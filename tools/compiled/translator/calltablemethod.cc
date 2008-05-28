@@ -11,6 +11,7 @@
  ********************************************************************/
 #include <javamethod.hh>
 #include <javamethod.hh>
+#include <controller.hh>
 #include <emit.hh>
 
 CallTableMethod::CallTableMethod(int maxMethods, cibyl_exported_symbol_t *exp_syms,
@@ -85,12 +86,19 @@ bool CallTableMethod::pass2()
   for (int i = 0; i < this->n_methods; i++)
     {
       JavaMethod *mt = this->methods[i];
+      JavaClass *cl;
       const char *comma = "";
+
+      panic_if(!mt, "this->methods[%d] is NULL!\n", i);
+      cl = controller->getClassByMethodName(mt->getName());
+
+      panic_if(!cl, "Method %s has no class mapping!\n",
+               mt->getName());
 
       emit->generic("      case 0x%x:  ", mt->getAddress());
       if (mt->clobbersReg( R_V0 ))
         emit->generic("v0 = ");
-      emit->generic("Cibyl.%s(", mt->getName()); /* FIXME! Don't use static class name */
+      emit->generic("%s.%s(", cl->getName(), mt->getName());
 
       /* Pass registers */
       if (mt->clobbersReg( R_SP ))
