@@ -52,8 +52,6 @@ Controller::Controller(const char **defines,
     this->readSyscallDatabase(database_filenames[i]);
 
   this->builtins = new BuiltinFactory();
-
-  emit->setOutputFile(open_file_in_dir(this->dstdir, "Cibyl.j", "w"));
 }
 
 char *Controller::resolveStrtabAddress(char *strtab, char *offset)
@@ -595,6 +593,11 @@ bool Controller::pass2()
 
   for (int i = 0; i < this->n_classes; i++)
     {
+      char buf[80];
+      panic_if(snprintf(buf, 80, "%s.j", this->classes[i]->getName()) >= 80,
+               "Too long string\n");
+      emit->setOutputFile(open_file_in_dir(this->dstdir, buf, "w"));
+
       if (this->classes[i]->pass2() != true)
         out = false;
     }
