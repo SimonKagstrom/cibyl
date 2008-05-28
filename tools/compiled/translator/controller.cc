@@ -237,7 +237,7 @@ bool Controller::pass0()
 
   /* And the (single) class */
   this->classes = (JavaClass**)xcalloc(1, sizeof(JavaClass*));
-  this->classes[0] = new JavaClass(this->methods, 0, i-1);
+  this->classes[0] = new JavaClass("Cibyl", this->methods, 0, i-1);
 
   this->syscalls = (Syscall**)xcalloc(sizeof(Syscall*),
                                       elf->getSection(".cibylstrtab")->size);
@@ -691,6 +691,7 @@ int main(int argc, const char **argv)
   /* Setup configuration */
   config = new Config();
   parse_config(config, argv[1] + strlen("config:"));
+  config->optimizePartialMemoryOps = true;
 
   /* Setup defines */
   for (n = 2; n < argc && strncmp(argv[n], "-D", 2) == 0; n++)
