@@ -623,7 +623,7 @@ static void usage()
 
 static void parse_config(Config *cfg, const char *config_str)
 {
-  char *cpy = strdup(config_str);
+  char *cpy = xstrdup(config_str);
   char *p;
 
   /* A series of "trace_start=0x12414,trace_end=0x15551,..." No spaces */
