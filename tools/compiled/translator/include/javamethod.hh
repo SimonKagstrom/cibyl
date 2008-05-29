@@ -124,6 +124,13 @@ public:
     return (char*)"CibylCallTable/call(IIIIII)I";
   }
 protected:
+  /* Generate a method with name @a name, with methods from @a start
+   * to @a end */
+  void generateMethod(const char *name, int start, int end);
+
+  /* Generate a hierarchy of methods */
+  void generateHierarchy(unsigned int n);
+
   JavaMethod **methods;
   cibyl_exported_symbol_t *exp_syms;
   ght_hash_table_t *method_table;
