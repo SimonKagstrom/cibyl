@@ -139,7 +139,7 @@ void BasicBlock::commentInstruction(Instruction *insn)
       instruction_to_string(insn->getDelayed(), buf+l+1, 255-l-1);
     }
 
-  snprintf(out, 255, "0x%08x: %s", insn->getAddress(), buf);
+  xsnprintf(out, 255, "0x%08x: %s", insn->getAddress(), buf);
   emit->bc_comment(out);
 
   if ( insn->getAddress() >= config->traceRange[0] && insn->getAddress() < config->traceRange[1])
