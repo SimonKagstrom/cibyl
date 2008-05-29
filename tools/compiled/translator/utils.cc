@@ -159,7 +159,7 @@ void *read_file(size_t *out_size, const char *fmt, ...)
 
     buf = (char*)xcalloc(len, 1);
 
-    snprintf(buf, len, "%s/%s", dir, filename);
+    xsnprintf(buf, len, "%s/%s", dir, filename);
     fp = fopen(buf, mode);
     free(buf);
     panic_if(!fp, "Cannot open file %s/%s\n", dir, filename);
