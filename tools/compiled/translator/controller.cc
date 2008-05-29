@@ -237,17 +237,30 @@ bool Controller::pass0()
     }
 
   /* And the (single) class */
-  this->n_classes = 1;
+  this->n_classes = config->nClasses;
   this->classes = (JavaClass**)xcalloc(this->n_classes, sizeof(JavaClass*));
-  this->classes[0] = new JavaClass("Cibyl", this->methods, 0, i-1);
-
-  /* Setup the mapping between methods and classes */
-  for (int i = 0; i < this->n_methods; i++)
+  for (i = 0; i < this->n_classes; i++)
     {
-      JavaMethod *mt = this->methods[i];
+      int methods_per_class = this->n_methods / config->nClasses;
+      char buf[80];
+      int first = i * methods_per_class;
+      int last = (i + 1) * methods_per_class - 1;
 
-      ght_insert(this->method_to_class, this->classes[0],
-                 strlen(mt->getName()), mt->getName());
+      if (i == 0)
+        xsnprintf(buf, 80, "Cibyl%s", ""); /* The first is always "Cibyl" */
+      else
+        xsnprintf(buf, 80, "Cibyl%d", i);
+      this->classes[i] = new JavaClass(buf, this->methods,
+                                       first, last);
+
+      /* Setup the mapping between methods and classes */
+      for (int j = first; j <= last; j++) /* last is the last "real" method... */
+        {
+          JavaMethod *mt = this->methods[j];
+
+          ght_insert(this->method_to_class, this->classes[i],
+                     strlen(mt->getName()), mt->getName());
+        }
     }
 
   this->syscalls = (Syscall**)xcalloc(sizeof(Syscall*),
@@ -319,7 +332,7 @@ Instruction *Controller::getBranchTarget(uint32_t address)
   return this->getInstructionByAddress(address);
 }
 
-void Controller::lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entries)
+void Controller::lookupDataAddresses(uint32_t *data, int n_entries)
 {
   uint32_t text_start = elf->getEntryPoint();
   uint32_t text_end = text_start + this->textSize;
@@ -335,19 +348,30 @@ void Controller::lookupDataAddresses(JavaClass *cl, uint32_t *data, int n_entrie
           if ((v & 0x3) != 0)
             continue;
 
-          JavaMethod *mt = cl->getMethodByAddress(v);
+          bool found_method = false;
 
-          panic_if(!mt, "Could not find method for address 0x%08x, which is within\n"
+          for (int i = 0; i < this->n_classes; i++)
+            {
+              JavaClass *cl = this->classes[i];
+              JavaMethod *mt = cl->getMethodByAddress(v);
+
+              if (!mt)
+                continue;
+
+              found_method = true;
+
+              /* Add to the call table */
+              if (mt->getAddress() == v)
+                this->callTableMethod->addMethod(mt);
+
+              /* Something has an address in this method (which can be an address) */
+              mt->addJumptabLabel(v);
+              this->addJumptabLabel(v);
+            }
+          panic_if(!found_method, "Could not find method for address 0x%08x, which is within\n"
                    "text start and text end (0x%08x...0x%08x)\n",
                    v, text_start, text_end);
 
-          /* Add to the call table */
-          if (mt->getAddress() == v)
-            this->callTableMethod->addMethod(mt);
-
-          /* Something has an address in this method (which can be an address) */
-          mt->addJumptabLabel(v);
-          this->addJumptabLabel(v);
         }
     }
 }
@@ -416,8 +440,9 @@ void Controller::lookupRelocations(JavaClass *cl)
             {
               JavaMethod *mt = cl->getMethodByAddress(rel->sym->addr);
 
-              panic_if(!mt, "Cannot find method for relocation: 0x%x\n",
-                       rel->sym->addr);
+              /* If this method is not in this class  */
+              if (!mt)
+                continue;
 
               if (mt->getAddress() == rel->sym->addr)
                 this->callTableMethod->addMethod(mt);
@@ -543,17 +568,17 @@ bool Controller::pass1()
   scns[2] = elf->getSection(".ctors");
   scns[3] = elf->getSection(".dtors");
 
+  /* Add addresses in the different ELF sections to the lookup tables */
+  for (unsigned int j = 0; j < sizeof(scns) / sizeof(ElfSection*); j++)
+    {
+      if (scns[j])
+        this->lookupDataAddresses((uint32_t*)scns[j]->data,
+                                  scns[j]->size / sizeof(uint32_t));
+    }
+
   for (int i = 0; i < this->n_classes; i++)
     {
       JavaClass *cl = this->classes[i];
-
-      /* Add addresses in the different ELF sections to the lookup tables */
-      for (unsigned int j = 0; j < sizeof(scns) / sizeof(ElfSection*); j++)
-        {
-          if (scns[j])
-            this->lookupDataAddresses(cl, (uint32_t*)scns[j]->data,
-                                      scns[j]->size / sizeof(uint32_t));
-        }
 
       /* And loop through the relocations and add these */
       this->lookupRelocations(cl);
@@ -594,8 +619,7 @@ bool Controller::pass2()
   for (int i = 0; i < this->n_classes; i++)
     {
       char buf[80];
-      panic_if(snprintf(buf, 80, "%s.j", this->classes[i]->getName()) >= 80,
-               "Too long string\n");
+      xsnprintf(buf, 80, "%s.j", this->classes[i]->getName());
       emit->setOutputFile(open_file_in_dir(this->dstdir, buf, "w"));
 
       if (this->classes[i]->pass2() != true)
@@ -668,10 +692,16 @@ static void parse_config(Config *cfg, const char *config_str)
         cfg->traceRange[1] = int_val;
       if (strcmp(p, "trace_stores") == 0)
         cfg->traceStores = int_val == 0 ? false : true;
+      if (strcmp(p, "thread_safe") == 0)
+        cfg->threadSafe = int_val == 0 ? false : true;
       if (strcmp(p, "prune_call_table") == 0)
         cfg->optimizeCallTable = int_val == 0 ? false : true;
       if (strcmp(p, "optimize_partial_memory_operations") == 0)
         cfg->optimizePartialMemoryOps = int_val == 0 ? false : true;
+      if (strcmp(p, "n_classes") == 0)
+        cfg->nClasses = int_val;
+      if (strcmp(p, "call_table_hierarchy") == 0)
+        cfg->callTableHierarchy = int_val;
 
       p = strtok(NULL, ",");
     }
