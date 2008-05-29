@@ -128,5 +128,8 @@ int instruction_to_string(Instruction *insn, char *buf, int buf_len)
       out = snprintf(buf, buf_len, "Unknown instruction 0x%x", insn->getOpcode());
     }
 
+  panic_if(out < 0 || out >= buf_len,
+           "buffer to small to write instruction string\n");
+
   return out;
 }
