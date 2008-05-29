@@ -71,4 +71,9 @@ static inline char *xstrdup(const char *s)
   return out;
 }
 
+#define xsnprintf(buf, size, fmt, x...) do { \
+    int r = snprintf(buf, size, fmt, x); \
+    panic_if(r < 0 || r >= (int)(size), "snprintf failed for %s with %d\n", fmt, r); \
+} while(0)
+
 #endif /* !__UTILS_H__ */
