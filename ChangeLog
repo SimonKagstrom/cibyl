@@ -1,4 +1,18 @@
 Cibyl (19)
+	* Added more sanity checks throughout the code, e.g., for snprintfs
+
+	* Implemented splitting classes for C++ as well. This is needed as a
+	workaround for blackberry problems.
+
+	* Implemented call a table hierarchy in the C++ translator. This is
+	needed as a workaround for problems on some phones
+
+	* Added a compiler option to implement 8- and 16-bit loads and stores
+	through subroutines instead of static methods in the runtime
+	support. This should improve performance a bit
+
+	* Mark the instructions used in each function
+
 	* Implemented symbol exporting to Java with the CIBYL_EXPORT_SYMBOL
 	macro and allow generation of these interfaces by the translator
 
