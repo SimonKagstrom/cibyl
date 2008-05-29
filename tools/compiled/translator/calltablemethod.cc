@@ -12,6 +12,7 @@
 #include <javamethod.hh>
 #include <javamethod.hh>
 #include <controller.hh>
+#include <config.hh>
 #include <emit.hh>
 
 CallTableMethod::CallTableMethod(int maxMethods, cibyl_exported_symbol_t *exp_syms,
@@ -57,33 +58,16 @@ bool CallTableMethod::pass1()
   return true;
 }
 
-bool CallTableMethod::pass2()
+void CallTableMethod::generateMethod(const char *name,
+                                     int start, int end)
 {
-  emit->generic("class CibylCallTable {\n");
-
-  /* If it exists, generate a table of exported symbols */
-  if (this->exp_syms)
-    {
-      emit->generic(" public static final int getAddressByName(String name) throws Exception {\n");
-
-      for (unsigned int i = 0; i < this->n_exp_syms; i++)
-        {
-          emit->generic("    if ( name == \"%s\") return 0x%x;\n",
-                        elf->getCibylStrtabString(this->exp_syms[i].name),
-                        this->exp_syms[i].addr);
-        }
-
-      emit->generic("    else throw new Exception(name + \" is not exported \");\n"
-                    " }\n\n");
-    }
-
-  emit->generic("  public static final int call(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {\n"
+  emit->generic("  public static final int %s(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {\n"
                 "    int v0 = 0;\n"
-                "    switch(address) {\n"
-                );
+                "    switch(address) {\n",
+                name);
 
   /* For each method, output a call to it */
-  for (int i = 0; i < this->n_methods; i++)
+  for (int i = start; i < end; i++)
     {
       JavaMethod *mt = this->methods[i];
       JavaClass *cl;
@@ -119,7 +103,77 @@ bool CallTableMethod::pass2()
                 "    }\n"
                 "    return v0;\n"
                 "  }\n"
-                "}\n"
                 );
+}
+
+void CallTableMethod::generateHierarchy(unsigned int n)
+{
+  int methods_per_level = this->n_methods / n;
+  const char *else_str = "";
+  char buf[80];
+  unsigned int i;
+
+  panic_if(n >= (unsigned int)this->n_methods,
+           "%d methods in the hierarchy and only %d methods totally\n",
+           n, this->n_methods);
+
+  emit->generic("  public static final int call(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {\n");
+  for (i = 0; i < n-1; i++)
+    {
+      JavaMethod *first_mt = this->methods[i * methods_per_level ];
+      JavaMethod *last_mt = this->methods[(i+1) * methods_per_level ];
+
+      xsnprintf(buf, 80, "call%d", i);
+
+      emit->generic("    %s if (address >= 0x%x && address < 0x%x) \n"
+                    "       return CibylCallTable.%s(address, sp, a0, a1, a2, a3);\n",
+                    else_str, first_mt->getAddress(), last_mt->getAddress(), buf);
+      else_str = "else";
+    }
+  /* And the last */
+  xsnprintf(buf, 80, "call%d", i);
+  emit->generic("    %s \n"
+                "       return CibylCallTable.%s(address, sp, a0, a1, a2, a3);\n",
+                else_str, buf);
+
+  emit->generic("  }\n\n");
+
+  /* And actually generate the methods */
+  for (i = 0; i < n-1; i++)
+    {
+      xsnprintf(buf, 80, "call%d", i);
+      this->generateMethod(buf, i * methods_per_level, (i+1) * methods_per_level);
+    }
+  xsnprintf(buf, 80, "call%d", i);
+  this->generateMethod(buf, i * methods_per_level, this->n_methods);
+}
+
+bool CallTableMethod::pass2()
+{
+  emit->generic("class CibylCallTable {\n");
+
+  /* If it exists, generate a table of exported symbols */
+  if (this->exp_syms)
+    {
+      emit->generic(" public static final int getAddressByName(String name) throws Exception {\n");
+
+      for (unsigned int i = 0; i < this->n_exp_syms; i++)
+        {
+          emit->generic("    if ( name == \"%s\") return 0x%x;\n",
+                        elf->getCibylStrtabString(this->exp_syms[i].name),
+                        this->exp_syms[i].addr);
+        }
+
+      emit->generic("    else throw new Exception(name + \" is not exported \");\n"
+                    " }\n\n");
+    }
+
+  if (config->callTableHierarchy > 1)
+    this->generateHierarchy(config->callTableHierarchy);
+  else
+    this->generateMethod("call", 0, this->n_methods);
+
+  emit->generic("}\n");
+
   return true;
 }
