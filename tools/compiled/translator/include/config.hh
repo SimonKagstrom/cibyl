@@ -21,24 +21,31 @@ public:
   {
     this->traceRange[0] = 0;
     this->traceRange[1] = 0;
-
     this->traceStores = false;
+
+    this->threadSafe = false;
 
     this->optimizeCallTable = false;
     this->optimizePartialMemoryOps = false;
 
-    this->threadSafe = false;
-    this->splitClasses = false;
+    this->nClasses = 1;
+    this->callTableHierarchy = 1;
   }
 
+  /* Debugging */
   uint32_t traceRange[2]; /* start, end */
   bool traceStores;
 
+  /* Features */
+  bool threadSafe;
+
+  /* Optimizations */
   bool optimizeCallTable;
   bool optimizePartialMemoryOps;
 
-  bool threadSafe;
-  bool splitClasses;
+  /* Workarounds for bugs */
+  unsigned int nClasses;
+  unsigned int callTableHierarchy;
 };
 
 extern Config *config;
