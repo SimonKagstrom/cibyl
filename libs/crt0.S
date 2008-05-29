@@ -34,6 +34,9 @@ __start:
 	nop
 .end	__start
 
+CIBYL_EXPORT_SYMBOL(__start)
+
+
 .section .data0
 .globl cibyl_memdebug_start_addr	# Export to C
 .globl cibyl_memdebug_end_addr

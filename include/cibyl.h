@@ -128,6 +128,15 @@ void NOPH_panic_if(int cond, const char *fmt, ...);
       ".long 1b\n" /* String Adr */             \
       ".long " #symbol_name "\n" /* Adr */      \
       ".popsection\n")
+#else
+#define CIBYL_EXPORT_SYMBOL(symbol_name)        \
+    .pushsection .cibylstrtab, "aS";            \
+99: .asciz #symbol_name;                        \
+    .popsection;                                \
+    .pushsection .cibylexpsyms;                 \
+    .long 99b; /* String Adr */                 \
+    .long symbol_name; /* Adr */                \
+    .popsection;
 
 #endif /* __ASSEMBLER__ */
 
