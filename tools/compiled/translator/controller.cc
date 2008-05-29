@@ -246,6 +246,9 @@ bool Controller::pass0()
       int first = i * methods_per_class;
       int last = (i + 1) * methods_per_class - 1;
 
+      if (i == this->n_classes - 1)
+        last = this->n_methods-1;
+
       if (i == 0)
         xsnprintf(buf, 80, "Cibyl%s", ""); /* The first is always "Cibyl" */
       else
