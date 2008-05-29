@@ -32,7 +32,7 @@ Function::Function(const char *name, Instruction **insns,
   this->registerIndirectJumps = false;
 
   this->name = (char*)xcalloc(strlen(name) + 16, 1);
-  snprintf(this->name, strlen(name) + 16, "%s_%x", name, this->getAddress());
+  xsnprintf(this->name, strlen(name) + 16, "%s_%x", name, this->getAddress());
 
   /* Create basic blocks */
   for (int i = first_insn; i < last_insn; i++)
