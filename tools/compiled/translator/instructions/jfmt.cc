@@ -140,12 +140,16 @@ public:
   Jal(uint32_t address, int opcode, int32_t extra) : BranchInstruction(address, opcode, R_ZERO, R_ZERO, R_ZERO, extra)
   {
     this->dstMethod = NULL;
+    this->dstClass = NULL;
     this->builtin = NULL;
   }
 
   bool pass1()
   {
     this->dstMethod = controller->getMethodByAddress(this->extra << 2);
+    panic_if(!this->dstMethod, "No method found for jal to 0x%x\n", this->extra << 2);
+
+    this->dstClass = controller->getClassByMethodName(this->dstMethod->getName());
 
     if (this->delayed)
       this->delayed->pass1();
@@ -181,7 +185,7 @@ public:
       {
 	emit->bc_pushregister( reg );
       }
-    emit->bc_invokestatic("%s/%s", "Cibyl", this->dstMethod->getJavaMethodName());
+    emit->bc_invokestatic("%s/%s", dstClass->getName(), this->dstMethod->getJavaMethodName());
 
     if (this->dstMethod->clobbersReg(R_V1))
       {
@@ -224,6 +228,7 @@ public:
 
 protected:
   JavaMethod *dstMethod;
+  JavaClass *dstClass;
   Builtin *builtin;
 };
 
