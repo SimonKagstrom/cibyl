@@ -104,6 +104,11 @@ public:
     return this->delayed;
   }
 
+  bool hasDelayed()
+  {
+    return this->delayed != NULL;
+  }
+
   void setPrefix(Instruction *prefix)
   {
     this->prefix = prefix;

@@ -47,6 +47,11 @@ public:
     return this->usedInsns[op];
   }
 
+  virtual size_t getBytecodeSize(void)
+  {
+    return this->bc_size;
+  };
+
   JavaMethod *parent;
 protected:
   void markOpcodeUsed(mips_opcode_t op)
@@ -59,6 +64,8 @@ protected:
   int registerDestinations[N_REGS];
   int registerSources[N_REGS];
   int n_bbs;
+
+  size_t bc_size;
 
   BasicBlock **bbs;
   char *name;

@@ -88,6 +88,11 @@ Function::Function(const char *name, Instruction **insns,
       n_bbs++;
     }
   this->n_bbs = n_bbs;
+
+  /* Fixup the bytecode size */
+  this->bc_size = 0;
+  for (int i = 0; i < this->n_bbs; i++)
+    this->bc_size += this->bbs[i]->getBytecodeSize();
 }
 
 Function::~Function()

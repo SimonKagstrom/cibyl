@@ -49,6 +49,11 @@ public:
   {
     return this->addToRegisterUsage(this->rs, p) + this->addToRegisterUsage(R_MEM, p);
   };
+
+  virtual size_t bytecodeSize(void)
+  {
+    return 13;
+  };
 protected:
   const char *bc;
 };
@@ -140,6 +145,11 @@ public:
     emit->bc_popregister( this->rt );
     return true;
   }
+
+  virtual size_t bytecodeSize(void)
+  {
+    return 11;
+  };
 };
 
 class SW : public StoreXX
@@ -167,6 +177,11 @@ public:
     emit->bc_iastore();
     return true;
   }
+
+  virtual size_t bytecodeSize(void)
+  {
+    return 11;
+  };
 };
 
 class LWc1 : public LoadXX

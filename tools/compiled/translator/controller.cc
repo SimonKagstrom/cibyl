@@ -236,40 +236,55 @@ bool Controller::pass0()
         this->callTableMethod->addMethod(this->methods[i]);
     }
 
-  /* And the (single) class */
-  this->n_classes = config->nClasses;
-  this->classes = (JavaClass**)xcalloc(this->n_classes, sizeof(JavaClass*));
-  for (i = 0; i < this->n_classes; i++)
-    {
-      int methods_per_class = this->n_methods / config->nClasses;
-      char buf[80];
-      int first = i * methods_per_class;
-      int last = (i + 1) * methods_per_class - 1;
-
-      if (i == this->n_classes - 1)
-        last = this->n_methods-1;
-
-      if (i == 0)
-        xsnprintf(buf, 80, "Cibyl%s", ""); /* The first is always "Cibyl" */
-      else
-        xsnprintf(buf, 80, "Cibyl%d", i);
-      this->classes[i] = new JavaClass(buf, this->methods,
-                                       first, last);
-
-      /* Setup the mapping between methods and classes */
-      for (int j = first; j <= last; j++) /* last is the last "real" method... */
-        {
-          JavaMethod *mt = this->methods[j];
-
-          ght_insert(this->method_to_class, this->classes[i],
-                     strlen(mt->getName()), mt->getName());
-        }
-    }
-
+  /* And the classes */
+  this->allocateClasses();
   this->syscalls = (Syscall**)xcalloc(sizeof(Syscall*),
                                       elf->getSection(".cibylstrtab")->size);
 
   return true;
+}
+
+/* Called by the constructor to setup classes */
+void Controller::allocateClasses()
+{
+  int first = 0;
+  int last = 0;
+  int n = 0;
+
+  this->classes = NULL;
+  while(last < this->n_methods)
+    {
+      char buf[80];
+      size_t size = 0;
+
+      this->classes = (JavaClass**)xrealloc(this->classes, (n+1) * sizeof(JavaClass*));
+      while (size < config->classSizeLimit &&
+             last < this->n_methods)
+        {
+          size += this->methods[last]->getBytecodeSize();
+          last++;
+        }
+
+      if (n == 0)
+        xsnprintf(buf, 80, "Cibyl%s", ""); /* The first is always "Cibyl" */
+      else
+        xsnprintf(buf, 80, "Cibyl%d", n);
+      this->classes[n] = new JavaClass(buf, this->methods,
+                                       first, last-1);
+
+      /* Setup the mapping between methods and classes */
+      for (int j = first; j < last; j++) /* last is the last "real" method... */
+        {
+          JavaMethod *mt = this->methods[j];
+
+          ght_insert(this->method_to_class, this->classes[n],
+                     strlen(mt->getName()), mt->getName());
+        }
+      first = last;
+      n++;
+    }
+
+  this->n_classes = n;
 }
 
 Syscall *Controller::getSyscall(uint32_t value)
@@ -701,8 +716,8 @@ static void parse_config(Config *cfg, const char *config_str)
         cfg->optimizeCallTable = int_val == 0 ? false : true;
       if (strcmp(p, "optimize_partial_memory_operations") == 0)
         cfg->optimizePartialMemoryOps = int_val == 0 ? false : true;
-      if (strcmp(p, "n_classes") == 0)
-        cfg->nClasses = int_val;
+      if (strcmp(p, "class_size_limit") == 0)
+        cfg->classSizeLimit = int_val;
       if (strcmp(p, "call_table_hierarchy") == 0)
         cfg->callTableHierarchy = int_val;
 

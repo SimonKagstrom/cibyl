@@ -47,6 +47,11 @@ JavaMethod::JavaMethod(Function **fns,
   memset(this->registerUsage, 0, sizeof(this->registerUsage));
   this->n_exceptionHandlers = 0;
   this->exceptionHandlers = NULL;
+
+  /* Fixup the bytecode size */
+  this->bc_size = 0;
+  for (int i = 0; i < this->n_functions; i++)
+    this->bc_size += this->functions[i]->getBytecodeSize();
 }
 
 JavaMethod::~JavaMethod()

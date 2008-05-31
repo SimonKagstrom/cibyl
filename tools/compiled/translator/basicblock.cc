@@ -18,12 +18,28 @@ BasicBlock::BasicBlock(Instruction **insns,
 		       bb_type_t type,
 		       int first, int last) : CodeBlock()
 {
+  panic_if(first < 0 || last < 0 || first > last,
+           "Basic block constructed with wrong instructions %d to %d\n", first, last);
+
   this->instructions = &(insns[first]);
   this->n_insns = last - first;
   this->type = type;
 
   this->address = this->instructions[0]->getAddress();
   this->size = this->n_insns * 4;
+
+  /* Fixup the bytecode size */
+  this->bc_size = 0;
+  for (int i = 0; i < n_insns; i++)
+    {
+      Instruction *insn = this->instructions[i];
+
+      this->bc_size += insn->getBytecodeSize();
+      if (insn->hasPrefix())
+        this->bc_size += insn->getPrefix()->getBytecodeSize();
+      if (insn->hasDelayed())
+        this->bc_size += insn->getDelayed()->getBytecodeSize();
+    }
 }
 
 bool BasicBlock::pass1()

@@ -69,6 +69,8 @@ public:
   }
 
 private:
+  void allocateClasses();
+
   char *resolveStrtabAddress(char *strtab, char *offset);
   unsigned long getSyscallFileLong(void *_p, int offset);
   void readSyscallDatabase(const char *filename);

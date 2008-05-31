@@ -28,7 +28,7 @@ public:
     this->optimizeCallTable = false;
     this->optimizePartialMemoryOps = false;
 
-    this->nClasses = 1;
+    this->classSizeLimit = 16384; /* Pretty arbitrary value! */
     this->callTableHierarchy = 1;
   }
 
@@ -44,7 +44,7 @@ public:
   bool optimizePartialMemoryOps;
 
   /* Workarounds for bugs */
-  unsigned int nClasses;
+  size_t classSizeLimit;
   unsigned int callTableHierarchy;
 };
 

@@ -84,6 +84,11 @@ public:
    */
   char *addExceptionHandler(uint32_t start, uint32_t end);
 
+  virtual size_t getBytecodeSize(void)
+  {
+    return this->bc_size;
+  };
+
 protected:
   void emitLoadSubroutine(mips_opcode_t op);
   void emitStoreSubroutine(mips_opcode_t op);
@@ -101,6 +106,8 @@ protected:
 
   int n_exceptionHandlers;
   ExceptionHandler **exceptionHandlers;
+
+  size_t bc_size;
 };
 
 class CallTableMethod : public JavaMethod
@@ -123,6 +130,7 @@ public:
   {
     return (char*)"CibylCallTable/call(IIIIII)I";
   }
+
 protected:
   /* Generate a method with name @a name, with methods from @a start
    * to @a end */
