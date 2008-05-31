@@ -42,6 +42,8 @@ def doTranslation(filename, syscallDirectories):
         conf = conf + "trace_stores=1,"
     if config.doOptimizeIndirectCalls:
         conf = conf + "prune_call_table=1,"
+    conf = conf + "class_size_limit=" + str(config.classSizeLimit) + ","
+    conf = conf + "call_table_hierarchy=" + str(config.callTableHierarchy) + ","
 
     for d in config.defines:
         defines = defines + d + " "
