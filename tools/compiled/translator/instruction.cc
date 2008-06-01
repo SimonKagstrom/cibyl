@@ -179,16 +179,12 @@ Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
     case OP_BGEZAL: return new Jal(address, opcode, extra); /* BAL instructions */
 
       /* Memory handling */
-    case OP_LW: return new LW(address, opcode, rs, rt, extra);
-    case OP_SW: return new SW(address, opcode, rs, rt, extra);
-    case OP_LB: return new LoadXXSigned("ByteUnsigned", "i2b",
-					address, opcode, rs, rt, extra);
-    case OP_LBU: return new LoadXX("ByteUnsigned", address, opcode,
-				   rs, rt, extra);
-    case OP_LH:  return new LoadXXSigned("ShortUnsigned", "i2s",
-					 address, opcode, rs, rt, extra);
-    case OP_LHU: return new LoadXX("ShortUnsigned", address, opcode,
-				    rs, rt, extra);
+    case OP_LW: return new Lw(address, opcode, rs, rt, extra);
+    case OP_SW: return new Sw(address, opcode, rs, rt, extra);
+    case OP_LB: return new Lb(address, opcode, rs, rt, extra);
+    case OP_LBU: return new Lbu(address, opcode, rs, rt, extra);
+    case OP_LH:  return new Lh(address, opcode, rs, rt, extra);
+    case OP_LHU: return new Lhu(address, opcode, rs, rt, extra);
     case OP_LWL: return new LoadXX("WordLeft", address, opcode,
 				   rs, rt, extra);
     case OP_LWR: return new Nop(address);
