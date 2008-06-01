@@ -210,7 +210,7 @@ bool Controller::pass0()
   /* Create all functions and methods */
   fn_syms = elf->getFunctions();
   assert(fn_syms);
-
+  int cnt = 0;
   for (i = 0; fn_syms[i]; i++)
     {
       ElfSymbol *sym = fn_syms[i];
@@ -219,14 +219,25 @@ bool Controller::pass0()
        * will in turn create basic blocks
        */
       if (sym->addr == elf->getEntryPoint())
-        this->functions[i] = new StartFunction(sym->name, this->instructions,
+        this->functions[cnt] = new StartFunction(sym->name, this->instructions,
                                                (sym->addr - textBase) / 4,
                                                (sym->addr - textBase + sym->size) / 4 - 1);
       else
-        this->functions[i] = new Function(sym->name, this->instructions,
+        {
+          if (config->pruneUnusedFunctions && !elf->getRelocationBySymbol(sym) &&
+              sym->binding != STB_LOCAL)
+            {
+              /* This is an "orphaned" symbol, just skip it */
+              continue;
+            }
+
+        this->functions[cnt] = new Function(sym->name, this->instructions,
                                           (sym->addr - textBase) / 4,
                                           (sym->addr - textBase + sym->size) / 4 - 1);
+        }
+      cnt++;
     }
+  this->n_methods = n_functions = cnt;
 
   this->callTableMethod = new CallTableMethod(n_functions + 1,
                                               exp_syms, n);
@@ -721,6 +732,8 @@ static void parse_config(Config *cfg, const char *config_str)
         cfg->optimizeCallTable = int_val == 0 ? false : true;
       if (strcmp(p, "optimize_partial_memory_operations") == 0)
         cfg->optimizePartialMemoryOps = int_val == 0 ? false : true;
+      if (strcmp(p, "prune_unused_functions") == 0)
+        cfg->pruneUnusedFunctions = int_val == 0 ? false : true;
       if (strcmp(p, "class_size_limit") == 0)
         cfg->classSizeLimit = int_val;
       if (strcmp(p, "call_table_hierarchy") == 0)
