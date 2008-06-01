@@ -207,12 +207,10 @@ bool Controller::pass0()
       this->fixupExportedSymbols(exp_syms, n);
     }
 
-  this->callTableMethod = new CallTableMethod(n_functions + 1,
-                                              exp_syms, n);
-
   /* Create all functions and methods */
   fn_syms = elf->getFunctions();
   assert(fn_syms);
+
   for (i = 0; fn_syms[i]; i++)
     {
       ElfSymbol *sym = fn_syms[i];
@@ -228,6 +226,13 @@ bool Controller::pass0()
         this->functions[i] = new Function(sym->name, this->instructions,
                                           (sym->addr - textBase) / 4,
                                           (sym->addr - textBase + sym->size) / 4 - 1);
+    }
+
+  this->callTableMethod = new CallTableMethod(n_functions + 1,
+                                              exp_syms, n);
+  /* Create methods */
+  for (i = 0; i < n_functions; i++)
+    {
       /* 1-1 mapping */
       this->methods[i] = new JavaMethod(functions, i, i);
 
