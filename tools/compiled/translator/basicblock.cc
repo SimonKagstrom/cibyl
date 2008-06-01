@@ -73,6 +73,10 @@ bool BasicBlock::pass1()
             }
         }
 
+      /* Prepare the instruction */
+      if (!insn->pass1())
+	out = false;
+
       if ( (this->type == PROLOGUE && insn->getOpcode() == OP_SW && insn->getRs() == R_SP) ||
 	   (this->type == EPILOGUE && insn->getOpcode() == OP_LW && insn->getRs() == R_SP) )
 	{
@@ -103,10 +107,6 @@ bool BasicBlock::pass1()
 		}
 	    }
 	}
-
-      /* Prepare the instruction */
-      if (!insn->pass1())
-	out = false;
     }
 
   return out;
