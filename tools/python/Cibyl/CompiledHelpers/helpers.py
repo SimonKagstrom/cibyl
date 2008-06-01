@@ -42,6 +42,10 @@ def doTranslation(filename, syscallDirectories):
         conf = conf + "trace_stores=1,"
     if config.doOptimizeIndirectCalls:
         conf = conf + "prune_call_table=1,"
+    if config.pruneUnusedFunctions:
+        conf = conf + "prune_unused_functions=1,"
+    else:
+        conf = conf + "prune_unused_functions=0,"
     conf = conf + "class_size_limit=" + str(config.classSizeLimit) + ","
     conf = conf + "call_table_hierarchy=" + str(config.callTableHierarchy) + ","
 
