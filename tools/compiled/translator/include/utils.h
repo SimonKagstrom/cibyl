@@ -60,7 +60,7 @@ FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode);
   } while(0)
 
 #define panic_if(cond, x...) \
-  do { if (cond) panic(x); } while(0)
+  do { if ((cond)) panic(x); } while(0)
 
 static inline char *xstrdup(const char *s)
 {
