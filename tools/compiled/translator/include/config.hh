@@ -25,6 +25,7 @@ public:
 
     this->threadSafe = false;
 
+    this->optimizeInlines = true;
     this->optimizeCallTable = false;
     this->optimizePartialMemoryOps = false;
     this->pruneUnusedFunctions = true;
@@ -41,6 +42,7 @@ public:
   bool threadSafe;
 
   /* Optimizations */
+  bool optimizeInlines;
   bool optimizeCallTable;
   bool optimizePartialMemoryOps;
   bool pruneUnusedFunctions;
