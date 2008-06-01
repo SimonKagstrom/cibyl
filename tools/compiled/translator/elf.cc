@@ -49,13 +49,14 @@ void CibylElf::handleSymtab(Elf_Scn *scn)
     {
       const char *sym_name = elf_strptr(this->elf, shdr->sh_link, s->st_name);
       int type = ELF32_ST_TYPE(s->st_info);
+      int binding = ELF32_ST_BIND(s->st_info);
 
       /* Ohh... This is an interesting symbol, add it! */
       if ( type == STT_FUNC)
-        this->symbols[n_syms++] = this->functionSymbols[n_fns++] = new ElfSymbol(i, s->st_value, s->st_size,
-                                                                                 type, sym_name);
+        this->symbols[n_syms++] = this->functionSymbols[n_fns++] = new ElfSymbol(i, binding, s->st_value,
+                                                                                 s->st_size, type, sym_name);
       else if (type == STT_OBJECT || type == STT_COMMON || type == STT_TLS)
-        this->symbols[n_syms++] = this->dataSymbols[n_datas++] = new ElfSymbol(i, (uint32_t)s->st_value,
+        this->symbols[n_syms++] = this->dataSymbols[n_datas++] = new ElfSymbol(i, binding, (uint32_t)s->st_value,
                                                                                (uint32_t)s->st_size,
                                                                                type, sym_name);
       s++;
@@ -96,6 +97,7 @@ CibylElf::CibylElf(const char *filename)
 
   this->symtable = ght_create(1024);
   this->sections_by_name = ght_create(32);
+  this->relocations_by_symbol = ght_create(512);
 
   panic_if(elf_version(EV_CURRENT) == EV_NONE,
            "ELF version failed on %s\n", filename);
@@ -184,7 +186,11 @@ CibylElf::CibylElf(const char *filename)
                                                    (void*)&sym_idx);
 
               assert(cur < max_relocs);
-              this->relocs[cur++] = new ElfReloc(s->r_offset, type, sym);
+              this->relocs[cur] = new ElfReloc(s->r_offset, type, sym);
+              if (sym)
+                ght_insert(this->relocations_by_symbol, (void*)this->relocs[cur],
+                           sizeof(ElfSymbol*), (void*)sym);
+              cur++;
               s++;
             }
         }
@@ -252,4 +258,10 @@ ElfReloc **CibylElf::getRelocations()
 int CibylElf::getNumberOfRelocations()
 {
   return this->n_relocs;
+}
+
+ElfReloc *CibylElf::getRelocationBySymbol(ElfSymbol *sym)
+{
+  return (ElfReloc*)ght_get(this->relocations_by_symbol,
+                            sizeof(ElfSymbol*), sym);
 }
