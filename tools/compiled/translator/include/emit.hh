@@ -113,6 +113,10 @@ public:
 
   void bc_i2s() { this->writeIndent("i2s"); }
 
+  void bc_i2f() { this->writeIndent("i2f"); }
+
+  void bc_f2i() { this->writeIndent("f2i"); }
+
   void bc_swap() { this->writeIndent("swap"); }
 
   void bc_iaload() { this->writeIndent("iaload"); }

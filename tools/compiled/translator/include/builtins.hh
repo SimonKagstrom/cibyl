@@ -55,7 +55,7 @@ public:
   /**
    * Return a builtin object if there is one
    */
-  Builtin *match(const char *name);
+  Builtin *match(Instruction *insn, const char *name);
 
 private:
   Builtin *builtins;
