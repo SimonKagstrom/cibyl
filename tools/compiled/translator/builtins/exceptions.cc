@@ -2,16 +2,13 @@
  *
  * Copyright (C) 2008,  Simon Kagstrom
  *
- * Filename:      exceptions.hh
+ * Filename:      exceptions.cc
  * Author:        Simon Kagstrom <simon.kagstrom@gmail.com>
  * Description:   Impl. of exception builtins
  *
  * $Id:$
  *
  ********************************************************************/
-#ifndef __EXCEPTIONS_HH__
-#define __EXCEPTIONS_HH__
-
 #include <javamethod.hh>
 #include <controller.hh>
 #include <builtins.hh>
@@ -87,5 +84,3 @@ public:
     return true;
   }
 };
-
-#endif /* !__EXCEPTIONS_HH__ */
