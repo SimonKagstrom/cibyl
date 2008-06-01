@@ -161,7 +161,7 @@ public:
 	return false;
       }
 
-    this->builtin = controller->matchBuiltin(this->dstMethod->getName());
+    this->builtin = controller->matchBuiltin(this, this->dstMethod->getName());
     if (this->builtin)
       return this->builtin->pass1(this);
 
