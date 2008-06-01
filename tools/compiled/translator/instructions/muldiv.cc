@@ -17,27 +17,29 @@ public:
 	 MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd, int32_t extra) : Instruction(address, opcode, rs, rt, rd, extra)
   {
     this->bc = what;
+    this->using_hi = false;
+    this->using_lo = 0x123;
   }
 
   bool pass1()
   {
+    JavaMethod *my = controller->getMethodByAddress(this->address);
+
+    panic_if(!my,
+             "The mul/div instruction at 0x%x has no method\n",
+             this->getAddress());
+
+    if (my->opcodeIsUsed(OP_MFHI) || my->opcodeIsUsed(OP_MTHI))
+      this->using_hi = true;
+
+    if (my->opcodeIsUsed(OP_MFLO) || my->opcodeIsUsed(OP_MTLO))
+      this->using_lo = true;
+
     return true;
   }
 
   bool pass2()
   {
-    JavaMethod *my = controller->getMethodByAddress(this->address);
-
-    if (!my)
-      {
-	emit->error("The instruction at 0x%x has no method\n",
-		    this->getAddress());
-	return false;
-      }
-    /* FIXME! Check if this instruction -only- uses HI/LO and only
-     * generate 32 bits if so
-     */
-
     emit->bc_pushregister( this->rs );
     emit->bc_pushregister( this->rt );
     emit->bc_invokestatic( "CRunTime/%s(II)J", this->bc);
@@ -65,7 +67,8 @@ public:
   {
     return 6;
   }
-private:
+protected:
+  bool using_hi, using_lo;
   const char *bc;
 };
 
@@ -79,6 +82,16 @@ public:
 
   bool pass2()
   {
+    if (this->using_lo && this->using_hi == false)
+      {
+        /* Just calculate the low parts */
+        emit->bc_pushregister( this->rs );
+        emit->bc_pushregister( this->rt );
+        emit->bc_imul();
+        emit->bc_popregister( R_LO );
+        return true;
+      }
+    /* hi is used, we need to generate both */
     emit->bc_pushregister( this->rs );
     emit->bc_i2l( );
     emit->bc_pushregister( this->rt );
@@ -93,6 +106,18 @@ public:
     emit->bc_popregister( R_LO );
     return true;
   }
+
+  int fillDestinations(int *p)
+  {
+    if (this->using_lo == false && this->using_hi == false)
+      emit->warning("Neither hi and lo are used for mult at 0x%x\n",
+                    this->getAddress());
+
+    if (this->using_lo && this->using_hi == false)
+      return this->addToRegisterUsage(R_LO, p);
+
+    return this->addToRegisterUsage(R_LO, p) + this->addToRegisterUsage(R_HI, p);
+  }
 };
 
 
@@ -106,6 +131,24 @@ public:
 
   bool pass2()
   {
+    if (this->using_lo == true && this->using_hi == false)
+      {
+        /* Only div */
+        emit->bc_pushregister( this->rs );
+        emit->bc_pushregister( this->rt );
+        emit->bc_idiv();
+        emit->bc_popregister( R_LO );
+        return true;
+      }
+    if (this->using_lo == false && this->using_hi == true)
+      {
+        /* Only mod */
+        emit->bc_pushregister( this->rs );
+        emit->bc_pushregister( this->rt );
+        emit->bc_irem();
+        emit->bc_popregister( R_HI );
+        return true;
+      }
     emit->bc_pushregister( this->rs );
     emit->bc_pushregister( this->rt );
     emit->bc_dup2( );
@@ -114,6 +157,22 @@ public:
     emit->bc_irem( );
     emit->bc_popregister( R_HI );
     return true;
+  }
+
+  int fillDestinations(int *p)
+  {
+    int out = 0;
+
+    if (this->using_lo == false && this->using_hi == false)
+      emit->warning("Neither hi and lo are used for div at 0x%x\n",
+                    this->getAddress());
+
+    if (this->using_lo)
+      out += this->addToRegisterUsage(R_LO, p);
+    if (this->using_hi)
+      out += this->addToRegisterUsage(R_HI, p);
+
+    return out;
   }
 };
 
