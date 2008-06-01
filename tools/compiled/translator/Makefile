@@ -27,7 +27,26 @@ clean:
 
 instruction.oo: instructions/fpu.cc instructions/memory.cc instructions/rfmt.cc \
                 instructions/ifmt.cc instructions/muldiv.cc instructions/set.cc \
-                instructions/jfmt.cc instructions/nop.cc instructions/syscall.cc
+                instructions/jfmt.cc instructions/nop.cc instructions/syscall.cc \
+                include/utils.h include/instruction.hh include/entity.hh include/elf.hh \
+		include/config.hh include/mips.hh
+
+controller.oo: controller.cc \
+		include/utils.h include/instruction.hh include/entity.hh include/elf.hh \
+		include/config.hh include/javamethod.hh include/function.hh \
+                include/javaclass.hh
+
+function.oo: function.cc include/basicblock.hh \
+		include/utils.h include/instruction.hh include/entity.hh include/elf.hh \
+		include/config.hh include/function.hh
+
+javamethod.oo: javamethod.cc include/basicblock.hh \
+		include/utils.h include/instruction.hh include/entity.hh include/elf.hh \
+		include/config.hh include/javamethod.hh include/function.hh
+
+
+builtins.oo: builtins.cc builtins/exceptions.cc builtins/softfloat.cc \
+		include/builtins.hh
 
 %.oo: %.cc
 	$(HOST_CXX) -Ilib/libghthash-0.6.2/src/ $(HOST_CFLAGS) -c -o $@ $<
