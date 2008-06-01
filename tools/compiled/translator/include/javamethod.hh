@@ -74,6 +74,14 @@ public:
     return this->n_registersToPass;
   }
 
+  bool opcodeIsUsed(mips_opcode_t op)
+  {
+    for (int i = 0; i < this->n_functions; i++)
+      if (this->functions[i]->opcodeIsUsed(op))
+        return true;
+    return false;
+  }
+
   /**
    * Add an exception handler between @start and @end
    *
