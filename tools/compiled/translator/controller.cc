@@ -771,7 +771,6 @@ int main(int argc, const char **argv)
   /* Setup configuration */
   config = new Config();
   parse_config(config, argv[1] + strlen("config:"));
-  config->optimizePartialMemoryOps = true;
 
   /* Setup defines */
   for (n = 2; n < argc && strncmp(argv[n], "-D", 2) == 0; n++)
