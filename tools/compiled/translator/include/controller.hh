@@ -55,9 +55,9 @@ public:
     return this->currentInstruction;
   }
 
-  Builtin *matchBuiltin(const char *name)
+  Builtin *matchBuiltin(Instruction *insn, const char *name)
   {
-    return this->builtins->match(name);
+    return this->builtins->match(insn, name);
   }
 
   JavaClass *getClassByMethodName(const char *name)
