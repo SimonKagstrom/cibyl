@@ -1,4 +1,9 @@
 Cibyl (19)
+	* Prune unused functions also in the C++ translator
+
+	* Implemented the 32-bit mul/div optimization for the C++ translator
+	as well. This is on by default and cannot be turned off
+
 	* Added more sanity checks throughout the code, e.g., for snprintfs
 
 	* Implemented splitting classes for C++ as well. This is needed as a
