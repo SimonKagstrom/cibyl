@@ -23,9 +23,10 @@ class CibylElf;
 class ElfSymbol
 {
 public:
-  ElfSymbol(int index, uint32_t addr, uint32_t size, int type, const char *name)
+  ElfSymbol(int index, int binding, uint32_t addr, uint32_t size, int type, const char *name)
   {
     this->index = index;
+    this->binding = binding;
     this->addr = addr;
     this->size = size;
     this->type = type;
@@ -33,6 +34,7 @@ public:
   }
 
   int index;
+  int binding;
   uint32_t addr;
   uint32_t size;
   int type;
@@ -114,6 +116,8 @@ public:
                                 strlen(name), name);
   }
 
+  ElfReloc *getRelocationBySymbol(ElfSymbol *sym);
+
 private:
   void addSection(ElfSection *section);
 
@@ -135,6 +139,7 @@ private:
   ght_hash_table_t *symtable;
 
   ght_hash_table_t *sections_by_name;
+  ght_hash_table_t *relocations_by_symbol;
 
   ElfReloc **relocs;
   int n_relocs;
