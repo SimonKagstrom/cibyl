@@ -27,6 +27,7 @@ public:
 
     this->optimizeCallTable = false;
     this->optimizePartialMemoryOps = false;
+    this->pruneUnusedFunctions = true;
 
     this->classSizeLimit = 16384; /* Pretty arbitrary value! */
     this->callTableHierarchy = 1;
@@ -42,6 +43,7 @@ public:
   /* Optimizations */
   bool optimizeCallTable;
   bool optimizePartialMemoryOps;
+  bool pruneUnusedFunctions;
 
   /* Workarounds for bugs */
   size_t classSizeLimit;
