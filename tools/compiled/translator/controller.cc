@@ -402,10 +402,6 @@ void Controller::lookupDataAddresses(uint32_t *data, int n_entries)
               mt->addJumptabLabel(v);
               this->addJumptabLabel(v);
             }
-          panic_if(!found_method, "Could not find method for address 0x%08x, which is within\n"
-                   "text start and text end (0x%08x...0x%08x)\n",
-                   v, text_start, text_end);
-
         }
     }
 }
