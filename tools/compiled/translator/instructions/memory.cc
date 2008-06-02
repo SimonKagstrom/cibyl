@@ -264,7 +264,7 @@ class Lb : public PartialLoad
 {
 public:
   Lb(uint32_t address, int opcode,
-     MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : PartialLoad(8, true, "Short", address, opcode, rs, rt, extra)
+     MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : PartialLoad(8, true, "Byte", address, opcode, rs, rt, extra)
   {
   }
 };
