@@ -178,10 +178,14 @@ protected:
       return LoadXX::pass2();
     if (mt->getBytecodeSize() > 32768)
       {
+        static JavaMethod *warn_method = NULL;
+
         /* Bytecode size too large to allow for direct inlining,
          * reverting to normal */
-        emit->warning("Bytecode size in %s is too large for direct inlining of lb/lh",
-                      mt->getName());
+        if (warn_method != mt)
+          emit->warning("Bytecode size for %s (%d) too large for inlining of lb/lh",
+                        mt->getName(), mt->getBytecodeSize());
+        warn_method = mt;
         return LoadXX::pass2();
       }
 
