@@ -183,7 +183,7 @@ protected:
         /* Bytecode size too large to allow for direct inlining,
          * reverting to normal */
         if (warn_method != mt)
-          emit->warning("Bytecode size for %s (%d) too large for inlining of lb/lh",
+          emit->warning("Bytecode size for %s (%d) too large for inlining of lb/lh\n",
                         mt->getName(), mt->getBytecodeSize());
         warn_method = mt;
         return LoadXX::pass2();
