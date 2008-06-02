@@ -326,7 +326,8 @@ public:
   LWc1(uint32_t address, int opcode,
        MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : LoadXX("", address, opcode, rs, rt, extra)
   {
-    assert(rt >= R_F0 && rt <= R_F31);
+    panic_if(rt < R_F0 || rt > R_F31,
+             "LWc1 at 0x%x called with non-float %d as argument\n", this->address, rt);
   }
 
   bool pass2()
@@ -342,7 +343,8 @@ public:
   SWc1(uint32_t address, int opcode,
        MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : StoreXX("", address, opcode, rs, rt, extra)
   {
-    assert(rt >= R_F0 && rt <= R_F31);
+    panic_if(rt < R_F0 || rt > R_F31,
+             "SWc1 at 0x%x called with non-float %d as argument\n", this->address, rt);
   }
 
   bool pass2()
