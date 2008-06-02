@@ -250,7 +250,7 @@ void Emit::warning(const char *fmt, ...)
 
   this->output("; WARNING: ");
   this->output(buf);
-  fprintf(stderr, "WARNING: %s\n", buf);
+  fprintf(stderr, "WARNING: %s", buf);
 }
 
 
