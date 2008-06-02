@@ -97,6 +97,10 @@ public:
 
   void bc_dup() { this->writeIndent("dup"); }
 
+  void bc_dup_x1() { this->writeIndent("dup_x1"); }
+
+  void bc_dup_x2() { this->writeIndent("dup_x2"); }
+
   void bc_dup2() { this->writeIndent("dup2"); }
 
   void bc_pop() { this->writeIndent("pop"); }

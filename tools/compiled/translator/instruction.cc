@@ -188,10 +188,8 @@ Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
     case OP_LWL: return new LoadXX("WordLeft", address, opcode,
 				   rs, rt, extra);
     case OP_LWR: return new Nop(address);
-    case OP_SB: return new StoreXX("Byte", address, opcode,
-				   rs, rt, extra);
-    case OP_SH: return new StoreXX("Short", address, opcode,
-				   rs, rt, extra);
+    case OP_SB: return new Sb(address, opcode, rs, rt, extra);
+    case OP_SH: return new Sh(address, opcode, rs, rt, extra);
     case OP_SWL: return new StoreXX("WordLeft", address, opcode,
 				    rs, rt, extra);
     case OP_SWR: return new Nop(address);
