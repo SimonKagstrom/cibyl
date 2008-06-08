@@ -300,6 +300,13 @@ void Controller::allocateClasses()
       n++;
     }
 
+  /* Add the call table method */
+  this->classes = (JavaClass**)xrealloc(this->classes, (n+1) * sizeof(JavaClass*));
+  this->classes[n] = new CallTableClass("CibylCallTable", (JavaMethod**)&this->callTableMethod, 0, 0);
+  ght_insert(this->method_to_class, this->classes[n],
+             strlen(this->callTableMethod->getName()), this->callTableMethod->getName());
+  n++;
+
   this->n_classes = n;
 }
 
@@ -648,15 +655,12 @@ bool Controller::pass2()
 
   for (int i = 0; i < this->n_classes; i++)
     {
-      char buf[80];
-      xsnprintf(buf, 80, "%s.j", this->classes[i]->getName());
-      emit->setOutputFile(open_file_in_dir(this->dstdir, buf, "w"));
+      emit->setOutputFile(open_file_in_dir(this->dstdir,
+                                           this->classes[i]->getFileName(), "w"));
 
       if (this->classes[i]->pass2() != true)
         out = false;
     }
-  emit->setOutputFile(open_file_in_dir(this->dstdir, "CibylCallTable.java", "w"));
-  this->callTableMethod->pass2();
 
   syscallWrappers = new SyscallWrapperGenerator(this->defines, this->dstdir,
                                                 this->n_syscall_dirs, this->syscall_dirs,

@@ -66,6 +66,8 @@ parser.add_option("-D", "--define", action="callback", help="""define a value fo
 arguments""",
 		  type="str", nargs=1,
 		  callback=defineCallback)
+parser.add_option("--thread-safe", action="store_true", dest="threadSafe", default=False,
+				  help="""Produce thread-safe output""")
 parser.add_option("--trace-function-calls", action="store_true", dest="traceFunctionCalls", default=False,
 				  help="Generate a trace of function calls")
 parser.add_option("--trace-range", dest="traceRange", default=None,
@@ -169,6 +171,7 @@ config.doPeepholeOptimize = options.peepholeOptimize
 config.doRegisterValueTracking = options.registerValueTracking
 
 config.pruneUnusedFunctions = options.pruneUnusedFunctions
+config.threadSafe = options.threadSafe
 
 if options.onlyTranslate:
 	config.onlyTranslate = True

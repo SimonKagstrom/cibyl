@@ -1,4 +1,8 @@
 Cibyl (19)
+	* Added option to control thread safety and reorganized the code to
+	support this. This is still off by default but can be enabled by the
+	--thread-safe option to cibyl-mips2java
+
 	* Inlining of builtins (softfloat operations) has now been implemented
 	in the C++ translator as well. Most important optimizations except for
 	function colocation are now present in the C++ translator

@@ -44,12 +44,15 @@ static int method_search_cmp(const void *_a, const void *_b)
 /* Class members */
 JavaClass::JavaClass(const char *name, JavaMethod **in_methods, int first, int last) : CodeBlock()
 {
-  assert( last >= first );
+  panic_if(last < first,
+           "Creating a class with methods from %d to %d\n", first, last);
 
   this->methods = &(in_methods[first]);
   this->n_methods = last - first + 1;
 
   this->name = xstrdup(name);
+  this->filename = (char*)xcalloc(strlen(name) + 8, sizeof(char));
+  xsnprintf(this->filename, strlen(name) + 8, "%s.j", this->name);
 
   /* Sort the methods */
   qsort((void*)this->methods, this->n_methods, sizeof(JavaMethod*),
@@ -118,4 +121,42 @@ bool JavaClass::pass2()
 	out = false;
     }
   return out;
+}
+
+
+CallTableClass::CallTableClass(const char *name, JavaMethod **methods, int first, int last) : JavaClass(name, methods, first, last)
+{
+  free(this->filename); /* Alloced by the base constructor */
+
+  this->filename = (char*)xcalloc(strlen(name) + 8, sizeof(char));
+  xsnprintf(this->filename, strlen(name) + 8, "%s.java", this->name);
+}
+
+
+bool CallTableClass::pass1()
+{
+  return this->methods[0]->pass1();
+}
+
+bool CallTableClass::pass2()
+{
+  bool out = true;
+
+  emit->generic("class CibylCallTable {\n");
+
+  out = this->methods[0]->pass2();
+
+  emit->generic("}\n");
+
+  return out;
+}
+
+JavaMethod *CallTableClass::getMethodByAddress(uint32_t addr)
+{
+  return NULL;
+}
+
+JavaMethod *CallTableClass::getMethodByAddress(uint32_t addr, int *idx)
+{
+  return NULL;
 }

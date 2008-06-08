@@ -42,6 +42,8 @@ def doTranslation(filename, syscallDirectories):
         conf = conf + "trace_stores=1,"
     if config.doOptimizeIndirectCalls:
         conf = conf + "prune_call_table=1,"
+    if config.threadSafe:
+        conf = conf + "thread_safe=1,"
     if config.pruneUnusedFunctions:
         conf = conf + "prune_unused_functions=1,"
     else:

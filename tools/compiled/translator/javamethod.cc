@@ -19,6 +19,10 @@
 JavaMethod::JavaMethod(Function **fns,
 		       int first, int last) : CodeBlock()
 {
+  panic_if(first > last,
+           "First and last %d:%d in method constructor are invalid\n",
+           first, last);
+
   if (fns)
     {
       this->functions = &(fns[first]);
@@ -73,10 +77,22 @@ char *JavaMethod::getJavaMethodName()
     this->javaName[o] = 'I';
   this->javaName[o++] = ')';
 
-  if ( this->clobbersReg(R_V0) )
-    this->javaName[o++] = 'I';
+  if ( config->threadSafe )
+    {
+      if ( this->clobbersReg(R_V0) && this->clobbersReg(R_V1) )
+        this->javaName[o++] = 'J'; /* long */
+      else if ( this->clobbersReg(R_V0) || this->clobbersReg(R_V1) )
+        this->javaName[o++] = 'I';
+      else
+        this->javaName[o++] = 'V';
+    }
   else
-    this->javaName[o++] = 'V';
+    {
+      if ( this->clobbersReg(R_V0) )
+        this->javaName[o++] = 'I';
+      else
+        this->javaName[o++] = 'V';
+    }
 
   return this->javaName;
 }
@@ -301,18 +317,49 @@ bool JavaMethod::pass2()
     }
 
   emit->bc_label("__CIBYL_function_return");
-  if (this->clobbersReg(R_V1))
+  if (config->threadSafe)
     {
-      emit->bc_pushregister(R_V1);
-      emit->bc_putstatic("CRunTime/saved_v1 I");
-    }
-  if (this->clobbersReg(R_V0))
-    {
-      emit->bc_pushregister(R_V0);
-      emit->bc_ireturn();
+      if (this->clobbersReg(R_V1) && this->clobbersReg(R_V0))
+        {
+          /* Return a 64-bit value */
+          emit->bc_pushregister(R_V1);
+          emit->bc_i2l();
+          emit->bc_pushconst(32);
+          emit->bc_lshl();
+          emit->bc_pushregister(R_V0);
+          emit->bc_i2l();
+          emit->bc_lor(); /* push (v1 << 32) | v0 */
+          emit->bc_lreturn();
+        }
+      else if (this->clobbersReg(R_V1)) /* Only v1 */
+        {
+          emit->bc_pushregister(R_V1);
+          emit->bc_ireturn();
+        }
+      else if (this->clobbersReg(R_V0)) /* Only v0 */
+        {
+          emit->bc_pushregister(R_V0);
+          emit->bc_ireturn();
+        }
+      else
+        emit->bc_return();
     }
   else
-    emit->bc_return();
+    {
+      /* Not thread safe */
+      if (this->clobbersReg(R_V1))
+        {
+          emit->bc_pushregister(R_V1);
+          emit->bc_putstatic("CRunTime/saved_v1 I");
+        }
+      if (this->clobbersReg(R_V0))
+        {
+          emit->bc_pushregister(R_V0);
+          emit->bc_ireturn();
+        }
+      else
+        emit->bc_return();
+    }
 
   emit->generic(".end method ; %s\n", this->getJavaMethodName());
 

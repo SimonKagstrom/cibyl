@@ -74,66 +74,6 @@ public:
 };
 
 
-class Jalr : public BranchInstruction
-{
-public:
-  Jalr(uint32_t address, int opcode, MIPS_register_t rs) : BranchInstruction(address, opcode, rs, R_ZERO, R_ZERO, 0)
-  {
-    this->dstMethod = NULL;
-  }
-
-  bool pass1()
-  {
-    this->dstMethod = controller->getCallTableMethod();
-
-    assert(this->dstMethod);
-
-    if (this->delayed)
-      this->delayed->pass1();
-
-    return true;
-  }
-
-  bool pass2()
-  {
-    void *it;
-
-    emit->bc_pushregister(this->rs);
-    if (this->delayed)
-      this->delayed->pass2();
-    for (MIPS_register_t reg = this->dstMethod->getFirstRegisterToPass(&it);
-	 reg != 0;
-	 reg = this->dstMethod->getNextRegisterToPass(&it))
-      {
-	emit->bc_pushregister( reg );
-      }
-    emit->bc_invokestatic( "%s", this->dstMethod->getJavaMethodName() );
-
-    if (this->dstMethod->clobbersReg(R_V1))
-      {
-	emit->bc_getstatic("CRunTime/saved_v1 I");
-	emit->bc_popregister( R_V1 );
-      }
-    if (this->dstMethod->clobbersReg(R_V0))
-      emit->bc_popregister( R_V0 );
-
-    return true;
-  }
-
-  int fillDestinations(int *p)
-  {
-    return this->addToRegisterUsage(R_V0, p) + this->addToRegisterUsage(R_V1, p);
-  }
-
-  int fillSources(int *p)
-  {
-    return this->addToRegisterUsage(this->rs, p) + this->addToRegisterUsage(R_A0, p) + this->addToRegisterUsage(R_A1, p) + this->addToRegisterUsage(R_A2, p) + this->addToRegisterUsage(R_A3, p) + this->addToRegisterUsage(R_SP, p);
-  };
-
-private:
-  JavaMethod *dstMethod;
-};
-
 class Jal : public BranchInstruction
 {
 public:
@@ -144,12 +84,19 @@ public:
     this->builtin = NULL;
   }
 
+  Jal(uint32_t address, int opcode, MIPS_register_t rs, int32_t extra) : BranchInstruction(address, opcode, rs, R_ZERO, R_ZERO, extra)
+  {
+    Jal::Jal(address, opcode, extra);
+  }
+
   bool pass1()
   {
     this->dstMethod = controller->getMethodByAddress(this->extra << 2);
     panic_if(!this->dstMethod, "No method found for jal to 0x%x\n", this->extra << 2);
 
     this->dstClass = controller->getClassByMethodName(this->dstMethod->getName());
+    panic_if(!this->dstClass, "No class found for method %s\n",
+             this->dstMethod->getName());
 
     if (this->delayed)
       this->delayed->pass1();
@@ -175,10 +122,6 @@ public:
     if (this->delayed)
       this->delayed->pass2();
 
-    if (this->builtin)
-      return this->builtin->pass2(this);
-
-    /* Pass registers */
     for (MIPS_register_t reg = this->dstMethod->getFirstRegisterToPass(&it);
 	 reg != 0;
 	 reg = this->dstMethod->getNextRegisterToPass(&it))
@@ -187,13 +130,35 @@ public:
       }
     emit->bc_invokestatic("%s/%s", dstClass->getName(), this->dstMethod->getJavaMethodName());
 
-    if (this->dstMethod->clobbersReg(R_V1))
+    if (config->threadSafe)
       {
-	emit->bc_getstatic("CRunTime/saved_v1 I");
-	emit->bc_popregister( R_V1 );
+        if (this->dstMethod->clobbersReg(R_V1) && this->dstMethod->clobbersReg(R_V0))
+          {
+            /* We have a 64-bit value on the stack */
+            emit->bc_dup2();
+            emit->bc_pushconst(32);
+            emit->bc_lushr();
+            emit->bc_l2i(); /* v1 */
+            emit->bc_popregister( R_V1 );
+            emit->bc_l2i(); /* v0 */
+            emit->bc_popregister( R_V0 );
+          }
+        else if (this->dstMethod->clobbersReg(R_V1))
+          emit->bc_popregister( R_V1 );
+        else if (this->dstMethod->clobbersReg(R_V0))
+          emit->bc_popregister( R_V0 );
+        /* else: Nada */
       }
-    if (this->dstMethod->clobbersReg(R_V0))
-      emit->bc_popregister( R_V0 );
+    else
+      {
+        if (this->dstMethod->clobbersReg(R_V1))
+          {
+            emit->bc_getstatic("CRunTime/saved_v1 I");
+            emit->bc_popregister( R_V1 );
+          }
+        if (this->dstMethod->clobbersReg(R_V0))
+          emit->bc_popregister( R_V0 );
+      }
 
     return true;
   }
@@ -230,6 +195,36 @@ protected:
   JavaMethod *dstMethod;
   JavaClass *dstClass;
   Builtin *builtin;
+};
+
+class Jalr : public Jal
+{
+public:
+  Jalr(uint32_t address, int opcode, MIPS_register_t rs) : Jal(address, opcode, rs, 0)
+  {
+  }
+
+  bool pass1()
+  {
+    this->dstMethod = controller->getCallTableMethod();
+    panic_if(!this->dstMethod, "No method found for jalr to 0x%x\n", this->extra << 2);
+
+    this->dstClass = controller->getClassByMethodName(this->dstMethod->getName());
+    panic_if(!this->dstClass, "No class found for method %s\n",
+             this->dstMethod->getName());
+
+    if (this->delayed)
+      this->delayed->pass1();
+
+    return true;
+  }
+
+  bool pass2()
+  {
+    emit->bc_pushregister(this->rs);
+
+    return Jal::pass2();
+  }
 };
 
 

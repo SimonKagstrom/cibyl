@@ -20,9 +20,9 @@ class JavaClass : public CodeBlock
 public:
   JavaClass(const char *name, JavaMethod **methods, int first, int last);
 
-  JavaMethod *getMethodByAddress(uint32_t addr, int *idx);
+  virtual JavaMethod *getMethodByAddress(uint32_t addr, int *idx);
 
-  JavaMethod *getMethodByAddress(uint32_t addr);
+  virtual JavaMethod *getMethodByAddress(uint32_t addr);
 
   int getNumberOfMethods()
   {
@@ -37,16 +37,36 @@ public:
     return this->methods[idx];
   }
 
-  bool pass1();
+  virtual bool pass1();
 
-  bool pass2();
+  virtual bool pass2();
 
   const char *getName();
 
-private:
+  const char *getFileName()
+  {
+    return this->filename;
+  }
+
+protected:
   int n_methods;
   JavaMethod **methods;
   const char *name;
+  char *filename;
+};
+
+class CallTableClass : public JavaClass
+{
+public:
+  CallTableClass(const char *name, JavaMethod **methods, int first, int last);
+
+  virtual bool pass1();
+
+  virtual bool pass2();
+
+  virtual JavaMethod *getMethodByAddress(uint32_t addr);
+
+  virtual JavaMethod *getMethodByAddress(uint32_t addr, int *idx);
 };
 
 #endif /* !__JAVACLASS_HH__ */

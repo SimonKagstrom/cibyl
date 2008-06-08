@@ -61,10 +61,12 @@ bool CallTableMethod::pass1()
 void CallTableMethod::generateMethod(const char *name,
                                      int start, int end)
 {
-  emit->generic("  public static final int %s(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {\n"
-                "    int v0 = 0;\n"
+  const char *ret_type = config->threadSafe ? "long" : "int";
+
+  emit->generic("  public static final %s %s(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {\n"
+                "    %s ret = 0;\n"
                 "    switch(address) {\n",
-                name);
+                ret_type, name, ret_type );
 
   /* For each method, output a call to it */
   for (int i = start; i < end; i++)
@@ -80,8 +82,16 @@ void CallTableMethod::generateMethod(const char *name,
                mt->getName());
 
       emit->generic("      case 0x%x:  ", mt->getAddress());
-      if (mt->clobbersReg( R_V0 ))
-        emit->generic("v0 = ");
+      if (config->threadSafe)
+        {
+          if (mt->clobbersReg( R_V0 ) && mt->clobbersReg( R_V1) )
+            emit->generic("ret = ");
+          else if (mt->clobbersReg( R_V0 ) || mt->clobbersReg( R_V1) ) /* Only one */
+            emit->generic("ret = (int)");
+          /* else nothing */
+        }
+      else if (mt->clobbersReg( R_V0 ))
+        emit->generic("ret = ");
       emit->generic("%s.%s(", cl->getName(), mt->getName());
 
       /* Pass registers */
@@ -101,7 +111,7 @@ void CallTableMethod::generateMethod(const char *name,
   emit->generic("      default:\n"
                 "         throw new Exception(\"Call to unknown location \" + Integer.toHexString(address));\n"
                 "    }\n"
-                "    return v0;\n"
+                "    return ret;\n"
                 "  }\n"
                 );
 }
@@ -150,8 +160,6 @@ void CallTableMethod::generateHierarchy(unsigned int n)
 
 bool CallTableMethod::pass2()
 {
-  emit->generic("class CibylCallTable {\n");
-
   /* If it exists, generate a table of exported symbols */
   if (this->exp_syms)
     {
@@ -172,8 +180,6 @@ bool CallTableMethod::pass2()
     this->generateHierarchy(config->callTableHierarchy);
   else
     this->generateMethod("call", 0, this->n_methods);
-
-  emit->generic("}\n");
 
   return true;
 }

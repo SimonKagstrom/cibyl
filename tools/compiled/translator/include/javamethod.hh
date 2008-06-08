@@ -18,6 +18,7 @@
 #include <mips.hh>
 #include <utils.h>
 #include <elf.hh>
+#include <config.hh>
 #include <registerallocator.hh>
 
 class JavaClass;
@@ -136,7 +137,9 @@ public:
 
   char *getJavaMethodName()
   {
-    return (char*)"CibylCallTable/call(IIIIII)I";
+    if (config->threadSafe)
+      return (char*)"call(IIIIII)J";
+    return (char*)"call(IIIIII)I";
   }
 
 protected:

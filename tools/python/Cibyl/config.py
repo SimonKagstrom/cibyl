@@ -33,6 +33,7 @@ classSizeLimit = 12000
 callTableHierarchy = 1
 peepholeIterations = 2
 
+threadSafe = False
 saveTemps = False
 onlyTranslate = False
 

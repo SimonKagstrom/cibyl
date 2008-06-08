@@ -77,6 +77,8 @@ public:
 
   void bc_ishl() { this->writeIndent("ishl"); }
 
+  void bc_lshl() { this->writeIndent("lshl"); }
+
   void bc_lushr() { this->writeIndent("lushr"); }
 
   void bc_imul() { this->writeIndent("imul"); }
@@ -90,6 +92,8 @@ public:
   void bc_iand() { this->writeIndent("iand"); }
 
   void bc_ior() { this->writeIndent("ior"); }
+
+  void bc_lor() { this->writeIndent("lor"); }
 
   void bc_ixor() { this->writeIndent("ixor"); }
 
@@ -128,6 +132,8 @@ public:
   void bc_iastore() { this->writeIndent("iastore"); }
 
   void bc_ireturn() { this->writeIndent("ireturn"); }
+
+  void bc_lreturn() { this->writeIndent("lreturn"); }
 
   void bc_return() { this->writeIndent("return"); }
 

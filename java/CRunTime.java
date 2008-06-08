@@ -239,7 +239,7 @@ public class CRunTime
   }
 
   /* Invoke a registered callback */
-  public static int invokeCallback(int which, int a0, int a1, int a2, int a3) throws Exception
+  public static long invokeCallback(int which, int a0, int a1, int a2, int a3) throws Exception
   {
     Integer id = (Integer)CRunTime.objectRepository[which];
 
@@ -293,11 +293,11 @@ public class CRunTime
   {
     int value = in & 0xff;
     int cur = CRunTime.memory[address / 4];
-    int b = 3 - (address & 3);
+    int b = (3 - (address & 3)) << 3;
 
-    cur &= ~(0xff << b*8);
+    cur &= ~(0xff << b);
 
-    cur |= (value << b*8);
+    cur |= (value << b);
     CRunTime.memory[address / 4] = cur;
   }
 
@@ -305,11 +305,11 @@ public class CRunTime
   {
     int value = in & 0xffff;
     int cur = CRunTime.memory[address / 4];
-    int b = 2 - (address & 2);
+    int b = (2 - (address & 2)) << 3;
 
-    cur &= ~(0xffff << b*8);
+    cur &= ~(0xffff << b);
 
-    cur |= (value << b*8);
+    cur |= (value << b);
     CRunTime.memory[address / 4] = cur;
   }
 

@@ -27,7 +27,7 @@ clean:
 
 instruction.oo: instructions/fpu.cc instructions/memory.cc instructions/rfmt.cc \
                 instructions/ifmt.cc instructions/muldiv.cc instructions/set.cc \
-                instructions/jfmt.cc instructions/nop.cc instructions/syscall.cc \
+		instructions/nop.cc instructions/syscall.cc instructions/jfmt.cc \
                 include/utils.h include/instruction.hh include/entity.hh include/elf.hh \
 		include/config.hh include/mips.hh
 
@@ -43,6 +43,9 @@ function.oo: function.cc include/basicblock.hh \
 javamethod.oo: javamethod.cc include/basicblock.hh \
 		include/utils.h include/instruction.hh include/entity.hh include/elf.hh \
 		include/config.hh include/javamethod.hh include/function.hh
+
+javaclass.oo: javaclass.cc \
+		include/config.hh include/javaclass.hh
 
 
 builtins.oo: builtins.cc builtins/exceptions.cc builtins/softfloat.cc \
