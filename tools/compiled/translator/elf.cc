@@ -39,6 +39,10 @@ void CibylElf::handleSymtab(Elf_Scn *scn)
   int n_datas = 0;
   int n = data->d_size / sizeof(Elf32_Sym);
 
+  panic_if(n <= 0,
+           "Section data too small (%d) - no symbols\n",
+           data->d_size);
+
   /* Allocate big enough tables of symbols */
   this->symbols = (ElfSymbol**)xcalloc(n, sizeof(ElfSymbol));
   this->functionSymbols = (ElfSymbol**)xcalloc(n, sizeof(ElfSymbol));
@@ -65,6 +69,9 @@ void CibylElf::handleSymtab(Elf_Scn *scn)
   this->n_symbols = n_syms;
   this->n_functionSymbols = n_fns;
   this->n_dataSymbols = n_datas;
+
+  panic_if(n_symbols <= 0,
+           "No symbols in the ELF file (file stripped?)\n");
 
   /* Insert all symbols into a hash table */
   for (int i = 0; i < n_syms; i++)
@@ -199,6 +206,11 @@ CibylElf::CibylElf(const char *filename)
 
   /* Sort relocs */
   qsort((void*)this->relocs, this->n_relocs, sizeof(ElfReloc*),	reloc_cmp);
+
+  panic_if(!this->functionSymbols,
+           "No function symbols in the ELF file\n");
+  panic_if(!this->dataSymbols,
+           "No data symbols in the ELF file\n");
 
   /* Sort the symbols and fixup addresses */
   this->fixupSymbolSize(this->functionSymbols,
