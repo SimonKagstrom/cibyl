@@ -20,10 +20,12 @@ SRCS=instruction.cc basicblock.cc controller.cc javamethod.cc \
 
 OBJS=$(patsubst %.cc,%.oo,$(SRCS))
 
+#GCOV=-fprofile-arcs -ftest-coverage
+
 all: xcibyl-translator
 
 clean:
-	rm -rf *.oo *~ xcibyl-translator lib/libghthash-0.6.2 lib/.libghthash
+	rm -rf *.oo *.gcda *.gcno *~ xcibyl-translator xcibyl-translator-gcov lib/libghthash-0.6.2 lib/.libghthash
 
 instruction.oo: instructions/fpu.cc instructions/memory.cc instructions/rfmt.cc \
                 instructions/ifmt.cc instructions/muldiv.cc instructions/set.cc \
@@ -52,7 +54,7 @@ builtins.oo: builtins.cc builtins/exceptions.cc builtins/softfloat.cc \
 		include/builtins.hh
 
 %.oo: %.cc
-	$(HOST_CXX) -Ilib/libghthash-0.6.2/src/ $(HOST_CFLAGS) -c -o $@ $<
+	$(HOST_CXX) $(GCOV) -Ilib/libghthash-0.6.2/src/ $(HOST_CFLAGS) -c -o $@ $<
 
 lib/.libghthash:
 	cd lib && tar -xzf libghthash-0.6.2.tar.gz
@@ -60,5 +62,4 @@ lib/.libghthash:
 	touch $@
 
 xcibyl-translator: lib/.libghthash $(OBJS)
-	echo $(OBJS)
-	$(HOST_LD) -Llib/libghthash-0.6.2/src/.libs/ -o $@ $(OBJS) -lghthash -lelf -static
+	$(HOST_LD) $(GCOV) -Llib/libghthash-0.6.2/src/.libs/ -o $@ $(OBJS) -lghthash -lelf -static
