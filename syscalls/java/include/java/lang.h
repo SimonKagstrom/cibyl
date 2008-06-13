@@ -59,7 +59,15 @@ extern NOPH_Exception_t NOPH_Exception_new_string_va(char *s, ...);
 #define NOPH_Exception_new_string NOPH_Exception_new_string_va
 
 /* Object */
+NOPH_Object_t NOPH_Object_new(void);
+int NOPH_Object_hashCode(NOPH_Object_t obj);
 NOPH_Class_t NOPH_Object_getClass(NOPH_Object_t obj);
+NOPH_String_t NOPH_Object_toString(NOPH_Object_t obj);
+void NOPH_Object_notify(NOPH_Object_t obj); /* Throws */
+void NOPH_Object_notifyAll(NOPH_Object_t obj); /* Throws */
+void NOPH_Object_wait(NOPH_Object_t obj); /* Throws */
+void NOPH_Object_wait_timeout(NOPH_Object_t obj, int timeout); /* Throws */
+void NOPH_Object_wait_timeoout2(NOPH_Object_t obj, int timeout, int nanos); /* Throws */
 
 /* Class */
 NOPH_InputStream_t NOPH_Class_getResourceAsStream(NOPH_Class_t obj, char* name); /* Throws */
