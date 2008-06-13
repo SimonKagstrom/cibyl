@@ -121,6 +121,8 @@ public:
 
     if (this->delayed)
       this->delayed->pass2();
+    if (this->builtin)
+      return this->builtin->pass2(this);
 
     for (MIPS_register_t reg = this->dstMethod->getFirstRegisterToPass(&it);
 	 reg != 0;
