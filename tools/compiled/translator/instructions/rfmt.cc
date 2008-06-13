@@ -69,7 +69,7 @@ public:
     else if (this->rs == 0)
 	emit->bc_pushregister(this->rt);
     else
-      assert(0 && "BUG!");
+      panic("Neither rt nor rs is 0 (should have been catched earlier))\n");
     emit->bc_popregister(this->rd);
 
     return true;
