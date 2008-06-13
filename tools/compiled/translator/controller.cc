@@ -54,11 +54,6 @@ Controller::Controller(const char **defines,
   this->builtins = new BuiltinFactory();
 }
 
-char *Controller::resolveStrtabAddress(char *strtab, char *offset)
-{
-  return strtab + (unsigned long)offset;
-}
-
 unsigned long Controller::getSyscallFileLong(void *_p, int offset)
 {
   unsigned long *p = (unsigned long*)_p;
