@@ -299,6 +299,15 @@ bool JavaMethod::pass2()
   for (int i = 0; i < this->n_exceptionHandlers; i++)
     {
       ExceptionHandler *eh = this->exceptionHandlers[i];
+      JavaClass *dstClass;
+      JavaMethod *dstMethod;
+
+      dstMethod = controller->getCallTableMethod();
+      panic_if(!dstMethod,
+               "No call table method???\n");
+      dstClass = controller->getClassByMethodName(dstMethod->getName());
+      panic_if(!dstClass,
+               "No class for the call table method???\n");
 
       emit->bc_label("%s", eh->name);
       /* Register the object passed here */
@@ -311,7 +320,8 @@ bool JavaMethod::pass2()
       emit->bc_pushregister(R_EAR);
       emit->bc_pushconst(0);
       emit->bc_pushconst(0);
-      emit->bc_invokestatic(controller->getCallTableMethod()->getJavaMethodName());
+      emit->bc_invokestatic("%s/%s", dstClass->getName(),
+                            dstMethod->getJavaMethodName());
       emit->bc_pop();
       emit->bc_goto( eh->end );
     }
