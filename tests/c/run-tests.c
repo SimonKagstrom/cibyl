@@ -46,6 +46,7 @@ extern void vmips_run(void);
 extern void ll_ret_run(void);
 extern void malloc_run(void);
 extern void function_run(void);
+extern void tail_call_run(void);
 
 test_run_t all_tests[] =
 {
@@ -66,6 +67,7 @@ test_run_t all_tests[] =
   TEST(vmips_run),
   TEST(ll_ret_run),
   TEST(function_run),
+  TEST(tail_call_run),
 };
 
 
