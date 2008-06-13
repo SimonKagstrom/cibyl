@@ -135,74 +135,34 @@ void *read_file(size_t *out_size, const char *fmt, ...)
   return data;
 }
 
-  DIR *open_dir_fmt(const char *fmt, ...)
-  {
-    char path[2048];
-    va_list ap;
-    int r;
+DIR *open_dir_fmt(const char *fmt, ...)
+{
+  char path[2048];
+  va_list ap;
+  int r;
 
-    /* Create the dirname */
-    assert ( fmt != NULL );
-    va_start(ap, fmt);
-    r = vsnprintf(path, 2048, fmt, ap);
-    va_end(ap);
+  /* Create the dirname */
+  assert ( fmt != NULL );
+  va_start(ap, fmt);
+  r = vsnprintf(path, 2048, fmt, ap);
+  va_end(ap);
 
-    return opendir(path);
-  }
-
-
-  FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode)
-  {
-    int len = strlen(dir) + strlen(filename) + 4;
-    FILE *fp;
-    char *buf;
-
-    buf = (char*)xcalloc(len, 1);
-
-    xsnprintf(buf, len, "%s/%s", dir, filename);
-    fp = fopen(buf, mode);
-    free(buf);
-    panic_if(!fp, "Cannot open file %s/%s\n", dir, filename);
-
-    return fp;
-  }
-
-  /* From tobin */
-  static uint32_t swap32(uint32_t x)
-  {
-    uint32_t out;
+  return opendir(path);
+}
 
 
-    out = ( (x & 0xffull) << 24 ) |
-      ( ((x & 0xff00ull) >> 8) << 16) |
-      ( ((x & 0xff0000ull) >> 16) << 8) |
-      ( ((x & 0xff000000ull) >> 24) << 0);
+FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode)
+{
+  int len = strlen(dir) + strlen(filename) + 4;
+  FILE *fp;
+  char *buf;
 
-    return out;
-  }
+  buf = (char*)xcalloc(len, 1);
 
-  static uint64_t swap64(uint64_t x)
-  {
-    uint64_t out;
+  xsnprintf(buf, len, "%s/%s", dir, filename);
+  fp = fopen(buf, mode);
+  free(buf);
+  panic_if(!fp, "Cannot open file %s/%s\n", dir, filename);
 
-    out = ( ((x & 0xffull) << 56 ) |
-            ( ((x & 0xff00ull) >> 8) << 48 ) |
-            ( ((x & 0xff0000ull) >> 16) << 40 ) |
-            ( ((x & 0xff000000ull) >> 24) << 32 ) |
-            ( ((x & 0xff00000000ull) >> 32) << 24 ) |
-            ( ((x & 0xff0000000000ull) >> 40)  << 16 ) |
-            ( ((x & 0xff000000000000ull) >> 48) << 8 ) |
-            ( ((x & 0xff00000000000000ull) >> 56) << 0 ) );
-
-    return out;
-  }
-
-  unsigned long be_to_host(unsigned long in)
-  {
-    if (sizeof(unsigned long) == 4)
-      return (unsigned long)swap32((uint32_t)in);
-    else if (sizeof(unsigned long) == 8)
-      return (unsigned long)swap64((uint64_t)in);
-
-    panic("ERROR: unsigned long must be 4 or 8 bytes!\n");
-  }
+  return fp;
+}
