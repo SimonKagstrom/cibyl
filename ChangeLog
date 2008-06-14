@@ -1,4 +1,10 @@
 Cibyl (19)
+	* Some more panic cases to handle broken binaries etc in a good way
+	and added gcov tests to improve the quality of the C++ translator
+
+	* More Object methods implemented, including wait() and notify() which
+	can be used to provide synchronization between threads
+
 	* Added option to control thread safety and reorganized the code to
 	support this. This is still off by default but can be enabled by the
 	--thread-safe option to cibyl-mips2java
