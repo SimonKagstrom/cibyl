@@ -148,10 +148,8 @@ void Emit::bc_popregister(MIPS_register_t reg)
   if (regalloc->regIsStatic(reg))
     this->bc_putstatic( regalloc->regToStatic(reg) );
   else if (!regalloc->regIsAllocated(reg)) /* This is an error! */
-    {
-      fprintf(stderr, "Warning/Error at 0x%08x: Popping to register %s, which is not allocated\n",
-              controller->getCurrentInstruction()->getAddress(), mips_reg_strings[reg]);
-    }
+    this->error("Warning/Error at 0x%08x: Popping to register %s, which is not allocated\n",
+                controller->getCurrentInstruction()->getAddress(), mips_reg_strings[reg]);
   else
     this->bc_istore( regalloc->regToLocal(reg) );
 }
