@@ -71,6 +71,8 @@ public:
 
   void bc_lookupswitch(int n, uint32_t *table, const char *def);
 
+  void bc_tableswitch(int first, int n, uint32_t *table, const char *def);
+
   void bc_iushr() { this->writeIndent("iushr"); }
 
   void bc_ishr() { this->writeIndent("ishr"); }
