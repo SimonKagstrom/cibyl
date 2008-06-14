@@ -94,11 +94,11 @@ typedef enum
   R_CM5 = 78,
   R_CM6 = 79,
   R_CM7 = 80,
-  R_MADR= 81,
-  R_ECB = 82,
-  R_EAR = 83,
-  R_FNA = 84,
-  R_MEM = 85
+  R_MADR= 81, /* Memory address temp for jsr lb/lh/sb/sh */
+  R_ECB = 82, /* Exception call back address */
+  R_EAR = 83, /* Exception argument (to function) */
+  R_FNA = 84, /* Function index (for multi-function methods) */
+  R_MEM = 85  /* Virtual memory "register" */
 } MIPS_register_t;
 
 #define N_REGS 86
