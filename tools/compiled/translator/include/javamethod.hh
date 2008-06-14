@@ -93,6 +93,14 @@ public:
    */
   char *addExceptionHandler(uint32_t start, uint32_t end);
 
+  /**
+   * Returns if this method is a multi-function-one
+   */
+  bool hasMultipleFunctions()
+  {
+    return (this->n_functions > 1);
+  }
+
   virtual size_t getBytecodeSize(void)
   {
     return this->bc_size;
