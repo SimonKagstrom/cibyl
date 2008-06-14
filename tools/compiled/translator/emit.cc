@@ -229,6 +229,18 @@ void Emit::bc_lookupswitch(int n, uint32_t *table,
   this->write("\t\tdefault: %s", def);
 }
 
+void Emit::bc_tableswitch(int first, int n, uint32_t *table,
+                          const char *def)
+{
+  this->write("\tableswitch %d %d\n", first, first + n);
+
+  for (int i = 0; i < n; i++)
+    {
+      this->write("\t\tL_%x",
+                  table[i]);
+    }
+  this->write("\t\tdefault: %s", def);
+}
 
 void Emit::error(const char *fmt, ...)
 {
