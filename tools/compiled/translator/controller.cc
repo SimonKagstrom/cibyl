@@ -680,10 +680,16 @@ static void usage()
          "syscall-database is one or more cibyl-syscalls.db files. The config options\n"
          "are:\n\n"
 
-         "   trace_start=0x...      The first address of instruction tracing\n"
-         "   trace_end=0x...        The last address of instruction tracing\n"
-         "   trace_stores=0/1       Set to 1 to trace memory stores\n"
-         "   prune_call_table=0/1   Set to 1 to prune unused indirect function calls\n"
+         "   trace_start=0x...       The first address of instruction tracing\n"
+         "   trace_end=0x...         The last address of instruction tracing\n"
+         "   trace_stores=0/1        Set to 1 to trace memory stores\n"
+         "   thread_safe=0/1         Set to 1 to generate thread-safe code (default 0)\n"
+         "   class_size_limit=N      Set the size limit for classes (class split size)\n"
+         "   call_table_hierarchy=N  Generate a call table hierarchy with N methods (default 1)\n"
+         "   prune_call_table=0/1    Set to 1 to prune unused indirect function calls\n"
+         "   optimize_partial_memory_operations=0/1  Set to 1 to generate subroutine calls for\n"
+         "                           lb/lh/sb/sh (default 0)\n"
+         "   prune_unused_functions=0/1  Prune unused functions from the call table\n"
          );
   exit(1);
 }
@@ -717,22 +723,24 @@ static void parse_config(Config *cfg, const char *config_str)
       /* Now match the keys*/
       if (strcmp(p, "trace_start") == 0)
         cfg->traceRange[0] = int_val;
-      if (strcmp(p, "trace_end") == 0)
+      else if (strcmp(p, "trace_end") == 0)
         cfg->traceRange[1] = int_val;
-      if (strcmp(p, "trace_stores") == 0)
+      else if (strcmp(p, "trace_stores") == 0)
         cfg->traceStores = int_val == 0 ? false : true;
-      if (strcmp(p, "thread_safe") == 0)
+      else if (strcmp(p, "thread_safe") == 0)
         cfg->threadSafe = int_val == 0 ? false : true;
-      if (strcmp(p, "prune_call_table") == 0)
+      else if (strcmp(p, "prune_call_table") == 0)
         cfg->optimizeCallTable = int_val == 0 ? false : true;
-      if (strcmp(p, "optimize_partial_memory_operations") == 0)
+      else if (strcmp(p, "optimize_partial_memory_operations") == 0)
         cfg->optimizePartialMemoryOps = int_val == 0 ? false : true;
-      if (strcmp(p, "prune_unused_functions") == 0)
+      else if (strcmp(p, "prune_unused_functions") == 0)
         cfg->pruneUnusedFunctions = int_val == 0 ? false : true;
-      if (strcmp(p, "class_size_limit") == 0)
+      else if (strcmp(p, "class_size_limit") == 0)
         cfg->classSizeLimit = int_val;
-      if (strcmp(p, "call_table_hierarchy") == 0)
+      else if (strcmp(p, "call_table_hierarchy") == 0)
         cfg->callTableHierarchy = int_val;
+      else
+        usage();
 
       p = strtok(NULL, ",");
     }
