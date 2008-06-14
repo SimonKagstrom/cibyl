@@ -10,18 +10,36 @@
  *
  ********************************************************************/
 
-class LoadXX : public Instruction
+class MemoryXX : public Instruction
 {
-public:
-  LoadXX(const char *what, uint32_t address, int opcode,
-	 MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : Instruction(address, opcode, rs, rt, R_ZERO, extra)
-  {
-    this->bc = what;
-  }
+ public:
+  MemoryXX(uint32_t address, int opcode,
+           MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : Instruction(address, opcode, rs, rt, R_ZERO, extra)
+    {
+      this->method = NULL;
+    }
 
   bool pass1()
   {
+    this->method = controller->getMethodByAddress(this->address);
+
+    panic_if(!this->method, "No method for instruction at 0x%x\n",
+             this->address);
+
     return true;
+  }
+
+ protected:
+  JavaMethod *method;
+};
+
+class LoadXX : public MemoryXX
+{
+public:
+  LoadXX(const char *what, uint32_t address, int opcode,
+	 MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : MemoryXX(address, opcode, rs, rt, extra)
+  {
+    this->bc = what;
   }
 
   bool pass2()
@@ -59,18 +77,13 @@ protected:
 };
 
 
-class StoreXX : public Instruction
+class StoreXX : public MemoryXX
 {
 public:
   StoreXX(const char *what, uint32_t address, int opcode,
-	  MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : Instruction(address, opcode, rs, rt, R_ZERO, extra)
+	  MIPS_register_t rs, MIPS_register_t rt, int32_t extra) : MemoryXX(address, opcode, rs, rt, extra)
   {
     this->bc = what;
-  }
-
-  bool pass1()
-  {
-    return true;
   }
 
   bool pass2()
@@ -134,7 +147,7 @@ public:
   bool pass2()
   {
     /* Skip stores to RA */
-    if (this->rt == R_RA)
+    if (this->rt == R_RA && !this->method->hasMultipleFunctions())
       return true;
 
     if (this->prefix)
@@ -198,7 +211,7 @@ protected:
         mask_val = 0xffff;
       }
     /* Maybe skip ra */
-    if (this->rt == R_RA)
+    if (this->rt == R_RA && !this->method->hasMultipleFunctions())
       return true;
     if (this->prefix)
       this->prefix->pass2();
@@ -296,7 +309,7 @@ protected:
         mask_val = 0xffff;
       }
     /* Maybe skip ra */
-    if (this->rt == R_RA)
+    if (this->rt == R_RA && !this->method->hasMultipleFunctions())
       return true;
     if (this->prefix)
       this->prefix->pass2();
@@ -424,7 +437,7 @@ public:
   bool pass2()
   {
     /* Skip stores to RA */
-    if (this->rt == R_RA)
+    if (this->rt == R_RA && !this->method->hasMultipleFunctions())
       return true;
 
     if (config->traceStores)
