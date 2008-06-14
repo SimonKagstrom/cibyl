@@ -50,7 +50,7 @@ public:
     return this->addToRegisterUsage(this->rs, p) + this->addToRegisterUsage(R_MEM, p);
   };
 
-  virtual size_t bytecodeSize(void)
+  virtual size_t getBytecodeSize(void)
   {
     return 13;
   };
@@ -146,7 +146,7 @@ public:
     return true;
   }
 
-  virtual size_t bytecodeSize(void)
+  virtual size_t getBytecodeSize(void)
   {
     return 11;
   };
@@ -241,7 +241,7 @@ protected:
     return true;
   }
 
-  virtual size_t bytecodeSize(void)
+  virtual size_t getBytecodeSize(void)
   {
     return 24;
   };
@@ -348,7 +348,7 @@ protected:
     return true;
   }
 
-  virtual size_t bytecodeSize(void)
+  virtual size_t getBytecodeSize(void)
   {
     return 32;
   };
@@ -439,7 +439,7 @@ public:
     return true;
   }
 
-  virtual size_t bytecodeSize(void)
+  virtual size_t getBytecodeSize(void)
   {
     return 11;
   };
