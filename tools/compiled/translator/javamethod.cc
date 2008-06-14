@@ -255,14 +255,23 @@ bool JavaMethod::pass2()
   /* Zero all used registers */
   for (int i = 0; i < N_REGS; i++)
     {
+      panic_if(i == R_FNA && this->registerUsage[i] > 0 && !this->hasMultipleFunctions(),
+               "%s is a single-function method but uses R_FNA %d times\n",
+               this->getName(), this->registerUsage[i]);
+
       /* These are passed as arguments, skip them */
-      if (i == R_SP || i == R_A0 || i == R_A1 || i == R_A2 || i == R_A3)
+      if (i == R_FNA || i == R_SP || i == R_A0 || i == R_A1 || i == R_A2 || i == R_A3)
         continue;
 
       if (this->registerUsage[i] > 0)
         {
-          /* This register is used, zero */
-          emit->bc_pushconst(0);
+          /* This register is used, initialize it */
+
+          /* Multi-function classes assign to RA */
+          if (this->hasMultipleFunctions() && i == R_RA)
+            emit->bc_pushconst(-1);
+          else
+            emit->bc_pushconst(0);
           emit->bc_popregister((MIPS_register_t)i);
         }
     }
@@ -276,6 +285,22 @@ bool JavaMethod::pass2()
     }
 
   emit->bc_label("__CIBYL_javamethod_begin");
+
+  if (this->hasMultipleFunctions())
+    {
+      uint32_t *table = (uint32_t*)xcalloc(this->n_functions,
+                                           sizeof(uint32_t));
+
+      /* Setup a table of functions to jump to */
+      for (int i = 0; i < this->n_functions; i++)
+        table[i] = this->functions[i]->getAddress();
+
+      emit->bc_pushregister(R_FNA);
+      emit->bc_tableswitch(0, this->n_functions,
+                           table, "__CIBYL_function_return");
+
+      free(table);
+    }
 
   for (int i = 0; i < this->n_functions; i++)
     {
@@ -327,6 +352,13 @@ bool JavaMethod::pass2()
     }
 
   emit->bc_label("__CIBYL_function_return");
+  if (this->hasMultipleFunctions())
+    {
+      emit->bc_pushregister(R_RA);
+      /* FIXME! Construct table of possible return addresses */
+      emit->bc_label("__CIBYL_function_return_non_local");
+    }
+
   if (config->threadSafe)
     {
       if (this->clobbersReg(R_V1) && this->clobbersReg(R_V0))
