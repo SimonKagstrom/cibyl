@@ -94,6 +94,14 @@ public:
   char *addExceptionHandler(uint32_t start, uint32_t end);
 
   /**
+   * Add a return address to this method (for multi-function methods)
+   *
+   * @param address the address to return to
+   * @return an integer with a handle of the return address (starting at 0)
+   */
+  int addReturnLocation(uint32_t address);
+
+  /**
    * Returns if this method is a multi-function-one
    */
   bool hasMultipleFunctions()
@@ -123,6 +131,9 @@ protected:
 
   int n_exceptionHandlers;
   ExceptionHandler **exceptionHandlers;
+
+  int n_returnLocations;
+  uint32_t *returnLocations;
 
   size_t bc_size;
 };
