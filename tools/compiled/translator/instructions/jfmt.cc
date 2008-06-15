@@ -79,6 +79,7 @@ class Jal : public BranchInstruction
 public:
   Jal(uint32_t address, int opcode, int32_t extra) : BranchInstruction(address, opcode, R_ZERO, R_ZERO, R_ZERO, extra)
   {
+    this->method = NULL;
     this->dstMethod = NULL;
     this->dstClass = NULL;
     this->builtin = NULL;
@@ -91,8 +92,13 @@ public:
 
   bool pass1()
   {
-    this->dstMethod = controller->getMethodByAddress(this->extra << 2);
-    panic_if(!this->dstMethod, "No method found for jal to 0x%x\n", this->extra << 2);
+    uint32_t dst = this->extra << 2;
+
+    this->method = controller->getMethodByAddress(this->getAddress());
+    panic_if(!this->method, "No method found for jal at 0x%x\n", this->getAddress());
+
+    this->dstMethod = controller->getMethodByAddress(dst);
+    panic_if(!this->dstMethod, "No method found for jal to 0x%x\n", dst);
 
     this->dstClass = controller->getClassByMethodName(this->dstMethod->getName());
     panic_if(!this->dstClass, "No class found for method %s\n",
@@ -104,7 +110,7 @@ public:
     if (!this->dstMethod)
       {
 	emit->error("Jal from 0x%x to 0x%x: Target address not found\n",
-		    this->address, this->extra << 2);
+		    this->address, dst);
 	return false;
       }
 
@@ -118,11 +124,29 @@ public:
   virtual bool pass2()
   {
     void *it;
+    uint32_t dst = this->extra << 2;
 
     if (this->delayed)
       this->delayed->pass2();
     if (this->builtin)
       return this->builtin->pass2(this);
+
+    /* OK, a bit ugly... */
+    if (this->opcode == OP_JAL && this->method->hasMultipleFunctions() &&
+        this->method == this->dstMethod)
+      {
+        int handle = this->method->addReturnLocation(this->getAddress() + 8);
+
+        panic_if(handle < 0,
+                 "Could not add return address at 0x%x: %d\n",
+                 this->getAddress() + 8, handle);
+
+        emit->bc_pushconst(handle);
+        emit->bc_popregister(R_RA);
+        emit->bc_goto(dst);
+
+        return true;
+      }
 
     for (MIPS_register_t reg = this->dstMethod->getFirstRegisterToPass(&it);
 	 reg != 0;
@@ -131,7 +155,6 @@ public:
 	emit->bc_pushregister( reg );
       }
     emit->bc_invokestatic("%s/%s", dstClass->getName(), this->dstMethod->getJavaMethodName());
-
     if (config->threadSafe)
       {
         if (this->dstMethod->clobbersReg(R_V1) && this->dstMethod->clobbersReg(R_V0))
@@ -172,6 +195,8 @@ public:
     out += this->addToRegisterUsage(R_V0, p) + this->addToRegisterUsage(R_V1, p);
     if (this->builtin)
       out += this->builtin->fillDestinations(p);
+    if (this->method == this->dstMethod && this->method->hasMultipleFunctions())
+      out += this->addToRegisterUsage(R_RA, p);
 
     return out;
   }
@@ -194,6 +219,7 @@ public:
   }
 
 protected:
+  JavaMethod *method;
   JavaMethod *dstMethod;
   JavaClass *dstClass;
   Builtin *builtin;
