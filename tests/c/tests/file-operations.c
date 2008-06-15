@@ -18,7 +18,9 @@ void file_operations_run(void)
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/stat.h> /* mkdir */
 #include <dirent.h>
+#include <unistd.h> /* rmdir */
 #include <javax/microedition/io.h>
 #include <cibyl-memoryfs.h>
 
@@ -223,6 +225,7 @@ void file_operations_run(void)
   NOPH_FileConnection_t fc;
   int error = 0;
   FILE *fp;
+  int r;
 
   snprintf(buf, 128, "file:///%s/cibyl_a", fs_root);
   path = buf;
@@ -275,7 +278,6 @@ void file_operations_run(void)
   else
     FAIL("Dirlist %s\n", root);
 
-
   /* Delete the file again */
   path = buf;
   error = 0;
@@ -287,5 +289,44 @@ void file_operations_run(void)
     FAIL("Deleting %s", path);
   else
     PASS("Deleting %s", path);
+
+  /* Test directory creation */
+  snprintf(buf, 128, "file:///%scibyl", fs_root);
+  r = mkdir(buf, 0777);
+  if (r < 0)
+    FAIL("mkdir: %d", r);
+  else
+    PASS("mkdir: %d", r);
+
+  /* A file in the directory */
+  snprintf(buf, 128, "file:///%scibyl/a", fs_root);
+  fp = NOPH_FileConnection_openFILE(buf, "w");
+  if (!fp)
+    FAIL("mkdir/file %s", buf);
+  else
+    {
+      PASS("mkdir/file %s", buf);
+      r = fputs("Maboo", fp);
+      if (r < 0)
+        FAIL("mkdir/file/fputs %d", r);
+      else
+        PASS("mkdir/file/fputs %d", r);
+
+      fclose(fp);
+      r = remove(buf);
+      if (r < 0)
+        FAIL("mkdir/file/remove %d", r);
+      else
+        PASS("mkdir/file/remove %d", r);
+    }
+
+  snprintf(buf, 128, "file:///%scibyl", fs_root);
+
+  /* Delete the directory */
+  r = rmdir(buf);
+  if (r < 0)
+    FAIL("rmdir: %d", r);
+  else
+    PASS("rmdir: %d", r);
 }
 #endif
