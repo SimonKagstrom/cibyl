@@ -1,4 +1,7 @@
 Cibyl (19)
+	* Added mkdir/rmdir/remove for JSR075 and added these to the test
+	cases
+
 	* Some more panic cases to handle broken binaries etc in a good way
 	and added gcov tests to improve the quality of the C++ translator
 

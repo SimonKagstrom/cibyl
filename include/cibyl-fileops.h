@@ -64,6 +64,8 @@ typedef struct s_cibyl_dops
   int priority;
 
   DIR *(*opendir)(const char *dirname);
+  int (*mkdir)(const char *pathname);
+  int (*remove)(const char *pathname);
   int (*readdir)(DIR *dir, struct dirent *entry);
   int (*closedir)(DIR *dir);
 } cibyl_dops_t;
