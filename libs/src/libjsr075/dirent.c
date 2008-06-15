@@ -26,7 +26,7 @@ static cibyl_dops_t fileconnection_dops;
 
 static DIR *open_dir(const char *dirname)
 {
-  NOPH_FileConnection_t fc;
+  NOPH_FileConnection_t fc = -1;
   int exception = 0;
   DIR *out;
   fileconnection_dir_t *p;
@@ -73,7 +73,7 @@ static int close_dir(DIR *dir)
 static int read_dir(DIR *dir, struct dirent *entry)
 {
   fileconnection_dir_t* p = (fileconnection_dir_t*)dir->priv;
-  NOPH_Object_t cur;
+  NOPH_Object_t cur = -1;
   int exception = 0;
 
   if (!NOPH_Enumeration_hasMoreElements(p->it))
@@ -93,6 +93,36 @@ static int read_dir(DIR *dir, struct dirent *entry)
   return 0;
 }
 
+static int make_dir(const char *dirname)
+{
+  int exception = 0;
+
+  NOPH_try(NOPH_setter_exception_handler, &exception) {
+    NOPH_FileConnection_t fc = NOPH_Connector_openFileConnection_mode(dirname, NOPH_Connector_READ_WRITE);
+
+    NOPH_FileConnection_mkdir(fc);
+  } NOPH_catch();
+  if (exception)  /* Exception - cannot open or mkdir failed */
+    return -1;
+
+  return 0;
+}
+
+static int remove_dir(const char *dirname)
+{
+  int exception = 0;
+
+  NOPH_try(NOPH_setter_exception_handler, &exception) {
+    NOPH_FileConnection_t fc = NOPH_Connector_openFileConnection_mode(dirname, NOPH_Connector_READ_WRITE);
+
+    NOPH_FileConnection_delete(fc);
+  } NOPH_catch();
+  if (exception)  /* Exception - cannot delete or open failed */
+    return -1;
+
+  return 0;
+}
+
 
 /* The dops structure */
 static cibyl_dops_t fileconnection_dops =
@@ -102,6 +132,8 @@ static cibyl_dops_t fileconnection_dops =
   .opendir  = open_dir,
   .closedir = close_dir,
   .readdir  = read_dir,
+  .mkdir = make_dir,
+  .remove = remove_dir,
 };
 
 static void __attribute__((constructor))register_fs(void)

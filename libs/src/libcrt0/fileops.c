@@ -181,6 +181,33 @@ static cibyl_fops_t *get_fops_from_uri(const char *path, const char **uri_out)
   return NULL;
 }
 
+static cibyl_dops_t *get_dops_from_uri(const char *path, const char **uri_out)
+{
+  int i;
+
+  *uri_out = NULL;
+
+  for (i = 0; i < dops.n_ops; i++)
+    {
+      cibyl_dops_t *cur = dops.table[i];
+      const char *uri = dops.uris[i];
+      int len = strlen(uri);
+
+      if (cur->keep_uri)
+        len = 0;
+
+      if (strncmp(uri, path, len) == 0)
+        {
+          *uri_out = uri;
+          return cur;
+        }
+    }
+
+  /* Found nothing, return the default */
+  return dops.fallback;
+}
+
+
 FILE *fopen(const char *path, const char *in_mode)
 {
   cibyl_fops_open_mode_t mode;
@@ -364,6 +391,7 @@ int __fputs(const char* ptr, FILE* fp)
   return n;
 }
 
+
 DIR *opendir(const char *dirname)
 {
   int i;
@@ -417,5 +445,27 @@ struct dirent *readdir(DIR *dir)
 
 int remove(const char *pathname)
 {
-  return -1;
+  const char *uri;
+  cibyl_dops_t *ops = get_dops_from_uri(pathname, &uri);
+
+  if (!ops)
+    return -1;
+
+  return ops->remove(pathname);
+}
+
+int mkdir(const char *pathname, mode_t mode)
+{
+  const char *uri;
+  cibyl_dops_t *ops = get_dops_from_uri(pathname, &uri);
+
+  if (!ops)
+    return -1;
+
+  return ops->mkdir(pathname);
+}
+
+int rmdir(const char *pathname)
+{
+  return remove(pathname);
 }

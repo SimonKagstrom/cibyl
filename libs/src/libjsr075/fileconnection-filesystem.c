@@ -40,16 +40,18 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
       fc = NOPH_Connector_openFileConnection_mode(path, fc_mode);
 
       /* Create and maybe truncate the file */
-      NOPH_try(NOPH_setter_exception_handler, (void*)&error)
+      //      NOPH_try(NOPH_setter_exception_handler, (void*)&error)
         {
           if (!NOPH_FileConnection_exists(fc))
             NOPH_FileConnection_create(fc);
 	  else if ((mode == READ_TRUNCATE) || (mode == WRITE))
             NOPH_FileConnection_truncate(fc, 0);
           error = 0;
-        } NOPH_catch();
+        } //NOPH_catch();
       if (error)
         {
+          printf("e1\n");
+
           NOPH_delete(fc);
           return NULL;
         }
@@ -62,12 +64,13 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
         offset = fp->file_size;
         fp->vfptr = fp->fptr = fp->file_size;
       }
-      NOPH_try(NOPH_setter_exception_handler, (void*)&error)
+      //      NOPH_try(NOPH_setter_exception_handler, (void*)&error)
         {
           p->os_file.os = NOPH_FileConnection_openOutputStream(fc, offset); /* Can throw stuff */
-        } NOPH_catch();
+        }// NOPH_catch();
       if (error)
         {
+          printf("e2\n");
           cibyl_file_free(fp);
           NOPH_delete(fc);
           return NULL;
@@ -76,6 +79,7 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
       NOPH_delete(fc);
       if (error)
         {
+          printf("e3\n");
           NOPH_OutputStream_close(p->os_file.os);
           return NULL;
         }
@@ -90,13 +94,14 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
     NOPH_throw(NOPH_Exception_new_string("Opening a connector stream with invalid mode"));
 
   /* Try to open the connector stream. */
-  NOPH_try(NOPH_setter_exception_handler, (void*)&error)
+  //  NOPH_try(NOPH_setter_exception_handler, (void*)&error)
     {
       fc = NOPH_Connector_openFileConnection_mode(path, NOPH_Connector_READ);
       p->is_file.is = NOPH_FileConnection_openDataInputStream(fc);
-    } NOPH_catch();
+    }// NOPH_catch();
   if (error)
     {
+      printf("e4\n");
       cibyl_file_free(fp);
       return NULL;
     }
