@@ -18,6 +18,7 @@
 #include <javaclass.hh>
 #include <elf.hh>
 #include <builtins.hh>
+#include <functioncolocation.hh>
 
 class Controller : public CodeBlock
 {
@@ -68,7 +69,10 @@ public:
                                 strlen(name), name);
   }
 
+  void addColocation(const char *str);
+
 private:
+
   void allocateClasses();
 
   char *resolveStrtabAddress(char *strtab, char *offset);
@@ -116,6 +120,9 @@ private:
   Instruction *currentInstruction;
 
   BuiltinFactory *builtins;
+
+  FunctionColocation **colocs;
+  int n_colocs;
 };
 
 extern Controller *controller;

@@ -31,6 +31,7 @@ Function::Function(const char *name, Instruction **insns,
   this->size = 0;
   this->registerIndirectJumps = false;
 
+  this->realName = xstrdup(name);
   this->name = (char*)xcalloc(strlen(name) + 16, 1);
   xsnprintf(this->name, strlen(name) + 16, "%s_%x", name, this->getAddress());
 

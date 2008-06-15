@@ -29,7 +29,23 @@ public:
 
   bool pass2();
 
-  const char *getName() { return this->name; }
+  /**
+   * Get the name of this function as it will appear in the Java
+   * bytecode. Unique in the entire program.
+   */
+  const char *getName()
+  {
+    return this->name;
+  }
+
+  /**
+   * Get the name of this function as it appears in the C source
+   * code. Might not be unique (static functions with the same name).
+   */
+  const char *getRealName()
+  {
+    return this->realName;
+  }
 
   int fillDestinations(int *p);
 
@@ -69,6 +85,7 @@ protected:
 
   BasicBlock **bbs;
   char *name;
+  char *realName;
   bool registerIndirectJumps;
 
   uint8_t usedInsns[N_INSNS];

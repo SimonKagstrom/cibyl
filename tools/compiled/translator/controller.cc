@@ -43,6 +43,9 @@ Controller::Controller(const char **defines,
   this->syscall_sets = NULL;
   this->defines = defines;
 
+  this->colocs = NULL;
+  this->n_colocs = 0;
+
   /* Get the .text section size (a small optimization) */
   ElfSection *textSection = elf->getSection(".text");
   panic_if(!textSection, "No .text section\n");
@@ -209,14 +212,16 @@ bool Controller::pass0()
   for (i = 0; fn_syms[i]; i++)
     {
       ElfSymbol *sym = fn_syms[i];
+      FunctionColocation *coloc;
+      Function *fn;
 
       /* Create a new function with a set of instructions, this
        * will in turn create basic blocks
        */
       if (sym->addr == elf->getEntryPoint())
-        this->functions[cnt] = new StartFunction(sym->name, this->instructions,
-                                               (sym->addr - textBase) / 4,
-                                               (sym->addr - textBase + sym->size) / 4 - 1);
+        fn = new StartFunction(sym->name, this->instructions,
+                               (sym->addr - textBase) / 4,
+                               (sym->addr - textBase + sym->size) / 4 - 1);
       else
         {
           if (config->pruneUnusedFunctions && !elf->getRelocationBySymbol(sym) &&
@@ -226,10 +231,14 @@ bool Controller::pass0()
               continue;
             }
 
-        this->functions[cnt] = new Function(sym->name, this->instructions,
-                                          (sym->addr - textBase) / 4,
-                                          (sym->addr - textBase + sym->size) / 4 - 1);
+          fn = new Function(sym->name, this->instructions,
+                            (sym->addr - textBase) / 4,
+                            (sym->addr - textBase + sym->size) / 4 - 1);
         }
+      this->functions[cnt] = fn;
+      coloc = FunctionColocation::lookup(fn->getRealName());
+      if (coloc)
+        coloc->addFunction(fn);
       cnt++;
     }
   this->n_methods = n_functions = cnt;
@@ -237,14 +246,30 @@ bool Controller::pass0()
   this->callTableMethod = new CallTableMethod(n_functions + 1,
                                               exp_syms, n);
   /* Create methods */
+  n = 0;
   for (i = 0; i < n_functions; i++)
     {
+      Function *fn = this->functions[i];
+
+      /* If this is part of a coloc, skip it */
+      FunctionColocation *coloc = FunctionColocation::lookup(fn->getRealName());
+      if (coloc)
+        continue;
+
       /* 1-1 mapping */
-      this->methods[i] = new JavaMethod(functions, i, i);
+      this->methods[n] = new JavaMethod(functions, i, i);
 
       /* Add all methods to the call table if we don't optimize this */
       if (!config->optimizeCallTable)
-        this->callTableMethod->addFunction(this->functions[i]);
+        this->callTableMethod->addFunction(fn);
+      n++;
+    }
+
+  /* And create the methods for colocated functions */
+  for (i = 0; i < this->n_colocs; i++)
+    {
+      this->methods[n] = this->colocs[i]->createJavaMethod();
+      n++;
     }
 
   /* And the classes */
@@ -681,6 +706,15 @@ bool Controller::pass2()
   return out;
 }
 
+void Controller::addColocation(const char *str)
+{
+  int n = this->n_colocs;
+
+  this->n_colocs++;
+  this->colocs = (FunctionColocation**)xrealloc(this->colocs,
+                                                sizeof(FunctionColocation*) * this->n_colocs);
+  this->colocs[n] = new FunctionColocation(str);
+}
 
 Controller *controller;
 Config *config;
@@ -705,11 +739,12 @@ static void usage()
          "   optimize_partial_memory_operations=0/1  Set to 1 to generate subroutine calls for\n"
          "                           lb/lh/sb/sh (default 0)\n"
          "   prune_unused_functions=0/1  Prune unused functions from the call table\n"
+         "   colocate_functions=FN1;FN2;... Colocate functions FN1... in a single method\n"
          );
   exit(1);
 }
 
-static void parse_config(Config *cfg, const char *config_str)
+static void parse_config(Controller *cntr, Config *cfg, const char *config_str)
 {
   char *cpy = xstrdup(config_str);
   char *p;
@@ -730,9 +765,7 @@ static void parse_config(Config *cfg, const char *config_str)
       int_val = strtol(value, &endp, 0);
       if (endp == value)
         {
-          fprintf(stderr, "Error: Argument for key '%s' (%s) cannot be converted to a number\n",
-                  p, value);
-          usage();
+          int_val = -1;
         }
 
       /* Now match the keys*/
@@ -754,6 +787,8 @@ static void parse_config(Config *cfg, const char *config_str)
         cfg->classSizeLimit = int_val;
       else if (strcmp(p, "call_table_hierarchy") == 0)
         cfg->callTableHierarchy = int_val;
+      else if (strcmp(p, "colocate_functions") == 0)
+        cntr->addColocation(value);
       else
         usage();
 
@@ -788,7 +823,6 @@ int main(int argc, const char **argv)
     }
   /* Setup configuration */
   config = new Config();
-  parse_config(config, argv[1] + strlen("config:"));
 
   /* Setup defines */
   for (n = 2; n < argc && strncmp(argv[n], "-D", 2) == 0; n++)
@@ -801,6 +835,7 @@ int main(int argc, const char **argv)
   regalloc = new RegisterAllocator();
   controller = new Controller(defines, argv[n], argv[n+1],
                               argc - n - 2, &argv[n + 2]);
+  parse_config(controller, config, argv[1] + strlen("config:"));
 
   controller->pass0();
   controller->pass1();
