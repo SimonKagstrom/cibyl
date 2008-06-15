@@ -343,6 +343,9 @@ public:
     JavaMethod *srcMethod = controller->getMethodByAddress( this->getAddress() );
     JavaMethod *dstMethod = controller->getMethodByAddress( dstInsn->getAddress() );
 
+    if (this->delayed)
+      this->delayed->pass1();
+
     if ( !dstInsn )
       {
 	emit->error("The branch at 0x%x in does not have a target (address 0x%x)\n",
@@ -397,6 +400,9 @@ public:
     Instruction *dstInsn = controller->getBranchTarget(this->dst);
     JavaMethod *srcMethod = controller->getMethodByAddress( this->getAddress() );
     JavaMethod *dstMethod = controller->getMethodByAddress( dstInsn->getAddress() );
+
+    if (this->delayed)
+      this->delayed->pass1();
 
     if ( !dstInsn )
       {
