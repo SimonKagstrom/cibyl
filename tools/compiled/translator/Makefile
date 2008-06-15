@@ -16,7 +16,8 @@ HOST_CFLAGS ?=-ggdb -Iinclude -Wall
 SRCS=instruction.cc basicblock.cc controller.cc javamethod.cc \
      function.cc javaclass.cc mips.cc utils.cc elf.cc emit.cc \
      registerallocator.cc calltablemethod.oo codeblock.oo \
-     string-instruction.cc builtins.cc syscall-wrappers.oo
+     string-instruction.cc builtins.cc syscall-wrappers.oo \
+     functioncolocation.cc
 
 OBJS=$(patsubst %.cc,%.oo,$(SRCS))
 
@@ -36,7 +37,7 @@ instruction.oo: instructions/fpu.cc instructions/memory.cc instructions/rfmt.cc 
 controller.oo: controller.cc \
 		include/utils.h include/instruction.hh include/entity.hh include/elf.hh \
 		include/config.hh include/javamethod.hh include/function.hh \
-                include/javaclass.hh
+                include/javaclass.hh include/functioncolocation.hh
 
 function.oo: function.cc include/basicblock.hh \
 		include/utils.h include/instruction.hh include/entity.hh include/elf.hh \
@@ -52,6 +53,9 @@ javaclass.oo: javaclass.cc \
 
 builtins.oo: builtins.cc builtins/exceptions.cc builtins/softfloat.cc \
 		include/builtins.hh
+
+functioncolocation.oo: include/functioncolocation.hh include/javamethod.hh include/function.hh \
+             include/utils.h
 
 %.oo: %.cc
 	$(HOST_CXX) $(GCOV) -Ilib/libghthash-0.6.2/src/ $(HOST_CFLAGS) -c -o $@ $<
