@@ -52,6 +52,9 @@ JavaMethod::JavaMethod(Function **fns,
   this->n_exceptionHandlers = 0;
   this->exceptionHandlers = NULL;
 
+  this->n_returnLocations = 0;
+  this->returnLocations = NULL;
+
   /* Fixup the bytecode size */
   this->bc_size = 0;
   for (int i = 0; i < this->n_functions; i++)
@@ -126,6 +129,19 @@ bool JavaMethod::pass1()
   return out;
 }
 
+
+int JavaMethod::addReturnLocation(uint32_t address)
+{
+  int out = this->n_returnLocations;
+
+  this->n_returnLocations++;
+  this->returnLocations = (uint32_t*)xrealloc(this->returnLocations,
+                                              this->n_returnLocations * sizeof(uint32_t*));
+
+  this->returnLocations[out] = address;
+
+  return out;
+}
 
 void JavaMethod::emitStoreSubroutine(mips_opcode_t op)
 {
@@ -263,10 +279,9 @@ bool JavaMethod::pass2()
       if (i == R_FNA || i == R_SP || i == R_A0 || i == R_A1 || i == R_A2 || i == R_A3)
         continue;
 
+      /* If this register is used, initialize it */
       if (this->registerUsage[i] > 0)
         {
-          /* This register is used, initialize it */
-
           /* Multi-function classes assign to RA */
           if (this->hasMultipleFunctions() && i == R_RA)
             emit->bc_pushconst(-1);
@@ -355,7 +370,8 @@ bool JavaMethod::pass2()
   if (this->hasMultipleFunctions())
     {
       emit->bc_pushregister(R_RA);
-      /* FIXME! Construct table of possible return addresses */
+      emit->bc_tableswitch(0, this->n_returnLocations, this->returnLocations,
+                           "__CIBYL_function_return_non_local");
       emit->bc_label("__CIBYL_function_return_non_local");
     }
 
