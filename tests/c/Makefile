@@ -23,7 +23,7 @@ OBJS    = main.o run-tests.o console.o \
           tests/shifts.o tests/and.o tests/vmips_tests.o tests/vmips/shifts.o \
           tests/vmips/bltz.o tests/vmips/load.o tests/vmips/multu.o tests/vmips/xor.o \
           tests/assign-to-ra.o tests/64-bit-return.o tests/malloc.o tests/function.o \
-          tests/tail_call.o tests/return_in_v1.o
+          tests/tail_call.o tests/return_in_v1.o tests/sw_in_delay_slot.o
 LDLIBS  = -lm -lsoftfloat -lmidp -ljsr075
 EXTRA_CLEAN=*.host.o tests/*.host.o
 

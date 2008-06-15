@@ -24,6 +24,7 @@ typedef struct
 
 #define TEST(fn) { fn, #fn}
 
+extern void sw_in_delay_slot(void);
 
 extern void int_run(void);
 extern void unsigned_int_run(void);
@@ -79,6 +80,8 @@ void test_run_all_tests(int run_fileops)
 
   n_fail = 0;
   n_pass = 0;
+
+  sw_in_delay_slot();
 
   for (test = all_tests;
        test != &all_tests[sizeof(all_tests) / sizeof(test_run_t)];
