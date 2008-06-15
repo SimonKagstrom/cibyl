@@ -114,6 +114,8 @@ public:
     return this->bc_size;
   };
 
+  Function *getFunctionByAddress(uint32_t addr);
+
 protected:
   void emitLoadSubroutine(mips_opcode_t op);
   void emitStoreSubroutine(mips_opcode_t op);
@@ -141,9 +143,9 @@ protected:
 class CallTableMethod : public JavaMethod
 {
 public:
-  CallTableMethod(int maxMethods, cibyl_exported_symbol_t *exp_syms, size_t n_exp_syms);
+  CallTableMethod(int maxFunctions, cibyl_exported_symbol_t *exp_syms, size_t n_exp_syms);
 
-  void addMethod(JavaMethod *method);
+  void addFunction(Function *fn);
 
   bool pass1();
 
@@ -169,11 +171,11 @@ protected:
   /* Generate a hierarchy of methods */
   void generateHierarchy(unsigned int n);
 
-  JavaMethod **methods;
+  Function **functions;
   cibyl_exported_symbol_t *exp_syms;
-  ght_hash_table_t *method_table;
+  ght_hash_table_t *function_table;
   size_t n_exp_syms;
-  int n_methods;
+  int n_function;
 };
 
 #endif /* !__JAVAMETHOD_HH__ */

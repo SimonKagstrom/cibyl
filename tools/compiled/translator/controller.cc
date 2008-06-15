@@ -244,7 +244,7 @@ bool Controller::pass0()
 
       /* Add all methods to the call table if we don't optimize this */
       if (!config->optimizeCallTable)
-        this->callTableMethod->addMethod(this->methods[i]);
+        this->callTableMethod->addFunction(this->functions[i]);
     }
 
   /* And the classes */
@@ -390,15 +390,19 @@ void Controller::lookupDataAddresses(uint32_t *data, int n_entries)
             {
               JavaClass *cl = this->classes[i];
               JavaMethod *mt = cl->getMethodByAddress(v);
+              Function *fn;
 
               if (!mt)
                 continue;
+              fn = mt->getFunctionByAddress(v);
+              panic_if(!fn, "No function for address 0x%x in method %s!\n",
+                       v, mt->getName());
 
               found_method = true;
 
               /* Add to the call table */
-              if (mt->getAddress() == v)
-                this->callTableMethod->addMethod(mt);
+              if (fn->getAddress() == v)
+                this->callTableMethod->addFunction(fn);
 
               /* Something has an address in this method (which can be an address) */
               mt->addJumptabLabel(v);
@@ -471,13 +475,17 @@ void Controller::lookupRelocations(JavaClass *cl)
           if (rel->sym->type == STT_FUNC && rel->type != R_MIPS_26)
             {
               JavaMethod *mt = cl->getMethodByAddress(rel->sym->addr);
+              Function *fn;
 
               /* If this method is not in this class  */
               if (!mt)
                 continue;
+              fn = mt->getFunctionByAddress(rel->sym->addr);
+              panic_if(!fn, "No function for address 0x%x in method %s!\n",
+                       rel->sym->addr, mt->getName());
 
-              if (mt->getAddress() == rel->sym->addr)
-                this->callTableMethod->addMethod(mt);
+              if (fn->getAddress() == rel->sym->addr)
+                this->callTableMethod->addFunction(fn);
             }
         }
       else if (rel->type == R_MIPS_HI16 || rel->type == R_MIPS_LO16)
@@ -582,7 +590,14 @@ void Controller::lookupRelocations(JavaClass *cl)
                 continue;
               JavaMethod *dst_mt = cl->getMethodByAddress(addr);
               if (dst_mt)
-                this->callTableMethod->addMethod(dst_mt);
+                {
+                  Function *fn = dst_mt->getFunctionByAddress(addr);
+
+                  panic_if(!fn, "No function for address 0x%x in method %s!\n",
+                           addr, dst_mt->getName());
+
+                  this->callTableMethod->addFunction(fn);
+                }
             }
         }
     }

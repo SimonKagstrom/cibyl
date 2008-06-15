@@ -143,6 +143,19 @@ int JavaMethod::addReturnLocation(uint32_t address)
   return out;
 }
 
+Function *JavaMethod::getFunctionByAddress(uint32_t addr)
+{
+  for (int i = 0; i < this->n_functions; i++)
+    {
+      Function *fn = this->functions[i];
+
+      if ( addr >= fn->getAddress() && addr < fn->getAddress() + fn->getSize() )
+        return fn;
+    }
+
+  return NULL;
+}
+
 void JavaMethod::emitStoreSubroutine(mips_opcode_t op)
 {
 }

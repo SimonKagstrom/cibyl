@@ -15,12 +15,12 @@
 #include <config.hh>
 #include <emit.hh>
 
-CallTableMethod::CallTableMethod(int maxMethods, cibyl_exported_symbol_t *exp_syms,
+CallTableMethod::CallTableMethod(int maxFunctions, cibyl_exported_symbol_t *exp_syms,
                                  size_t n_exp_syms) : JavaMethod(NULL, 0, 0)
 {
-  this->n_methods = 0;
-  this->methods = (JavaMethod**)xcalloc(sizeof(JavaMethod*), maxMethods);
-  this->method_table = ght_create(maxMethods);
+  this->n_functions = 0;
+  this->functions = (Function**)xcalloc(sizeof(Function*), maxFunctions);
+  this->function_table = ght_create(maxFunctions);
 
   /* Exported symbols */
   this->exp_syms = exp_syms;
@@ -29,20 +29,20 @@ CallTableMethod::CallTableMethod(int maxMethods, cibyl_exported_symbol_t *exp_sy
   memset(this->registerUsage, 0, sizeof(this->registerUsage));
 }
 
-void CallTableMethod::addMethod(JavaMethod *method)
+void CallTableMethod::addFunction(Function *fn)
 {
-  uint32_t addr = method->getAddress();
+  uint32_t addr = fn->getAddress();
 
-  if ( ght_get(this->method_table,
+  if ( ght_get(this->function_table,
                sizeof(uint32_t), (void*)&addr) != NULL )
     {
       /* Already exists, don't insert again */
       return;
     }
-  ght_insert(this->method_table, (void*)method,
+  ght_insert(this->function_table, (void*)fn,
              sizeof(uint32_t), (void*)&addr);
 
-  this->methods[this->n_methods++] = method;
+  this->functions[this->n_functions++] = fn;
 }
 
 bool CallTableMethod::pass1()
@@ -71,7 +71,8 @@ void CallTableMethod::generateMethod(const char *name,
   /* For each method, output a call to it */
   for (int i = start; i < end; i++)
     {
-      JavaMethod *mt = this->methods[i];
+      Function *fn = this->functions[i];
+      JavaMethod *mt = controller->getMethodByAddress(fn->getAddress());
       JavaClass *cl;
       const char *comma = "";
 
@@ -118,20 +119,22 @@ void CallTableMethod::generateMethod(const char *name,
 
 void CallTableMethod::generateHierarchy(unsigned int n)
 {
-  int methods_per_level = this->n_methods / n;
+  int functions_per_level = this->n_functions / n;
   const char *else_str = "";
   char buf[80];
   unsigned int i;
 
-  panic_if(n >= (unsigned int)this->n_methods,
+  panic_if(n >= (unsigned int)this->n_functions,
            "%d methods in the hierarchy and only %d methods totally\n",
-           n, this->n_methods);
+           n, this->n_functions);
 
   emit->generic("  public static final int call(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {\n");
   for (i = 0; i < n-1; i++)
     {
-      JavaMethod *first_mt = this->methods[i * methods_per_level ];
-      JavaMethod *last_mt = this->methods[(i+1) * methods_per_level ];
+      Function *first_fn = this->functions[i * functions_per_level ];
+      Function *last_fn = this->functions[(i+1) * functions_per_level ];
+      JavaMethod *first_mt = controller->getMethodByAddress(first_fn->getAddress());
+      JavaMethod *last_mt = controller->getMethodByAddress(last_fn->getAddress());
 
       xsnprintf(buf, 80, "call%d", i);
 
@@ -152,10 +155,10 @@ void CallTableMethod::generateHierarchy(unsigned int n)
   for (i = 0; i < n-1; i++)
     {
       xsnprintf(buf, 80, "call%d", i);
-      this->generateMethod(buf, i * methods_per_level, (i+1) * methods_per_level);
+      this->generateMethod(buf, i * functions_per_level, (i+1) * functions_per_level);
     }
   xsnprintf(buf, 80, "call%d", i);
-  this->generateMethod(buf, i * methods_per_level, this->n_methods);
+  this->generateMethod(buf, i * functions_per_level, this->n_functions);
 }
 
 bool CallTableMethod::pass2()
@@ -179,7 +182,7 @@ bool CallTableMethod::pass2()
   if (config->callTableHierarchy > 1)
     this->generateHierarchy(config->callTableHierarchy);
   else
-    this->generateMethod("call", 0, this->n_methods);
+    this->generateMethod("call", 0, this->n_functions);
 
   return true;
 }
