@@ -149,7 +149,7 @@ Function *JavaMethod::getFunctionByAddress(uint32_t addr)
     {
       Function *fn = this->functions[i];
 
-      if ( addr >= fn->getAddress() && addr < fn->getAddress() + fn->getSize() )
+      if ( addr >= fn->getAddress() && addr <= fn->getAddress() + fn->getSize() )
         return fn;
     }
 
