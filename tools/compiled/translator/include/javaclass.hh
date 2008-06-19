@@ -50,6 +50,7 @@ public:
 
 protected:
   int n_methods;
+  int n_multiFunctionMethods; /* Will be placed last in the vector */
   JavaMethod **methods;
   const char *name;
   char *filename;
