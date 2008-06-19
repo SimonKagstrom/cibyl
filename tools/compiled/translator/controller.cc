@@ -271,6 +271,7 @@ bool Controller::pass0()
       this->methods[n] = this->colocs[i]->createJavaMethod();
       n++;
     }
+  this->n_methods = n;
 
   /* And the classes */
   this->allocateClasses();
