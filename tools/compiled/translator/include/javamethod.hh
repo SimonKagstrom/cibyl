@@ -109,6 +109,11 @@ public:
     return (this->n_functions > 1);
   }
 
+  int getNumberOfFunctions()
+  {
+    return this->n_functions;
+  }
+
   virtual size_t getBytecodeSize(void)
   {
     return this->bc_size;
