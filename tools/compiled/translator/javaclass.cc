@@ -53,7 +53,9 @@ JavaClass::JavaClass(const char *name, JavaMethod **in_methods, int first, int l
 
   /* Setup the multi-function methods last in the method lists */
   int last_idx = this->n_methods - 1;
-  for (int i = 0; i < this->n_methods; i++)
+  for (int i = 0;
+      i < this->n_methods;
+      i++)
     {
       JavaMethod *mt = this->methods[i];
       JavaMethod *last = this->methods[last_idx];
@@ -64,7 +66,7 @@ JavaClass::JavaClass(const char *name, JavaMethod **in_methods, int first, int l
           last = this->methods[last_idx];
           this->n_multiFunctionMethods++;
         }
-      if (last_idx == 0)
+      if (last_idx == 0 || i == last_idx)
         break; /* Already looped through everything */
 
       panic_if(last->hasMultipleFunctions(),
@@ -92,7 +94,7 @@ JavaMethod *JavaClass::getMethodByAddress(uint32_t addr, int *idx)
   JavaMethod **ret;
 
   *idx = -1; /* Assume not found */
-  ret = (JavaMethod**)bsearch(&tmp, this->methods, this->n_methods,
+  ret = (JavaMethod**)bsearch(&tmp, this->methods, this->n_methods - this->n_multiFunctionMethods,
                               sizeof(JavaMethod*), method_search_cmp);
 
   if (ret == NULL)
@@ -105,7 +107,10 @@ JavaMethod *JavaClass::getMethodByAddress(uint32_t addr, int *idx)
 
           /* If the method has a function with this address, just return it */
           if (mt->getFunctionByAddress(addr))
-            return mt;
+            {
+              *idx = i;
+              return mt;
+            }
         }
       return NULL;
     }
