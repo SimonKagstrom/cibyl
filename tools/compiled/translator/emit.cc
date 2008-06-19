@@ -232,7 +232,7 @@ void Emit::bc_lookupswitch(int n, uint32_t *table,
 void Emit::bc_tableswitch(int first, int n, uint32_t *table,
                           const char *def)
 {
-  this->write("\tableswitch %d %d\n", first, first + n);
+  this->write("\ttableswitch %d %d", first, first + n);
 
   for (int i = 0; i < n; i++)
     {
