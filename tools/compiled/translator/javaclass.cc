@@ -49,14 +49,41 @@ JavaClass::JavaClass(const char *name, JavaMethod **in_methods, int first, int l
 
   this->methods = &(in_methods[first]);
   this->n_methods = last - first + 1;
+  this->n_multiFunctionMethods = 0;
+
+  /* Setup the multi-function methods last in the method lists */
+  int last_idx = this->n_methods - 1;
+  for (int i = 0; i < this->n_methods; i++)
+    {
+      JavaMethod *mt = this->methods[i];
+      JavaMethod *last = this->methods[last_idx];
+
+      while (last->hasMultipleFunctions() && last_idx > 0)
+        {
+          last_idx--;
+          last = this->methods[last_idx];
+          this->n_multiFunctionMethods++;
+        }
+      if (last_idx == 0)
+        break; /* Already looped through everything */
+
+      panic_if(last->hasMultipleFunctions(),
+          "Implementation error: The last method has multiple functions\n");
+      /* Put the multi-function method at the end (swap ) */
+      if (mt->hasMultipleFunctions())
+        {
+          this->methods[i] = last;
+          this->methods[last_idx] = mt;
+        }
+    }
 
   this->name = xstrdup(name);
   this->filename = (char*)xcalloc(strlen(name) + 8, sizeof(char));
   xsnprintf(this->filename, strlen(name) + 8, "%s.j", this->name);
 
   /* Sort the methods */
-  qsort((void*)this->methods, this->n_methods, sizeof(JavaMethod*),
-	method_cmp);
+  qsort((void*)this->methods, this->n_methods - this->n_multiFunctionMethods,
+      sizeof(JavaMethod*), method_cmp);
 }
 
 JavaMethod *JavaClass::getMethodByAddress(uint32_t addr, int *idx)
@@ -69,7 +96,19 @@ JavaMethod *JavaClass::getMethodByAddress(uint32_t addr, int *idx)
                               sizeof(JavaMethod*), method_search_cmp);
 
   if (ret == NULL)
-    return NULL;
+    {
+      /* Lookup the multi-function methods manually */
+      for (int i = this->n_methods - this->n_multiFunctionMethods;
+          i < this->n_methods; i++)
+        {
+          JavaMethod *mt = this->methods[i];
+
+          /* If the method has a function with this address, just return it */
+          if (mt->getFunctionByAddress(addr))
+            return mt;
+        }
+      return NULL;
+    }
 
   *idx = ret - this->methods;
   return *ret;
