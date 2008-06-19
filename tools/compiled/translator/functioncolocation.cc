@@ -69,9 +69,9 @@ JavaMethod *FunctionColocation::createJavaMethod()
 {
   for (int i = 0; i < this->n_fns; i++)
     panic_if(!this->fns[i], "Colocating %s failed: %s not found\n",
-             this->in_str, this->fn_names[i]);
+        this->in_str, this->fn_names[i]);
 
-  return NULL;
+  return new JavaMethod(this->fns, 0, this->n_fns-1);
 }
 
 FunctionColocation *FunctionColocation::lookup(const char *fn_name)
