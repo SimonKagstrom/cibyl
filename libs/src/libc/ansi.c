@@ -92,7 +92,7 @@ int strncasecmp(const char *s1, const char *s2, size_t n)
 
   do
     {
-      if (s - s1 > n)
+      if (s - s1 == n)
 	break;
 
       a = tolower(*s);
