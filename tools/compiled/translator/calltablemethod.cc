@@ -105,7 +105,15 @@ void CallTableMethod::generateMethod(const char *name,
       if (mt->clobbersReg( R_A2 ))
         { emit->generic("%s a2", comma); comma = ","; }
       if (mt->clobbersReg( R_A3 ))
-        emit->generic("%s a3", comma);
+        { emit->generic("%s a3", comma); comma = ","; }
+      if (mt->clobbersReg( R_FNA ))
+        {
+          int idx = mt->getFunctionIndexByAddress(fn->getAddress());
+
+          panic_if(idx < 0, "Could not find function index for function %s in method %s",
+              fn->getName(), mt->getName());
+          emit->generic("%s %d", comma, idx);
+        }
       emit->generic("); break;\n");
     }
 
