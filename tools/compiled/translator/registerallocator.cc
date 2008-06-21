@@ -48,6 +48,8 @@ void RegisterAllocator::setAllocation(int *registerUsage)
     n = allocateRegister(n, R_A2, sorted, usage);
   if (registerUsage[R_A3] > 0)
     n = allocateRegister(n, R_A3, sorted, usage);
+  if (registerUsage[R_FNA] > 0)
+    n = allocateRegister(n, R_FNA, sorted, usage);
 
   /* Allocate the rest of the registers */
   int largest;
