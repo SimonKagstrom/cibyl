@@ -152,7 +152,17 @@ public:
 	 reg != 0;
 	 reg = this->dstMethod->getNextRegisterToPass(&it))
       {
-	emit->bc_pushregister( reg );
+        /* Push the function index if it has one*/
+        if (reg == R_FNA)
+          {
+            int idx = this->dstMethod->getFunctionIndexByAddress(dst);
+
+            panic_if(idx < 0, "Method %s has no function for address 0x%x\n",
+                this->dstMethod->getName(), dst);
+            emit->bc_pushconst(idx);
+          }
+        else
+          emit->bc_pushregister( reg );
       }
     emit->bc_invokestatic("%s/%s", dstClass->getName(), this->dstMethod->getJavaMethodName());
     if (config->threadSafe)
