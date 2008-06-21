@@ -104,7 +104,7 @@ public:
   /**
    * Returns if this method is a multi-function-one
    */
-  bool hasMultipleFunctions()
+  virtual bool hasMultipleFunctions()
   {
     return (this->n_functions > 1);
   }
@@ -120,6 +120,8 @@ public:
   };
 
   Function *getFunctionByAddress(uint32_t addr);
+
+  int getFunctionIndexByAddress(uint32_t addr);
 
 protected:
   void emitLoadSubroutine(mips_opcode_t op);
@@ -166,6 +168,11 @@ public:
     if (config->threadSafe)
       return (char*)"call(IIIIII)J";
     return (char*)"call(IIIIII)I";
+  }
+
+  bool hasMultipleFunctions()
+  {
+    return false;
   }
 
 protected:
