@@ -122,8 +122,14 @@ bool JavaMethod::pass1()
       fn->fillDestinations(this->registerUsage);
       fn->fillSources(this->registerUsage);
     }
+  /* If this is a multi-function method, it will also use R_FNA as
+   * a method argument */
+  if (this->hasMultipleFunctions())
+    this->registerUsage[R_FNA]++;
 
-  for (MIPS_register_t reg = this->getFirstRegisterToPass(&it); reg != R_ZERO; reg = this->getNextRegisterToPass(&it))
+  for (MIPS_register_t reg = this->getFirstRegisterToPass(&it);
+      reg != R_ZERO;
+      reg = this->getNextRegisterToPass(&it))
     this->n_registersToPass++;
 
   return out;
@@ -155,6 +161,20 @@ Function *JavaMethod::getFunctionByAddress(uint32_t addr)
 
   return NULL;
 }
+
+int JavaMethod::getFunctionIndexByAddress(uint32_t addr)
+{
+  for (int i = 0; i < this->n_functions; i++)
+    {
+      Function *fn = this->functions[i];
+
+      if ( addr >= fn->getAddress() && addr <= fn->getAddress() + fn->getSize() )
+        return i;
+    }
+
+  return -1;
+}
+
 
 void JavaMethod::emitStoreSubroutine(mips_opcode_t op)
 {
@@ -438,22 +458,14 @@ bool JavaMethod::pass2()
 }
 
 /* R_ZERO terminates it */
-static MIPS_register_t possibleArgumentRegs[] = { R_SP, R_A0, R_A1, R_A2, R_A3, R_ZERO };
+static MIPS_register_t possibleArgumentRegs[] = { R_SP, R_A0, R_A1, R_A2, R_A3, R_FNA, R_ZERO };
 
 MIPS_register_t JavaMethod::getFirstRegisterToPass(void *_it)
 {
   int *it = (int*)_it;
-  MIPS_register_t ret;
 
   *it = 0;
-
-  while (possibleArgumentRegs[*it] != R_ZERO &&
-	 this->clobbersReg( possibleArgumentRegs[*it] ) == 0)
-      (*it)++;
-  ret = possibleArgumentRegs[*it];
-  (*it)++;
-
-  return ret;
+  return this->getNextRegisterToPass(it);
 }
 
 MIPS_register_t JavaMethod::getNextRegisterToPass(void *_it)
