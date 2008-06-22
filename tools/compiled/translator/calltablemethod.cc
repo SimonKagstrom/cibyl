@@ -82,7 +82,7 @@ void CallTableMethod::generateMethod(const char *name,
       panic_if(!cl, "Method %s has no class mapping!\n",
                mt->getName());
 
-      emit->generic("      case 0x%x:  ", mt->getAddress());
+      emit->generic("      case 0x%x:  ", fn->getAddress());
       if (config->threadSafe)
         {
           if (mt->clobbersReg( R_V0 ) && mt->clobbersReg( R_V1) )
