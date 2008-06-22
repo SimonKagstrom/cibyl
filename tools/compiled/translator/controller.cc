@@ -601,11 +601,13 @@ void Controller::lookupRelocations(JavaClass *cl)
                 case OP_SWR:
                 case OP_ADDI:
                 case OP_ADDIU:
-                  addr += b->getExtra();
-                  break;
+                  addr += b->getExtra(); break;
                 case OP_ORI:
-                  addr |= b->getExtra();
-                  break;
+                  addr |= b->getExtra(); break;
+                case OP_XORI:
+                  addr ^= b->getExtra(); break;
+                case OP_ANDI:
+                  addr &= b->getExtra(); break;
                 default:
                   emit->warning("Warning: Unknown opcode %d in hilo pair at 0x%08x : 0x%08x\n",
                                 b->getOpcode(), rel_hi->addr, rel_lo->addr);
