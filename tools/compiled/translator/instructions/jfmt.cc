@@ -290,7 +290,8 @@ public:
 class Jr : public BranchInstruction
 {
 public:
-  Jr(uint32_t address, int opcode, MIPS_register_t rs) : BranchInstruction(address, opcode, rs, R_ZERO, R_ZERO, 0)
+  Jr(uint32_t address, int opcode, MIPS_register_t rs) : BranchInstruction(address, opcode,
+      rs, R_ZERO, R_ZERO, 0)
   {
   }
 
