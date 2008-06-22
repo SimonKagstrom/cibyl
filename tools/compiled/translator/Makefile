@@ -21,7 +21,7 @@ SRCS=instruction.cc basicblock.cc controller.cc javamethod.cc \
 
 OBJS=$(patsubst %.cc,%.oo,$(SRCS))
 
-#GCOV=-fprofile-arcs -ftest-coverage
+GCOV=-fprofile-arcs -ftest-coverage
 
 all: xcibyl-translator
 

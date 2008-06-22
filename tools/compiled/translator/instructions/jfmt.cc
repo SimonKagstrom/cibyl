@@ -215,7 +215,9 @@ public:
   {
     int out = 0;
 
-    out += this->addToRegisterUsage(this->rs, p) + this->addToRegisterUsage(R_A0, p) + this->addToRegisterUsage(R_A1, p) + this->addToRegisterUsage(R_A2, p) + this->addToRegisterUsage(R_A3, p) + this->addToRegisterUsage(R_SP, p);
+    out += this->addToRegisterUsage(this->rs, p) + this->addToRegisterUsage(R_A0, p) +
+      this->addToRegisterUsage(R_A1, p) + this->addToRegisterUsage(R_A2, p) +
+      this->addToRegisterUsage(R_A3, p) + this->addToRegisterUsage(R_SP, p);
     if (this->builtin)
       out += this->builtin->fillSources(p);
 
