@@ -251,6 +251,10 @@ bool Controller::pass0()
     {
       Function *fn = this->functions[i];
 
+      /* Add all methods to the call table if we don't optimize this */
+      if (!config->optimizeCallTable)
+        this->callTableMethod->addFunction(fn);
+
       /* If this is part of a coloc, skip it */
       FunctionColocation *coloc = FunctionColocation::lookup(fn->getRealName());
       if (coloc)
@@ -258,10 +262,6 @@ bool Controller::pass0()
 
       /* 1-1 mapping */
       this->methods[n] = new JavaMethod(functions, i, i);
-
-      /* Add all methods to the call table if we don't optimize this */
-      if (!config->optimizeCallTable)
-        this->callTableMethod->addFunction(fn);
       n++;
     }
 
