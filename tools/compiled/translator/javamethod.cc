@@ -122,6 +122,7 @@ bool JavaMethod::pass1()
       fn->fillDestinations(this->registerUsage);
       fn->fillSources(this->registerUsage);
     }
+
   /* If this is a multi-function method, it will also use R_FNA as
    * a method argument */
   if (this->hasMultipleFunctions())
@@ -355,6 +356,8 @@ bool JavaMethod::pass2()
       Function *fn = this->functions[i];
 
       /* And compile the function */
+      if (this->hasMultipleFunctions())
+        emit->bc_label( fn->getAddress() );
       if ( !fn->pass2() )
 	out = false;
     }
@@ -400,7 +403,7 @@ bool JavaMethod::pass2()
     }
 
   emit->bc_label("__CIBYL_function_return");
-  if (this->hasMultipleFunctions())
+  if (this->hasMultipleFunctions() && this->n_returnLocations > 0)
     {
       emit->bc_pushregister(R_RA);
       emit->bc_tableswitch(0, this->n_returnLocations, this->returnLocations,
