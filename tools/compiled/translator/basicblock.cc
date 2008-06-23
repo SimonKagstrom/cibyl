@@ -180,7 +180,7 @@ bool BasicBlock::pass2()
       /* FIXME: Emit .line info if debug is on */
       if ( (insn->isBranchTarget() || controller->hasJumptabLabel(insn->getAddress())) &&
            !insn->isDelaySlotNop() )
-	emit->bc_label( "L_%x", insn->getAddress() );
+	emit->bc_label( insn->getAddress() );
 
       if (!insn->isNop())
 	this->commentInstruction(insn);
