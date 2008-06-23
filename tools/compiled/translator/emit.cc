@@ -232,14 +232,14 @@ void Emit::bc_lookupswitch(int n, uint32_t *table,
 void Emit::bc_tableswitch(int first, int n, uint32_t *table,
                           const char *def)
 {
-  this->write("\ttableswitch %d %d", first, first + n);
+  this->write("\ttableswitch %d %d", first, first + n - 1);
 
   for (int i = 0; i < n; i++)
     {
       this->write("\t\tL_%x",
                   table[i]);
     }
-  this->write("\t\tdefault: %s", def);
+  this->write("\tdefault: %s", def);
 }
 
 void Emit::error(const char *fmt, ...)
