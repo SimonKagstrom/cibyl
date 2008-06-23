@@ -1,6 +1,6 @@
 #!/bin/sh
 
-lcov --directory .. --zerocounters
+lcov --directory .. --base-directory .. --zerocounters
 rm -rf html/* out/* lcov.info
 
 # Run with different options
@@ -12,5 +12,5 @@ rm -rf html/* out/* lcov.info
 ../xcibyl-translator config:optimize_partial_memory_operations=1,class_size_limit=99999999 -DMABOO=1  out $CIBYL_BASE/tests/c/program $CIBYL_BASE/include/generated/cibyl-syscalls.db $CIBYL_BASE/tests/include/cibyl-syscalls.db
 ../xcibyl-translator "config:colocate_functions=main;test_run_all_tests;vsnprintf,optimize_partial_memory_operations=1,class_size_limit=99999999" -DMABOO=1  out $CIBYL_BASE/tests/c/program $CIBYL_BASE/include/generated/cibyl-syscalls.db $CIBYL_BASE/tests/include/cibyl-syscalls.db
 
-lcov --directory .. --capture --output-file lcov.info
+lcov --directory .. --base-directory .. --capture --output-file lcov.info
 genhtml --output-directory html/ lcov.info

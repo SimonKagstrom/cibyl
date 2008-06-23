@@ -15,50 +15,27 @@ HOST_CFLAGS ?=-ggdb -Iinclude -Wall
 
 SRCS=instruction.cc basicblock.cc controller.cc javamethod.cc \
      function.cc javaclass.cc mips.cc utils.cc elf.cc emit.cc \
-     registerallocator.cc calltablemethod.oo codeblock.oo \
-     string-instruction.cc builtins.cc syscall-wrappers.oo \
+     registerallocator.cc calltablemethod.cc codeblock.cc \
+     string-instruction.cc builtins.cc syscall-wrappers.cc \
      functioncolocation.cc
 
-OBJS=$(patsubst %.cc,%.oo,$(SRCS))
+OBJS=$(patsubst %.cc,objs/%.oo,$(SRCS))
+DEPS=$(patsubst %.cc,deps/%.d,$(SRCS))
 
-GCOV=-fprofile-arcs -ftest-coverage
+#GCOV=-fprofile-arcs -ftest-coverage
 
-all: xcibyl-translator
+all: $(DEPS) xcibyl-translator
+
+-include $(DEPS)
 
 clean:
-	rm -rf *.oo *.gcda *.gcno *~ xcibyl-translator xcibyl-translator-gcov lib/libghthash-0.6.2 lib/.libghthash
+	rm -rf objs/* deps/* *.gcda *.gcno *~ xcibyl-translator xcibyl-translator-gcov lib/libghthash-0.6.2 lib/.libghthash
 
-instruction.oo: instructions/fpu.cc instructions/memory.cc instructions/rfmt.cc \
-                instructions/ifmt.cc instructions/muldiv.cc instructions/set.cc \
-		instructions/nop.cc instructions/syscall.cc instructions/jfmt.cc \
-                include/utils.h include/instruction.hh include/entity.hh include/elf.hh \
-		include/config.hh include/mips.hh
-
-controller.oo: controller.cc \
-		include/utils.h include/instruction.hh include/entity.hh include/elf.hh \
-		include/config.hh include/javamethod.hh include/function.hh \
-                include/javaclass.hh include/functioncolocation.hh
-
-function.oo: function.cc include/basicblock.hh \
-		include/utils.h include/instruction.hh include/entity.hh include/elf.hh \
-		include/config.hh include/function.hh
-
-javamethod.oo: javamethod.cc include/basicblock.hh \
-		include/utils.h include/instruction.hh include/entity.hh include/elf.hh \
-		include/config.hh include/javamethod.hh include/function.hh
-
-javaclass.oo: javaclass.cc \
-		include/config.hh include/javaclass.hh
-
-
-builtins.oo: builtins.cc builtins/exceptions.cc builtins/softfloat.cc \
-		include/builtins.hh
-
-functioncolocation.oo: include/functioncolocation.hh include/javamethod.hh include/function.hh \
-             include/utils.h
-
-%.oo: %.cc
+objs/%.oo: %.cc
 	$(HOST_CXX) $(GCOV) -Ilib/libghthash-0.6.2/src/ $(HOST_CFLAGS) -c -o $@ $<
+
+deps/%.d: %.cc
+	$(HOST_CXX) -MM -MT '$(patsubst %.cc,objs/%.oo,$<)' $(GCOV) -Ilib/libghthash-0.6.2/src/ $(HOST_CFLAGS) -o $@ $<
 
 lib/.libghthash:
 	cd lib && tar -xzf libghthash-0.6.2.tar.gz
