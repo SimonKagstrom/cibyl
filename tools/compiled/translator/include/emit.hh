@@ -27,6 +27,11 @@ public:
 
   void bc_label(const char *what, ...);
 
+  void bc_label(uint32_t addr)
+  {
+    this->bc_label("L_%x", addr);
+  }
+
   void bc_goto(uint32_t dst) { this->writeIndent("goto L_%x", dst); }
 
   void bc_goto(const char *what, ...);
