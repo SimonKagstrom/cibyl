@@ -1,4 +1,12 @@
 Cibyl (19)
+	* The C++ translator Makefile now handles proper dependencies
+
+	* Implemented function colocation in methods for the C++
+	translator. All important optimizations from the Python translator
+	have now been implemented in the C++ ditto
+
+	* Fixed bug in looking up function addresses in methods
+
 	* Added mkdir/rmdir/remove for JSR075 and added these to the test
 	cases
 
