@@ -44,6 +44,13 @@ def doTranslation(filename, syscallDirectories):
         conf = conf + "prune_call_table=1,"
     if config.threadSafe:
         conf = conf + "thread_safe=1,"
+    if len(config.colocateFunctions) > 0:
+        l = len(config.colocateFunctions)
+        s = ""
+        for i in config.colocateFunctions[:l-1]:
+            s = s + i + ";"
+        s = s + config.colocateFunctions[-1]
+        conf = conf + "colocate_functions=" + s + ","
     if config.pruneUnusedFunctions:
         conf = conf + "prune_unused_functions=1,"
     else:
@@ -57,7 +64,7 @@ def doTranslation(filename, syscallDirectories):
     for d in syscallDirectories:
         dbs = dbs + d + "/cibyl-syscalls.db "
 
-    ret = os.system(config.xcibyl_translator + " " + conf + " " + defines + config.outDirectory
-                    + " " + config.infile + " " + dbs)
+    call_str = config.xcibyl_translator + " \"" + conf + "\" " + defines + config.outDirectory + " " + config.infile + " " + dbs
+    ret = os.system(call_str)
     if ret != 0:
         sys.exit(ret)
