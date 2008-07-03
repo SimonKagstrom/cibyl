@@ -53,8 +53,8 @@ static FILE *open(const char *path,
       return NULL;
     }
 
-  if (NOPH_InputStream_markSupported(p->is_file.is))
-    NOPH_InputStream_mark(p->is_file.is, 0x7fffffff);
+  //  if (NOPH_InputStream_markSupported(p->is_file.is))
+  //    NOPH_InputStream_mark(p->is_file.is, 0x7fffffff);
 
   p->path = strdup(path);
   /* We cannot get the file size for the connectors */
