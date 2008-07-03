@@ -21,20 +21,14 @@ __start:
 
 	## Run global constructors
 	jal	crt0_run_global_constructors
-
-	## Start the program
-        move    $4, $0
-        move    $5, $0
-	jal	main
 	nop
 
-        ## global destructors should be run by exit()
-	move	$4, $2		# move a0, v0
-	jal	exit
+	jr	$31
 	nop
 .end	__start
 
 CIBYL_EXPORT_SYMBOL(__start)
+CIBYL_EXPORT_SYMBOL(main)
 
 
 .section .data0
