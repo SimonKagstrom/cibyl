@@ -33,6 +33,7 @@ static void run_list(unsigned long *start, unsigned long *end)
     }
 }
 
+
 void crt0_run_global_constructors(void)
 {
   run_list(&__ctors_begin, &__ctors_end);
@@ -43,6 +44,7 @@ void crt0_run_global_destructors(void)
 {
   run_list(&__dtors_begin, &__dtors_end);
 }
+CIBYL_EXPORT_SYMBOL(crt0_run_global_destructors);
 
 /* This is a quite common case for an exception handler */
 void NOPH_setter_exception_handler(NOPH_Exception_t ex, void *arg)
