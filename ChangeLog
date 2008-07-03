@@ -1,4 +1,10 @@
 Cibyl (19)
+	* Split startup (from start.o) - this is now split in one call to
+	initialize (and run global constructors), start main() and then to run
+	global destructors
+
+	* strncmp off-by-one bug fixed (Ehud Shabtai)
+
 	* The C++ translator Makefile now handles proper dependencies
 
 	* Implemented function colocation in methods for the C++
