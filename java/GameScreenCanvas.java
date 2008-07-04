@@ -137,9 +137,12 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
       int main = CibylCallTable.getAddressByName("main");
       int destructors = CibylCallTable.getAddressByName("crt0_run_global_destructors");
 
-      Syscalls.initJ2ME(this, this.getGraphics(), this.main);
-      /* Start the virtual machine */
+      /* Register some objects */
+      Syscalls.canvasHandle = CRunTime.registerObject( this );
+      Syscalls.graphicsHandle = CRunTime.registerObject( this.getGraphics() );
+      Syscalls.midletHandle = CRunTime.registerObject( this.main );
 
+      /* Start the virtual machine */
       int sp = (CRunTime.memory.length * 4) - 8;
       CibylCallTable.call(start, sp, 0, 0, 0, 0);
       CibylCallTable.call(main, sp, 0, 0, 0, 0);
