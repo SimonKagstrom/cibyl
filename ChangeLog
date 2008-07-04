@@ -1,7 +1,11 @@
 Cibyl (19)
 	* Split startup (from start.o) - this is now split in one call to
 	initialize (and run global constructors), start main() and then to run
-	global destructors
+	global destructors. The NOPH_GameCanvas_get have also changed to
+	NOPH_Canvas_get (with an inlined function to get the original one),
+	and these objects are registered from the Java file.
+
+	* Don't mark streams (causes problems on Nokia devices)
 
 	* strncmp off-by-one bug fixed (Ehud Shabtai)
 

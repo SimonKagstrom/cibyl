@@ -110,6 +110,8 @@ typedef int NOPH_StringItem_t;
 typedef int NOPH_Gauge_t;
 
 /* Canvas and GameCanvas classes. */
+NOPH_Canvas_t NOPH_Canvas_get(void); /* Not generated */
+
 void NOPH_Canvas_setFullScreenMode(NOPH_Canvas_t canvas, bool_t mode);
 int NOPH_Canvas_getKeyCode(NOPH_Canvas_t canvas, int gameAction);
 int NOPH_Canvas_getGameAction(NOPH_Canvas_t canvas, int keyCode);

@@ -35,7 +35,11 @@ typedef int NOPH_TiledLayer_t;
 typedef int NOPH_Layer_t;
 typedef int NOPH_LayerManager_t;
 
-NOPH_GameCanvas_t NOPH_GameCanvas_get(void); /* Not generated */
+static inline NOPH_GameCanvas_t NOPH_GameCanvas_get(void)
+{
+  return (NOPH_GameCanvas_t)NOPH_Canvas_get();
+}
+
 void NOPH_GameCanvas_flushGraphics(NOPH_GameCanvas_t canvas);
 void NOPH_GameCanvas_flushGraphics_rect(NOPH_GameCanvas_t canvas, int x, int y, int width, int height);
 NOPH_Graphics_t NOPH_GameCanvas_getGraphics(NOPH_GameCanvas_t canvas); /* Not generated */
