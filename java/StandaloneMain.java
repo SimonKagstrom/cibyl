@@ -40,16 +40,14 @@ public class StandaloneMain
 
         CRunTime.init(is);
         int sp = (CRunTime.memory.length * 4) - 8;
-	CRunTime.publishCallback("Cibyl.atexit"); /* Never used! */
+        CRunTime.publishCallback("Cibyl.atexit"); /* Never used! */
         CibylCallTable.call(start, sp, 0, 0, 0, 0);
         CibylCallTable.call(main, sp, 0, 0, 0, 0);
         CibylCallTable.call(destructors, sp, 0, 0, 0, 0);
     } catch(Exception e)
-        {
-	  System.out.println(e.getMessage());
-	  e.printStackTrace();
-        }
-
-    System.err.println("Returned from the C-code (this should not happen)");
+    {
+    	System.out.println(e.getMessage());
+    	e.printStackTrace();
+    }
   }
 }
