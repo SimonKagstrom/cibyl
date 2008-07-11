@@ -37,7 +37,7 @@ public class CommandMgr implements CommandListener
   public void addCommand(int type, String name, int callback, int arg)
   {
     GameCanvas gc = (GameCanvas)CRunTime.getRegisteredObject(
-                                        Syscalls.NOPH_GameCanvas_get());
+                                        Syscalls.NOPH_Canvas_get());
     Command cmd = new Command(name, type, 1);
     commands.put(cmd, new MgrItem(callback, arg));
     gc.addCommand(cmd);
