@@ -40,7 +40,7 @@ void CibylElf::handleSymtab(Elf_Scn *scn)
   int n = data->d_size / sizeof(Elf32_Sym);
 
   panic_if(n <= 0,
-           "Section data too small (%d) - no symbols\n",
+           "Section data too small (%zd) - no symbols\n",
            data->d_size);
 
   /* Allocate big enough tables of symbols */

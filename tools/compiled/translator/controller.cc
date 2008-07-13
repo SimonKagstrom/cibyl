@@ -199,7 +199,7 @@ bool Controller::pass0()
       exp_syms = (cibyl_exported_symbol_t *)expsymsSection->data;
 
       panic_if(expsymsSection->size % sizeof(cibyl_exported_symbol_t) != 0,
-               "Size of the exported symbols section is wrong: %d\n",
+               "Size of the exported symbols section is wrong: %zd\n",
                expsymsSection->size);
 
       this->fixupExportedSymbols(exp_syms, n);
