@@ -1,1 +1,11 @@
 This example shows how to use Cibyl to export a C library to Java
+
+It exports the library in c/lib/implementation.c which simply exports
+three functions:
+
+  int add_to_arg(int num)
+  int *get_int_pointer(void)
+  void update_pointer(int *p)
+
+the file LibraryWrapper.java shows how the Java interface to these
+works.
