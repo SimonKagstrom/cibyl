@@ -12,7 +12,7 @@
 import java.lang.*;
 import java.io.*;
 
-public class Main
+public class StandaloneMain
 {
   public static void initCibyl(InputStream is)
   {
@@ -22,6 +22,7 @@ public class Main
 
         CRunTime.init(is);
         int sp = (CRunTime.memory.length * 4) - 8;
+        CRunTime.publishCallback("Cibyl.atexit"); /* Never used! */
         CibylCallTable.call(start, sp, 0, 0, 0, 0);
         CibylCallTable.call(destructors, sp, 0, 0, 0, 0);
     } catch(Exception e)
@@ -46,6 +47,21 @@ public class Main
     }
   }
 
+
+  public static void testStuff()
+  {
+    LibraryWrapper l = new LibraryWrapper();
+
+    int v = l.add_to_arg(5);
+
+    System.out.println("Called C add_to_arg, return value " + v);
+
+    int ptr = l.get_int_pointer();
+    System.out.println("Called C get_int_pointer, return value " + Integer.toHexString(ptr));
+
+    l.update_pointer(ptr);
+  }
+
   public static void main(String args[])
   {
     int i;
@@ -65,9 +81,12 @@ public class Main
       System.err.println(exception);
       System.exit(1);
     }
-    /* init Cibyl */
-    Main.initCibyl();
 
-    Main.cleanupCibyl();
+    /* init Cibyl */
+    StandaloneMain.initCibyl(is);
+
+    StandaloneMain.testStuff();
+
+    StandaloneMain.cleanupCibyl();
   }
 }
