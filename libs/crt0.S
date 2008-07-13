@@ -30,6 +30,13 @@ __start:
 CIBYL_EXPORT_SYMBOL(__start)
 CIBYL_EXPORT_SYMBOL(main)
 
+### Declase a dummy main to allow for it to always be exported
+.weak	main
+.ent	main
+main:
+	jr	$31
+	nop
+.end	main
 
 .section .data0
 .globl cibyl_memdebug_start_addr	# Export to C
