@@ -24,6 +24,8 @@ typedef int NOPH_InputStream_t;
 typedef int NOPH_OutputStream_t;
 typedef int NOPH_DataInputStream_t;
 typedef int NOPH_DataOutputStream_t;
+typedef int NOPH_FileInputStream_t;
+typedef int NOPH_FileOutputStream_t;
 
 typedef int NOPH_EOFException_t;
 
@@ -44,6 +46,10 @@ void NOPH_OutputStream_close(NOPH_OutputStream_t os); /* Throws */
 
 void NOPH_DataOutputStream_writeInt(NOPH_DataOutputStream_t os, int i); /* Throws */
 void NOPH_DataOutputStream_writeShort(NOPH_DataOutputStream_t os, short i); /* Throws */
+
+/* FileInputStream (J2SE) */
+NOPH_FileInputStream_t NOPH_FileInputStream_new(const char *name);
+NOPH_FileOutputStream_t NOPH_FileOutputStream_new(const char *name);
 
 /* EOFException */
 NOPH_EOFException_t NOPH_EOFException_new(void);

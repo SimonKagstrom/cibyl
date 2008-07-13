@@ -28,7 +28,6 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
   if (mode == WRITE || mode == APPEND || mode == READ_TRUNCATE)
     {
       file_outputfile_t *p;
-      long offset = 0;
 
       fp = cibyl_file_alloc(&file_output_fops);
       p = (file_outputfile_t*)fp->priv;
