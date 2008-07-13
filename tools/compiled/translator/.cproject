@@ -57,6 +57,7 @@
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+
 <storageModule moduleId="org.eclipse.cdt.core.pathentry">
 <pathentry kind="src" path=""/>
 <pathentry kind="out" path=""/>
