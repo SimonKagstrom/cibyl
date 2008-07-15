@@ -1,4 +1,8 @@
 Cibyl (19)
+	* Always export main - in crt0.S it's defined as an empty function
+	with weak linkage. If it's defined elsewhere, that version will be
+	used instead.
+
 	* Reorganized examples into J2ME and non-J2ME parts, and added an
 	example which shows how to export a library to Java
 
