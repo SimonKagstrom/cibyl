@@ -48,8 +48,8 @@ void NOPH_DataOutputStream_writeInt(NOPH_DataOutputStream_t os, int i); /* Throw
 void NOPH_DataOutputStream_writeShort(NOPH_DataOutputStream_t os, short i); /* Throws */
 
 /* FileInputStream (J2SE) */
-NOPH_FileInputStream_t NOPH_FileInputStream_new(const char *name);
-NOPH_FileOutputStream_t NOPH_FileOutputStream_new(const char *name);
+NOPH_FileInputStream_t NOPH_FileInputStream_new(const char* name); /* Throws */
+NOPH_FileOutputStream_t NOPH_FileOutputStream_new(const char* name); /* Throws */
 
 /* EOFException */
 NOPH_EOFException_t NOPH_EOFException_new(void);
