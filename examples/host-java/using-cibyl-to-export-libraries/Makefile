@@ -16,7 +16,7 @@ TARGET   =
 CIBYL_SYSCALL_SETS ?= ansi
 JAVA_OPTS=
 
-all: tmpclasses/LibraryWrapper.java
+all: $(SUBDIRS) tmpclasses/ tmpclasses/LibraryWrapper.java
 
 include $(CIBYL_BASE)/build/Rules-java.mk
 
@@ -24,3 +24,7 @@ tmpclasses/StandaloneMain.java: StandaloneMain.java
 	cp $< $@
 tmpclasses/LibraryWrapper.java: LibraryWrapper.java
 	cp $< $@
+
+tmpclasses:
+	install -d tmpclasses
+	
