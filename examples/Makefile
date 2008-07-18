@@ -10,7 +10,7 @@
 ##
 ######################################################################
 SUBDIRS=host-java/hello-world host-java/floating-point host-java/cpp-test \
-        host-java/external-syscalls j2me/hello-world j2me/tiles-sprites j2me/sokoban \
-        j2me/tafl-client j2me/events j2me/s9
+        host-java/exporting-java-functionality-to-cibyl j2me/hello-world j2me/tiles-sprites \
+        j2me/sokoban j2me/tafl-client j2me/events j2me/s9
 
 include $(CIBYL_BASE)/build/Rules-common.mk
