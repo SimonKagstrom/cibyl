@@ -1,3 +1,7 @@
+Cibyl (20)
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+
 Cibyl (19)
 	* Implemented FileInputStream/FileOutputStream handling in libj2se
 	(new library). This allows file handling from J2SE as well and added
@@ -76,7 +80,7 @@ Cibyl (19)
 	* Refactored the implementation of ELF section handling - much more
 	general now
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Fri Jul 18 15:15:53 CEST 2008
 
 Cibyl (18)
 	* Peephole optimization is now possible for the C++ translator
