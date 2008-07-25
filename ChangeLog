@@ -1,4 +1,5 @@
 Cibyl (20)
+	* Do not automatically invoke the python translator on -O
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>
 

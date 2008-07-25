@@ -239,7 +239,7 @@ if config.memoryDebug:
 usePythonCompiler = False
 
 # The C++ compiler cannot be used with some options
-if options.usePythonTranslator or config.doRegisterValueTracking or options.debug:
+if options.usePythonTranslator:
         usePythonCompiler = True
 
 if options.useCppTranslator:
