@@ -86,6 +86,8 @@ public:
 
   void bc_lshl() { this->writeIndent("lshl"); }
 
+  void bc_lshr() { this->writeIndent("lshr"); }
+
   void bc_lushr() { this->writeIndent("lushr"); }
 
   void bc_imul() { this->writeIndent("imul"); }
@@ -105,6 +107,10 @@ public:
   void bc_ixor() { this->writeIndent("ixor"); }
 
   void bc_lmul() { this->writeIndent("lmul"); }
+
+  void bc_ldiv() { this->writeIndent("ldiv"); }
+
+  void bc_lrem() { this->writeIndent("lrem"); }
 
   void bc_dup() { this->writeIndent("dup"); }
 

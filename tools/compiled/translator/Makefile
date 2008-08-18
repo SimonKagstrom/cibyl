@@ -22,7 +22,7 @@ SRCS=instruction.cc basicblock.cc controller.cc javamethod.cc \
 OBJS=$(patsubst %.cc,objs/%.oo,$(SRCS))
 DEPS=$(patsubst %.cc,deps/%.d,$(SRCS))
 
-#GCOV=-fprofile-arcs -ftest-coverage
+GCOV=-fprofile-arcs -ftest-coverage
 
 all: $(DEPS) xcibyl-translator
 

@@ -14,6 +14,7 @@
 
 #include "builtins/exceptions.cc"
 #include "builtins/softfloat.cc"
+#include "builtins/64-bit-muldiv.cc"
 
 Instruction *tryInstruction;
 
@@ -45,6 +46,12 @@ Builtin* BuiltinFactory::match(Instruction *insn, const char *name)
     return new FloatToInt(name);
   else if (cmp(name, "__fixsfdi"))
     return new FloatToInt(name);
+
+  /* 64-bit division */
+  else if (cmp(name, "__divdi3"))
+    return new DivBuiltin(name);
+  else if (cmp(name, "__moddi3"))
+    return new ModBuiltin(name);
 
   if (config->optimizeInlines)
     {
