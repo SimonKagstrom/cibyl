@@ -55,33 +55,39 @@ extern void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), 
 } while(0); if ( *(int*)0 != 0 ) {
 
 /**
+ * End a Java exception-catching block, catching a specific classes of
+ * exceptions. Must be preceeded by a @a NOPH_try.
+ *
+ * @see NOPH_try, NOPH_catch
+ */
+#define NOPH_catch_exception(exceptions) } do { \
+  asm volatile("");                             \
+  asm(".pushsection .cibylexceptionstrs, \"aS\"\n"     \
+      "1: .asciz \"" #exceptions "\"\n"         \
+      ".popsection\n"                           \
+      ".set noreorder\n"                        \
+      "jal   __NOPH_catch\n"                    \
+      ".long 1b\n"                              \
+      ".set reorder\n"                          \
+      : : : "v0");                              \
+} while(0)
+/* Exception names are passed in the delay slot of the jal instruction
+ * as an offset within the .cibylexceptionstrs section */
+
+
+/**
  * End a Java exception-catching block, catching all exceptions. Must
  * be preceeded by a @a NOPH_try
  *
  * @see NOPH_try
  */
-extern void __NOPH_catch(void);
-#define NOPH_catch() } do {          \
-  asm volatile("");                  \
-  __NOPH_catch();                    \
-} while(0)
+#define NOPH_catch_exception(exceptions) NOPH_catch_exception(all)
 
 extern void __NOPH_throw(NOPH_Exception_t exception);
 #define NOPH_throw(exception) do { \
   asm volatile("");                \
   __NOPH_throw(exception);         \
 } while(0)
-
-/**
- * End a Java exception-catching block, catching a specific class of
- * exceptions. Must be preceeded by a @a NOPH_try.
- *
- * @warning This is not yet implemented and will now to the same as @a
- * NOPH_catch
- *
- * @see NOPH_try, NOPH_catch
- */
-#define NOPH_catch_exception(exceptionClass) NOPH_catch()
 
 /**
  * Standard exception handler that sets the argument to 1 if an

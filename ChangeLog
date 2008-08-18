@@ -1,5 +1,6 @@
 Cibyl (20)
-	* 64-bit div and mod are handled as builtins now
+	* 64-bit div and mod are handled as builtins now (as suggested by
+	Susmith M R)
 
 	* Do not automatically invoke the python translator on -O
 

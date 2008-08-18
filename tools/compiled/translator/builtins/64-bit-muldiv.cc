@@ -43,8 +43,8 @@ public:
   bool pass2(Instruction *insn)
   {
     /* Concatenate the first and second parameters */
-    this->push_64_bit_from_32_bit_regs(R_A0, R_A1);
-    this->push_64_bit_from_32_bit_regs(R_A2, R_A3);
+    this->push_64_bit_from_32_bit_regs(R_A1, R_A0);
+    this->push_64_bit_from_32_bit_regs(R_A3, R_A2);
 
     /* The actual operation */
     emit->bc_generic_insn(this->bc);
@@ -54,10 +54,10 @@ public:
     emit->bc_pushconst(32);
     emit->bc_lushr();
     emit->bc_l2i();
-    emit->bc_popregister(R_V1);
+    emit->bc_popregister(R_V0);
 
     emit->bc_l2i();
-    emit->bc_popregister(R_V0);
+    emit->bc_popregister(R_V1);
     
     return true;
   }
@@ -93,18 +93,18 @@ public:
   }  
 };
 
-class ShrBuiltin : public MulDivBuiltinBase
+class ShiftBuiltinBase : public MulDivBuiltinBase
 {
 public:
-  ShrBuiltin(const char *name) : MulDivBuiltinBase(name, "lshr")
+  ShiftBuiltinBase(const char *name, const char *bc) : MulDivBuiltinBase(name, bc)
   {
   }  
 
   bool pass2(Instruction *insn)
   {
     /* Concatenate the first and second parameters */
-    this->push_64_bit_from_32_bit_regs(R_A0, R_A1);
-    emit->bc_pushregister(R_A2); /* Low part of the register pair */
+    this->push_64_bit_from_32_bit_regs(R_A1, R_A0);
+    emit->bc_pushregister(R_A3); /* Low part of the register pair */
 
     /* The actual operation */
     emit->bc_generic_insn(this->bc);
@@ -114,11 +114,27 @@ public:
     emit->bc_pushconst(32);
     emit->bc_lushr();
     emit->bc_l2i();
-    emit->bc_popregister(R_V1);
+    emit->bc_popregister(R_V0);
 
     emit->bc_l2i();
-    emit->bc_popregister(R_V0);
+    emit->bc_popregister(R_V1);
     
     return true;
+  }
+};
+
+class ShrBuiltin : public ShiftBuiltinBase
+{
+public:
+  ShrBuiltin(const char *name) : ShiftBuiltinBase(name, "lshr")
+  {
+  }  
+};
+
+class ShlBuiltin : public ShiftBuiltinBase
+{
+public:
+  ShlBuiltin(const char *name) : ShiftBuiltinBase(name, "lshl")
+  {
   }
 };
