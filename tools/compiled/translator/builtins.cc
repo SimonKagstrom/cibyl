@@ -52,6 +52,8 @@ Builtin* BuiltinFactory::match(Instruction *insn, const char *name)
     return new DivBuiltin(name);
   else if (cmp(name, "__moddi3"))
     return new ModBuiltin(name);
+  else if (cmp(name, "__ashrdi3"))
+    return new ShrBuiltin(name);
 
   if (config->optimizeInlines)
     {

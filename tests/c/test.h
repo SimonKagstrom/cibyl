@@ -74,6 +74,8 @@ typedef struct                                   \
 #define binary_arithmetic_test_short_constant(name, constant, op) __binary_arithmetic_test(name, short, constant, short, op)
 #define binary_arithmetic_test_int(name, op) __binary_arithmetic_test(name, int, int, int, op)
 #define binary_arithmetic_test_int_constant(name, constant, op) __binary_arithmehic_test(name, int, constant, int, op)
+#define binary_arithmetic_test_longlong(name, op) __binary_arithmetic_test(name, long long, long long, long long, op)
+#define binary_arithmetic_test_longlong_constant(name, constant, op) __binary_arithmehic_test(name, long long, constant, long long, op)
 
 #define binary_arithmetic_test_unsigned_char(name, op) __binary_arithmetic_test(name, unsigned char, unsigned char, unsigned char, op)
 #define binary_arithmetic_test_unsigned_char_constant(name, constant, op) __binary_arithmetic_test(name, unsigned char, constant, unsigned char, op)
@@ -99,6 +101,7 @@ bin_test_struct(unsigned_char_test_t, unsigned char);
 bin_test_struct(short_test_t, short);
 bin_test_struct(unsigned_short_test_t, unsigned short);
 bin_test_struct(int_test_t, int);
+bin_test_struct(longlong_test_t, long long);
 bin_test_struct(unsigned_int_test_t, unsigned int);
 
 bin_test_struct(float_test_t, float);
@@ -109,6 +112,7 @@ un_test_struct(unsigned_char_un_test_t, unsigned char);
 un_test_struct(short_un_test_t, short);
 un_test_struct(unsigned_short_un_test_t, unsigned short);
 un_test_struct(int_un_test_t, int);
+un_test_struct(longlong_un_test_t, long long);
 un_test_struct(unsigned_int_un_test_t, unsigned int);
 
 un_test_struct(double_un_test_t, double);

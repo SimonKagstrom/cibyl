@@ -1,4 +1,6 @@
 Cibyl (20)
+	* 64-bit div and mod are handled as builtins now
+
 	* Do not automatically invoke the python translator on -O
 
 	-- Simon Kagstrom <simon.kagstrom@gmail.com>

@@ -32,6 +32,7 @@ extern void char_run(void);
 extern void varargs_run(void);
 extern void float_run(void);
 extern void double_run(void);
+extern void longlong_run(void);
 extern void libm_run(void);
 extern void memory_run(void);
 extern void exceptions_run(void);
@@ -56,6 +57,7 @@ test_run_t all_tests[] =
   TEST(char_run),
   TEST(float_run),
   TEST(double_run),
+  TEST(longlong_run),
   TEST(libm_run),
   TEST(varargs_run),
   TEST(memory_run),

@@ -126,6 +126,18 @@ void __NOPH_throw(NOPH_Exception_t ex)
 {
 }
 
+void __divdi3(int64_t a, int64_t b)
+{
+}
+
+void __moddi3(int64_t a, int64_t b)
+{
+}
+
+void __ashrdi3(int64_t a, int64_t b)
+{
+}
+
 
 /* --- atexit(3) handling */
 static void (**atexit_list)(void);
