@@ -37,7 +37,7 @@ static longlong_test_t longlong_tests[] =
   BIN_OP(longlong_add, +, -1, -1),
   BIN_OP(longlong_add, +, 0, 0),
   BIN_OP(longlong_add, +, -1, 1),
-  BIN_OP(longlong_add, +, 1, 0xffffffff),
+  BIN_OP(longlong_add, +, 1ll, 0xffffffffll),
   BIN_OP(longlong_add, +, 1231565, -12312565),
 
   BIN_OP(longlong_sub, -, 5, 9),
@@ -49,8 +49,8 @@ static longlong_test_t longlong_tests[] =
   BIN_OP(longlong_mul, *, 5, 0),
   BIN_OP(longlong_mul, *, 1255, -0),
   BIN_OP(longlong_mul, *, 6979, -1),
-  BIN_OP(longlong_mul, *, 0x7fffffff, 2),
-  BIN_OP(longlong_mul, *, -1, -1),
+  BIN_OP(longlong_mul, *, 0x7fffffffll, 2ll),
+  BIN_OP(longlong_mul, *, -1ll, -1ll),
 
   BIN_OP(longlong_div, /, -1, -1),
   BIN_OP(longlong_div, /, -1, 5),
@@ -58,8 +58,8 @@ static longlong_test_t longlong_tests[] =
   BIN_OP(longlong_div, /,  1, -1),
   BIN_OP(longlong_div, /,  26, 25),
   BIN_OP(longlong_div, /,  2, 25),
-  BIN_OP(longlong_div, /,  40, 30),
-  BIN_OP(longlong_div, /,  155525, 536),
+  BIN_OP(longlong_div, /,  40ll, 30ll),
+  BIN_OP(longlong_div, /,  155525ll, 536ll),
 
   BIN_OP(longlong_mod, %,  155525, 536),
   BIN_OP(longlong_mod, %,  15, 15),
