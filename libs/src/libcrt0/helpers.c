@@ -134,10 +134,13 @@ void __moddi3(int64_t a, int64_t b)
 {
 }
 
-void __ashrdi3(int64_t a, int64_t b)
+void __ashrdi3(int64_t a, unsigned int b)
 {
 }
 
+void __ashldi3(int64_t a, unsigned int b)
+{
+}
 
 /* --- atexit(3) handling */
 static void (**atexit_list)(void);

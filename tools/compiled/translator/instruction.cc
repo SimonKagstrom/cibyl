@@ -59,6 +59,7 @@ void Instruction::setBranchTarget()
 #include "instructions/syscall.cc"
 #include "instructions/memory.cc"
 #include "instructions/fpu.cc"
+#include "instructions/catch.cc"
 
 /* --- The factory --- */
 Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
@@ -94,6 +95,10 @@ Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
   /* Syscall argument */
   if ( (word >> 16) == 0xfefe )
     return new SyscallRegisterArgument(address, word & 0x0000ffff);
+
+  /* Catch statements */
+  if ( (word >> 24) == 0xfd )
+    return new CatchInsn(address, word & 0x00ffffff);
 
   if ( opentry.fmt == IFMT )
     {

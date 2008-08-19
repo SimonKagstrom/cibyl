@@ -14,8 +14,6 @@
 #include <builtins.hh>
 #include <emit.hh>
 
-extern Instruction *tryInstruction;
-
 class ExceptionBuiltinBase : public Builtin
 {
 public:
@@ -54,33 +52,8 @@ public:
     emit->bc_pushregister(R_A1);
     emit->bc_popregister(R_EAR);
 
-    tryInstruction = insn;
+    controller->pushTryStack(insn);
 
-    return true;
-  }
-};
-
-class ExceptionBuiltinCatch : public ExceptionBuiltinBase
-{
-public:
-  ExceptionBuiltinCatch() : ExceptionBuiltinBase("__NOPH_catch")
-  {
-  }
-
-  int fillSources(int *p)
-  {
-    return this->addToRegisterUsage(R_SP, p); /* ECB, EAR in try */
-  };
-
-  bool pass2(Instruction *insn)
-  {
-    JavaMethod *method = controller->getMethodByAddress(insn->getAddress());
-    uint32_t start = tryInstruction->getAddress();
-    uint32_t end = insn->getAddress();
-    const char *handler = method->addExceptionHandler(start, end);
-
-    emit->generic(".catch all from L_%x to L_%x using %s\n",
-                     start, end, handler);
     return true;
   }
 };

@@ -20,6 +20,10 @@ SECTIONS
         /* Exported symbols (to Java) */
        	.cibylexpsyms : { *(.cibylexpsyms) }
 
+	/* The string table with the exception names */
+	. = 0xfd000000;
+       	.cibylexceptionstrs : { *(.cibylexceptionstrs) }
+
 	/* The string table with the system call names */
 	. = 0xff000000;
        	.cibylstrtab : { *(.cibylstrtab) }

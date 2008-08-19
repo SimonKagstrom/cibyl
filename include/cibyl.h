@@ -62,18 +62,13 @@ extern void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), 
  */
 #define NOPH_catch_exception(exceptions) } do { \
   asm volatile("");                             \
-  asm(".pushsection .cibylexceptionstrs, \"aS\"\n"     \
+  asm(".pushsection .cibylexceptionstrs, \"aS\"\n" \
       "1: .asciz \"" #exceptions "\"\n"         \
       ".popsection\n"                           \
       ".set noreorder\n"                        \
-      "jal   __NOPH_catch\n"                    \
       ".long 1b\n"                              \
-      ".set reorder\n"                          \
-      : : : "v0");                              \
+      ".set reorder\n");                        \
 } while(0)
-/* Exception names are passed in the delay slot of the jal instruction
- * as an offset within the .cibylexceptionstrs section */
-
 
 /**
  * End a Java exception-catching block, catching all exceptions. Must
@@ -81,7 +76,7 @@ extern void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), 
  *
  * @see NOPH_try
  */
-#define NOPH_catch_exception(exceptions) NOPH_catch_exception(all)
+#define NOPH_catch() NOPH_catch_exception(all)
 
 extern void __NOPH_throw(NOPH_Exception_t exception);
 #define NOPH_throw(exception) do { \

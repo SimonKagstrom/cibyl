@@ -45,6 +45,9 @@ Controller::Controller(const char **defines,
 
   this->colocs = NULL;
   this->n_colocs = 0;
+  
+  this->try_stack_top = 0;
+  memset(this->try_stack, 0, sizeof(this->try_stack));
 
   /* Get the .text section size (a small optimization) */
   ElfSection *textSection = elf->getSection(".text");
@@ -392,6 +395,26 @@ Instruction *Controller::getInstructionByAddress(uint32_t address)
 Instruction *Controller::getBranchTarget(uint32_t address)
 {
   return this->getInstructionByAddress(address);
+}
+
+void Controller::pushTryStack(Instruction *insn)
+{
+  panic_if(this->try_stack_top >= N_TRY_STACK_ENTRIES,
+      "Pushing too many entries on the stack: %d", this->try_stack_top);
+
+  this->try_stack[this->try_stack_top++] = insn;
+}
+
+Instruction *Controller::popTryStack()
+{
+  panic_if(this->try_stack_top <= 0,
+      "Popping off empty stack: %d", this->try_stack_top);
+
+  this->try_stack_top--;
+  
+  Instruction *out = this->try_stack[this->try_stack_top];
+
+  return out;
 }
 
 void Controller::lookupDataAddresses(uint32_t *data, int n_entries)

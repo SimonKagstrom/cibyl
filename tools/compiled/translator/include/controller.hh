@@ -20,6 +20,8 @@
 #include <builtins.hh>
 #include <functioncolocation.hh>
 
+#define N_TRY_STACK_ENTRIES 32
+
 class Controller : public CodeBlock
 {
 public:
@@ -70,6 +72,10 @@ public:
   }
 
   void addColocation(const char *str);
+
+  void pushTryStack(Instruction *insn);
+
+  Instruction *popTryStack();
 
 private:
 
@@ -123,6 +129,10 @@ private:
 
   FunctionColocation **colocs;
   int n_colocs;
+  
+  /* Try/catch blocks are handled as a stack */
+  int try_stack_top;
+  Instruction *try_stack[N_TRY_STACK_ENTRIES];
 };
 
 extern Controller *controller;

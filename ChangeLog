@@ -1,4 +1,8 @@
 Cibyl (20)
+	* Try/catch handling has been reimplemented. The new implementation is
+	based on a stack to handle nested try/catches and supports catching
+	specific classes
+
 	* 64-bit div and mod are handled as builtins now (as suggested by
 	Susmith M R)
 
