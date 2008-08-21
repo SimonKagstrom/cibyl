@@ -35,6 +35,8 @@ public:
     this->name = (char*)xcalloc(32, 1);
     snprintf(this->name, 32, "L_EXH_%08x_%08x", start, end);
   }
+  
+  virtual bool pass2();
 
   uint32_t start;
   uint32_t end;
@@ -86,12 +88,11 @@ public:
   /**
    * Add an exception handler between @start and @end
    *
-   * @param start the start address
-   * @param end the end address
+   * @param eh the exception handler to add
    *
    * @return the name of the exception handler
    */
-  char *addExceptionHandler(uint32_t start, uint32_t end);
+  char *addExceptionHandler(ExceptionHandler *eh);
 
   /**
    * Add a return address to this method (for multi-function methods)

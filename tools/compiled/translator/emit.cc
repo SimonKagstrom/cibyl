@@ -178,6 +178,26 @@ void Emit::bc_goto(const char *fmt, ...)
   this->output("\n");
 }
 
+void Emit::bc_if_icmpne(const char *fmt, ...)
+{
+  char buf[2048];
+
+  this->output("\tif_icmpne ");
+  do_vsnprintf(buf, fmt);
+  this->output(buf);
+  this->output("\n");
+}
+
+void Emit::bc_if_icmpeq(const char *fmt, ...)
+{
+  char buf[2048];
+
+  this->output("\tif_icmpeq ");
+  do_vsnprintf(buf, fmt);
+  this->output(buf);
+  this->output("\n");
+}
+
 void Emit::bc_jsr(const char *fmt, ...)
 {
   char buf[2048];
@@ -211,6 +231,16 @@ void Emit::bc_invokestatic(const char *fmt, ...)
   char buf[2048];
 
   this->output("\tinvokestatic ");
+  do_vsnprintf(buf, fmt);
+  this->output(buf);
+  this->output("\n");
+}
+
+void Emit::bc_invokevirtual(const char *fmt, ...)
+{
+  char buf[2048];
+
+  this->output("\tinvokevirtual ");
   do_vsnprintf(buf, fmt);
   this->output(buf);
   this->output("\n");

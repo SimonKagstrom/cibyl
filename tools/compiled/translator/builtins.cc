@@ -36,6 +36,10 @@ Builtin* BuiltinFactory::match(Instruction *insn, const char *name)
   /* Only look at the first part of the name */
   if (cmp(name, "__NOPH_try"))
     return new ExceptionBuiltinTry();
+  if (cmp(name, "__NOPH_throw"))
+    return new ThrowBuiltin();
+  else if (cmp(name, "__NOPH_setjmp"))
+    return new SetjmpBuiltin(name);
 
   /* Soft float optimization, the conversion can always be done */
   else if (cmp(name, "__floatsisf"))

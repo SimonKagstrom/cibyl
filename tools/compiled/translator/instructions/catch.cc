@@ -46,20 +46,24 @@ public:
 #undef DELIMS
 
     free(strs);
+    JavaMethod *method = controller->getMethodByAddress(this->getAddress());
+    this->tryInstruction = controller->popTryStack();
+    uint32_t start = this->tryInstruction->getAddress();
+    uint32_t end = this->getAddress();
+
+    this->handler = method->addExceptionHandler(new ExceptionHandler(start, end));
+
     return true;
   }
 
   bool pass2()
   {
-    JavaMethod *method = controller->getMethodByAddress(this->getAddress());
-    Instruction *tryInstruction = controller->popTryStack();
-    uint32_t start = tryInstruction->getAddress();
+    uint32_t start = this->tryInstruction->getAddress();
     uint32_t end = this->getAddress();
-    const char *handler = method->addExceptionHandler(start, end);
 
     for ( int i = 0; i < this->n_exception_classes; i++ )
       emit->generic(".catch %s from L_%x to L_%x using %s\n",
-          this->exception_classes[i], start, end, handler);  
+          this->exception_classes[i], start, end, this->handler);  
     emit->bc_label(end);
 
     return true;
@@ -73,4 +77,7 @@ public:
 protected:
   char **exception_classes;
   int n_exception_classes;
+  
+  Instruction *tryInstruction;
+  const char *handler;
 };

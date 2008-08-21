@@ -16,6 +16,37 @@
 #include <config.hh>
 #include <emit.hh>
 
+bool ExceptionHandler::pass2()
+{
+  JavaClass *dstClass;
+  JavaMethod *dstMethod;
+
+  dstMethod = controller->getCallTableMethod();
+  panic_if(!dstMethod,
+           "No call table method???\n");
+  dstClass = controller->getClassByMethodName(dstMethod->getName());
+  panic_if(!dstClass,
+           "No class for the call table method???\n");
+
+  emit->bc_label("%s", this->name);
+  /* Register the object passed here */
+  emit->bc_invokestatic("CRunTime/registerObject(Ljava/lang/Object;)I");
+  emit->bc_pushregister(R_ECB);
+  emit->bc_swap();
+  /* This is just a jalr(ecb, sp, ear (exception obj)) */
+  emit->bc_pushregister(R_SP);
+  emit->bc_swap();
+  emit->bc_pushregister(R_EAR);
+  emit->bc_pushconst(0);
+  emit->bc_pushconst(0);
+  emit->bc_invokestatic("%s/%s", dstClass->getName(),
+                        dstMethod->getJavaMethodName());
+  emit->bc_pop();
+  emit->bc_goto( this->end );
+
+  return true;
+}
+
 JavaMethod::JavaMethod(Function **fns,
 		       int first, int last) : CodeBlock()
 {
@@ -372,34 +403,13 @@ bool JavaMethod::pass2()
                             "__CIBYL_function_return");
     }
 
+  emit->bc_label("__CIBYL_exception_handlers");
   for (int i = 0; i < this->n_exceptionHandlers; i++)
     {
       ExceptionHandler *eh = this->exceptionHandlers[i];
-      JavaClass *dstClass;
-      JavaMethod *dstMethod;
-
-      dstMethod = controller->getCallTableMethod();
-      panic_if(!dstMethod,
-               "No call table method???\n");
-      dstClass = controller->getClassByMethodName(dstMethod->getName());
-      panic_if(!dstClass,
-               "No class for the call table method???\n");
-
-      emit->bc_label("%s", eh->name);
-      /* Register the object passed here */
-      emit->bc_invokestatic("CRunTime/registerObject(Ljava/lang/Object;)I");
-      emit->bc_pushregister(R_ECB);
-      emit->bc_swap();
-      /* This is just a jalr(ecb, sp, ear (exception obj)) */
-      emit->bc_pushregister(R_SP);
-      emit->bc_swap();
-      emit->bc_pushregister(R_EAR);
-      emit->bc_pushconst(0);
-      emit->bc_pushconst(0);
-      emit->bc_invokestatic("%s/%s", dstClass->getName(),
-                            dstMethod->getJavaMethodName());
-      emit->bc_pop();
-      emit->bc_goto( eh->end );
+      
+      if (eh->pass2() != true)
+        out = false;
     }
 
   emit->bc_label("__CIBYL_function_return");
@@ -489,16 +499,13 @@ bool JavaMethod::clobbersReg(MIPS_register_t reg)
   return this->registerUsage[reg] > 0;
 }
 
-char *JavaMethod::addExceptionHandler(uint32_t start, uint32_t end)
+char *JavaMethod::addExceptionHandler(ExceptionHandler *eh)
 {
   int n = this->n_exceptionHandlers;
-  ExceptionHandler *eh;
 
   this->exceptionHandlers = (ExceptionHandler**)xrealloc(this->exceptionHandlers,
                                                          (n + 1) * sizeof(ExceptionHandler*) );
   this->n_exceptionHandlers = n + 1;
-
-  eh = new ExceptionHandler(start, end);
   this->exceptionHandlers[n] = eh;
 
   return eh->name;

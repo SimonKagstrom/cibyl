@@ -32,6 +32,8 @@ public:
     this->bc_label("L_%x", addr);
   }
 
+  void bc_checkcast(const char *what) { this->writeIndent("checkcast %s", what); }
+
   void bc_goto(uint32_t dst) { this->writeIndent("goto L_%x", dst); }
 
   void bc_goto(const char *what, ...);
@@ -47,6 +49,10 @@ public:
   void bc_ret(MIPS_register_t reg);
 
   void bc_astore(MIPS_register_t reg);
+
+  void bc_aaload() { this->writeIndent("aaload"); }
+
+  void bc_athrow() { this->writeIndent("athrow"); }
 
   void bc_pushregister(MIPS_register_t reg);
 
@@ -73,6 +79,8 @@ public:
   void bc_isub() { this->writeIndent("isub"); }
 
   void bc_invokestatic(const char *what, ...);
+
+  void bc_invokevirtual(const char *what, ...);
 
   void bc_lookupswitch(int n, uint32_t *table, const char *def);
 
@@ -150,6 +158,9 @@ public:
 
   void bc_return() { this->writeIndent("return"); }
 
+  void bc_if_icmpne(const char *what, ...);
+
+  void bc_if_icmpeq(const char *what, ...);
 
   void error(const char *dst, ...);
 

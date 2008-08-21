@@ -66,7 +66,9 @@ extern void __NOPH_try(void (*callback)(NOPH_Exception_t exception, void *arg), 
       "1: .asciz \"" #exceptions "\"\n"         \
       ".popsection\n"                           \
       ".set noreorder\n"                        \
+      "nop\n"                                   \
       ".long 1b\n"                              \
+      "nop\n"                                   \
       ".set reorder\n");                        \
 } while(0)
 

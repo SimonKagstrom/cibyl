@@ -1,4 +1,6 @@
 Cibyl (20)
+	* Actually implemented NOPH_throw(), as a builtin
+
 	* Try/catch handling has been reimplemented. The new implementation is
 	based on a stack to handle nested try/catches and supports catching
 	specific classes
