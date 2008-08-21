@@ -400,7 +400,7 @@ Instruction *Controller::getBranchTarget(uint32_t address)
 void Controller::pushTryStack(Instruction *insn)
 {
   panic_if(this->try_stack_top >= N_TRY_STACK_ENTRIES,
-      "Pushing too many entries on the stack: %d", this->try_stack_top);
+      "Pushing too many entries on the stack: %d\n", this->try_stack_top);
 
   this->try_stack[this->try_stack_top++] = insn;
 }
@@ -408,7 +408,7 @@ void Controller::pushTryStack(Instruction *insn)
 Instruction *Controller::popTryStack()
 {
   panic_if(this->try_stack_top <= 0,
-      "Popping off empty stack: %d", this->try_stack_top);
+      "Popping off empty stack: %d\n", this->try_stack_top);
 
   this->try_stack_top--;
   

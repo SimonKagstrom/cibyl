@@ -29,7 +29,7 @@ public:
     strs = strdup((const char*)(scn->data + this->extra));
 
     /* Get all exception classes */
-#define DELIMS " ,"
+#define DELIMS " \t,\n"
     p = strtok(strs, DELIMS);
     panic_if(!p, "Could not tokenize %s", strs);
 

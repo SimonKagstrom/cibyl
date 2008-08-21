@@ -45,14 +45,19 @@ public:
     return this->addToRegisterUsage(R_A0, p) + this->addToRegisterUsage(R_A1, p);
   };
 
+  bool pass1(Instruction *insn)
+  {
+    insn->setBranchTarget();
+    controller->pushTryStack(insn);
+    return true;
+  }
+
   bool pass2(Instruction *insn)
   {
     emit->bc_pushregister(R_A0);
     emit->bc_popregister(R_ECB);
     emit->bc_pushregister(R_A1);
     emit->bc_popregister(R_EAR);
-
-    controller->pushTryStack(insn);
 
     return true;
   }
