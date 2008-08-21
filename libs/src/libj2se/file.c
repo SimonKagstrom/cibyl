@@ -38,7 +38,7 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
         {
           p->os_file = NOPH_FileOutputStream_new(path);
           error = 0;
-        } NOPH_catch();
+        } NOPH_catch_exception( java/io/FileNotFoundException java/lang/SecurityException );
       if (error)
         {
           cibyl_file_free(fp);
@@ -59,7 +59,7 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
     {
       p->is_file = NOPH_FileInputStream_new(path);
       error = 0;
-    } NOPH_catch();
+    } NOPH_catch_exception( java/io/FileNotFoundException java/lang/SecurityException );
   if (error)
     {
       cibyl_file_free(fp);

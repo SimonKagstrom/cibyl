@@ -47,7 +47,9 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
 	  else if ((mode == READ_TRUNCATE) || (mode == WRITE))
             NOPH_FileConnection_truncate(fc, 0);
           error = 0;
-        } NOPH_catch();
+        } NOPH_catch_exception(javax/microedition/io/file/IllegalModeException
+            java/io/IOException
+            javax/microedition/io/file/ConnectionClosedException);
       if (error)
         {
           NOPH_delete(fc);
@@ -65,7 +67,9 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
       NOPH_try(NOPH_setter_exception_handler, (void*)&error)
         {
           p->os_file.os = NOPH_FileConnection_openOutputStream(fc, offset); /* Can throw stuff */
-        } NOPH_catch();
+        } NOPH_catch_exception(javax/microedition/io/file/IllegalModeException
+            java/io/IOException
+            java/lang/SecurityException);
       if (error)
         {
           cibyl_file_free(fp);
@@ -94,7 +98,10 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
     {
       fc = NOPH_Connector_openFileConnection_mode(path, NOPH_Connector_READ);
       p->is_file.is = NOPH_FileConnection_openDataInputStream(fc);
-    } NOPH_catch();
+    } NOPH_catch_exception(java/lang/IllegalArgumentException
+        javax/microedition/io/ConnectionNotFoundException
+        javax/microedition/io/file/IllegalModeException
+        java/io/IOException java/lang/SecurityException);
   if (error)
     {
       cibyl_file_free(fp);

@@ -46,7 +46,9 @@ static FILE *open(const char *path,
   NOPH_try(NOPH_setter_exception_handler, (void*)&error)
     {
       p->is_file.is = NOPH_Connector_openDataInputStream((char*)path);
-    } NOPH_catch();
+    } NOPH_catch_exception(java/lang/IllegalArgumentException
+        javax/microedition/io/ConnectionNotFoundException
+        java/io/IOException java/lang/SecurityException);
   if (error)
     {
       cibyl_file_free(fp);
