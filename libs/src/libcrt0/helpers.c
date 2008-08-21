@@ -126,6 +126,11 @@ void __NOPH_throw(NOPH_Exception_t ex)
 {
 }
 
+int __NOPH_setjmp(void)
+{
+  return 0;
+}
+
 void __divdi3(int64_t a, int64_t b)
 {
 }
