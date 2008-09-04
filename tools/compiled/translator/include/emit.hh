@@ -168,6 +168,10 @@ public:
 
   void setOutputFile(FILE *fp);
 
+  void closeOutputFile();
+
+  FILE *getOutputFile() { return this->fp; }
+
   void output(const char *what);
 
   void generic(const char *what, ...);

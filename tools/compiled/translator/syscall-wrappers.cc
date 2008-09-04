@@ -244,6 +244,7 @@ void SyscallWrapperGenerator::generateHelperClasses()
                 {
                   emit->setOutputFile(open_file_in_dir(this->dstdir, de->d_name, "w"));
                   emit->output(data);
+                  emit->closeOutputFile();
                 }
               de = readdir(dir);
             }
@@ -275,6 +276,7 @@ bool SyscallWrapperGenerator::pass2()
                                 p);
     }
   emit->generic("}\n");
+  emit->closeOutputFile();
   this->generateHelperClasses();
 
   return true;

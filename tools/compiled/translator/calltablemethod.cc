@@ -171,6 +171,8 @@ void CallTableMethod::generateHierarchy(unsigned int n)
 
 bool CallTableMethod::pass2()
 {
+  unsigned int functions_per_class = this->n_functions / config->callTableClasses;
+
   /* If it exists, generate a table of exported symbols */
   if (this->exp_syms)
     {
@@ -187,10 +189,65 @@ bool CallTableMethod::pass2()
                     " }\n\n");
     }
 
+
+  panic_if(config->callTableClasses != 1 && config->callTableHierarchy != 1,
+      "Setting both number of call table classes (%d) and call table hierarchy (%d)\n"
+      "is not allowed\n", config->callTableClasses, config->callTableHierarchy);
+
   if (config->callTableHierarchy > 1)
     this->generateHierarchy(config->callTableHierarchy);
   else
-    this->generateMethod("call", 0, this->n_functions);
+    {
+      FILE *old_fp = emit->getOutputFile();
+
+      if ( config->callTableClasses > 1 )
+        {
+          /* First generate a class that just calls into the "correct" one */
+
+          emit->generic("  public static final int call(int address, int sp, int a0, int a1, int a2, int a3) throws Exception {\n");
+          for ( unsigned int i = 0; i < config->callTableClasses; i++ )
+            {
+              Function *first_fn = this->functions[i * functions_per_class];
+              Function *last_fn = this->functions[(i + 1) * functions_per_class];
+
+              if (i < config->callTableClasses - 1)
+                emit->generic("    %s ( address >= 0x%08x && address < 0x%08x)\n"
+                              "        return CibylCallTable%d.call(address, sp, a0, a1, a2, a3);\n",
+                              i == 0 ? "if" : "else if",
+                              first_fn->getAddress(), last_fn->getAddress(), i);
+              else /* The last */
+                emit->generic("    else\n"
+                              "        return CibylCallTable%d.call(address, sp, a0, a1, a2, a3);\n",
+                              i);
+
+            }
+          emit->generic("  }\n\n");
+        }
+      for ( unsigned int i = 0; i < config->callTableClasses; i++ )
+        {
+          /* Add a new class if there are multiple call table classes (yes, hack) */
+          if ( config->callTableClasses > 1 )
+            {
+              char buf[80];
+
+              xsnprintf(buf, 80, "CibylCallTable%d.java", i);
+              emit->setOutputFile(open_file_in_dir(controller->getDstDir(),
+                                                   buf, "w"));
+              emit->generic("class CibylCallTable%d {\n", i);
+            }
+
+          this->generateMethod("call", i * functions_per_class,
+              (i + 1) * functions_per_class);
+
+          if ( config->callTableClasses > 1 )
+            {
+              emit->generic("}\n");
+              emit->closeOutputFile();
+            }
+        }
+      /* Take back the old output file */
+      emit->setOutputFile(old_fp);
+    }
 
   return true;
 }

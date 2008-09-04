@@ -101,6 +101,9 @@ parser.add_option("--call-table-hierarchy", default=1,
 				  help="""Split the call table in NR hiearchies (workaround a JVM bug on some
 phones). Default is 1 (no hierarchy)""",
 		  dest="callTableHierarchy", metavar="NR")
+parser.add_option("--call-table-classes", default=1,
+				  help="""Split the call table in NR classes (for very big projects). Default is 1 (no hierarchy)""",
+		  dest="callTableClasses", metavar="NR")
 parser.add_option("--use-direct-memory-references", action="store_true", default=False,
 		  help="""Emit the memory vector directly for each memory access instead of
 using an aload reference (which saves space and might improve
@@ -191,6 +194,7 @@ if options.javacCommandLine:
 	config.javac = options.javacCommandLine
 
 config.callTableHierarchy = int(options.callTableHierarchy)
+config.callTableClasses = int(options.callTableClasses)
 config.peepholeIterations = int(options.peepholeIterations)
 
 config.infile = infile

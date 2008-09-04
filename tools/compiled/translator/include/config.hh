@@ -32,6 +32,7 @@ public:
 
     this->classSizeLimit = 16384; /* Pretty arbitrary value! */
     this->callTableHierarchy = 1;
+    this->callTableClasses = 1;
   }
 
   /* Debugging */
@@ -50,6 +51,7 @@ public:
   /* Workarounds for bugs */
   size_t classSizeLimit;
   unsigned int callTableHierarchy;
+  unsigned int callTableClasses;
 };
 
 extern Config *config;

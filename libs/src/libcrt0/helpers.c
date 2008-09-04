@@ -173,3 +173,9 @@ static void atexit_run(void)
 
   crt0_run_global_destructors();
 }
+
+void _flush_cache(void)
+{
+  /* Empty implementation of _flush_cache. This is called on for
+   * example some private functions */
+}

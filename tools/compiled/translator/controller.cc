@@ -45,7 +45,7 @@ Controller::Controller(const char **defines,
 
   this->colocs = NULL;
   this->n_colocs = 0;
-  
+
   this->try_stack_top = 0;
   memset(this->try_stack, 0, sizeof(this->try_stack));
 
@@ -326,9 +326,10 @@ void Controller::allocateClasses()
 
   /* Add the call table method */
   this->classes = (JavaClass**)xrealloc(this->classes, (n+1) * sizeof(JavaClass*));
+
   this->classes[n] = new CallTableClass("CibylCallTable", (JavaMethod**)&this->callTableMethod, 0, 0);
   ght_insert(this->method_to_class, this->classes[n],
-             strlen(this->callTableMethod->getName()), this->callTableMethod->getName());
+      strlen(this->callTableMethod->getName()), this->callTableMethod->getName());
   n++;
 
   this->n_classes = n;
@@ -411,7 +412,7 @@ Instruction *Controller::popTryStack()
       "Popping off empty stack: %d\n", this->try_stack_top);
 
   this->try_stack_top--;
-  
+
   Instruction *out = this->try_stack[this->try_stack_top];
 
   return out;
@@ -721,6 +722,7 @@ bool Controller::pass2()
 
       if (this->classes[i]->pass2() != true)
         out = false;
+      emit->closeOutputFile();
     }
 
   syscallWrappers = new SyscallWrapperGenerator(this->defines, this->dstdir,
@@ -761,6 +763,7 @@ static void usage()
          "   thread_safe=0/1         Set to 1 to generate thread-safe code (default 0)\n"
          "   class_size_limit=N      Set the size limit for classes (class split size)\n"
          "   call_table_hierarchy=N  Generate a call table hierarchy with N methods (default 1)\n"
+         "   call_table_classes=N    Generate several call table classes\n"
          "   prune_call_table=0/1    Set to 1 to prune unused indirect function calls\n"
          "   optimize_partial_memory_operations=0/1  Set to 1 to generate subroutine calls for\n"
          "                           lb/lh/sb/sh (default 0)\n"
@@ -813,6 +816,8 @@ static void parse_config(Controller *cntr, Config *cfg, const char *config_str)
         cfg->classSizeLimit = int_val;
       else if (strcmp(p, "call_table_hierarchy") == 0)
         cfg->callTableHierarchy = int_val;
+      else if (strcmp(p, "call_table_classes") == 0)
+        cfg->callTableClasses = int_val;
       else if (strcmp(p, "colocate_functions") == 0)
         cntr->addColocation(value);
       else

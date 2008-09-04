@@ -322,9 +322,12 @@ void Emit::output(const char *what)
 
 void Emit::setOutputFile(FILE *fp)
 {
-  if (this->fp != stdout)
-    fclose(this->fp);
   this->fp = fp;
+}
+
+void Emit::closeOutputFile()
+{
+  fclose(this->fp);
 }
 
 Emit *emit;

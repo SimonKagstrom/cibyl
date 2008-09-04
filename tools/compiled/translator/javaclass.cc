@@ -185,6 +185,7 @@ bool CallTableClass::pass1()
 bool CallTableClass::pass2()
 {
   bool out = true;
+  int i;
 
   emit->generic("class CibylCallTable {\n");
 

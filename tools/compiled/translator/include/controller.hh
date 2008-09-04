@@ -38,6 +38,10 @@ public:
   JavaMethod *getCallTableMethod();
   Syscall *getSyscall(uint32_t value);
 
+  const char *getDstDir()
+  {
+    return this->dstdir;
+  }
   /**
    * Set the instruction currently being compiled
    *
@@ -129,7 +133,7 @@ private:
 
   FunctionColocation **colocs;
   int n_colocs;
-  
+
   /* Try/catch blocks are handled as a stack */
   int try_stack_top;
   Instruction *try_stack[N_TRY_STACK_ENTRIES];
