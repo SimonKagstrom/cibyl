@@ -58,6 +58,18 @@ private:
 
   void traceRegisterValues(Instruction *insn);
 
+  void handleTables(Instruction **rtab, Instruction **wtab, Instruction *insn);
+
+  void fillInstructionReadsAndWrites(Instruction **rtab, Instruction **wtab,
+      Instruction *insn);
+
+  void fillWriteTable(Instruction **table, Instruction *insn);
+
+  void fillReadTable(Instruction **table, Instruction *insn);
+
+  Instruction *lookupPrevRegister(Instruction *insn, MIPS_register_t reg,
+      bool is_write);
+
   int n_insns;
   bb_type_t type;
   Instruction **instructions;

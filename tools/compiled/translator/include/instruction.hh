@@ -132,14 +132,57 @@ public:
 
   int32_t getExtra() { return this->extra; }
 
+  /**
+   * Get the last instruction where the register @a which was written to
+   * in the basic block of this instruction
+   *
+   * @param which the register to lookup (rs/rt/rd)
+   * @return a pointer to the last instruction or NULL if there
+   *         was no previous write
+   */
+  Instruction *getPrevRegisterWrite(mips_register_type_t which)
+  {
+    return this->register_writes[which];
+  }
+
+  /**
+   * Get the last instruction where the register @a which was read from
+   * in the basic block of this instruction
+   *
+   * @param which the register to lookup (rs/rt/rd)
+   * @return a pointer to the last instruction or NULL if there
+   *         was no previous read
+   */
+  Instruction *getPrevRegisterRead(mips_register_type_t which)
+  {
+    return this->register_reads[which];
+  }
+
+  void setPrevRegisterReadAndWrite(Instruction *rinsn, Instruction *winsn,
+      mips_register_type_t which)
+  {
+    this->setPrevRegisterGeneric(this->register_reads, which, rinsn);
+    this->setPrevRegisterGeneric(this->register_writes, which, winsn);
+  }
+
   BasicBlock *parent;
 protected:
+  void setPrevRegisterGeneric(Instruction **table, mips_register_type_t which,
+      Instruction *insn)
+  {
+    table[which] = insn;
+  }
+
   int opcode;
   MIPS_register_t rs, rt, rd;
   int32_t extra;
   Instruction *delayed;
   Instruction *prefix;
 
+  /* rs/rt/rd */
+  Instruction *register_writes[3];
+  Instruction *register_reads[3];
+ 
   bool branchTarget;
 };
 

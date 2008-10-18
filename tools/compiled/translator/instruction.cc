@@ -36,6 +36,9 @@ Instruction::Instruction(uint32_t address, int opcode,
   this->branchTarget = false;
   this->prefix = NULL;
   this->delayed = NULL;
+
+  memset(this->register_reads, 0, sizeof(this->register_reads));
+  memset(this->register_writes, 0, sizeof(this->register_writes));
 };
 
 Instruction::~Instruction()

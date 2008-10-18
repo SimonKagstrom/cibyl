@@ -18,6 +18,11 @@ BasicBlock::BasicBlock(Instruction **insns,
 		       bb_type_t type,
 		       int first, int last) : CodeBlock()
 {
+  Instruction **write_table = (Instruction**)xcalloc(N_REGS,
+      sizeof(Instruction*));
+  Instruction **read_table = (Instruction**)xcalloc(N_REGS,
+      sizeof(Instruction*));
+
   panic_if(first < 0 || last < 0 || first > last,
            "Basic block constructed with wrong instructions %d to %d\n", first, last);
 
@@ -28,18 +33,92 @@ BasicBlock::BasicBlock(Instruction **insns,
   this->address = this->instructions[0]->getAddress();
   this->size = this->n_insns * 4;
 
-  /* Fixup the bytecode size */
+  /* Fixup the bytecode size and fill in last register writes and
+   * last register reads for the instruction */
   this->bc_size = 0;
   for (int i = 0; i < n_insns; i++)
     {
       Instruction *insn = this->instructions[i];
 
-      this->bc_size += insn->getBytecodeSize();
+      /* Order is important. The parameters for the instruction with a delay
+       * slot is pushed before the delay slot */
       if (insn->hasPrefix())
-        this->bc_size += insn->getPrefix()->getBytecodeSize();
+        {
+          this->handleTables(read_table, write_table, insn->getPrefix());
+          this->bc_size += insn->getPrefix()->getBytecodeSize();
+        }
+      this->handleTables(read_table, write_table, insn);
+      this->bc_size += insn->getBytecodeSize();
       if (insn->hasDelayed())
-        this->bc_size += insn->getDelayed()->getBytecodeSize();
+        {
+          this->handleTables(read_table, write_table, insn->getDelayed());
+          this->bc_size += insn->getDelayed()->getBytecodeSize();
+        }
     }
+
+  free(write_table);
+  free(read_table);
+}
+
+void BasicBlock::handleTables(Instruction **rtab, Instruction **wtab,
+    Instruction *insn)
+{
+  /* First update the instruction and then the tables */
+  this->fillInstructionReadsAndWrites(rtab, wtab, insn);
+  this->fillReadTable(rtab, insn);
+  this->fillWriteTable(wtab, insn);
+}
+
+
+void BasicBlock::fillInstructionReadsAndWrites(Instruction **rtab,
+    Instruction **wtab, Instruction *insn)
+{
+  int uses[N_REGS];
+
+  memset(uses, 0, sizeof(uses));
+  insn->fillDestinations(uses);
+  insn->fillSources(uses);
+
+  if (uses[insn->getRs()])
+      insn->setPrevRegisterReadAndWrite(rtab[insn->getRs()],
+          wtab[insn->getRs()], I_RS);
+  if (uses[insn->getRt()])
+    insn->setPrevRegisterReadAndWrite(rtab[insn->getRt()],
+        wtab[insn->getRt()], I_RT);
+  if (uses[insn->getRd()])
+    insn->setPrevRegisterReadAndWrite(rtab[insn->getRd()],
+        wtab[insn->getRd()], I_RD);
+}
+
+void BasicBlock::fillWriteTable(Instruction **table, Instruction *insn)
+{
+  int dsts[N_REGS];
+  
+  memset(dsts, 0, sizeof(dsts));
+  insn->fillDestinations(dsts);
+
+  /* rs is rarely used as a destination, but we want to be sure! */
+  if (dsts[insn->getRs()])
+    table[insn->getRs()] = insn;
+  if (dsts[insn->getRt()])
+    table[insn->getRt()] = insn;
+  if (dsts[insn->getRd()])
+    table[insn->getRd()] = insn;
+}
+
+void BasicBlock::fillReadTable(Instruction **table, Instruction *insn)
+{
+  int srcs[N_REGS];
+  
+  memset(srcs, 0, sizeof(srcs));
+  insn->fillDestinations(srcs);
+
+  if (srcs[insn->getRs()])
+    table[insn->getRs()] = insn;
+  if (srcs[insn->getRt()])
+    table[insn->getRt()] = insn;
+  if (srcs[insn->getRd()])
+    table[insn->getRd()] = insn;
 }
 
 bool BasicBlock::pass1()
@@ -77,8 +156,9 @@ bool BasicBlock::pass1()
       if (!insn->pass1())
 	out = false;
 
-      if ( (this->type == PROLOGUE && insn->getOpcode() == OP_SW && insn->getRs() == R_SP) ||
-	   (this->type == EPILOGUE && insn->getOpcode() == OP_LW && insn->getRs() == R_SP) )
+      if (config->optimizePruneStackSaves &&
+          ((this->type == PROLOGUE && insn->getOpcode() == OP_SW && insn->getRs() == R_SP) ||
+           (this->type == EPILOGUE && insn->getOpcode() == OP_LW && insn->getRs() == R_SP)) )
 	{
 	  int p_s[N_REGS];
 	  int p_d[N_REGS];
@@ -95,8 +175,8 @@ bool BasicBlock::pass1()
 	    {
 	      MIPS_register_t reg = mips_caller_saved[j];
 
-	      if ( (this->type == PROLOGUE && p_s[reg] != 0) ||
-                   (this->type == EPILOGUE && p_d[reg] != 0) )
+	      if ( (this->type == PROLOGUE && p_s[reg] != 0 && !this->lookupPrevRegister(insn, reg, true)) ||
+                   (this->type == EPILOGUE && p_d[reg] != 0 && !this->lookupPrevRegister(insn, reg, true)))
 		{
 		  this->instructions[i] = InstructionFactory::getInstance()->createNop(insn->getAddress());
                   if (insn->isBranchTarget())
@@ -136,6 +216,25 @@ void BasicBlock::traceRegisterValues(Instruction *insn)
   emit->bc_invokestatic("CRunTime/emitRegisterTrace(III)V");
   if (insn->getDelayed())
     this->traceRegisterValues(insn->getDelayed());
+}
+
+Instruction *BasicBlock::lookupPrevRegister(Instruction *insn, MIPS_register_t reg,
+    bool is_write)
+{
+  mips_register_type_t which;
+
+  if (reg == insn->getRs())
+    which = I_RS;
+  else if (reg == insn->getRt())
+    which = I_RT;
+  else if (reg == insn->getRd())
+    which = I_RD;
+  else /* Does not access the register! */
+    return NULL;
+
+  if (is_write)
+    return insn->getPrevRegisterWrite(which);
+  return insn->getPrevRegisterRead(which);
 }
 
 void BasicBlock::commentInstruction(Instruction *insn)

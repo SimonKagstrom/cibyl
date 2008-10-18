@@ -238,6 +238,14 @@ typedef enum
 
 #define N_INSNS 133
 
+/* Indices */
+typedef enum
+{
+  I_RS = 0,
+  I_RT = 1,
+  I_RD = 2,
+} mips_register_type_t;
+
 typedef enum
 {
   IFMT = 1,
