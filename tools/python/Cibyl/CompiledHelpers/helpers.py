@@ -43,7 +43,7 @@ def doTranslation(filename, syscallDirectories):
     if config.doOptimizeIndirectCalls:
         conf = conf + "prune_call_table=1,"
     if config.doOptimizePruneStackStores:
-        conf = conf + "optimize_prune_stack_saves=1,"
+        conf = conf + "optimize_prune_stack_stores=1,"
     if config.threadSafe:
         conf = conf + "thread_safe=1,"
     if len(config.colocateFunctions) > 0:
