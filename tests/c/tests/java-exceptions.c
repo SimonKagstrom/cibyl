@@ -16,6 +16,7 @@ void exceptions_run(void)
 #else
 #include <test.h>
 #include <stdlib.h>
+#include <setjmp.h>
 #include <javax/microedition/io.h>
 #include <javax/microedition/lcdui/game.h>
 
@@ -164,6 +165,46 @@ static void handler_file_io(NOPH_Exception_t exception, void *arg)
   NOPH_delete(exception);
 }
 
+jmp_buf jb;
+int exc_dummy = 0;
+void exception_test_longjmp_2(void)
+{
+  exc_dummy = 2;
+  longjmp(jb, 2);
+}
+
+void exception_test_longjmp_1(void)
+{
+  exception_test_longjmp_2();
+  /* Will never be executed */
+  exc_dummy = 1;
+}
+
+void exception_test_setjmp(void)
+{
+  int v;
+  
+  exc_dummy = 0;
+  v = setjmp(jb);
+  
+  if (v == 0)
+    {
+      PASS("setjmp: %d", v);
+    }
+  else if (v == 2)
+    {
+      PASS("after longjmp: %d", v);
+      return;
+    }
+  else
+    {
+      FAIL("setjmp: %d", v);
+      return;
+    }
+  
+  exception_test_longjmp_1();
+}
+
 extern void assign_to_ra(void);
 
 /* The run-the-tests function */
@@ -180,6 +221,7 @@ void exceptions_run(void)
   exception_test_2();
   exception_test_multiple();
   exception_test_stacked();
+  exception_test_setjmp();
 
   NOPH_try(handler_file_io, (void*)&threw_exception) {
     NOPH_Connector_openDataInputStream(s);

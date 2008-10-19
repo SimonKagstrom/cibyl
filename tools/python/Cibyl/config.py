@@ -20,6 +20,7 @@ doRegisterScheduling = False
 doOptimizeIndirectCalls = False
 doPeepholeOptimize = False
 doRegisterValueTracking = False
+doOptimizePruneStackStores = False
 
 aloadMemory = True
 

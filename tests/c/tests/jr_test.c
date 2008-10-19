@@ -31,5 +31,5 @@ void jr_run(void)
   if (v2 & 0x100000000LL)
     PASS("return_in_v1: %x:%08x\n", (unsigned int)(v2 >> 32), (unsigned int)(v2 & 0xffffffff) );
   else
-    PASS("return_in_v1: %x:%08x != 0x1:Random\n", (unsigned int)(v2 >> 32), (unsigned int)(v2 & 0xffffffff) );
+    FAIL("return_in_v1: %x:%08x != 0x1:Random\n", (unsigned int)(v2 >> 32), (unsigned int)(v2 & 0xffffffff) );
 }

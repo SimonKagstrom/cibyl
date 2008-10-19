@@ -49,6 +49,7 @@ extern void ll_ret_run(void);
 extern void malloc_run(void);
 extern void function_run(void);
 extern void tail_call_run(void);
+extern void store_s_regs_run(void);
 
 test_run_t all_tests[] =
 {
@@ -71,6 +72,7 @@ test_run_t all_tests[] =
   TEST(ll_ret_run),
   TEST(function_run),
   TEST(tail_call_run),
+  TEST(store_s_regs_run),
 };
 
 

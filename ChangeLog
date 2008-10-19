@@ -1,4 +1,11 @@
 Cibyl (20)
+	* Fixed bug caused by removing some stores of s-registers in function
+	porlogues/epilogues without checking if they were in use (thanks
+	Ehud). Added test case for this and made the optimization optional
+	(enabled via -O or --optimize-prune-stack-stores)
+
+	* setjmp/longjmp
+
 	* Actually implemented NOPH_throw(), as a builtin
 
 	* Try/catch handling has been reimplemented. The new implementation is

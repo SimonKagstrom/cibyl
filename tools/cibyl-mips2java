@@ -142,6 +142,9 @@ parser.add_option("--optimize-indirect-calls", action="store_true", default=Fals
 				  help="""Turn on optimization of indirect call generation. This will reduce the
 size of the generated class file""",
 		  dest="doOptimizeIndirectCalls")
+parser.add_option("--optimize-prune-stack-stores", action="store_true", default=False,
+				  help="""Turn on removal of unecessary stack stores. Reduces the size.""",
+		  dest="doOptimizePruneStackStores")
 parser.add_option("--optimize-inline-all-builtins", action="store_true", default=False,
 				  help="""Turn on inlining of ALL builtin functions (e.g., floating point helper
 functions). This will increase the size of the executable, but may improve performance""",
@@ -172,6 +175,7 @@ config.doInlineAllBuiltins = options.doInlineAllBuiltins
 config.doOptimizeIndirectCalls = options.doOptimizeIndirectCalls
 config.doPeepholeOptimize = options.peepholeOptimize
 config.doRegisterValueTracking = options.registerValueTracking
+config.doOptimizePruneStackStores = options.doOptimizePruneStackStores
 
 config.pruneUnusedFunctions = options.pruneUnusedFunctions
 config.threadSafe = options.threadSafe
@@ -236,6 +240,7 @@ if options.optimize_all:
 	config.doRegisterScheduling = True
 	config.doPeepholeOptimize = True
 	config.doRegisterValueTracking = True
+	config.doOptimizePruneStackStores = True
 
 if config.memoryDebug:
 	instruction.setupMemoryDebug()

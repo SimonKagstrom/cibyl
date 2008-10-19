@@ -18,11 +18,6 @@ BasicBlock::BasicBlock(Instruction **insns,
 		       bb_type_t type,
 		       int first, int last) : CodeBlock()
 {
-  Instruction **write_table = (Instruction**)xcalloc(N_REGS,
-      sizeof(Instruction*));
-  Instruction **read_table = (Instruction**)xcalloc(N_REGS,
-      sizeof(Instruction*));
-
   panic_if(first < 0 || last < 0 || first > last,
            "Basic block constructed with wrong instructions %d to %d\n", first, last);
 
@@ -43,21 +38,11 @@ BasicBlock::BasicBlock(Instruction **insns,
       /* Order is important. The parameters for the instruction with a delay
        * slot is pushed before the delay slot */
       if (insn->hasPrefix())
-        {
-          this->handleTables(read_table, write_table, insn->getPrefix());
-          this->bc_size += insn->getPrefix()->getBytecodeSize();
-        }
-      this->handleTables(read_table, write_table, insn);
+        this->bc_size += insn->getPrefix()->getBytecodeSize();
       this->bc_size += insn->getBytecodeSize();
       if (insn->hasDelayed())
-        {
-          this->handleTables(read_table, write_table, insn->getDelayed());
-          this->bc_size += insn->getDelayed()->getBytecodeSize();
-        }
+        this->bc_size += insn->getDelayed()->getBytecodeSize();
     }
-
-  free(write_table);
-  free(read_table);
 }
 
 void BasicBlock::handleTables(Instruction **rtab, Instruction **wtab,
@@ -124,6 +109,10 @@ void BasicBlock::fillReadTable(Instruction **table, Instruction *insn)
 bool BasicBlock::pass1()
 {
   bool out = true;
+  Instruction **write_table = (Instruction**)xcalloc(N_REGS,
+      sizeof(Instruction*));
+  Instruction **read_table = (Instruction**)xcalloc(N_REGS,
+      sizeof(Instruction*));
 
   for (int i = 0; i < this->n_insns; i++)
     {
@@ -156,37 +145,51 @@ bool BasicBlock::pass1()
       if (!insn->pass1())
 	out = false;
 
-      if (config->optimizePruneStackSaves &&
+      /* Order is important. The parameters for the instruction with a delay
+       * slot is pushed before the delay slot */
+      if (insn->hasPrefix())
+        this->handleTables(read_table, write_table, insn->getPrefix());
+      this->handleTables(read_table, write_table, insn);
+      if (insn->hasDelayed())
+        this->handleTables(read_table, write_table, insn->getDelayed());
+    }
+
+  free(write_table);
+  free(read_table);
+
+  for (int i = 0; i < this->n_insns; i++)
+    {
+      Instruction *insn = this->instructions[i];
+
+      if (config->optimizePruneStackStores &&
           ((this->type == PROLOGUE && insn->getOpcode() == OP_SW && insn->getRs() == R_SP) ||
-           (this->type == EPILOGUE && insn->getOpcode() == OP_LW && insn->getRs() == R_SP)) )
-	{
-	  int p_s[N_REGS];
-	  int p_d[N_REGS];
+              (this->type == EPILOGUE && insn->getOpcode() == OP_LW && insn->getRs() == R_SP)) )
+        {
+          int p_s[N_REGS];
+          int p_d[N_REGS];
 
-	  memset(p_s, 0, sizeof(p_s));
-	  memset(p_d, 0, sizeof(p_d));
-	  insn->fillSources(p_s);
-	  insn->fillDestinations(p_d);
+          memset(p_s, 0, sizeof(p_s));
+          memset(p_d, 0, sizeof(p_d));
+          insn->fillSources(p_s);
+          insn->fillDestinations(p_d);
 
-	  /* Loop through all caller saved registers and for writes, simply skip them */
-	  for (int j = 0;
-	       mips_caller_saved[j] != R_ZERO;
-	       j++)
-	    {
-	      MIPS_register_t reg = mips_caller_saved[j];
+          /* Loop through all caller saved registers and for writes, simply skip them */
+          for (int j = 0; mips_caller_saved[j] != R_ZERO; j++)
+            {
+              MIPS_register_t reg = mips_caller_saved[j];
 
-	      if ( (this->type == PROLOGUE && p_s[reg] != 0 && !this->lookupPrevRegister(insn, reg, true)) ||
-                   (this->type == EPILOGUE && p_d[reg] != 0 && !this->lookupPrevRegister(insn, reg, true)))
-		{
-		  this->instructions[i] = InstructionFactory::getInstance()->createNop(insn->getAddress());
+              if ( (this->type == PROLOGUE && p_s[reg] != 0 && !insn->getPrevRegisterWrite(I_RT)) ||
+                  (this->type == EPILOGUE && p_d[reg] != 0 && !insn->getPrevRegisterWrite(I_RT)))
+                {
+                  this->instructions[i] = InstructionFactory::getInstance()->createNop(insn->getAddress());
                   if (insn->isBranchTarget())
                     this->instructions[i]->setBranchTarget();
-		  delete insn;
+                  delete insn;
                   insn = this->instructions[i];
-		  break;
-		}
-	    }
-	}
+                  break;
+                }
+            }
+        }
     }
 
   return out;

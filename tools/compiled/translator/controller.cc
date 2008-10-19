@@ -810,8 +810,8 @@ static void parse_config(Controller *cntr, Config *cfg, const char *config_str)
         cfg->optimizeCallTable = int_val == 0 ? false : true;
       else if (strcmp(p, "optimize_partial_memory_operations") == 0)
         cfg->optimizePartialMemoryOps = int_val == 0 ? false : true;
-      else if (strcmp(p, "optimize_prune_stack_saves") == 0)
-        cfg->optimizePruneStackSaves = int_val == 0 ? false : true;
+      else if (strcmp(p, "optimize_prune_stack_stores") == 0)
+        cfg->optimizePruneStackStores = int_val == 0 ? false : true;
       else if (strcmp(p, "prune_unused_functions") == 0)
         cfg->pruneUnusedFunctions = int_val == 0 ? false : true;
       else if (strcmp(p, "class_size_limit") == 0)
