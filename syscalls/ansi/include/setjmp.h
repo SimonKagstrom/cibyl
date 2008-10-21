@@ -29,7 +29,7 @@ typedef int jmp_buf[1];
 /* "Builtins" */
 extern int __NOPH_setjmp(int cookie);
 
-static inline int setjmp(jmp_buf env)
+static inline int __attribute__((returns_twice)) setjmp(jmp_buf env)
 {
   int cookie;
   int out;
@@ -39,12 +39,13 @@ static inline int setjmp(jmp_buf env)
       ".long 2f                       \n"
       ".popsection                    \n"
       "    la   %[cookie], 1b         \n"
-      "    sw   %[cookie], 0(%[envp]) \n" /* env[0] = address to the jal */
-      "    move $4, %[envp]           \n"
       "2:  jal __NOPH_setjmp          \n"
       "    move %[out], $2            \n"
       ""
-      : [cookie]"=r"(cookie), [out]"=r"(out) : [envp]"r"(&env[0]) : "memory", "$2", "$4");
+      : [cookie]"=r"(cookie), [out]"=r"(out)
+      :
+      : "memory", "$2", "$4");
+  env[0] = cookie;
 
   /* The longjmp return value will be "generated" */
   return out;

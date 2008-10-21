@@ -183,10 +183,10 @@ void exception_test_longjmp_1(void)
 void exception_test_setjmp(void)
 {
   int v;
-  
+
   exc_dummy = 0;
   v = setjmp(jb);
-  
+
   if (v == 0)
     {
       PASS("setjmp: %d", v);
@@ -194,6 +194,11 @@ void exception_test_setjmp(void)
   else if (v == 2)
     {
       PASS("after longjmp: %d", v);
+      if (exc_dummy != 2)
+        FAIL("longjmp executed too much code: %d", exc_dummy);
+      else
+        PASS("longjmp executed correct code: %d", exc_dummy);
+
       return;
     }
   else
@@ -201,7 +206,7 @@ void exception_test_setjmp(void)
       FAIL("setjmp: %d", v);
       return;
     }
-  
+
   exception_test_longjmp_1();
 }
 

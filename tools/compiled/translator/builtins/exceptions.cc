@@ -91,7 +91,7 @@ public:
     emit->bc_swap();
     emit->bc_iaload(); /* load *cookie */
     emit->bc_pushconst( this->target );
-    emit->bc_if_icmpeq("L_setjmp_handler_%s_not_this", this->name);
+    emit->bc_if_icmpne("L_setjmp_handler_%s_not_this", this->name);
 
     /* Put value in V0 */
     emit->bc_invokevirtual("SetjmpException/getValue()I");
@@ -134,7 +134,9 @@ public:
     
     /* Catch the SetjmpException in the entire method */
     emit->generic(".catch SetjmpException from __CIBYL_javamethod_begin to __CIBYL_exception_handlers using %s\n",
-        handler);  
+        handler);
+    emit->bc_pushconst(0);
+    emit->bc_popregister(R_V0);
     emit->bc_label( target );
     
     return true;
