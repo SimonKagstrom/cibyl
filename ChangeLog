@@ -4,20 +4,21 @@ Cibyl (20)
 	Ehud). Added test case for this and made the optimization optional
 	(enabled via -O or --optimize-prune-stack-stores)
 
-	* setjmp/longjmp
+	* setjmp/longjmp has been implemented, the last missing big C
+	functionality
 
-	* Actually implemented NOPH_throw(), as a builtin
+	* Implemented NOPH_throw(), as a builtin, to throw exceptions
 
 	* Try/catch handling has been reimplemented. The new implementation is
 	based on a stack to handle nested try/catches and supports catching
-	specific classes
+	specific classes. It allows for the adding of setjmp/longjmp support
 
 	* 64-bit div and mod are handled as builtins now (as suggested by
 	Susmith M R)
 
 	* Do not automatically invoke the python translator on -O
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Sun Oct 26 09:41:20 CET 2008
 
 Cibyl (19)
 	* Implemented FileInputStream/FileOutputStream handling in libj2se
