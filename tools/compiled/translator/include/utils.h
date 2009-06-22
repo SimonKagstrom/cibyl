@@ -19,6 +19,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#define max(x,y) ( (x) > (y) ? (x) : (y) )
+
 void *xcalloc(size_t nmemb, size_t size);
 
 void *xrealloc(void *ptr, size_t size);

@@ -65,7 +65,7 @@ public:
 
   virtual bool pass2() = 0;
 
-  virtual int getMaxStackHeight()
+  virtual size_t getMaxStackHeight()
   {
     return 2;
   }
