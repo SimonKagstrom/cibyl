@@ -66,6 +66,7 @@ public:
     this->javaSignature[n + i] = returnValue;
 
     this->returnValue = returnValue;
+    this->nrArguments = nrArguments;
   }
 
   char *getJavaSignature() { return this->javaSignature; }

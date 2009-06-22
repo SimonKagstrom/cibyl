@@ -92,6 +92,7 @@ Function::Function(const char *name, Instruction **insns,
 
   /* Fixup the bytecode size */
   this->bc_size = 0;
+  this->maxStackHeight = 0;
   for (int i = 0; i < this->n_bbs; i++)
     this->bc_size += this->bbs[i]->getBytecodeSize();
 }
@@ -113,6 +114,7 @@ bool Function::pass1()
       /* Fill in the register usage of this function */
       bb->fillDestinations(this->registerDestinations);
       bb->fillSources(this->registerSources);
+      this->maxStackHeight = max(this->maxStackHeight, bb->getMaxStackHeight());
     }
 
   return true;
@@ -166,6 +168,7 @@ bool StartFunction::pass1()
       /* Fill in the register usage of this function */
       bb->fillDestinations(this->registerDestinations);
       bb->fillSources(this->registerSources);
+      this->maxStackHeight = max(this->maxStackHeight, bb->getMaxStackHeight());
     }
 
   /* Start always have everything defined */

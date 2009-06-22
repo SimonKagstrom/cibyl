@@ -68,6 +68,11 @@ public:
     return this->bc_size;
   };
 
+  virtual size_t getMaxStackHeight(void)
+  {
+    return this->maxStackHeight;
+  };
+
   JavaMethod *parent;
 protected:
   void markOpcodeUsed(mips_opcode_t op)
@@ -82,6 +87,7 @@ protected:
   int n_bbs;
 
   size_t bc_size;
+  size_t maxStackHeight;
 
   BasicBlock **bbs;
   char *name;

@@ -41,9 +41,9 @@ public:
     return 0;
   };
 
-  int getMaxStackHeight()
+  size_t getMaxStackHeight()
   {
-    return this->sysc->getRegistersToPass();
+    return max(this->sysc->getRegistersToPass(), 1);
   }
 
 protected:
@@ -75,7 +75,7 @@ public:
     return this->addToRegisterUsage((MIPS_register_t)this->extra, p);
   };
 
-  int getMaxStackHeight()
+  size_t getMaxStackHeight()
   {
     return 1;
   }

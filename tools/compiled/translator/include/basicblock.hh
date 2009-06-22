@@ -53,6 +53,11 @@ public:
     return this->bc_size;
   };
 
+  virtual size_t getMaxStackHeight(void)
+  {
+    return this->maxStackHeight;
+  };
+
 private:
   void commentInstruction(Instruction *insn);
 
@@ -75,6 +80,7 @@ private:
   Instruction **instructions;
 
   size_t bc_size;
+  size_t maxStackHeight;
 };
 
 #endif /* !__BASICBLOCK_HH__ */

@@ -31,7 +31,10 @@ public:
     return true;
   }
 
-  int getMaxStackHeight() { return 0; }
+  size_t getMaxStackHeight()
+  {
+    return 3 + this->delayed ? this->delayed->getMaxStackHeight() : 0;
+  }
 };
 
 class Jump : public BranchInstruction
@@ -224,10 +227,10 @@ public:
     return out;
   };
 
-  int getMaxStackHeight()
+  size_t getMaxStackHeight()
   {
-    assert(this->dstMethod);
-    return max(this->dstMethod->getRegistersToPass(), 2);
+    /* Cowardly assume all 6 possible registers are passed */
+    return 6;
   }
 
 protected:
@@ -387,6 +390,12 @@ public:
 
     return true;
   }
+
+  size_t getMaxStackHeight()
+  {
+    return 4 + this->delayed ? this->delayed->getMaxStackHeight() : 0;
+  }
+
 private:
   const char *bc;
   uint32_t dst;
@@ -445,6 +454,12 @@ public:
 
     return true;
   }
+
+  size_t getMaxStackHeight()
+  {
+    return 3 + this->delayed ? this->delayed->getMaxStackHeight() : 0;
+  }
+
 private:
   const char *bc;
   uint32_t dst;

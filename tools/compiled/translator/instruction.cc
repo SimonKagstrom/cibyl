@@ -19,8 +19,6 @@
 #include <config.hh>
 #include <utils.h>
 
-#define max(x,y) ( (x) > (y) ? (x) : (y) )
-
 /* The base class for all instructions */
 Instruction::Instruction(uint32_t address, int opcode,
 			 MIPS_register_t rs, MIPS_register_t rt, MIPS_register_t rd,

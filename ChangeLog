@@ -1,3 +1,9 @@
+Cibyl (21)
+	* Make the Java stack size dynamically allocated (might reduce the
+	memory usage just a tiny bit)
+
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+
 Cibyl (20)
 	* Fixed bug caused by removing some stores of s-registers in function
 	porlogues/epilogues without checking if they were in use (thanks
@@ -23,7 +29,7 @@ Cibyl (20)
 Cibyl (19)
 	* Implemented FileInputStream/FileOutputStream handling in libj2se
 	(new library). This allows file handling from J2SE as well and added
-	an example in examples/host-java/file-ops 
+	an example in examples/host-java/file-ops
 
 	* Always export main - in crt0.S it's defined as an empty function
 	with weak linkage. If it's defined elsewhere, that version will be

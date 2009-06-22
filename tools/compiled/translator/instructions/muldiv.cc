@@ -63,7 +63,7 @@ public:
     return this->addToRegisterUsage(this->rs, p) + this->addToRegisterUsage(this->rt, p);
   };
 
-  int getMaxStackHeight()
+  size_t getMaxStackHeight()
   {
     return 6;
   }

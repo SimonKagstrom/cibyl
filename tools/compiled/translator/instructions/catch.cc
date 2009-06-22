@@ -69,7 +69,7 @@ public:
     return true;
   }
 
-  int getMaxStackHeight()
+  size_t getMaxStackHeight()
   {
     return 2;
   }

@@ -31,6 +31,7 @@ BasicBlock::BasicBlock(Instruction **insns,
   /* Fixup the bytecode size and fill in last register writes and
    * last register reads for the instruction */
   this->bc_size = 0;
+  this->maxStackHeight = 0; /* Fixed in pass 1 */
   for (int i = 0; i < n_insns; i++)
     {
       Instruction *insn = this->instructions[i];
@@ -190,6 +191,10 @@ bool BasicBlock::pass1()
                 }
             }
         }
+      this->maxStackHeight = max(this->maxStackHeight, insn->getMaxStackHeight());
+      if (insn->getDelayed())
+        this->maxStackHeight = max(this->maxStackHeight,
+            insn->getDelayed()->getMaxStackHeight());
     }
 
   return out;

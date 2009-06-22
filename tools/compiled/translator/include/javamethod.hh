@@ -120,6 +120,11 @@ public:
     return this->bc_size;
   };
 
+  virtual size_t getMaxStackHeight(void)
+  {
+    return this->maxStackHeight;
+  };
+
   Function *getFunctionByAddress(uint32_t addr);
 
   int getFunctionIndexByAddress(uint32_t addr);
@@ -146,6 +151,7 @@ protected:
   uint32_t *returnLocations;
 
   size_t bc_size;
+  size_t maxStackHeight;
 };
 
 class CallTableMethod : public JavaMethod

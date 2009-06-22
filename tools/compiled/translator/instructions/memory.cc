@@ -29,6 +29,11 @@ class MemoryXX : public Instruction
     return true;
   }
 
+  virtual size_t getMaxStackHeight()
+  {
+    return 3;
+  }
+
  protected:
   JavaMethod *method;
 };
@@ -258,6 +263,11 @@ protected:
   {
     return 24;
   };
+
+  virtual size_t getMaxStackHeight()
+  {
+    return 5;
+  }
 protected:
   int word_size;
   bool is_signed;
@@ -365,6 +375,12 @@ protected:
   {
     return 32;
   };
+
+  virtual size_t getMaxStackHeight()
+  {
+    return 8;
+  }
+
 protected:
   int word_size;
   bool is_signed;

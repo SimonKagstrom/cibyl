@@ -88,6 +88,7 @@ JavaMethod::JavaMethod(Function **fns,
 
   /* Fixup the bytecode size */
   this->bc_size = 0;
+  this->maxStackHeight = 0;
   for (int i = 0; i < this->n_functions; i++)
     this->bc_size += this->functions[i]->getBytecodeSize();
 }
@@ -144,6 +145,7 @@ bool JavaMethod::pass1()
 	out = false;
       if ( fn->hasRegisterIndirectJumps() )
         this->registerIndirectJumps = true;
+      this->maxStackHeight = max(this->maxStackHeight, fn->getMaxStackHeight());
     }
 
   for (int i = 0; i < this->n_functions; i++)
@@ -319,9 +321,10 @@ bool JavaMethod::pass2()
   regalloc->setAllocation(this->registerUsage);
 
   emit->generic("\n.method public static %s\n"
-                ".limit stack 20\n"
+                ".limit stack %d\n"
                 ".limit locals %d\n",
                 this->getJavaMethodName(),
+                this->getMaxStackHeight() + 2,
                 regalloc->getNumberOfLocals());
 
   /* Emit register mapping */
