@@ -66,6 +66,8 @@ public:
 
   void bc_putstatic(const char *what) { this->writeIndent("putstatic %s", what); }
 
+  void bc_aload(int nr);
+  
   void bc_iload(int n);
 
   void bc_istore(int n);

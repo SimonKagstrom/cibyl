@@ -353,6 +353,8 @@ bool JavaMethod::pass2()
           /* Multi-function classes assign to RA */
           if (this->hasMultipleFunctions() && i == R_RA)
             emit->bc_pushconst(-1);
+          else if (i == R_MEM)
+            emit->bc_getstatic( "CRunTime/memory [I" );
           else
             emit->bc_pushconst(0);
           emit->bc_popregister((MIPS_register_t)i);

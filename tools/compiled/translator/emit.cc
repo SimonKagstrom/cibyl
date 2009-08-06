@@ -99,6 +99,11 @@ void Emit::bc_load_store_helper(const char *type, int nr)
     this->writeIndent("%s %d", type, nr);
 }
 
+void Emit::bc_aload(int nr)
+{
+  this->bc_load_store_helper("aload", nr);
+}
+
 void Emit::bc_iload(int nr)
 {
   this->bc_load_store_helper("iload", nr);
@@ -138,7 +143,7 @@ void Emit::bc_pushregister(MIPS_register_t reg)
   else if (reg == R_ZERO || !regalloc->regIsAllocated(reg))
     this->bc_pushconst(0);
   else if (reg == R_MEM)
-    this->bc_getstatic( "CRunTime/memory [I" );
+    this->bc_aload( regalloc->regToLocal(reg) );
   else
     this->bc_iload( regalloc->regToLocal(reg) );
 }
@@ -150,6 +155,8 @@ void Emit::bc_popregister(MIPS_register_t reg)
   else if (!regalloc->regIsAllocated(reg)) /* This is an error! */
     this->error("Warning/Error at 0x%08x: Popping to register %s, which is not allocated\n",
                 controller->getCurrentInstruction()->getAddress(), mips_reg_strings[reg]);
+  else if (reg == R_MEM)
+    emit->bc_astore(R_MEM);
   else
     this->bc_istore( regalloc->regToLocal(reg) );
 }

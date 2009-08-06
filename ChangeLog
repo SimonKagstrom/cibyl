@@ -1,4 +1,8 @@
 Cibyl (21)
+	* Make R_MEM a real register, which stores a reference to
+	CRunTime.memory. This improves performance on blackberry devices quite
+	a bit (Ehud Shabtai)
+
 	* Make the Java stack size dynamically allocated (might reduce the
 	memory usage just a tiny bit)
 
