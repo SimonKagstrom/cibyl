@@ -27,6 +27,8 @@ Controller::Controller(const char **defines,
 {
   elf = new CibylElf(elf_filename);
 
+  this->package_name = NULL;
+  memset(this->jasmin_package_name, 0, sizeof(this->jasmin_package_name));
   this->syscall_db_table = ght_create(1024);
   this->syscall_used_table = ght_create(1024);
 
@@ -382,6 +384,28 @@ JavaMethod *Controller::getCallTableMethod()
 {
   return this->callTableMethod;
 }
+
+void Controller::setPackageName(const char *name)
+{
+  size_t len = strlen(name);
+  unsigned i;
+
+  this->package_name = name;
+
+  panic_if(len > sizeof(this->jasmin_package_name),
+      "Length of package name (%s) is too large (> %d)\n",
+      name, sizeof(this->jasmin_package_name));
+
+  for (i = 0; i < len; i++)
+    {
+      if (name[i] == '.')
+        this->jasmin_package_name[i] = '/';
+      else
+        this->jasmin_package_name[i] = name[i];
+    }
+  this->jasmin_package_name[i] = '\0';
+}
+
 
 Instruction *Controller::getInstructionByAddress(uint32_t address)
 {
@@ -769,6 +793,7 @@ static void usage()
          "                           lb/lh/sb/sh (default 0)\n"
          "   prune_unused_functions=0/1  Prune unused functions from the call table\n"
          "   colocate_functions=FN1;FN2;... Colocate functions FN1... in a single method\n"
+         "   package_name=NAME       Set Java package name (default: unnamed)\n"
          );
   exit(1);
 }
@@ -822,6 +847,8 @@ static void parse_config(Controller *cntr, Config *cfg, const char *config_str)
         cfg->callTableClasses = int_val;
       else if (strcmp(p, "colocate_functions") == 0)
         cntr->addColocation(value);
+      else if (strcmp(p, "package_name") == 0)
+        cntr->setPackageName(value);
       else
         usage();
 

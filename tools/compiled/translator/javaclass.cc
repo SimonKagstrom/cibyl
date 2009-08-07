@@ -15,6 +15,7 @@
 #include <string.h>
 
 #include <javaclass.hh>
+#include <controller.hh>
 #include <emit.hh>
 
 /* Some utilities */
@@ -148,9 +149,13 @@ bool JavaClass::pass1()
 
 bool JavaClass::pass2()
 {
+  const char *pkg = controller->getJasminPackageName();
   bool out = true;
 
-  emit->generic(".class public %s\n"
+  emit->generic(".class public %s%s",
+      pkg ? pkg : "", pkg ? "/" : "");
+
+  emit->generic("%s\n"
                 ".super java/lang/Object\n\n"
                 ".method public <init>()V\n"
                 "\taload_0\n"
@@ -187,7 +192,9 @@ bool CallTableClass::pass2()
   bool out = true;
   int i;
 
-  emit->generic("class CibylCallTable {\n");
+  if (controller->getPackageName() != NULL)
+    emit->generic("package %s;\n", controller->getPackageName());
+  emit->generic("public class CibylCallTable {\n");
 
   out = this->methods[0]->pass2();
 

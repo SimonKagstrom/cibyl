@@ -81,6 +81,20 @@ public:
 
   Instruction *popTryStack();
 
+  const char *getPackageName()
+  {
+    return this->package_name;
+  }
+
+  const char *getJasminPackageName()
+  {
+    if (this->jasmin_package_name[0] == '\0')
+      return NULL;
+    return this->jasmin_package_name;
+  }
+
+  void setPackageName(const char *name);
+
 private:
 
   void allocateClasses();
@@ -137,6 +151,9 @@ private:
   /* Try/catch blocks are handled as a stack */
   int try_stack_top;
   Instruction *try_stack[N_TRY_STACK_ENTRIES];
+
+  const char *package_name;
+  char jasmin_package_name[255];
 };
 
 extern Controller *controller;
