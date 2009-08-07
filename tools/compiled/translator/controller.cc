@@ -741,7 +741,12 @@ bool Controller::pass2()
 
   for (int i = 0; i < this->n_classes; i++)
     {
-      emit->setOutputFile(open_file_in_dir(this->dstdir,
+      char path[2048];
+      const char *pkg = this->getJasminPackageName();
+
+      xsnprintf(path, 2048, "%s%s%s%s", this->dstdir, pkg ? "/" : "",
+          pkg ? pkg : "", pkg ? "/" : "");
+      emit->setOutputFile(open_file_in_dir(path,
                                            this->classes[i]->getFileName(), "w"));
 
       if (this->classes[i]->pass2() != true)

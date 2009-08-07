@@ -135,6 +135,39 @@ void *read_file(size_t *out_size, const char *fmt, ...)
   return data;
 }
 
+static void create_dir_structure(const char *dir)
+{
+  char *p, *dst;
+  const char *p2;
+  char path[2048];
+
+  memset(path, 0, sizeof(path));
+  p = strstr(dir, "/");
+  if (!p)
+    {
+      mkdir(dir, 0755);
+      return;
+    }
+  dst = path;
+  p2 = dir;
+  while (p)
+    {
+      int i;
+      for ( i = 0; i < (int)(p - p2); i++ )
+        {
+          *dst = p2[i];
+          dst++;
+        }
+      p2 = p;
+      p += i + 1;
+
+      mkdir(path, 0755);
+      p = strstr(p, "/");
+    }
+  strcat(path, p2);
+  mkdir(path, 0755);
+}
+
 DIR *open_dir_fmt(const char *fmt, ...)
 {
   char path[2048];
@@ -160,6 +193,7 @@ FILE *open_file_in_dir(const char *dir, const char *filename, const char *mode)
   buf = (char*)xcalloc(len, 1);
 
   xsnprintf(buf, len, "%s/%s", dir, filename);
+  create_dir_structure(dir);
   fp = fopen(buf, mode);
   free(buf);
   panic_if(!fp, "Cannot open file %s/%s\n", dir, filename);
