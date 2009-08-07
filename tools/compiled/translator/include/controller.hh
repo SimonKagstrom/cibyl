@@ -86,11 +86,11 @@ public:
     return this->package_name;
   }
 
-  const char *getJasminPackageName()
+  const char *getJasminPackagePath()
   {
-    if (this->jasmin_package_name[0] == '\0')
-      return NULL;
-    return this->jasmin_package_name;
+    if (this->jasmin_package_path[0] == '\0')
+      return "";
+    return this->jasmin_package_path;
   }
 
   void setPackageName(const char *name);
@@ -153,7 +153,7 @@ private:
   Instruction *try_stack[N_TRY_STACK_ENTRIES];
 
   const char *package_name;
-  char jasmin_package_name[255];
+  char jasmin_package_path[255];
 };
 
 extern Controller *controller;

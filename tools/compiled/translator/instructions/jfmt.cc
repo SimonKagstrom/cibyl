@@ -167,11 +167,9 @@ public:
         else
           emit->bc_pushregister( reg );
       }
-    if (controller->getJasminPackageName() != NULL)
-      emit->bc_invokestatic("%s/%s/%s", controller->getJasminPackageName(),
-          dstClass->getName(), this->dstMethod->getJavaMethodName());
-    else
-      emit->bc_invokestatic("%s/%s", dstClass->getName(), this->dstMethod->getJavaMethodName());
+
+    emit->bc_invokestatic("%s%s/%s",
+        controller->getJasminPackagePath(), dstClass->getName(), this->dstMethod->getJavaMethodName());
 
     if (config->threadSafe)
       {
@@ -196,7 +194,8 @@ public:
       {
         if (this->dstMethod->clobbersReg(R_V1))
           {
-            emit->bc_getstatic("CRunTime/saved_v1 I");
+            emit->bc_getstatic("%sCRunTime/saved_v1 I",
+                controller->getJasminPackagePath());
             emit->bc_popregister( R_V1 );
           }
         if (this->dstMethod->clobbersReg(R_V0))

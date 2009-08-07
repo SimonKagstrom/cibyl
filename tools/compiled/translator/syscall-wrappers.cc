@@ -13,6 +13,7 @@
 #include <syscall-wrappers.hh>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <controller.hh>
 
 
 SyscallWrapperGenerator::SyscallWrapperGenerator(const char **defines, const char *dstdir,
@@ -260,6 +261,8 @@ bool SyscallWrapperGenerator::pass2()
 
   emit->setOutputFile(open_file_in_dir(this->dstdir, "Syscalls.java", "w"));
   emit->generic("/* GENERATED, DON'T EDIT */\n");
+  if (controller->getPackageName())
+    emit->generic("package %s;\n", controller->getPackageName());
   this->generateImports();
   emit->generic("public class Syscalls {\n");
 

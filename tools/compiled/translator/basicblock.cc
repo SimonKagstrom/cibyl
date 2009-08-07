@@ -221,7 +221,8 @@ void BasicBlock::traceRegisterValues(Instruction *insn)
   pushRegister(rt);
   pushRegister(rd);
 
-  emit->bc_invokestatic("CRunTime/emitRegisterTrace(III)V");
+  emit->bc_invokestatic("%sCRunTime/emitRegisterTrace(III)V",
+      controller->getJasminPackagePath());
   if (insn->getDelayed())
     this->traceRegisterValues(insn->getDelayed());
 }
@@ -268,7 +269,8 @@ void BasicBlock::commentInstruction(Instruction *insn)
   if ( insn->getAddress() >= config->traceRange[0] && insn->getAddress() < config->traceRange[1])
     {
       emit->bc_ldc(buf);
-      emit->bc_invokestatic("CRunTime/emitTrace(Ljava/lang/String;)V");
+      emit->bc_invokestatic("%sCRunTime/emitTrace(Ljava/lang/String;)V",
+          controller->getJasminPackagePath());
       this->traceRegisterValues(insn);
     }
 }

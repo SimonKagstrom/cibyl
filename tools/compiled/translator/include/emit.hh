@@ -62,9 +62,9 @@ public:
 
   void bc_pushaddress(MIPS_register_t reg, int32_t extra);
 
-  void bc_getstatic(const char *what) { this->writeIndent("getstatic %s", what); }
+  void bc_getstatic(const char *what, ...);
 
-  void bc_putstatic(const char *what) { this->writeIndent("putstatic %s", what); }
+  void bc_putstatic(const char *what, ...);
 
   void bc_aload(int nr);
   

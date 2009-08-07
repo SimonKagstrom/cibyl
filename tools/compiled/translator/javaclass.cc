@@ -149,19 +149,16 @@ bool JavaClass::pass1()
 
 bool JavaClass::pass2()
 {
-  const char *pkg = controller->getJasminPackageName();
   bool out = true;
 
-  emit->generic(".class public %s%s",
-      pkg ? pkg : "", pkg ? "/" : "");
-
-  emit->generic("%s\n"
+  emit->generic(".class public %s%s\n"
                 ".super java/lang/Object\n\n"
                 ".method public <init>()V\n"
                 "\taload_0\n"
                 "\tinvokenonvirtual java/lang/Object.<init>()V\n"
                 "\treturn\n"
                 ".end method\n",
+                controller->getJasminPackagePath(),
                 this->getName());
 
   for (int i = 0; i < this->n_methods; i++)

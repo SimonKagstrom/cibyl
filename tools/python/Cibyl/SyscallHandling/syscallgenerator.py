@@ -149,7 +149,8 @@ class SyscallHeaderGenerator(SyscallGenerator):
 
 
 class SyscallWrapperGenerator(SyscallGenerator):
-    def __init__(self, program, syscallDirectories, dirs, syscallSets, outdir, defines=[], generateAllSyscalls = False):
+    def __init__(self, program, syscallDirectories, dirs, syscallSets, outdir,
+                 defines=[], packageName = None, generateAllSyscalls = False):
 	self.dirs = dirs
 	self.syscallSets = generateSyscallSetDependencies(self.dirs, syscallSets)
 	self.functions = functionsFromHeaderDirectories(syscallDirectories)
@@ -162,12 +163,15 @@ class SyscallWrapperGenerator(SyscallGenerator):
 	self.outdir = outdir
 	self.outfile = open(outdir + "/Syscalls.java", "w")
 	self.defines = defines
+        self.packageName = packageName
 
     def run(self):
 	"""
 	Generate Java systemcall wrappers
 	"""
 	self.outfile.write("/* GENERATED, DON'T EDIT! */\n")
+        if self.packageName != None:
+            self.outfile.write("package %s;" % (self.packageName))
 
 	for curDir in self.dirs:
 	    for syscallDir in self.syscallSets:

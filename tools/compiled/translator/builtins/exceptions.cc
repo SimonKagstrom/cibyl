@@ -13,6 +13,7 @@
 #include <controller.hh>
 #include <builtins.hh>
 #include <emit.hh>
+#include <controller.hh>
 
 class ExceptionBuiltinBase : public Builtin
 {
@@ -84,7 +85,8 @@ public:
     /* Push the cookie and the argument (passed to the __NOPH_setjmp
      * function) - if these are equal, this was for us - otherwise
      * just rethrow it */
-    emit->bc_invokevirtual("SetjmpException/getCookie()I");
+    emit->bc_invokevirtual("%sSetjmpException/getCookie()I",
+        controller->getJasminPackagePath());
     emit->bc_pushconst(2);
     emit->bc_ishr();
     emit->bc_pushregister(R_MEM);
@@ -94,7 +96,8 @@ public:
     emit->bc_if_icmpne("L_setjmp_handler_%s_not_this", this->name);
 
     /* Put value in V0 */
-    emit->bc_invokevirtual("SetjmpException/getValue()I");
+    emit->bc_invokevirtual("%sSetjmpException/getValue()I",
+        controller->getJasminPackagePath());
     emit->bc_popregister(R_V0);
     
     emit->bc_goto( this->target );
@@ -133,7 +136,8 @@ public:
         target) );
     
     /* Catch the SetjmpException in the entire method */
-    emit->generic(".catch SetjmpException from __CIBYL_javamethod_begin to __CIBYL_exception_handlers using %s\n",
+    emit->generic(".catch %sSetjmpException from __CIBYL_javamethod_begin to __CIBYL_exception_handlers using %s\n",
+        controller->getJasminPackagePath(),
         handler);
     emit->bc_pushconst(0);
     emit->bc_popregister(R_V0);
@@ -157,7 +161,8 @@ public:
 
   bool pass2(Instruction *insn)
   {
-    emit->bc_getstatic("CRunTime/objectRepository [Ljava/lang/Object;");
+    emit->bc_getstatic("%sCRunTime/objectRepository [Ljava/lang/Object;",
+        controller->getJasminPackagePath());
     emit->bc_pushregister(R_A0);
     emit->bc_aaload();
     emit->bc_checkcast("java/lang/Throwable");

@@ -33,7 +33,8 @@ public:
       {
 	emit->bc_pushregister( this->rs );
 	emit->bc_pushregister( this->rt );
-	emit->bc_invokestatic( "CRunTime/%s(II)I", this->bc );
+	emit->bc_invokestatic( "%sCRunTime/%s(II)I",
+	    controller->getJasminPackagePath(), this->bc );
       }
     emit->bc_popregister( this->rd );
     return true;

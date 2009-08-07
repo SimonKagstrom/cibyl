@@ -53,7 +53,7 @@ threadSafe = False
 infile = None
 profileFile = None
 
-packageName = "org.cibyl.cibyl"
+packageName = ""
 
 def getBasePath():
     base = os.getenv("CIBYL_BASE")
@@ -78,9 +78,7 @@ xcibyl_translator = os.getenv("CIBYL_XCIBYL_TRANSLATOR",
                               getBasePath() + "/tools/compiled/translator/xcibyl-translator")
 
 def packageNameJavaPath():
-    if packageName != None:
-        return "/" + packageName.replace(".", "/")
-    return ""
+    return "/" + packageName.replace(".", "/")
 
 def checkOne(cmdline, fn, error_message):
     f = os.popen(cmdline)

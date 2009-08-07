@@ -55,7 +55,8 @@ public:
          this->opcode != OP_LWL && this->opcode != OP_LWR)
       emit->bc_jsr("__CIBYL_memoryRead%s", this->bc);
     else
-      emit->bc_invokestatic("CRunTime/memoryRead%s(I)I", this->bc);
+      emit->bc_invokestatic("%sCRunTime/memoryRead%s(I)I",
+          controller->getJasminPackagePath(), this->bc);
     emit->bc_popregister( this->rt );
     return true;
   }
@@ -98,7 +99,8 @@ public:
 
     emit->bc_pushaddress( this->rs, this->extra );
     emit->bc_pushregister( this->rt );
-    emit->bc_invokestatic("CRunTime/memoryWrite%s(II)V", this->bc);
+    emit->bc_invokestatic("%sCRunTime/memoryWrite%s(II)V",
+        controller->getJasminPackagePath(), this->bc);
     return true;
   }
 
@@ -114,7 +116,8 @@ protected:
     emit->bc_pushaddress( this->rs, this->extra );
     emit->bc_pushregister( this->rt );
 
-    emit->bc_invokestatic("CRunTime/memoryWrite%sPc(III)V", this->bc);
+    emit->bc_invokestatic("%sCRunTime/memoryWrite%sPc(III)V",
+        controller->getJasminPackagePath(), this->bc);
   }
 
   const char *bc;
@@ -132,7 +135,8 @@ public:
   bool pass2()
   {
     emit->bc_pushaddress( this->rs, this->extra );
-    emit->bc_invokestatic("CRunTime/memoryRead%s(I)I", this->bc);
+    emit->bc_invokestatic("%sCRunTime/memoryRead%s(I)I",
+        controller->getJasminPackagePath(), this->bc);
     emit->bc_generic_insn( this->convert );
     emit->bc_popregister( this->rt );
     return true;

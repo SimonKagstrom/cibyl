@@ -28,7 +28,7 @@ Controller::Controller(const char **defines,
   elf = new CibylElf(elf_filename);
 
   this->package_name = NULL;
-  memset(this->jasmin_package_name, 0, sizeof(this->jasmin_package_name));
+  memset(this->jasmin_package_path, 0, sizeof(this->jasmin_package_path));
   this->syscall_db_table = ght_create(1024);
   this->syscall_used_table = ght_create(1024);
 
@@ -392,18 +392,19 @@ void Controller::setPackageName(const char *name)
 
   this->package_name = name;
 
-  panic_if(len > sizeof(this->jasmin_package_name),
+  panic_if(len + 2 > sizeof(this->jasmin_package_path),
       "Length of package name (%s) is too large (> %d)\n",
-      name, sizeof(this->jasmin_package_name));
+      name, sizeof(this->jasmin_package_path));
 
   for (i = 0; i < len; i++)
     {
       if (name[i] == '.')
-        this->jasmin_package_name[i] = '/';
+        this->jasmin_package_path[i] = '/';
       else
-        this->jasmin_package_name[i] = name[i];
+        this->jasmin_package_path[i] = name[i];
     }
-  this->jasmin_package_name[i] = '\0';
+  this->jasmin_package_path[i] = '/';
+  this->jasmin_package_path[i + 1] = '\0';
 }
 
 
@@ -720,6 +721,7 @@ bool Controller::pass2()
 {
   ElfSection *scns[4];
   SyscallWrapperGenerator *syscallWrappers;
+  char path[2048];
   bool out = true;
   uint32_t addr = 0;
   FILE *fp;
@@ -728,6 +730,8 @@ bool Controller::pass2()
   scns[1] = elf->getSection(".rodata");
   scns[2] = elf->getSection(".ctors");
   scns[3] = elf->getSection(".dtors");
+
+  xsnprintf(path, 2048, "%s/%s", this->dstdir, this->getJasminPackagePath());
 
   /* Output the data sections to a file */
   fp = open_file_in_dir(this->dstdir, "program.data.bin", "w");
@@ -741,11 +745,6 @@ bool Controller::pass2()
 
   for (int i = 0; i < this->n_classes; i++)
     {
-      char path[2048];
-      const char *pkg = this->getJasminPackageName();
-
-      xsnprintf(path, 2048, "%s%s%s%s", this->dstdir, pkg ? "/" : "",
-          pkg ? pkg : "", pkg ? "/" : "");
       emit->setOutputFile(open_file_in_dir(path,
                                            this->classes[i]->getFileName(), "w"));
 
@@ -754,7 +753,7 @@ bool Controller::pass2()
       emit->closeOutputFile();
     }
 
-  syscallWrappers = new SyscallWrapperGenerator(this->defines, this->dstdir,
+  syscallWrappers = new SyscallWrapperGenerator(this->defines, strdup(path),
                                                 this->n_syscall_dirs, this->syscall_dirs,
                                                 this->n_syscall_sets, this->syscall_sets,
                                                 this->syscall_used_table);

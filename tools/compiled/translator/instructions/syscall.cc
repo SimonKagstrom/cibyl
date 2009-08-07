@@ -9,6 +9,26 @@
  * $Id:$
  *
  ********************************************************************/
+#include <controller.hh>
+
+Syscall::Syscall(const char *name, int nrArguments, char returnValue)
+{
+  int len = strlen(name) + strlen(controller->getJasminPackagePath()) +
+      nrArguments + 4 + strlen("Syscalls/");
+  int i, n;
+
+  this->javaSignature = (char*)xcalloc( len, sizeof(char) );
+  n = snprintf(this->javaSignature, len, "%sSyscalls/%s(",
+      controller->getJasminPackagePath(), name);
+  for (i = 0; i < nrArguments; i++)
+    this->javaSignature[n + i] = 'I';
+  this->javaSignature[n + i] = ')';
+  i++;
+  this->javaSignature[n + i] = returnValue;
+
+  this->returnValue = returnValue;
+  this->nrArguments = nrArguments;
+}
 
 class SyscallInsn : public Instruction
 {

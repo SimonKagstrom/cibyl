@@ -242,6 +242,25 @@ void Emit::bc_invokestatic(const char *fmt, ...)
   this->output(buf);
   this->output("\n");
 }
+void Emit::bc_getstatic(const char *fmt, ...)
+{
+  char buf[2048];
+
+  this->output("\tgetstatic ");
+  do_vsnprintf(buf, fmt);
+  this->output(buf);
+  this->output("\n");
+}
+
+void Emit::bc_putstatic(const char *fmt, ...)
+{
+  char buf[2048];
+
+  this->output("\tgetstatic ");
+  do_vsnprintf(buf, fmt);
+  this->output(buf);
+  this->output("\n");
+}
 
 void Emit::bc_invokevirtual(const char *fmt, ...)
 {

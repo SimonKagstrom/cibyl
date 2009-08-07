@@ -30,7 +30,8 @@ bool ExceptionHandler::pass2()
 
   emit->bc_label("%s", this->name);
   /* Register the object passed here */
-  emit->bc_invokestatic("CRunTime/registerObject(Ljava/lang/Object;)I");
+  emit->bc_invokestatic("%sCRunTime/registerObject(Ljava/lang/Object;)I",
+      controller->getJasminPackagePath());
   emit->bc_pushregister(R_ECB);
   emit->bc_swap();
   /* This is just a jalr(ecb, sp, ear (exception obj)) */
@@ -354,7 +355,8 @@ bool JavaMethod::pass2()
           if (this->hasMultipleFunctions() && i == R_RA)
             emit->bc_pushconst(-1);
           else if (i == R_MEM)
-            emit->bc_getstatic( "CRunTime/memory [I" );
+            emit->bc_getstatic( "%sCRunTime/memory [I",
+                controller->getJasminPackagePath());
           else
             emit->bc_pushconst(0);
           emit->bc_popregister((MIPS_register_t)i);
@@ -459,7 +461,8 @@ bool JavaMethod::pass2()
       if (this->clobbersReg(R_V1))
         {
           emit->bc_pushregister(R_V1);
-          emit->bc_putstatic("CRunTime/saved_v1 I");
+          emit->bc_putstatic("%sCRunTime/saved_v1 I",
+              controller->getJasminPackagePath());
         }
       if (this->clobbersReg(R_V0))
         {

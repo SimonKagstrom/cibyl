@@ -52,22 +52,7 @@ typedef struct
 class Syscall
 {
 public:
-  Syscall(const char *name, int nrArguments, char returnValue)
-  {
-    int len = strlen(name) + nrArguments + 4 + strlen("Syscalls/");
-    int i, n;
-
-    this->javaSignature = (char*)xcalloc( len, sizeof(char) );
-    n = snprintf(this->javaSignature, len, "Syscalls/%s(", name);
-    for (i = 0; i < nrArguments; i++)
-      this->javaSignature[n + i] = 'I';
-    this->javaSignature[n + i] = ')';
-    i++;
-    this->javaSignature[n + i] = returnValue;
-
-    this->returnValue = returnValue;
-    this->nrArguments = nrArguments;
-  }
+  Syscall(const char *name, int nrArguments, char returnValue);
 
   char *getJavaSignature() { return this->javaSignature; }
 

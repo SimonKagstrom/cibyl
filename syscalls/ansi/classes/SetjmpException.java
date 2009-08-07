@@ -1,4 +1,4 @@
-class SetjmpException extends Exception
+public class SetjmpException extends Exception
 {
     public SetjmpException(int cookie, int val)
     {

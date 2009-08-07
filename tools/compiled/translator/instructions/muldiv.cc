@@ -42,7 +42,8 @@ public:
   {
     emit->bc_pushregister( this->rs );
     emit->bc_pushregister( this->rt );
-    emit->bc_invokestatic( "CRunTime/%s(II)J", this->bc);
+    emit->bc_invokestatic( "%sCRunTime/%s(II)J",
+        controller->getJasminPackagePath(), this->bc);
     emit->bc_dup2();
     emit->bc_pushconst(32);
     emit->bc_lushr();
@@ -266,7 +267,8 @@ public:
   {
     emit->bc_pushregister( this->rs );
     emit->bc_pushconst( this->extra );
-    emit->bc_invokestatic("CRunTime/%s(II)I", this->bc);
+    emit->bc_invokestatic("%sCRunTime/%s(II)I",
+        controller->getJasminPackagePath(), this->bc);
     emit->bc_popregister( this->rt );
     return true;
   }

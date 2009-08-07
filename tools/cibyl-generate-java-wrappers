@@ -54,6 +54,9 @@ parser.add_option("-S", "--syscalls", action="callback", help="directory to sear
 		  callback=syscallCallback)
 parser.add_option("-a", "--generate-all-syscalls", action="store_true", dest="generateAllSyscalls", default=False,
 				  help="Generate all syscalls available. The ELF binary is then ignored")
+parser.add_option("-p", "--package-name", dest="packageName", default=None,
+				  help="Specify java package name",
+				  metavar="PACKAGE_NAME")
 
 (options, args) = parser.parse_args()
 
@@ -69,5 +72,6 @@ else:
     syscallSets = args[1:]
 
 f = SyscallWrapperGenerator(elffile, syscallDirectories, headerDirectories, syscallSets,
-			    outdir = options.outdir, defines = defines, generateAllSyscalls = options.generateAllSyscalls)
+			    outdir = options.outdir, defines = defines, packageName = options.packageName,
+                            generateAllSyscalls = options.generateAllSyscalls)
 f.run()
