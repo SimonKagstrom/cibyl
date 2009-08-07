@@ -61,7 +61,7 @@ def doTranslation(filename, syscallDirectories):
     conf = conf + "call_table_hierarchy=" + str(config.callTableHierarchy) + ","
     conf = conf + "call_table_classes=" + str(config.callTableClasses) + ","
     if config.packageName != "":
-        conf = conf + "package_name=cibyl"
+        conf = conf + "package_name=" + config.packageName
 
     for d in config.defines:
         defines = defines + d + " "
