@@ -142,7 +142,8 @@ static void create_dir_structure(const char *dir)
   char path[2048];
 
   memset(path, 0, sizeof(path));
-  p = strstr(dir, "/");
+  p = strchr(dir, '/');
+
   if (!p)
     {
       mkdir(dir, 0755);
@@ -153,16 +154,17 @@ static void create_dir_structure(const char *dir)
   while (p)
     {
       int i;
+
       for ( i = 0; i < (int)(p - p2); i++ )
         {
           *dst = p2[i];
           dst++;
         }
+      *dst = '\0';
       p2 = p;
-      p += i + 1;
 
       mkdir(path, 0755);
-      p = strstr(p, "/");
+      p = strchr(p + 1, '/');
     }
   strcat(path, p2);
   mkdir(path, 0755);
