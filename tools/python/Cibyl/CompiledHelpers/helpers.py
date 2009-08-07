@@ -60,6 +60,8 @@ def doTranslation(filename, syscallDirectories):
     conf = conf + "class_size_limit=" + str(config.classSizeLimit) + ","
     conf = conf + "call_table_hierarchy=" + str(config.callTableHierarchy) + ","
     conf = conf + "call_table_classes=" + str(config.callTableClasses) + ","
+    if config.packageName != "":
+        conf = conf + "package_name=cibyl"
 
     for d in config.defines:
         defines = defines + d + " "

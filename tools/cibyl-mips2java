@@ -263,10 +263,10 @@ def doCompile():
 def doCppCompile():
     doTranslation(config.infile, syscallDirectories)
     if not config.onlyTranslate:
-            doJasmin(config.outDirectory + "/Cibyl.j")
+            doJasmin(config.outDirectory + config.packageNameJavaPath() + "/Cibyl.j")
     i = 1
     while True:
-            cur = config.outDirectory + "/Cibyl" + str(i) + ".j"
+            cur = config.outDirectory + config.packageNameJavaPath() + "/Cibyl" + str(i) + ".j"
             try:
                     st = os.lstat(cur)
             except:
@@ -276,7 +276,7 @@ def doCppCompile():
                     doJasmin(cur)
             i = i + 1
     if not config.onlyTranslate:
-            doJavac(config.outDirectory + "/CibylCallTable.java")
+            doJavac(config.outDirectory + config.packageNameJavaPath() + "/CibylCallTable.java")
 
 if usePythonCompiler:
     doCompile()
