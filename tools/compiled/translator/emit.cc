@@ -256,7 +256,7 @@ void Emit::bc_putstatic(const char *fmt, ...)
 {
   char buf[2048];
 
-  this->output("\tgetstatic ");
+  this->output("\tputstatic ");
   do_vsnprintf(buf, fmt);
   this->output(buf);
   this->output("\n");
