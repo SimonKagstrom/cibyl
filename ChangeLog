@@ -1,4 +1,8 @@
 Cibyl (21)
+	* Correct regression for __ashldi3 and other 64-bit shift operations
+	introduced in v20 (the shift-by argument was passed in the wrong
+	register). This caused s9 (t9) input to malfunction in Sarien.
+
 	* Make R_MEM a real register, which stores a reference to
 	CRunTime.memory. This improves performance on blackberry devices quite
 	a bit (Ehud Shabtai)

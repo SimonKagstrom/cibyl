@@ -104,7 +104,7 @@ public:
   {
     /* Concatenate the first and second parameters */
     this->push_64_bit_from_32_bit_regs(R_A1, R_A0);
-    emit->bc_pushregister(R_A3); /* Low part of the register pair */
+    emit->bc_pushregister(R_A2);
 
     /* The actual operation */
     emit->bc_generic_insn(this->bc);
