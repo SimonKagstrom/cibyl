@@ -13,14 +13,13 @@ from Cibyl.BinaryTranslation import bytecode, register
 from Cibyl.BinaryTranslation.Mips import mips
 import builtins
 from base import BuiltinBase
-from sets import Set
 
 tryInstruction = None
 
 class ExceptionBuiltinBase(BuiltinBase):
 	def __init__(self, controller, instruction, name, operation):
 		BuiltinBase.__init__(self, controller, instruction, name, operation)
-		self.instruction.destinations = Set([mips.R_EAR, mips.R_ECB])
+		self.instruction.destinations = set([mips.R_EAR, mips.R_ECB])
 		self.controller.addLabel(self.instruction.address)
 
 class Try(ExceptionBuiltinBase):

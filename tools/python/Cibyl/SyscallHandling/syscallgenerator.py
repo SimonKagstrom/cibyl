@@ -10,7 +10,6 @@
 ##
 ######################################################################
 import sys, re, os, tempfile, struct
-from sets import Set
 from Cibyl.BinaryTranslation.translator import Controller
 from Cibyl import config
 from function import *
@@ -72,7 +71,7 @@ def generateSyscallSetDependencies(dirs, syscallSets):
 		    unresolved.remove(syscallDir)
 
     # Remove duplicates
-    return Set(syscallSets)
+    return set(syscallSets)
 
 
 class SyscallFile:

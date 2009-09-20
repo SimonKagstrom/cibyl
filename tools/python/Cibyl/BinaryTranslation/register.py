@@ -11,7 +11,6 @@
 ######################################################################
 from Cibyl.BinaryTranslation.Mips import mips
 from Cibyl import config
-from sets import Set
 
 reg2local = {
 	mips.namesToRegisters["sp"] :  0,
@@ -93,7 +92,7 @@ def generateRegisterMapping(functions, usedRegisters, argumentRegisters, registe
 	mapping = {}
 	count = 0
 
-	usedRegisters = Set(usedRegisters)
+	usedRegisters = set(usedRegisters)
 	registerUseCount = dict(registerUseCount)
 	argumentRegisters = list(argumentRegisters)
 
@@ -120,7 +119,7 @@ def generateRegisterMapping(functions, usedRegisters, argumentRegisters, registe
 	# local variables (to allow local calling)
 	for fn in functions:
 		cur = mapping.copy()
-		left = Set(fn.usedRegisters).intersection(mips.callerSavedRegisters)
+		left = set(fn.usedRegisters).intersection(mips.callerSavedRegisters)
 		for reg in sortedDictValues(registerUseCount):
 			if reg in left:
 				cur[reg] = count

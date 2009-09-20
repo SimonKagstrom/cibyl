@@ -13,7 +13,6 @@ from Cibyl.BinaryTranslation import bytecode, register
 from Cibyl.BinaryTranslation.Optimization.Mips import mult
 from Cibyl import config
 import mips, instruction
-from sets import Set
 import struct
 
 from Cibyl.BinaryTranslation.codeblock import CodeBlock
@@ -55,7 +54,7 @@ class JavaMethod(CodeBlock):
 			if lab.address >= self.address and lab.address <= self.address + self.size:
 				lab.setJavaMethod(self)
 
-		self.cleanupRegs = Set()
+		self.cleanupRegs = set()
 
 		# For non-leafs, we always pass all registers
 		i = 0
@@ -204,7 +203,7 @@ class JavaMethod(CodeBlock):
 		# used registers which are read before written to in the first
 		# basic block - or are not used there - are placed in the
 		# cleanup list
-		skipRegisters = Set(self.argumentRegisters + [mips.R_HI, mips.R_LO, mips.R_ZERO, mips.R_RA])
+		skipRegisters = set(self.argumentRegisters + [mips.R_HI, mips.R_LO, mips.R_ZERO, mips.R_RA])
 		checkRegisters = self.usedRegisters - skipRegisters
 		for fn in self.functions:
 			bb0 = fn.basicBlocks[0]
@@ -264,7 +263,7 @@ class JavaMethod(CodeBlock):
 		self.cleanupRegs.remove(mips.R_MEM)
 
 		for reg in self.cleanupRegs:
-			localsToZero = Set()
+			localsToZero = set()
 			# Add all possible mappings to zero
 			for fn in self.functions:
 				mapping = registerMapping[fn.address]

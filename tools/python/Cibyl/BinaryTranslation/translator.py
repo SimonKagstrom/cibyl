@@ -10,7 +10,6 @@
 ##
 ######################################################################
 import StringIO, re, sys, struct, bisect, os, copy
-from sets import Set
 
 if __name__ == "__main__":
 	sys.path.append('%s/../../' % sys.path[0])

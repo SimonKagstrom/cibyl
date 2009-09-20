@@ -9,8 +9,6 @@
 ## $Id: codeblock.py 14248 2007-03-14 17:13:31Z ska $
 ##
 ######################################################################
-from sets import Set
-
 from Cibyl.BinaryTranslation.Mips.instruction import Instruction, newInstruction, Syscall
 from Cibyl.BinaryTranslation import labelmanager
 from Cibyl import config
@@ -26,9 +24,9 @@ class CodeBlock:
 		self.useTracing = trace
 
 		# Register use statistics
-		self.usedRegisters = Set()
-		self.destinationRegisters = Set()
-		self.sourceRegisters = Set()
+		self.usedRegisters = set()
+		self.destinationRegisters = set()
+		self.sourceRegisters = set()
 		self.registerUseCount = {}
 
 		# Iterate over instructions to generate registers to zero at

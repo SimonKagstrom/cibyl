@@ -9,7 +9,6 @@
 ## $Id: function.py 13391 2007-02-02 12:26:28Z ska $
 ##
 ######################################################################
-from sets import Set
 from Cibyl.BinaryTranslation.codeblock import CodeBlock
 from Cibyl.BinaryTranslation.basicblock import BasicBlock
 from Cibyl import config

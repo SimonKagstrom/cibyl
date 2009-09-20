@@ -10,7 +10,6 @@
 ##
 ######################################################################
 import sys
-from sets import Set
 
 from Cibyl.BinaryTranslation import register, bytecode
 import mips
@@ -54,8 +53,8 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 		self.rt = rt
 		self.isDelayed = False
 		# Destination register and source registers
-		self.destinations = Set()
-		self.sources = Set()
+		self.destinations = set()
+		self.sources = set()
 
 	def setBasicBlock(self, bb):
 		self.basicBlock = bb
@@ -135,7 +134,7 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 		return self.function
 
 	def getDestinationRegisters(self):
-		out = Set(self.destinations)
+		out = set(self.destinations)
 		if self.delayed:
 			out = out.union(self.delayed.destinations)
 		if self.prefix:
@@ -143,7 +142,7 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 		return out
 
 	def getSourceRegisters(self):
-		out = Set(self.sources)
+		out = set(self.sources)
 		if self.delayed:
 			out = out.union(self.delayed.sources)
 		if self.prefix:
@@ -177,8 +176,8 @@ class Instruction(bytecode.ByteCodeGenerator, register.RegisterHandler):
 
 	def nullify(self):
 		"Deactivate the compilation of this instruction"
-		self.sources = Set()
-		self.destinations = Set()
+		self.sources = set()
+		self.destinations = set()
 		self.compile = self.nullifiedCompile
 
 	def isDisabled(self):
@@ -225,8 +224,8 @@ class Ifmt(Instruction):
 		self.popToRegister( self.rt )
 
 	def fixup(self):
-		self.destinations = Set([self.rt])
-		self.sources = Set([self.rs])
+		self.destinations = set([self.rt])
+		self.sources = set([self.rs])
 
 	def run(self):
 		"Execute this instruction"
@@ -250,8 +249,8 @@ class Rfmt(Instruction):
 		self.popToRegister( self.rd )
 
 	def fixup(self):
-		self.destinations = Set([self.rd])
-		self.sources = Set([self.rs, self.rt])
+		self.destinations = set([self.rd])
+		self.sources = set([self.rs, self.rt])
 
 	def run(self):
 		op = insnToJavaInstruction[self.opCode][2]
@@ -326,8 +325,8 @@ class Multxx(Instruction):
 		return 5
 
 	def fixup(self):
-		self.destinations = Set([ mips.R_HI, mips.R_LO ])
-		self.sources = Set([self.rs, self.rt])
+		self.destinations = set([ mips.R_HI, mips.R_LO ])
+		self.sources = set([self.rs, self.rt])
 
 	def run(self):
 		rt = self.optimizer.getRegisterValue(self.rt)
@@ -501,8 +500,8 @@ class LoadXX(MemoryAccess):
 		self.popToRegister( self.rt )
 
 	def fixup(self):
-		self.destinations = Set([self.rt])
-		self.sources = Set([self.rs, self.rt])
+		self.destinations = set([self.rt])
+		self.sources = set([self.rs, self.rt])
 
 	def run(self):
 		self.optimizer.setRegisterValue(self.rt, UnknownValue())
@@ -532,7 +531,7 @@ class StoreXX(MemoryAccess):
 			self.invokestatic("CRunTime/memoryWrite%s(II)V" % insnToJavaInstruction[self.opCode][1])
 
 	def fixup(self):
-		self.sources = Set([ self.rs, self.rt ])
+		self.sources = set([ self.rs, self.rt ])
 
 	def run(self):
 		return False
@@ -605,8 +604,8 @@ class Mfxx(Instruction):
 		self.popToRegister( self.rd )
 
 	def fixup(self):
-		self.destinations = Set([ self.rd ])
-		self.sources = Set([ insnToJavaInstruction[self.opCode][2] ])
+		self.destinations = set([ self.rd ])
+		self.sources = set([ insnToJavaInstruction[self.opCode][2] ])
 
 	def run(self):
 		src = self.optimizer.getRegisterValue(insnToJavaInstruction[self.opCode][2])
@@ -625,8 +624,8 @@ class Mtxx(Instruction):
 		self.popToRegister( insnToJavaInstruction[self.opCode][2] )
 
 	def fixup(self):
-		self.destinations = Set([ insnToJavaInstruction[self.opCode][2] ])
-		self.sources = Set([ self.rs ])
+		self.destinations = set([ insnToJavaInstruction[self.opCode][2] ])
+		self.sources = set([ self.rs ])
 
 	def run(self):
 		src = self.rs
@@ -654,7 +653,7 @@ class Syscall(Instruction):
 	def fixup(self):
 		call = self.controller.hasSyscall(self.extra) # Will throw an exception if this is not present
 		if call.getReturnType() != "void":
-			self.destinations = Set([ mips.R_V0 ])
+			self.destinations = set([ mips.R_V0 ])
 
 	def __str__(self):
 		call = self.controller.hasSyscall(self.extra)
@@ -677,7 +676,7 @@ class SyscallRegisterArgument(Instruction):
 		self.pushRegister( self.extra )
 
 	def fixup(self):
-		self.sources = Set([ self.extra ])
+		self.sources = set([ self.extra ])
 
 	def __str__(self):
 		return "0x%08x: syscall_push_r %s" % (self.address, mips.registerNames[ self.extra ])
@@ -794,7 +793,7 @@ class Jal(BranchInstruction):
 	def fixup(self):
 		self.controller.addLabel(self.address + 8, inJumpTab = False)
 		self.controller.addLabel(self.dstAddress, inJumpTab = True)
-		self.destinations = Set([ mips.R_RA ])
+		self.destinations = set([ mips.R_RA ])
 
 		otherName = self.controller.elf.getSymbolByAddress(self.dstAddress).name
 
@@ -838,8 +837,8 @@ class Jalr(BranchInstruction):
 		self.popToRegister(mips.R_V0)
 
 	def fixup(self):
-		self.sources = Set([ self.rs ])
-		self.destinations = Set([ self.rd ])
+		self.sources = set([ self.rs ])
+		self.destinations = set([ self.rd ])
 
 	def maxOperandStackHeight(self):
 		return 9
@@ -873,7 +872,7 @@ class Jr(BranchInstruction):
 
 	def fixup(self):
 		self.isBranch = True
-		self.sources = Set([ self.rs ])
+		self.sources = set([ self.rs ])
 
 	def maxOperandStackHeight(self):
 		return 1
@@ -898,8 +897,8 @@ class OneRegisterSetInstruction(SetInstruction):
 		self.popToRegister(self.rt)
 
 	def fixup(self):
-		self.sources = Set([ self.rs ])
-		self.destinations = Set([ self.rt ])
+		self.sources = set([ self.rs ])
+		self.destinations = set([ self.rt ])
 
 	def __str__(self):
 		return "0x%08x: %10s %s, %s, 0x%08x" % (self.address, mips.opStrings[self.opCode],
@@ -935,8 +934,8 @@ class TwoRegisterSetInstruction(SetInstruction):
 		self.popToRegister(self.rd)
 
 	def fixup(self):
-		self.sources = Set([ self.rs, self.rt ])
-		self.destinations = Set([ self.rd ])
+		self.sources = set([ self.rs, self.rt ])
+		self.destinations = set([ self.rd ])
 
 	def maxOperandStackHeight(self):
 		return 3
@@ -976,7 +975,7 @@ class OneRegisterConditionalJump(BranchInstruction):
 	def fixup(self):
 		self.controller.addLabel( self.dstAddress )
 		self.isBranch = True
-		self.sources = Set([ self.rs ])
+		self.sources = set([ self.rs ])
 
 	def maxOperandStackHeight(self):
 		return 1
@@ -1009,7 +1008,7 @@ class TwoRegisterConditionalJump(BranchInstruction):
 	def fixup(self):
 		self.controller.addLabel( self.dstAddress )
 		self.isBranch = True
-		self.sources = Set([ self.rs, self.rt ])
+		self.sources = set([ self.rs, self.rt ])
 
 	def __str__(self):
 		out = "0x%08x: %10s %s, %s, 0x%08x" % (self.address, mips.opStrings[self.opCode],
