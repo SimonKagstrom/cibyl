@@ -50,9 +50,9 @@ void BasicBlock::handleTables(Instruction **rtab, Instruction **wtab,
     Instruction *insn)
 {
   /* First update the instruction and then the tables */
-  this->fillInstructionReadsAndWrites(rtab, wtab, insn);
   this->fillReadTable(rtab, insn);
   this->fillWriteTable(wtab, insn);
+  this->fillInstructionReadsAndWrites(rtab, wtab, insn);
 }
 
 
@@ -97,7 +97,7 @@ void BasicBlock::fillReadTable(Instruction **table, Instruction *insn)
   int srcs[N_REGS];
   
   memset(srcs, 0, sizeof(srcs));
-  insn->fillDestinations(srcs);
+  insn->fillSources(srcs);
 
   if (srcs[insn->getRs()])
     table[insn->getRs()] = insn;
