@@ -50,9 +50,10 @@ void BasicBlock::handleTables(Instruction **rtab, Instruction **wtab,
     Instruction *insn)
 {
   /* First update the instruction and then the tables */
+  this->fillInstructionReadsAndWrites(rtab, wtab, insn);
+  /* Update the tables with this instruction */
   this->fillReadTable(rtab, insn);
   this->fillWriteTable(wtab, insn);
-  this->fillInstructionReadsAndWrites(rtab, wtab, insn);
 }
 
 
