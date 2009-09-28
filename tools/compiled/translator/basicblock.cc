@@ -212,7 +212,7 @@ bool BasicBlock::pass1()
               MIPS_register_t reg = mips_caller_saved[j];
 
               if ( (this->type == PROLOGUE && p_s[reg] != 0 && !insn->getPrevRegisterWrite(I_RT)) ||
-                  (this->type == EPILOGUE && p_d[reg] != 0 && !insn->getPrevRegisterWrite(I_RT)))
+                  (this->type == EPILOGUE && p_d[reg] != 0))
                 {
                   this->instructions[i] = InstructionFactory::getInstance()->createNop(insn->getAddress());
                   if (insn->isBranchTarget())
