@@ -35,8 +35,10 @@ Instruction::Instruction(uint32_t address, int opcode,
   this->prefix = NULL;
   this->delayed = NULL;
 
-  memset(this->register_reads, 0, sizeof(this->register_reads));
-  memset(this->register_writes, 0, sizeof(this->register_writes));
+  memset(this->prev_register_reads, 0, sizeof(this->prev_register_reads));
+  memset(this->prev_register_writes, 0, sizeof(this->prev_register_writes));
+  memset(this->next_register_reads, 0, sizeof(this->prev_register_reads));
+  memset(this->next_register_writes, 0, sizeof(this->prev_register_writes));
 };
 
 Instruction::~Instruction()

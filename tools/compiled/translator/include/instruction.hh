@@ -130,6 +130,21 @@ public:
 
   MIPS_register_t getRd() { return this->rd; }
 
+  MIPS_register_t getRegister(mips_register_type_t type)
+  {
+    switch(type)
+    {
+    case I_RS:
+      return this->getRs();
+    case I_RT:
+      return this->getRt();
+    case I_RD:
+      return this->getRd();
+    default:
+      panic("getRegister called with type %d\n", type);
+    }
+  }
+
   int32_t getExtra() { return this->extra; }
 
   /**
@@ -142,7 +157,7 @@ public:
    */
   Instruction *getPrevRegisterWrite(mips_register_type_t which)
   {
-    return this->register_writes[which];
+    return this->prev_register_writes[which];
   }
 
   /**
@@ -155,19 +170,26 @@ public:
    */
   Instruction *getPrevRegisterRead(mips_register_type_t which)
   {
-    return this->register_reads[which];
+    return this->prev_register_reads[which];
   }
 
   void setPrevRegisterReadAndWrite(Instruction *rinsn, Instruction *winsn,
       mips_register_type_t which)
   {
-    this->setPrevRegisterGeneric(this->register_reads, which, rinsn);
-    this->setPrevRegisterGeneric(this->register_writes, which, winsn);
+    this->setPrevNextRegisterGeneric(this->prev_register_reads, which, rinsn);
+    this->setPrevNextRegisterGeneric(this->prev_register_writes, which, winsn);
+  }
+
+  void setNextRegisterReadAndWrite(Instruction *rinsn, Instruction *winsn,
+      mips_register_type_t which)
+  {
+    this->setPrevNextRegisterGeneric(this->next_register_reads, which, rinsn);
+    this->setPrevNextRegisterGeneric(this->next_register_writes, which, winsn);
   }
 
   BasicBlock *parent;
 protected:
-  void setPrevRegisterGeneric(Instruction **table, mips_register_type_t which,
+  void setPrevNextRegisterGeneric(Instruction **table, mips_register_type_t which,
       Instruction *insn)
   {
     table[which] = insn;
@@ -180,8 +202,10 @@ protected:
   Instruction *prefix;
 
   /* rs/rt/rd */
-  Instruction *register_writes[3];
-  Instruction *register_reads[3];
+  Instruction *prev_register_writes[3];
+  Instruction *prev_register_reads[3];
+  Instruction *next_register_writes[3];
+  Instruction *next_register_reads[3];
  
   bool branchTarget;
 };

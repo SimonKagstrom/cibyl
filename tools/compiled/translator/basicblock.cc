@@ -47,34 +47,51 @@ BasicBlock::BasicBlock(Instruction **insns,
 }
 
 void BasicBlock::handleTables(Instruction **rtab, Instruction **wtab,
-    Instruction *insn)
+    Instruction *insn, bool before)
 {
   /* First update the instruction and then the tables */
-  this->fillInstructionReadsAndWrites(rtab, wtab, insn);
+  this->fillInstructionReadsAndWrites(rtab, wtab, insn, before);
   /* Update the tables with this instruction */
   this->fillReadTable(rtab, insn);
   this->fillWriteTable(wtab, insn);
 }
 
+void BasicBlock::handleRegisterTablesPrev(Instruction **rtab, Instruction **wtab,
+    Instruction *insn)
+{
+  this->handleTables(rtab, wtab, insn, true);
+}
+
+void BasicBlock::handleRegisterTablesAfter(Instruction **rtab, Instruction **wtab,
+    Instruction *insn)
+{
+  this->handleTables(rtab, wtab, insn, false);
+}
 
 void BasicBlock::fillInstructionReadsAndWrites(Instruction **rtab,
-    Instruction **wtab, Instruction *insn)
+    Instruction **wtab, Instruction *insn, bool before)
 {
+  mips_register_type_t regs[3] = {I_RS, I_RT, I_RD};
   int uses[N_REGS];
 
   memset(uses, 0, sizeof(uses));
   insn->fillDestinations(uses);
   insn->fillSources(uses);
 
-  if (uses[insn->getRs()])
-      insn->setPrevRegisterReadAndWrite(rtab[insn->getRs()],
-          wtab[insn->getRs()], I_RS);
-  if (uses[insn->getRt()])
-    insn->setPrevRegisterReadAndWrite(rtab[insn->getRt()],
-        wtab[insn->getRt()], I_RT);
-  if (uses[insn->getRd()])
-    insn->setPrevRegisterReadAndWrite(rtab[insn->getRd()],
-        wtab[insn->getRd()], I_RD);
+  for (unsigned i = 0; i < sizeof(regs) / sizeof(mips_register_type_t); i++)
+    {
+      MIPS_register_t reg = insn->getRegister(regs[i]);
+
+      if (uses[reg])
+        {
+          if (before)
+            insn->setPrevRegisterReadAndWrite(rtab[reg],
+                wtab[reg], regs[i]);
+          else
+            insn->setNextRegisterReadAndWrite(rtab[reg],
+                wtab[reg], regs[i]);
+        }
+    }
 }
 
 void BasicBlock::fillWriteTable(Instruction **table, Instruction *insn)
@@ -150,10 +167,24 @@ bool BasicBlock::pass1()
       /* Order is important. The parameters for the instruction with a delay
        * slot is pushed before the delay slot */
       if (insn->hasPrefix())
-        this->handleTables(read_table, write_table, insn->getPrefix());
-      this->handleTables(read_table, write_table, insn);
+        this->handleRegisterTablesPrev(read_table, write_table, insn->getPrefix());
+      this->handleRegisterTablesPrev(read_table, write_table, insn);
       if (insn->hasDelayed())
-        this->handleTables(read_table, write_table, insn->getDelayed());
+        this->handleRegisterTablesPrev(read_table, write_table, insn->getDelayed());
+    }
+
+  /* Fill in the tables in reverse (next instruction write) */
+  memset(write_table, 0, sizeof(Instruction*) * N_REGS);
+  memset(read_table, 0, sizeof(Instruction*) * N_REGS);
+  for (int i = this->n_insns - 1; i >= 0; i--)
+    {
+      Instruction *insn = this->instructions[i];
+
+      if (insn->hasPrefix())
+        this->handleRegisterTablesAfter(read_table, write_table, insn->getPrefix());
+      this->handleRegisterTablesAfter(read_table, write_table, insn);
+      if (insn->hasDelayed())
+        this->handleRegisterTablesAfter(read_table, write_table, insn->getDelayed());
     }
 
   free(write_table);

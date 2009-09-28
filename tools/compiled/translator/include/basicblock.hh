@@ -63,10 +63,14 @@ private:
 
   void traceRegisterValues(Instruction *insn);
 
-  void handleTables(Instruction **rtab, Instruction **wtab, Instruction *insn);
+  void handleTables(Instruction **rtab, Instruction **wtab, Instruction *insn, bool before);
+
+  void handleRegisterTablesPrev(Instruction **rtab, Instruction **wtab, Instruction *insn);
+
+  void handleRegisterTablesAfter(Instruction **rtab, Instruction **wtab, Instruction *insn);
 
   void fillInstructionReadsAndWrites(Instruction **rtab, Instruction **wtab,
-      Instruction *insn);
+      Instruction *insn, bool before);
 
   void fillWriteTable(Instruction **table, Instruction *insn);
 
