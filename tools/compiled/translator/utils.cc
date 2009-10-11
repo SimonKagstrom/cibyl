@@ -86,7 +86,7 @@ void *read_cpp(size_t *out_size, const char **defines, const char *fmt, ...)
   while ( (size = fread(data, 1, buf.st_size * 4, f)) != 0)
     {
       panic_if (size != 0 && size >= (size_t)(buf.st_size * 4),
-                "Outbuffer of %s is too large: %zd vs %zd\n",
+                "Outbuffer of %s is too large: %zd vs %ld\n",
                 path, size, buf.st_size * 4);
     }
   fclose(f);
@@ -142,7 +142,7 @@ static void create_dir_structure(const char *dir)
   char path[2048];
 
   memset(path, 0, sizeof(path));
-  p = strchr(dir, '/');
+  p = strchr((char*)dir, '/');
 
   if (!p)
     {
