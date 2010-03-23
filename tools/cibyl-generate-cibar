@@ -29,7 +29,7 @@ strtab_offset = 0
 
 for name in all_filenames:
 	try:
-		f = open(dirname + "/" + name, "r")
+		f = open(dirname + "/" + name, "rb")
 		all_files[name] = f.read()
 		f.close()
 	except:
