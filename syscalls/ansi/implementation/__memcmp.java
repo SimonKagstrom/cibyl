@@ -7,7 +7,7 @@ public static final int __memcmp(int s1, int s2, int n)
 
   do
     {
-      if (s - s1 > n)
+      if (s - s1 >= n)
 	break;
 
       a = CRunTime.memoryReadByte(s);
