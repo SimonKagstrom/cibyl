@@ -55,6 +55,9 @@ bool CallTableMethod::pass1()
   this->registerUsage[ R_V0 ] = 1;
   this->registerUsage[ R_V1 ] = 1;
 
+  /* Clobbers both registers */
+  this->setReturnSize(2);
+
   return true;
 }
 

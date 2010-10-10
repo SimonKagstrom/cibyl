@@ -29,6 +29,7 @@ public:
     this->optimizeCallTable = false;
     this->optimizePartialMemoryOps = false;
     this->optimizePruneStackStores = false;
+    this->optimizeFunctionReturnArguments = false;
     this->pruneUnusedFunctions = true;
 
     this->classSizeLimit = 16384; /* Pretty arbitrary value! */
@@ -48,6 +49,7 @@ public:
   bool optimizeCallTable;
   bool optimizePartialMemoryOps;
   bool optimizePruneStackStores;
+  bool optimizeFunctionReturnArguments;
   bool pruneUnusedFunctions;
 
   /* Workarounds for bugs */

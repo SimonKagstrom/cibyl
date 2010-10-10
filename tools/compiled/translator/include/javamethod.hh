@@ -79,6 +79,8 @@ public:
    */
   int returnSize();
 
+  void setReturnSize(int n);
+
   int getRegistersToPass()
   {
     return this->n_registersToPass;
@@ -159,6 +161,8 @@ protected:
 
   size_t bc_size;
   size_t maxStackHeight;
+
+  int m_returnSize;
 };
 
 class CallTableMethod : public JavaMethod

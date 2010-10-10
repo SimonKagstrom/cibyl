@@ -69,6 +69,7 @@ JavaMethod::JavaMethod(Function **fns,
   this->javaName = NULL;
   this->n_registersToPass = 0;
   this->registerIndirectJumps = false;
+  this->m_returnSize = -1;
 
   this->address = 0;
   this->size = 0;
@@ -166,6 +167,18 @@ bool JavaMethod::pass1()
       reg != R_ZERO;
       reg = this->getNextRegisterToPass(&it))
     this->n_registersToPass++;
+
+  /* Setup the size of the return value - 0 for functions
+   * that return nothing, 1 for 32-bit returns and 2 for 64-bit
+   * dittos */
+  this->setReturnSize(0);
+
+  if (this->clobbersReg(R_V0) && this->clobbersReg(R_V1))
+    this->setReturnSize(2);
+  else if (this->clobbersReg(R_V0))
+    this->setReturnSize(1);
+  else if (this->clobbersReg(R_V1))
+    emit->warning("Function clobbers V1 but not V0");
 
   return out;
 }
@@ -504,15 +517,19 @@ MIPS_register_t JavaMethod::getNextRegisterToPass(void *_it)
 
 int JavaMethod::returnSize()
 {
-  int count = 0;
+  panic_if(this->m_returnSize < 0,
+      "returnSize accessed too soon for %s %d\n",
+      this->getJavaMethodName(), this->m_returnSize);
+  return this->m_returnSize;
+}
 
-  if (this->clobbersReg(R_V0))
-    count++;
+void JavaMethod::setReturnSize(int n)
+{
+  panic_if(n < 0 || n > 2,
+      "return size is out of bounds for %s: %d\n",
+      this->getJavaMethodName(), n);
 
-  if (this->clobbersReg(R_V1))
-    count++;
-
-  return count;
+  this->m_returnSize = n;
 }
 
 bool JavaMethod::clobbersReg(MIPS_register_t reg)
