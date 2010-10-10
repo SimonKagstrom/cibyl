@@ -173,7 +173,7 @@ public:
 
     if (config->threadSafe)
       {
-        if (this->dstMethod->clobbersReg(R_V1) && this->dstMethod->clobbersReg(R_V0))
+        if (this->dstMethod->returnSize() == 2)
           {
             /* We have a 64-bit value on the stack */
             emit->bc_dup2();
@@ -184,21 +184,20 @@ public:
             emit->bc_l2i(); /* v0 */
             emit->bc_popregister( R_V0 );
           }
-        else if (this->dstMethod->clobbersReg(R_V1))
-          emit->bc_popregister( R_V1 );
-        else if (this->dstMethod->clobbersReg(R_V0))
+        else if (this->dstMethod->returnSize() == 1)
           emit->bc_popregister( R_V0 );
         /* else: Nada */
       }
     else
       {
-        if (this->dstMethod->clobbersReg(R_V1))
+        if (this->dstMethod->returnSize() == 2)
           {
             emit->bc_getstatic("%sCRunTime/saved_v1 I",
                 controller->getJasminPackagePath());
             emit->bc_popregister( R_V1 );
+            emit->bc_popregister( R_V0 );
           }
-        if (this->dstMethod->clobbersReg(R_V0))
+        else if (this->dstMethod->returnSize() == 1)
           emit->bc_popregister( R_V0 );
       }
 

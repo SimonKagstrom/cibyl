@@ -72,6 +72,13 @@ public:
 
   MIPS_register_t getNextRegisterToPass(void *it);
 
+  /**
+   * The size of the return value, in words.
+   *
+   * @return 0, 1 or 2.
+   */
+  int returnSize();
+
   int getRegistersToPass()
   {
     return this->n_registersToPass;

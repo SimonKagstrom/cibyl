@@ -502,6 +502,19 @@ MIPS_register_t JavaMethod::getNextRegisterToPass(void *_it)
   return ret;
 }
 
+int JavaMethod::returnSize()
+{
+  int count = 0;
+
+  if (this->clobbersReg(R_V0))
+    count++;
+
+  if (this->clobbersReg(R_V1))
+    count++;
+
+  return count;
+}
+
 bool JavaMethod::clobbersReg(MIPS_register_t reg)
 {
   return this->registerUsage[reg] > 0;
