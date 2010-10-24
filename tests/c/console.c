@@ -139,6 +139,11 @@ static void select_fs_root(void)
 
         NOPH_Display_setCurrent(display, cur);
         NOPH_delete(fs_list);
+	
+	/* Remove trailing "/" on root for consistency, if any */
+	i = strlen(fs_root);
+	if(i>0 && fs_root[i-1]=='/')
+	  fs_root[i-1] = 0;
 }
 
 void console_init(void)
