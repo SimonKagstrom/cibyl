@@ -90,7 +90,10 @@ public:
 
   Jal(uint32_t address, int opcode, MIPS_register_t rs, int32_t extra) : BranchInstruction(address, opcode, rs, R_ZERO, R_ZERO, extra)
   {
-    Jal::Jal(address, opcode, extra);
+    this->method = NULL;
+    this->dstMethod = NULL;
+    this->dstClass = NULL;
+    this->builtin = NULL;
   }
 
   bool pass1()
