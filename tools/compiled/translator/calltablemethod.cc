@@ -32,6 +32,7 @@ CallTableMethod::CallTableMethod(int maxFunctions, cibyl_exported_symbol_t *exp_
 void CallTableMethod::addFunction(Function *fn)
 {
   uint32_t addr = fn->getAddress();
+  int i,j;
 
   if ( ght_get(this->function_table,
                sizeof(uint32_t), (void*)&addr) != NULL )
@@ -42,7 +43,21 @@ void CallTableMethod::addFunction(Function *fn)
   ght_insert(this->function_table, (void*)fn,
              sizeof(uint32_t), (void*)&addr);
 
-  this->functions[this->n_functions++] = fn;
+  /* Find correct position in function list, based on sorting by address */
+  for(i=0; i<this->n_functions; i++)
+    {
+      if(this->functions[i]->getAddress() > addr)
+	break;
+    }
+
+  /* Shift remaining functions up by one to make room for new entry */
+  for(j=this->n_functions; j>i; j--)
+   {
+      this->functions[j] = this->functions[j-1];
+   }
+
+  this->functions[i] = fn;  
+  this->n_functions++;
 }
 
 bool CallTableMethod::pass1()
