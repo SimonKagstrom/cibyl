@@ -96,19 +96,15 @@ class MatchStoreStore(Template):
 	return items
 
 
-# Assuming nothing in the function jumps to LABEL
 #	istore $N
-# LABEL:
 #	iload $N
 #       ireturn
 # ->
-# LABEL:
 #       ireturn
-class MatchStoreLabelLoad(Template):
+class MatchStoreLoadIreturn(Template):
     def __init__(self):
 	Template.__init__(self,
 			  [{"class" : Istore},
-			   {"class" : Label},
 			   {"class" : Iload},
 			   {"class" : Ireturn},
 			   ])
@@ -116,11 +112,6 @@ class MatchStoreLabelLoad(Template):
     def match(self, fn, items):
 	if items[0].targetLocal != items[-2].sourceLocal:
 	    return False
-	# See to it that there are no jumps to LABEL
-	for fnItem in fn.contents:
-	    if isinstance(fnItem, BranchInstruction):
-		if fnItem.target == items[1].name:
-		    return False
 	return True
 
     # Remove the istore/iload
@@ -129,23 +120,19 @@ class MatchStoreLabelLoad(Template):
 	items[-2] = Nop()
 	return items
 
-# Assuming nothing in the function jumps to LABEL
 #	istore $N
-# LABEL:
 #       iload  $X != $N
 #       putstatic saved_v1
 #	iload  $N
 #       ireturn
 # ->
-# LABEL:
 #       iload  $X != $N
 #       putstatic saved_v1
 #       ireturn
-class MatchStoreLabelPutstaticLoad(MatchStoreLabelLoad):
+class MatchStorePutstaticLoadIreturn(MatchStoreLoadIreturn):
     def __init__(self):
 	Template.__init__(self,
 			  [{"class" : Istore},
-			   {"class" : Label},
 			   {"class" : Iload},
 			   {"class" : Putstatic},
 			   {"class" : Iload},
@@ -153,10 +140,10 @@ class MatchStoreLabelPutstaticLoad(MatchStoreLabelLoad):
 			   ])
 
     def match(self, fn, items):
-	if not MatchStoreLabelLoad.match(self, fn, items):
+	if not MatchStoreLoadIreturn.match(self, fn, items):
 	    return False
 	N = items[0].targetLocal
-	if items[2].sourceLocal == N:
+	if items[1].sourceLocal == N:
 	    return False
 	return True
 
@@ -168,29 +155,20 @@ class MatchStoreLabelPutstaticLoad(MatchStoreLabelLoad):
 
 
 
-# Assuming nothing in the function jumps to LABEL
 #       dup
 #       istore
-# LABEL:
 #       ireturn
 # ->
-# LABEL:
 #       ireturn
-class MatchDupIstoreLabelIreturn(MatchStoreLabelLoad):
+class MatchDupIstoreIreturn(Template):
     def __init__(self):
 	Template.__init__(self,
 			  [{"class" : Dup},
 			   {"class" : Istore},
-			   {"class" : Label},
 			   {"class" : Ireturn},
 			   ])
 
     def match(self, fn, items):
-	# See to it that there are no jumps to LABEL
-	for fnItem in fn.contents:
-	    if isinstance(fnItem, BranchInstruction):
-		if fnItem.target == items[2].name:
-		    return False
 	return True
 
     # Remove the dup/istore
@@ -300,9 +278,9 @@ for n in range(0, 1):
 	addTemplate(MatchStoreLoadStore(n, m))
 for i in range(0, 6):
     addTemplate(MatchStoreStore(i))
-addTemplate(MatchStoreLabelLoad())
+addTemplate(MatchStoreLoadIreturn())
 addTemplate(MatchStoreLoad())
-addTemplate(MatchDupIstoreLabelIreturn())
-addTemplate(MatchStoreLabelPutstaticLoad())
+addTemplate(MatchDupIstoreIreturn())
+addTemplate(MatchStorePutstaticLoadIreturn())
 addTemplate(MatchSwap())
 addTemplate(MatchSwapDup())

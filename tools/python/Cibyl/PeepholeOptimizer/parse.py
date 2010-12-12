@@ -14,7 +14,7 @@ import template
 import re, sys
 import emit
 
-from templates import goto_next_line, const_store_aload, const_and_inc, double_stores, double_pop, getstatic_v1_pop, putstatic_getstatic, dup_pop, const_and_pop
+from templates import unused_label, goto_next_line, const_store_aload, push_store_inc, const_and_inc, jal_return, jal_arguments, double_stores, double_pop, getstatic_v1_pop, putstatic_getstatic, dup_pop, const_and_pop
 
 FUNCTION_NAME="([A-Z,a-z,0-9,_,\(,\)]+)"
 
@@ -202,17 +202,22 @@ def readFile(filename):
     return all
 
 def optimize(num, all):
-    for n in range(0, num):
-	for item in all:
-	    if isinstance(item, Function):
+    for item in all:
+        if isinstance(item, Function):
+            for n in range(0, num):
+		applied = 0
 		for t in template.getTemplates():
-		    t.apply(item)
+		    applied = applied + t.apply(item)
+		if applied==0:
+		    # No need to try again if nothing got changed
+		    break
 
     for item in all:
 	item.emit()
 
 def run(num, infile, outfile):
     all = readFile(infile)
+    print "Optimizing "+infile
     emit.out = open(outfile, "w")
     optimize(num, all)
     emit.out.close()

@@ -37,3 +37,30 @@ class MatchClass(Template):
 	return items # Keep the label
 
 addTemplate(MatchClass())
+
+#	goto LABEL
+#LABEL2:
+#LABEL:
+#->
+#LABEL2:
+#LABEL:
+class MatchClass2(Template):
+    def __init__(self):
+	Template.__init__(self,
+			  [{"class" : Goto},
+			   {"class" : Label},
+			   {"class" : Label},
+			   ]
+			  )
+
+    def match(self, fn, items):
+	if items[0].target != items[2].name:
+	    return False
+	return True
+
+    # The action here is simple - just remove the instruction
+    def execute(self, fn, items):
+	items[0] = Nop()
+	return items # Keep the label
+
+addTemplate(MatchClass2())
