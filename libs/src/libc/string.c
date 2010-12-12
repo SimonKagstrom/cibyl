@@ -18,25 +18,26 @@
 
 void *memset(void *s, int c, size_t n)
 {
-  return __memset(s, c, n);
-#if 0
-  char *p;
-  int i_c = ( (c << 24) | (c << 16) | (c << 8) | c );
+  char *p = s;
 
-  for ( p = s;
-	((unsigned long)p & (sizeof(int)-1)) != 0 && n > 0;
-	p++, n--)
-    *p = c;
-
-  /* Middle */
-  while ( n > sizeof(int) )
+  if ( n > sizeof(int) )
     {
-      int *p_i = (int*)p;
+      while ( ((unsigned long)p & (sizeof(int)-1)) != 0 && n > 0 )
+        {
+          *p = c;
+    	  p++;
+	  n--;
+        }
 
-      *p_i = i_c;
-
-      p += sizeof(int);
-      n -= sizeof(int);
+      /* Middle */
+      int i_c = ( (c << 24) | (c << 16) | (c << 8) | c );
+      while ( n > sizeof(int) )
+        {
+          int *p_i = (int*)p;
+          *p_i = i_c;
+          p += sizeof(int);
+          n -= sizeof(int);
+        }
     }
 
   /* Last */
@@ -46,7 +47,6 @@ void *memset(void *s, int c, size_t n)
     *p = c;
 
   return s;
-#endif
 }
 
 /* Will be optimized away by GCC for the builtin cases */
@@ -55,10 +55,21 @@ void *memcpy(void *dest, const void *src, size_t n)
   char *d = (char*)dest;
   char *s = (char*)src;
 
+  if ( ((((int)src) | ((int)dest) | n) & (sizeof(int)-1)) == 0 )
+    {
+      while ( n > 0 )
+        {
+          *(int*)d = *(int*)s;
+          s += sizeof(int);
+	  d += sizeof(int);
+          n -= sizeof(int);
+        }
+      return dest;
+    }
+
   while ( n > 0 )
     {
       *d = *s;
-
       d++;
       s++;
       n--;
