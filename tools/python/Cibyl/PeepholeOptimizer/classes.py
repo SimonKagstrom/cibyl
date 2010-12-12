@@ -54,6 +54,7 @@ class Instruction(Base):
 class Nop(Instruction):
     def __init__(self):
 	Instruction.__init__(self, "")
+	self.isNop = True
 
 class Ireturn(Instruction, PopInstruction):
     def __init__(self, line):
