@@ -36,6 +36,8 @@ public:
 
   void bc_goto(uint32_t dst) { this->writeIndent("goto L_%x", dst); }
 
+  void bc_goto_w(uint32_t dst) { this->writeIndent("goto_w L_%x", dst); }
+
   void bc_goto(const char *what, ...);
 
   void bc_jsr(const char *what, ...);
@@ -46,6 +48,8 @@ public:
 
   void bc_pushconst_u(uint32_t nr);
 
+  void bc_pushconst_l(uint64_t nr);
+  
   void bc_ret(MIPS_register_t reg);
 
   void bc_astore(MIPS_register_t reg);
@@ -114,7 +118,11 @@ public:
 
   void bc_lor() { this->writeIndent("lor"); }
 
+  void bc_land() { this->writeIndent("land"); }
+
   void bc_ixor() { this->writeIndent("ixor"); }
+
+  void bc_lcmp() { this->writeIndent("lcmp"); }
 
   void bc_lmul() { this->writeIndent("lmul"); }
 

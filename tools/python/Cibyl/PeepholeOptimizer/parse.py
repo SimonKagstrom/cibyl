@@ -39,7 +39,7 @@ ins_ldc_int = re.compile("[ ,\t]*ldc ([-]*[0-9]+)")
 ins_iconst = re.compile("[ ,\t]*iconst_([0-5]+)")
 ins_iconst_m1 = re.compile("[ ,\t]*iconst_m1")
 ins_cond_branch_two = re.compile("[ ,\t]*if_icmp[ne][qe][ ,\t]([A-Z,a-z,0-9,_]+)")
-ins_cond_branch_one = re.compile("[ ,\t]*if[gl][et][ ,\t]([A-Z,a-z,0-9,_]+)")
+ins_cond_branch_one = re.compile("[ ,\t]*if[glne][etq][ ,\t]([A-Z,a-z,0-9,_]+)")
 ins_invokestatic = re.compile("[ ,\t]*invokestatic[ ,\t]([A-Z,a-z,0-9,_]+)")
 
 instruction = re.compile("\t([A-Z,a-z,0-9,_,\(,\), ]+)")

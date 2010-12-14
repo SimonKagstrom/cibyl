@@ -47,4 +47,4 @@ lib/.libghthash:
 	touch $@
 
 xcibyl-translator: lib/.libghthash $(OBJS)
-	$(HOST_LD) $(GCOV) -Llib/libghthash-0.6.2/src/.libs/ -o $@ $(OBJS) -lghthash -lelf -static
+	$(HOST_LD) $(GCOV) -Llib/libghthash-0.6.2/src/.libs/ -o $@ $(OBJS) -lghthash -ldwarf -lelf -static

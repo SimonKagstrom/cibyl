@@ -47,6 +47,11 @@ void Emit::bc_pushconst_u(uint32_t val)
     this->writeIndent("ldc %u", val);
 }
 
+void Emit::bc_pushconst_l(uint64_t val)
+{
+  this->writeIndent("ldc2_w %lu", val);
+}
+
 void Emit::bc_pushconst(int32_t val)
 {
   if (val == -1)
@@ -139,7 +144,7 @@ void Emit::bc_ret(MIPS_register_t reg)
 void Emit::bc_pushregister(MIPS_register_t reg)
 {
   if (regalloc->regIsStatic(reg))
-    this->bc_getstatic( regalloc->regToStatic(reg) );
+    this->bc_getstatic( "%s I", regalloc->regToStatic(reg) );
   else if (reg == R_ZERO || !regalloc->regIsAllocated(reg))
     this->bc_pushconst(0);
   else if (reg == R_MEM)
@@ -151,7 +156,7 @@ void Emit::bc_pushregister(MIPS_register_t reg)
 void Emit::bc_popregister(MIPS_register_t reg)
 {
   if (regalloc->regIsStatic(reg))
-    this->bc_putstatic( regalloc->regToStatic(reg) );
+    this->bc_putstatic( "%s I", regalloc->regToStatic(reg) );
   else if (!regalloc->regIsAllocated(reg)) /* This is an error! */
     this->error("Warning/Error at 0x%08x: Popping to register %s, which is not allocated\n",
                 controller->getCurrentInstruction()->getAddress(), mips_reg_strings[reg]);
