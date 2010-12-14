@@ -216,14 +216,19 @@ Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
     case OP_LUI: return new Lui(address, opcode, rt, extra);
 
       /* Conditional jumps, shifts */
-    case OP_SLTU: return new TwoRegisterSetInstruction("sltu", address, opcode,
-						      rs, rt, rd);
+    case OP_SLTU: return new Sltu(address, opcode, rs, rt, rd);
     case OP_SLT: return new Slt(address, opcode, rs, rt, rd);
-    case OP_SLTIU: return new OneRegisterSetInstruction("sltu", address, opcode, rs, rt, extra);
+    case OP_SLTIU: return new Sltiu(address, opcode, rs, rt, extra);
     case OP_SLTI: return new Slti(address, opcode, rs, rt, extra);
 
-    case OP_BEQ: return new TwoRegisterConditionalJump("if_icmpeq", address, opcode, rs, rt, extra);
-    case OP_BNE: return new TwoRegisterConditionalJump("if_icmpne", address, opcode, rs, rt, extra);
+    case OP_BEQ: if(rt==R_ZERO)
+		   return new OneRegisterConditionalJump("ifeq", address, opcode, rs, extra);
+		 else
+	           return new TwoRegisterConditionalJump("if_icmpeq", address, opcode, rs, rt, extra);
+    case OP_BNE: if(rt==R_ZERO)
+		   return new OneRegisterConditionalJump("ifne", address, opcode, rs, extra);
+		 else
+                   return new TwoRegisterConditionalJump("if_icmpne", address, opcode, rs, rt, extra);
 
     case OP_BGEZ: return new OneRegisterConditionalJump("ifge", address, opcode, rs, extra);
     case OP_BGTZ: return new OneRegisterConditionalJump("ifgt", address, opcode, rs, extra);
