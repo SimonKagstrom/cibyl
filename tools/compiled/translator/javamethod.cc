@@ -71,6 +71,16 @@ JavaMethod::JavaMethod(Function **fns,
   this->registerIndirectJumps = false;
   this->m_returnSize = -1;
 
+  this->m_possibleArguments = (MIPS_register_t*)xcalloc(7,
+      sizeof(MIPS_register_t));
+  this->m_possibleArguments[0] = R_SP;
+  this->m_possibleArguments[1] = R_FNA;
+  this->m_possibleArguments[2] = R_A0;
+  this->m_possibleArguments[3] = R_A1;
+  this->m_possibleArguments[4] = R_A2;
+  this->m_possibleArguments[5] = R_A3;
+  this->m_possibleArguments[6] = R_ZERO;
+
   this->address = 0;
   this->size = 0;
   for (int i = 0; i < this->n_functions; i++)
@@ -163,6 +173,21 @@ bool JavaMethod::pass1()
   if (this->hasMultipleFunctions())
     this->registerUsage[R_FNA]++;
 
+  ElfSymbol *sym = elf->getSymbolByAddr(this->getAddress());
+  /* First see which arguments need to be passed */
+  if (config->optimizeFunctionReturnArguments && sym)
+    {
+      /* Zero-terminate at the last needed reg */
+      if (sym->n_args <= 3)
+        this->m_possibleArguments[5] = R_ZERO;
+      if (sym->n_args <= 2)
+        this->m_possibleArguments[4] = R_ZERO;
+      if (sym->n_args <= 1)
+        this->m_possibleArguments[3] = R_ZERO;
+      if (sym->n_args == 0)
+        this->m_possibleArguments[2] = R_ZERO;
+    }
+
   for (MIPS_register_t reg = this->getFirstRegisterToPass(&it);
       reg != R_ZERO;
       reg = this->getNextRegisterToPass(&it))
@@ -181,7 +206,6 @@ bool JavaMethod::pass1()
     emit->warning("Function clobbers V1 but not V0");
 
   /* Update the size from the ELF, if it's known */
-  ElfSymbol *sym = elf->getSymbolByAddr(this->getAddress());
   if (config->optimizeFunctionReturnArguments && sym)
     {
       if (sym->ret_size >= 0 && sym->ret_size <= 2)
@@ -366,7 +390,7 @@ bool JavaMethod::pass2()
                this->getName(), this->registerUsage[i]);
 
       /* These are passed as arguments, skip them */
-      if (i == R_FNA || i == R_SP || i == R_A0 || i == R_A1 || i == R_A2 || i == R_A3)
+      if (this->registerIsArgument((MIPS_register_t)i))
         continue;
 
       /* If this register is used, initialize it */
@@ -494,9 +518,6 @@ bool JavaMethod::pass2()
   return out;
 }
 
-/* R_ZERO terminates it */
-static MIPS_register_t possibleArgumentRegs[] = { R_SP, R_A0, R_A1, R_A2, R_A3, R_FNA, R_ZERO };
-
 MIPS_register_t JavaMethod::getFirstRegisterToPass(void *_it)
 {
   int *it = (int*)_it;
@@ -510,12 +531,25 @@ MIPS_register_t JavaMethod::getNextRegisterToPass(void *_it)
   int *it = (int*)_it;
   MIPS_register_t ret;
 
-  while (possibleArgumentRegs[*it] != R_ZERO &&
-	 this->clobbersReg( possibleArgumentRegs[*it] ) == 0)
+  while (this->m_possibleArguments[*it] != R_ZERO &&
+	 this->clobbersReg(this->m_possibleArguments[*it] ) == 0)
       (*it)++;
-  ret = possibleArgumentRegs[*it];
+  ret = this->m_possibleArguments[*it];
   (*it)++;
   return ret;
+}
+
+bool JavaMethod::registerIsArgument(MIPS_register_t reg)
+{
+  int i;
+
+  for (i = 0; this->m_possibleArguments[i] != R_ZERO; i++)
+    {
+      if (this->m_possibleArguments[i] == reg)
+        return true;
+    }
+
+  return false;
 }
 
 int JavaMethod::returnSize()

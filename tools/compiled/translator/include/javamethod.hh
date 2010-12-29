@@ -72,6 +72,8 @@ public:
 
   MIPS_register_t getNextRegisterToPass(void *it);
 
+  bool registerIsArgument(MIPS_register_t reg);
+
   /**
    * The size of the return value, in words.
    *
@@ -163,6 +165,9 @@ protected:
   size_t maxStackHeight;
 
   int m_returnSize;
+
+  /* M_ZERO-terminated list */
+  MIPS_register_t *m_possibleArguments;
 };
 
 class CallTableMethod : public JavaMethod

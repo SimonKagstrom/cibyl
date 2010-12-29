@@ -114,23 +114,29 @@ void CallTableMethod::generateMethod(const char *name,
       emit->generic("%s.%s(", cl->getName(), mt->getName());
 
       /* Pass registers */
-      if (mt->clobbersReg( R_SP ))
-        { emit->generic("sp"); comma = ","; }
-      if (mt->clobbersReg( R_A0 ))
-        { emit->generic("%s a0", comma); comma = ","; }
-      if (mt->clobbersReg( R_A1 ))
-        { emit->generic("%s a1", comma); comma = ","; }
-      if (mt->clobbersReg( R_A2 ))
-        { emit->generic("%s a2", comma); comma = ","; }
-      if (mt->clobbersReg( R_A3 ))
-        { emit->generic("%s a3", comma); comma = ","; }
-      if (mt->clobbersReg( R_FNA ))
+      void *it;
+      for (MIPS_register_t reg = mt->getFirstRegisterToPass(&it);
+          reg != R_ZERO;
+          reg = mt->getNextRegisterToPass(&it))
         {
-          int idx = mt->getFunctionIndexByAddress(fn->getAddress());
+          if (reg == R_SP)
+            { emit->generic("sp"); comma = ","; }
+          if (reg == R_FNA)
+            {
+              int idx = mt->getFunctionIndexByAddress(fn->getAddress());
 
-          panic_if(idx < 0, "Could not find function index for function %s in method %s",
-              fn->getName(), mt->getName());
-          emit->generic("%s %d", comma, idx);
+              panic_if(idx < 0, "Could not find function index for function %s in method %s",
+                  fn->getName(), mt->getName());
+              emit->generic("%s %d", comma, idx);
+            }
+          if (reg == R_A0)
+            { emit->generic("%s a0", comma); comma = ","; }
+          if (reg == R_A1)
+            { emit->generic("%s a1", comma); comma = ","; }
+          if (reg == R_A2)
+            { emit->generic("%s a2", comma); comma = ","; }
+          if (reg == R_A3)
+            { emit->generic("%s a3", comma); comma = ","; }
         }
       emit->generic("); break;\n");
     }
