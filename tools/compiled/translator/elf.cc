@@ -16,6 +16,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include <fcntl.h>
+#include <libelf.h>
+#include <dwarf.h>
+#include <elfutils/libdw.h>
 
 #include <utils.h>
 #include <elf.hh>
@@ -56,9 +59,14 @@ void CibylElf::handleSymtab(Elf_Scn *scn)
       int binding = ELF32_ST_BIND(s->st_info);
 
       /* Ohh... This is an interesting symbol, add it! */
-      if ( type == STT_FUNC)
-        this->symbols[n_syms++] = this->functionSymbols[n_fns++] = new ElfSymbol(i, binding, s->st_value,
-                                                                                 s->st_size, type, sym_name);
+      if ( type == STT_FUNC) {
+          ElfSymbol *sym = new ElfSymbol(i, binding, s->st_value,
+              s->st_size, type, sym_name);
+
+          this->symbols[n_syms++] = this->functionSymbols[n_fns++] = sym;
+          ght_insert(this->symbols_by_addr, (void*)sym,
+              sizeof(sym->addr), (void*)&sym->addr);
+      }
       else if (type == STT_OBJECT || type == STT_COMMON || type == STT_TLS)
         this->symbols[n_syms++] = this->dataSymbols[n_datas++] = new ElfSymbol(i, binding, (uint32_t)s->st_value,
                                                                                (uint32_t)s->st_size,
@@ -95,6 +103,61 @@ static int reloc_cmp(const void *_a, const void *_b)
   return addr_diff;
 }
 
+extern "C" int mips_arg_size (Elf *elf, Dwarf_Die *functypedie, Dwarf_Attribute *attr);
+
+void CibylElf::handleDwarfFunction(Dwarf_Die *fun_die)
+{
+  Dwarf_Die result;
+  Dwarf_Attribute attr_mem;
+  Dwarf_Attribute *attr;
+  Dwarf_Addr addr;
+
+  if (dwarf_lowpc(fun_die, &addr) != 0)
+    return;
+  ElfSymbol *sym = this->getSymbolByAddr(addr);
+
+  if (!sym)
+    return;
+
+  if (dwarf_child (fun_die, &result) != 0)
+    return;
+
+  attr = dwarf_attr_integrate(fun_die, DW_AT_type, &attr_mem);
+
+  sym->ret_size = mips_arg_size(elf, fun_die, attr);
+
+  int n_args = 0;
+  do {
+      int arg_size;
+
+      switch (dwarf_tag (&result))
+      {
+      case DW_TAG_formal_parameter:
+        attr = dwarf_attr_integrate(&result, DW_AT_type, &attr_mem);
+        arg_size = mips_arg_size(elf, fun_die, attr);
+
+        if (arg_size != 1)
+          {
+            /* Better safe than sorry - skip this */
+            n_args = -1;
+            break;
+          }
+
+        n_args++;
+        break;
+      case DW_TAG_inlined_subroutine:
+        /* Recurse further down */
+        this->handleDwarfFunction(&result);
+        break;
+      default:
+        break;
+      }
+  } while(dwarf_siblingof(&result, &result) == 0);
+
+  sym->n_args = n_args;
+}
+
+
 CibylElf::CibylElf(const char *filename)
 {
   Elf_Scn *scn = NULL;
@@ -103,6 +166,7 @@ CibylElf::CibylElf(const char *filename)
   int fd;
 
   this->symtable = ght_create(1024);
+  this->symbols_by_addr = ght_create(1024);
   this->sections_by_name = ght_create(32);
   this->relocations_by_symbol = ght_create(512);
 
@@ -220,8 +284,44 @@ CibylElf::CibylElf(const char *filename)
     this->fixupSymbolSize(this->dataSymbols,
                           this->n_dataSymbols,
                           this->getSection(".data")->size);
-
   close(fd);
+
+
+  Dwarf_Off last_offset = 0;
+  Dwarf_Off offset = 0;
+  size_t hdr_size;
+  Dwarf *dbg;
+
+  /* Initialize libdwarf */
+  dbg = dwarf_begin_elf(this->elf, DWARF_C_READ, NULL);
+  if (!dbg)
+      panic("No DWARF info???");
+
+  while (dwarf_nextcu(dbg, offset, &offset, &hdr_size, 0, 0, 0) == 0) {
+      Dwarf_Die result, cu_die;
+
+      if (dwarf_offdie(dbg, last_offset + hdr_size, &cu_die) == NULL)
+        continue;
+      last_offset = offset;
+
+      if (dwarf_child (&cu_die, &result) != 0)
+        continue;
+
+      do {
+          switch (dwarf_tag(&result))
+          {
+          case DW_TAG_subprogram:
+          case DW_TAG_entry_point:
+          case DW_TAG_inlined_subroutine:
+            this->handleDwarfFunction(&result);
+            break;
+          default:
+            break;
+          }
+      } while(dwarf_siblingof(&result, &result) == 0);
+  }
+
+  dwarf_end(dbg);
 }
 
 void CibylElf::fixupSymbolSize(ElfSymbol **table, int n, uint32_t sectionEnd)
@@ -276,4 +376,11 @@ ElfReloc *CibylElf::getRelocationBySymbol(ElfSymbol *sym)
 {
   return (ElfReloc*)ght_get(this->relocations_by_symbol,
                             sizeof(ElfSymbol*), sym);
+}
+
+ElfSymbol *CibylElf::getSymbolByAddr(unsigned long addr)
+{
+  return (ElfSymbol *)ght_get(this->symbols_by_addr,
+      sizeof(uint32_t), (void*)&addr);
+
 }

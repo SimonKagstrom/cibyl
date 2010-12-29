@@ -103,13 +103,13 @@ void CallTableMethod::generateMethod(const char *name,
       emit->generic("      case 0x%x:  ", fn->getAddress());
       if (config->threadSafe)
         {
-          if (mt->clobbersReg( R_V0 ) && mt->clobbersReg( R_V1) )
+          if (mt->returnSize() == 2)
             emit->generic("ret = ");
-          else if (mt->clobbersReg( R_V0 ) || mt->clobbersReg( R_V1) ) /* Only one */
+          else if (mt->returnSize() == 1) /* Only one */
             emit->generic("ret = (int)");
           /* else nothing */
         }
-      else if (mt->clobbersReg( R_V0 ))
+      else if (mt->returnSize() == 1)
         emit->generic("ret = ");
       emit->generic("%s.%s(", cl->getName(), mt->getName());
 

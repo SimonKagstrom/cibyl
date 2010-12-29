@@ -44,6 +44,8 @@ def doTranslation(filename, syscallDirectories):
         conf = conf + "prune_call_table=1,"
     if config.doOptimizePruneStackStores:
         conf = conf + "optimize_prune_stack_stores=1,"
+    if config.doOptimizeFunctionArguments:
+        conf = conf + "optimize_function_return_arguments=1,"
     if config.threadSafe:
         conf = conf + "thread_safe=1,"
     if len(config.colocateFunctions) > 0:

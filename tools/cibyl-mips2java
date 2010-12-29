@@ -162,6 +162,9 @@ a function. The number of arguments passed to leaf functions can also
 be reduced. This reduces the size of the executable and can provide
 performance advantages for frequently called short functions""",
 		  dest="optimize_register_scheduling")
+parser.add_option("--optimize-function-arguments", action="store_true", default=False,
+				  help="""Lookup the number of arguments and return values from the DWARF information in the input program to determine register usage. Typically reduces the size by quite a bit, especially with small functions.""",
+		  dest="optimize_function_arguments")
 
 (options, args) = parser.parse_args()
 if len(args) != 1:
@@ -176,6 +179,7 @@ config.doOptimizeIndirectCalls = options.doOptimizeIndirectCalls
 config.doPeepholeOptimize = options.peepholeOptimize
 config.doRegisterValueTracking = options.registerValueTracking
 config.doOptimizePruneStackStores = options.doOptimizePruneStackStores
+config.doOptimizeFunctionArguments = options.optimize_function_arguments
 
 config.pruneUnusedFunctions = options.pruneUnusedFunctions
 config.threadSafe = options.threadSafe

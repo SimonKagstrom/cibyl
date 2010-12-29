@@ -16,6 +16,7 @@
 #include <stdlib.h>
 
 #include <libelf.h>
+#include <elfutils/libdw.h>
 #include <ght_hash_table.h>
 
 class CibylElf;
@@ -31,6 +32,10 @@ public:
     this->size = size;
     this->type = type;
     this->name = name;
+
+    /* Unknown */
+    this->ret_size = -1;
+    this->n_args = -1;
   }
 
   int index;
@@ -39,6 +44,9 @@ public:
   uint32_t size;
   int type;
   const char *name;
+
+  int ret_size;
+  int n_args;
 };
 
 
@@ -95,6 +103,8 @@ public:
 
   ElfSymbol **getFunctions();
 
+  ElfSymbol *getSymbolByAddr(unsigned long addr);
+
   int getNumberOfFunctions();
 
   ElfReloc **getRelocations();
@@ -125,6 +135,8 @@ private:
 
   void fixupSymbolSize(ElfSymbol **table, int n, uint32_t sectionEnd);
 
+  void handleDwarfFunction(Dwarf_Die *fun_die);
+
   static CibylElf *instance;
 
   Elf *elf; /* from libelf */
@@ -137,6 +149,7 @@ private:
   int n_functionSymbols;
   int n_dataSymbols;
   ght_hash_table_t *symtable;
+  ght_hash_table_t *symbols_by_addr;
 
   ght_hash_table_t *sections_by_name;
   ght_hash_table_t *relocations_by_symbol;

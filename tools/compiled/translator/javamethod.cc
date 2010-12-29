@@ -116,16 +116,16 @@ char *JavaMethod::getJavaMethodName()
 
   if ( config->threadSafe )
     {
-      if ( this->clobbersReg(R_V0) && this->clobbersReg(R_V1) )
+      if ( this->returnSize() == 2)
         this->javaName[o++] = 'J'; /* long */
-      else if ( this->clobbersReg(R_V0) || this->clobbersReg(R_V1) )
+      else if ( this->returnSize() == 1)
         this->javaName[o++] = 'I';
       else
         this->javaName[o++] = 'V';
     }
   else
     {
-      if ( this->clobbersReg(R_V0) )
+      if ( this->returnSize() >= 1)
         this->javaName[o++] = 'I';
       else
         this->javaName[o++] = 'V';
@@ -179,6 +179,14 @@ bool JavaMethod::pass1()
     this->setReturnSize(1);
   else if (this->clobbersReg(R_V1))
     emit->warning("Function clobbers V1 but not V0");
+
+  /* Update the size from the ELF, if it's known */
+  ElfSymbol *sym = elf->getSymbolByAddr(this->getAddress());
+  if (config->optimizeFunctionReturnArguments && sym)
+    {
+      if (sym->ret_size >= 0 && sym->ret_size <= 2)
+        this->setReturnSize(sym->ret_size);
+    }
 
   return out;
 }
@@ -443,7 +451,7 @@ bool JavaMethod::pass2()
 
   if (config->threadSafe)
     {
-      if (this->clobbersReg(R_V1) && this->clobbersReg(R_V0))
+      if (this->returnSize() == 2)
         {
           /* Return a 64-bit value */
           emit->bc_pushregister(R_V1);
@@ -455,12 +463,7 @@ bool JavaMethod::pass2()
           emit->bc_lor(); /* push (v1 << 32) | v0 */
           emit->bc_lreturn();
         }
-      else if (this->clobbersReg(R_V1)) /* Only v1 */
-        {
-          emit->bc_pushregister(R_V1);
-          emit->bc_ireturn();
-        }
-      else if (this->clobbersReg(R_V0)) /* Only v0 */
+      else if (this->returnSize() == 1) /* Only v0 */
         {
           emit->bc_pushregister(R_V0);
           emit->bc_ireturn();
@@ -471,13 +474,13 @@ bool JavaMethod::pass2()
   else
     {
       /* Not thread safe */
-      if (this->clobbersReg(R_V1))
+      if (this->returnSize() == 2)
         {
           emit->bc_pushregister(R_V1);
           emit->bc_putstatic("%sCRunTime/saved_v1 I",
               controller->getJasminPackagePath());
         }
-      if (this->clobbersReg(R_V0))
+      if (this->returnSize() >= 1)
         {
           emit->bc_pushregister(R_V0);
           emit->bc_ireturn();
@@ -517,7 +520,7 @@ MIPS_register_t JavaMethod::getNextRegisterToPass(void *_it)
 
 int JavaMethod::returnSize()
 {
-  panic_if(this->m_returnSize < 0,
+  panic_if(this->m_returnSize < 0 || this->m_returnSize > 2,
       "returnSize accessed too soon for %s %d\n",
       this->getJavaMethodName(), this->m_returnSize);
   return this->m_returnSize;
