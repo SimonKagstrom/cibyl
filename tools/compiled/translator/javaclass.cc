@@ -187,7 +187,6 @@ bool CallTableClass::pass1()
 bool CallTableClass::pass2()
 {
   bool out = true;
-  int i;
 
   if (controller->getPackageName() != NULL)
     emit->generic("package %s;\n", controller->getPackageName());
