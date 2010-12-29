@@ -245,6 +245,7 @@ if options.optimize_all:
 	config.doPeepholeOptimize = True
 	config.doRegisterValueTracking = True
 	config.doOptimizePruneStackStores = True
+	config.doOptimizeFunctionArguments = True
 
 if config.memoryDebug:
 	instruction.setupMemoryDebug()
