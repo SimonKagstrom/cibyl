@@ -109,7 +109,7 @@ void CallTableMethod::generateMethod(const char *name,
             emit->generic("ret = (int)");
           /* else nothing */
         }
-      else if (mt->returnSize() == 1)
+      else if (mt->returnSize() >= 1)
         emit->generic("ret = ");
       emit->generic("%s.%s(", cl->getName(), mt->getName());
 
