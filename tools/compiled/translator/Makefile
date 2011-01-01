@@ -31,9 +31,12 @@ DEPS_c=$(patsubst %.c,deps/%.d,$(SRCS_C))
 
 #GCOV=-fprofile-arcs -ftest-coverage
 
-all: $(DEPS) xcibyl-translator
+all: create-dirs $(DEPS) xcibyl-translator
 
 -include $(DEPS) $(DEPS_C)
+
+create-dirs:
+	@mkdir -p deps objs
 
 clean:
 	rm -rf objs/* deps/* *.gcda *.gcno *~ xcibyl-translator xcibyl-translator-gcov lib/libghthash-0.6.2 lib/.libghthash
