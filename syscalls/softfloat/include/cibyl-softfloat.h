@@ -47,6 +47,8 @@ int __fixdfsi_helper(void* address); /* Not generated */
 int __floatsisf_helper(int i); /* Not generated */
 int __cmpsf2_helper(int _a, int _b); /* Not generated */
 
+float __floatunsisf_helper(unsigned int i); /* Not generated */
+double __floatunsidf_helper(unsigned int i); /* Not generated */
 void __floatsidf_helper(void* address, int i); /* Not generated */
 int __cmpdf2_helper(void* address_a, void* address_b); /* Not generated */
 

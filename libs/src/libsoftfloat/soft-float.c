@@ -154,6 +154,23 @@ unsigned long __fixunsdfdi (double A)
   return (unsigned long)__fixunsdfsi(A);
 }
 
+float __floatunsisf(unsigned int i)
+{
+  float_union_t res;
+
+  res.i = __floatunsisf_helper(i);
+
+  return res.f;
+}
+
+double __floatunsidf (unsigned int i)
+{
+	double_union_t res;
+
+	res.i = __floatunsidf_helper(i);
+
+	return res.f;
+}
 
 float __floatsisf(int i)
 {
