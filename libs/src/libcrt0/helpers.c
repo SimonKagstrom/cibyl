@@ -84,9 +84,7 @@ void NOPH_panic(const char *fmt, ...)
   vsnprintf(buf, sizeof(buf), fmt, ap);
   va_end(ap);
 
-  fprintf(stderr, "PANIC: ");
-  fprintf(stderr, buf);
-  fprintf(stderr, "\n");
+  fprintf(stderr, "PANIC: %s\n", buf);
   NOPH_throw(NOPH_Exception_new());
   exit(1);
 }
@@ -106,9 +104,7 @@ void NOPH_panic_if(int cond, const char *fmt, ...)
   vsnprintf(buf, sizeof(buf), fmt, ap);
   va_end(ap);
 
-  fprintf(stderr, "PANIC: ");
-  fprintf(stderr, buf);
-  fprintf(stderr, "\n");
+  fprintf(stderr, "PANIC: %s\n", buf);
   NOPH_throw(NOPH_Exception_new());
   exit(1);
 }
