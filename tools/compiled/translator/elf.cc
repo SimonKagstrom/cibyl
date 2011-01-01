@@ -132,6 +132,10 @@ void CibylElf::handleDwarfFunction(Dwarf_Die *fun_die)
 
       switch (dwarf_tag (&result))
       {
+      case DW_TAG_unspecified_parameters:
+    	  /* varargs etc */
+          n_args = -1;
+    	  goto out;
       case DW_TAG_formal_parameter:
         attr = dwarf_attr_integrate(&result, DW_AT_type, &attr_mem);
         arg_size = mips_arg_size(elf, fun_die, attr);
@@ -140,7 +144,7 @@ void CibylElf::handleDwarfFunction(Dwarf_Die *fun_die)
           {
             /* Better safe than sorry - skip this */
             n_args = -1;
-            break;
+            goto out;
           }
 
         n_args++;
@@ -154,6 +158,7 @@ void CibylElf::handleDwarfFunction(Dwarf_Die *fun_die)
       }
   } while(dwarf_siblingof(&result, &result) == 0);
 
+out:
   sym->n_args = n_args;
 }
 
