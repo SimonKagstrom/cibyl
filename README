@@ -2,7 +2,11 @@ Cibyl is an environment to compile and run programs written in C,
 Objective-C, C++ and possibly Fortran on J2ME phones. It is documented
 on the project page at
 
-http://cibyl.googlecode.com
+  http://cibyl.org
+
+and the source code can be found on github:
+
+  http://github.com/SimonKagstrom/cibyl
 
 Prerequisites
 -------------
@@ -10,7 +14,7 @@ You need the following to use Cibyl:
 
 - Python (2.3, 2.4 tested)
 - The Jasmin assembler (http://jasmin.sourceforge.net)
-- A GCC MIPS cross-compiler, >= 3.3 (e.g., ELDK: http://spel.bth.se/index.php/Install_the_ELDK_MIPS_tools)
+- A GCC MIPS cross-compiler, >= 3.3 (e.g., ELDK)
 - A Java compiler / runtime environment
 - The jasmin java assembler (http://jasmin.sourceforge.net)
 - For J2ME support, MIDPath (http://midpath.thenesis.org) or the Sun
