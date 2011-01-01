@@ -175,7 +175,7 @@ bool JavaMethod::pass1()
 
   ElfSymbol *sym = elf->getSymbolByAddr(this->getAddress());
   /* First see which arguments need to be passed */
-  if (config->optimizeFunctionReturnArguments && sym)
+  if (config->optimizeFunctionReturnArguments && sym && sym->n_args >= 0)
     {
       /* Zero-terminate at the last needed reg */
       if (sym->n_args <= 3)
