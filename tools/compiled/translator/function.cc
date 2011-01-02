@@ -33,7 +33,20 @@ Function::Function(const char *name, Instruction **insns,
 
   this->realName = xstrdup(name);
   this->name = (char*)xcalloc(strlen(name) + 16, 1);
-  xsnprintf(this->name, strlen(name) + 16, "%s_%x", name, this->getAddress());
+
+  char *cpy = xstrdup(name);
+
+  /* Fixup GCC temporary function names, e.g., T.35 etc */
+  int o = 0;
+  for (; cpy[o]; o++)
+    {
+      char c = cpy[o];
+
+      if (c == '.')
+        c = '_';
+      cpy[o] = c;
+    }
+  xsnprintf(this->name, strlen(cpy) + 16, "%s_%x", cpy, this->getAddress());
 
   /* Create basic blocks */
   for (int i = first_insn; i < last_insn; i++)
