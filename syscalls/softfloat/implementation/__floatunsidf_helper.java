@@ -1,6 +1,6 @@
-public static long __floatsidf_helper(int i)
+public static long __floatunsidf_helper(int i)
 {
 	long v = (long)i;
 
-	return Double.floatToLongBits(v);
+	return Double.doubleToLongBits(v);
 }
