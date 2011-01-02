@@ -33,7 +33,8 @@ Syscall::Syscall(const char *name, int nrArguments, char returnValue)
 class SyscallInsn : public Instruction
 {
 public:
-  SyscallInsn(uint32_t address, int32_t extra) : Instruction(address, 0, R_ZERO, R_ZERO, R_ZERO, extra)
+  SyscallInsn(uint32_t address, int32_t extra) : Instruction(address,
+		  CIBYL_SYSCALL, R_ZERO, R_ZERO, R_ZERO, extra)
   {
     this->sysc = NULL;
   }
@@ -75,7 +76,8 @@ protected:
 class SyscallRegisterArgument : public Instruction
 {
 public:
-  SyscallRegisterArgument(uint32_t address, int32_t extra) : Instruction(address, 0, R_ZERO, R_ZERO, R_ZERO, extra)
+  SyscallRegisterArgument(uint32_t address, int32_t extra) : Instruction(address,
+		  CIBYL_REGISTER_ARGUMENT, R_ZERO, R_ZERO, R_ZERO, extra)
   {
   }
 

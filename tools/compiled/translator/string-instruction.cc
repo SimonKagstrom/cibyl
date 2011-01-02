@@ -14,10 +14,13 @@
 
 int instruction_to_string(Instruction *insn, char *buf, int buf_len)
 {
-  const char *insn_name = mips_op_strings[insn->getOpcode()];
+  const char *insn_name = "unknown";
   uint32_t rs, rt, rd;
   uint32_t extra;
   int out = 0;
+
+  if (insn->getOpcode() < SPECIAL)
+	  insn_name = mips_op_strings[insn->getOpcode()];
 
   rs = insn->getRs();
   rt = insn->getRt();
@@ -124,6 +127,12 @@ int instruction_to_string(Instruction *insn, char *buf, int buf_len)
       out = snprintf(buf, buf_len, "%s %s, 0x%x", insn_name, mips_reg_strings[rs],
                (insn->getAddress() + 4) + (extra << 2));
       break;
+    case CIBYL_SYSCALL:
+        out = snprintf(buf, buf_len, "cibyl_sysc 0x%x", extra);
+        break;
+    case CIBYL_REGISTER_ARGUMENT:
+        out = snprintf(buf, buf_len, "cibyl_sysc_arg 0x%x", extra);
+        break;
     default:
       out = snprintf(buf, buf_len, "Unknown instruction 0x%x", insn->getOpcode());
     }
