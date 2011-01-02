@@ -95,9 +95,9 @@ Instruction *InstructionFactory::create(uint32_t address, uint32_t word)
   if ( (word >> 24) == 0xff )
     return new SyscallInsn(address, word & 0x00ffffff);
 
-  /* Syscall argument */
+  /* Syscall argument - always registers */
   if ( (word >> 16) == 0xfefe )
-    return new SyscallRegisterArgument(address, word & 0x0000ffff);
+    return new SyscallRegisterArgument(address, word & 0x0000001f);
 
   /* Catch statements */
   if ( (word >> 24) == 0xfd )
