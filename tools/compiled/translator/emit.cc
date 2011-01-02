@@ -143,6 +143,8 @@ void Emit::bc_ret(MIPS_register_t reg)
 
 void Emit::bc_pushregister(MIPS_register_t reg)
 {
+  panic_if(reg > N_REGS,
+      "bc_pushregister called with out-of-bounds register 0x%x\n", reg);
   if (regalloc->regIsStatic(reg))
     this->bc_getstatic( "%s I", regalloc->regToStatic(reg) );
   else if (reg == R_ZERO || !regalloc->regIsAllocated(reg))
