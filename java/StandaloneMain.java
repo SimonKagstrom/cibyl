@@ -35,15 +35,11 @@ public class StandaloneMain
 
     try {
         int start = CibylCallTable.getAddressByName("__start");
-        int main = CibylCallTable.getAddressByName("main");
-        int destructors = CibylCallTable.getAddressByName("crt0_run_global_destructors");
 
         CRunTime.init(is);
         int sp = (CRunTime.memory.length * 4) - 8;
         CRunTime.publishCallback("Cibyl.atexit"); /* Never used! */
         CibylCallTable.call(start, sp, 0, 0, 0, 0);
-        CibylCallTable.call(main, sp, 0, 0, 0, 0);
-        CibylCallTable.call(destructors, sp, 0, 0, 0, 0);
     } catch(Exception e)
     {
     	System.out.println(e.getMessage());

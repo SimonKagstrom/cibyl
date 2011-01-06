@@ -134,8 +134,6 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
   {
     try {
       int start = CibylCallTable.getAddressByName("__start");
-      int main = CibylCallTable.getAddressByName("main");
-      int destructors = CibylCallTable.getAddressByName("crt0_run_global_destructors");
 
       /* Register some objects */
       Syscalls.canvasHandle = CRunTime.registerObject( this );
@@ -145,8 +143,6 @@ public class GameScreenCanvas extends GameCanvas implements Runnable
       /* Start the virtual machine */
       int sp = (CRunTime.memory.length * 4) - 8;
       CibylCallTable.call(start, sp, 0, 0, 0, 0);
-      CibylCallTable.call(main, sp, 0, 0, 0, 0);
-      CibylCallTable.call(destructors, sp, 0, 0, 0, 0);
 
     } catch (OutOfMemoryError e) {
       this.showError(e, "Out of memory");

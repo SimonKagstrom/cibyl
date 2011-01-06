@@ -37,17 +37,18 @@ static void run_list(unsigned long *start, unsigned long *end)
 }
 
 
-void crt0_run_global_constructors(void)
+void __do_global_ctors_aux(void)
 {
   run_list(&__ctors_begin, &__ctors_end);
   NOPH_registerCallback("Cibyl.atexit", (int)atexit_run);
 }
+CIBYL_EXPORT_SYMBOL(__do_global_ctors_aux);
 
-void crt0_run_global_destructors(void)
+void __do_global_dtors_aux(void)
 {
   run_list(&__dtors_begin, &__dtors_end);
 }
-CIBYL_EXPORT_SYMBOL(crt0_run_global_destructors);
+CIBYL_EXPORT_SYMBOL(__do_global_dtors_aux);
 
 /* This is a quite common case for an exception handler */
 void NOPH_setter_exception_handler(NOPH_Exception_t ex, void *arg)
@@ -153,6 +154,5 @@ static void atexit_run(void)
   unsigned long *end = start + atexit_n;
 
   run_list(start, end);
-
-  crt0_run_global_destructors();
+  __do_global_dtors_aux();
 }

@@ -20,8 +20,13 @@ __start:
 	jal	smalloc_set_memory_pool	# init malloc
 
 	## Run global constructors
-	jal	crt0_run_global_constructors
+	jal	__do_global_ctors_aux
 	nop
+
+	jal	main
+	nop
+
+	# Dtors are handled in helpers.c::atexit_run()
 
 	jr	$31
 	nop
