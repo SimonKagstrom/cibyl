@@ -9,3 +9,6 @@ tmpclasses
 classes/
 .dirs
 res/
+*.jar
+*.jad
+.jar_built
