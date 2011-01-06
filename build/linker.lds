@@ -1,4 +1,6 @@
 OUTPUT_ARCH(mips)
+STARTUP(crt0.o)
+GROUP(-lcrt0 -lc -ljava)
 ENTRY(__start)
 
 SECTIONS
