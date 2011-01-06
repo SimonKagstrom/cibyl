@@ -11,12 +11,12 @@
 ######################################################################
 EXTRA_CLEAN += $(OBJS) $(TARGET).data.bin $(TARGET).debug CompiledProgram.class CompiledProgram.j
 
-as       ?= mips-linux-gcc
-cc       ?= mips-linux-gcc
-cxx      ?= mips-linux-g++
-cpp      ?= mips-linux-cpp
-ld       ?= mips-linux-ld
-ar       ?= mips-linux-ar
+as       ?= mips-cibyl-elf-gcc
+cc       ?= mips-cibyl-elf-gcc
+cxx      ?= mips-cibyl-elf-g++
+cpp      ?= mips-cibyl-elf-cpp
+ld       ?= mips-cibyl-elf-ld
+ar       ?= mips-cibyl-elf-ar
 
 # -Wa,--no-warn inhibits the "Warning: register value used as expression"
 # from the assembler on syscall arguments. It is not a valid warning for
