@@ -8,14 +8,21 @@ SECTIONS
        	. = 0x0;
        	.data : ALIGN(16) { *(.data0) *(.data) *(.rodata.str1.4)  *(.rodata.cst4) *(.rodata.cst8) *(.reginfo) }
        	.rodata : ALIGN(16) { *(.rodata) *(.rodata.*) *(.gnu.linkonce.r.*) *(.cibylsetjmp) }
-	PROVIDE(__ctors_begin = .);
-	.ctors : ALIGN(4) { *(.ctors) }
-	PROVIDE(__ctors_end = .);
-	PROVIDE(__dtors_begin = .);
-	.dtors : ALIGN(4) { *(.dtors) }
-	PROVIDE(__dtors_end = .);
-       	.bss : ALIGN(16) { *(.bss) *(.scommon) *(.sbss) }
-       	PROVIDE(__edata = .);
+
+	.ctors : ALIGN(4) {
+	       PROVIDE(__ctors_begin = .);
+	       *(.ctors)
+	       PROVIDE(__ctors_end = .);
+	}
+	.dtors : ALIGN(4) {
+	       PROVIDE(__dtors_begin = .);
+	       *(.dtors)
+	       PROVIDE(__dtors_end = .);
+	}
+       	.bss : ALIGN(16) {
+	     *(.bss) *(.scommon) *(.sbss)
+	     PROVIDE(__edata = .);
+	}
 
         /* Exported symbols (to Java) */
        	.cibylexpsyms : { *(.cibylexpsyms) }
