@@ -130,22 +130,6 @@ int __NOPH_setjmp(void)
   return 0;
 }
 
-void __divdi3(int64_t a, int64_t b)
-{
-}
-
-void __moddi3(int64_t a, int64_t b)
-{
-}
-
-void __ashrdi3(int64_t a, unsigned int b)
-{
-}
-
-void __ashldi3(int64_t a, unsigned int b)
-{
-}
-
 /* --- atexit(3) handling */
 static void (**atexit_list)(void);
 static int atexit_n = 0;
@@ -171,10 +155,4 @@ static void atexit_run(void)
   run_list(start, end);
 
   crt0_run_global_destructors();
-}
-
-void _flush_cache(void)
-{
-  /* Empty implementation of _flush_cache. This is called on for
-   * example some private functions */
 }

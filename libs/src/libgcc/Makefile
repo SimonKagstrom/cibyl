@@ -12,18 +12,11 @@
 SUBDIRS =
 OBJS    = soft-float.o
 ALL_TARGETS=install
-EXTRA_CLEAN=libsoftfloat.a
+EXTRA_CLEAN=libgcc.a
 
 include $(CIBYL_BASE)/build/Rules.mk
 
-# libsoftfloat.a is actually not an ar archive. We do this because we
-# want to override the (weak) vsnprintf in vsnprintf.c with a version
-# in soft-float.c which has support for the %f format.
-#
-# See the thread  http://sourceware.org/ml/binutils/2003-10/msg00377.html
-# for why we cannot use an ar archive
-libsoftfloat.a: soft-float.o
-	cp $< $@
+libgcc.a: soft-float.o 64-bit-ops.o cache.o
 
-install: libsoftfloat.a
+install: libgcc.a
 	cp $< $(CIBYL_BASE)/libs/lib

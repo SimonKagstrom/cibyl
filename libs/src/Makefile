@@ -9,7 +9,7 @@
 ## $Id: Makefile 15373 2007-05-13 07:55:04Z ska $
 ##
 ######################################################################
-SUBDIRS = libcrt0 libc libdebug libsoftfloat libm libcibar libs9 libjava \
+SUBDIRS = libcrt0 libc libdebug libgcc libm libcibar libs9 libjava \
           libmidp libjsr075 libstdc++ libj2se
 
 include $(CIBYL_BASE)/build/Rules-common.mk
