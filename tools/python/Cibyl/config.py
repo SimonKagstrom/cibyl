@@ -56,7 +56,9 @@ profileFile = None
 packageName = ""
 
 def getBasePath():
-    base = os.getenv("CIBYL_BASE")
+    dn = os.path.dirname(sys.argv[0])
+    base = os.path.dirname(os.path.realpath(dn))
+
     if base == None:
 	base = "/usr/local/share/cibyl"
     return base
@@ -67,6 +69,8 @@ jasminCommandLine="jasmin"
 javacCommandLine="javac -source 1.4 -bootclasspath " + wtk + "/lib/cldcapi11.jar:" + wtk + "/lib/midpapi20.jar"
 
 # setup some of the environment
+base_path = getBasePath()
+sysroot = base_path + "/mips-cibyl-elf/sys-root/"
 jasmin = os.getenv("CIBYL_JASMIN", jasminCommandLine)
 javac = os.getenv("CIBYL_JAVAC", javacCommandLine)
 readelf = os.getenv("CIBYL_READELF", "readelf")
@@ -75,7 +79,7 @@ objcopy = os.getenv("CIBYL_OBJCOPY", "objcopy")
 cpp = os.getenv("CIBYL_CPP", "cpp")
 
 xcibyl_translator = os.getenv("CIBYL_XCIBYL_TRANSLATOR",
-                              getBasePath() + "/tools/compiled/translator/xcibyl-translator")
+                              base_path + "/bin/xcibyl-translator")
 
 def packageNameJavaPath():
     return "/" + packageName.replace(".", "/")
