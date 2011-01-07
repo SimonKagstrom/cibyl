@@ -29,7 +29,6 @@ Controller::Controller(const char **defines,
 
   this->package_name = NULL;
   memset(this->jasmin_package_path, 0, sizeof(this->jasmin_package_path));
-  this->syscall_db_table = ght_create(1024);
   this->syscall_used_table = ght_create(1024);
 
   this->dstdir = dstdir;
@@ -138,8 +137,7 @@ void Controller::readSyscallDatabase(const char *filename)
         }
 
       /* Add to the hash table */
-      ght_insert(this->syscall_db_table, (void*)cur,
-                 strlen(cur->name), (void*)cur->name);
+      this->m_syscall_db_table[cur->name] = cur;
     }
 }
 
@@ -346,8 +344,8 @@ Syscall *Controller::getSyscall(uint32_t value)
   if (!this->syscalls[value])
     {
       const char *name = elf->getCibylStrtabString(value);
-      cibyl_db_entry_t *p = (cibyl_db_entry_t*)ght_get(this->syscall_db_table,
-                                                       strlen(name), name);
+      cibyl_db_entry_t *p = this->m_syscall_db_table[name];
+
       panic_if(!p, "No syscall %s:\n"
                "  Are all syscall databases added on the command line (cibyl-syscalls.db)?\n",
                name);

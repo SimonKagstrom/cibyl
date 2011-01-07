@@ -99,6 +99,7 @@ public:
   void setPackageName(const char *name);
 
   typedef map<const char *, JavaClass *, cmp_str> JavaClassTable_t;
+  typedef map<const char *, cibyl_db_entry_t *, cmp_str> CibylDbTable_t;
 
 private:
 
@@ -139,7 +140,8 @@ private:
 
   Syscall **syscalls; /* Sparse table of syscalls */
 
-  ght_hash_table_t *syscall_db_table;
+  CibylDbTable_t m_syscall_db_table;
+
   ght_hash_table_t *syscall_used_table;
   char **syscall_dirs;
   char **syscall_sets;
