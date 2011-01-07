@@ -39,31 +39,22 @@ create-dirs:
 	@mkdir -p deps objs
 
 clean:
-	rm -rf objs/* deps/* *.gcda *.gcno *~ xcibyl-translator xcibyl-translator-gcov lib/libghthash-0.6.2 lib/.libghthash
+	rm -rf objs/* deps/* *.gcda *.gcno *~ xcibyl-translator xcibyl-translator-gcov
 
 objs/%.oo: %.cc
 	@echo CXX $(notdir $<)
-	@$(HOST_CXX) $(GCOV) -Ilib/libghthash-0.6.2/src/ $(HOST_CFLAGS) -c -o $@ $< $(ERROR_FILTER)
+	@$(HOST_CXX) $(GCOV) $(HOST_CFLAGS) -c -o $@ $< $(ERROR_FILTER)
 
 objs/%.o: %.c
 	@echo CXX $(notdir $<)
-	@$(HOST_CC) $(GCOV) -Ilib/libghthash-0.6.2/src/ $(HOST_CFLAGS) -c -o $@ $< $(ERROR_FILTER)
+	@$(HOST_CC) $(GCOV) $(HOST_CFLAGS) -c -o $@ $< $(ERROR_FILTER)
 
 
 deps/%.d: %.cc
-	@$(HOST_CXX) -MM -MT '$(patsubst %.cc,objs/%.oo,$<)' $(GCOV) -Ilib/libghthash-0.6.2/src/ $(HOST_CFLAGS) -o $@ $<
+	@$(HOST_CXX) -MM -MT '$(patsubst %.cc,objs/%.oo,$<)' $(GCOV) $(HOST_CFLAGS) -o $@ $<
 
 deps/%.d: %.c
-	@$(HOST_CC) -MM -MT '$(patsubst %.cc,objs/%.oo,$<)' $(GCOV) -Ilib/libghthash-0.6.2/src/ $(HOST_CFLAGS) -o $@ $<
+	@$(HOST_CC) -MM -MT '$(patsubst %.cc,objs/%.oo,$<)' $(GCOV) $(HOST_CFLAGS) -o $@ $<
 
-lib/.libghthash:
-	cd lib && tar -xzf libghthash-0.6.2.tar.gz
-	cd lib/libghthash-0.6.2/ && ./configure && make
-	touch $@
-
-lib/.dwarves:
-	cd lib/dwarves/ && make
-	touch $@
-
-xcibyl-translator: lib/.libghthash $(OBJS) $(OBJS_C)
-	$(HOST_LD) $(GCOV) -Llib/libghthash-0.6.2/src/.libs/ -o $@ $(OBJS) $(OBJS_C) -lghthash -ldw -lelf -static
+xcibyl-translator: $(OBJS) $(OBJS_C)
+	$(HOST_LD) $(GCOV) -o $@ $(OBJS) $(OBJS_C) -ldw -lelf -static
