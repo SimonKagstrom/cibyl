@@ -167,7 +167,6 @@ CibylElf::CibylElf(const char *filename)
   size_t shstrndx;
   int fd;
 
-  this->sections_by_name = ght_create(32);
   this->relocations_by_symbol = ght_create(512);
 
   panic_if(elf_version(EV_CURRENT) == EV_NONE,
@@ -352,8 +351,7 @@ ElfSymbol **CibylElf::getFunctions()
 
 void CibylElf::addSection(ElfSection *section)
 {
-  ght_insert(this->sections_by_name, (void*)section,
-             strlen(section->name), (void*)section->name);
+  this->m_sectionsByName[section->name] = section;
 }
 
 int CibylElf::getNumberOfFunctions()

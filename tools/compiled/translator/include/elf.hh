@@ -21,6 +21,8 @@
 #include <elfutils/libdw.h>
 #include <ght_hash_table.h>
 
+#include <cpp-utils.hh>
+
 using namespace std;
 
 class CibylElf;
@@ -126,13 +128,13 @@ public:
 
   ElfSection *getSection(const char *name)
   {
-    return (ElfSection*)ght_get(this->sections_by_name,
-                                strlen(name), name);
+    return this->m_sectionsByName[name];
   }
 
   ElfReloc *getRelocationBySymbol(ElfSymbol *sym);
 
   typedef map<uint32_t, ElfSymbol*> ElfSymbolTable_t;
+  typedef map<const char *, ElfSection*, cmp_str> ElfSectionTable_t;
 
 private:
   void addSection(ElfSection *section);
@@ -156,8 +158,8 @@ private:
   int n_dataSymbols;
   ElfSymbolTable_t m_symbolTable;
   ElfSymbolTable_t m_symbolsByAddr;
+  ElfSectionTable_t m_sectionsByName;
 
-  ght_hash_table_t *sections_by_name;
   ght_hash_table_t *relocations_by_symbol;
 
   ElfReloc **relocs;
