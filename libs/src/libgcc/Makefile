@@ -16,7 +16,7 @@ EXTRA_CLEAN=libgcc.a
 
 include $(CIBYL_BASE)/build/Rules.mk
 
-libgcc.a: soft-float.o 64-bit-ops.o cache.o weak-main.o
+libgcc.a: soft-float.o 64-bit-ops.o cache.o
 
 install: libgcc.a
 	cp $< $(CIBYL_BASE)/libs/lib
