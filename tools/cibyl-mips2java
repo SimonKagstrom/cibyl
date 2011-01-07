@@ -22,9 +22,6 @@ except:
 
 sys.path.append('%s/python/' % sys.path[0])
 
-from Cibyl.BinaryTranslation.translator import Controller
-from Cibyl.BinaryTranslation.Mips import instruction
-from Cibyl.BinaryTranslation.translator import config
 from Cibyl.CompiledHelpers.helpers import *
 
 # Handling of the -I option is done through this callback
@@ -76,12 +73,6 @@ parser.add_option("--trace-range", dest="traceRange", default=None,
 parser.add_option("--memory-debug", action="store_true", default=False,
 				  help="Enable memory debugging (setup in CRunTime.java)",
 		  dest="memoryDebug")
-parser.add_option("--force-python-translator", action="store_true", default=False,
-				  help="Force usage of the Python translator",
-		  dest="usePythonTranslator")
-parser.add_option("--force-cpp-translator", action="store_true", default=False,
-				  help="Force usage of the new C++ translator (the C++ translator is used by default)",
-		  dest="useCppTranslator")
 parser.add_option("--save-temps", action="store_true", default=False,
 				  help="Do not remove temporary files",
 		  dest="saveTemps")
@@ -250,15 +241,6 @@ if options.optimize_all:
 if config.memoryDebug:
 	instruction.setupMemoryDebug()
 
-usePythonCompiler = False
-
-# The C++ compiler cannot be used with some options
-if options.usePythonTranslator:
-        usePythonCompiler = True
-
-if options.useCppTranslator:
-        usePythonCompiler = False
-
 def doCompile():
 	global controller
 	config.checkEnvironment()
@@ -283,7 +265,4 @@ def doCppCompile():
     if not config.onlyTranslate:
             doJavac(config.outDirectory + config.packageNameJavaPath() + "/CibylCallTable.java")
 
-if usePythonCompiler:
-    doCompile()
-else:
-    doCppCompile()
+doCppCompile()

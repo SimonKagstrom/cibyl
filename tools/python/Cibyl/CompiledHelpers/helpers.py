@@ -12,7 +12,7 @@
 import os, sys
 import Cibyl.PeepholeOptimizer.parse
 
-from Cibyl.BinaryTranslation.translator import config
+from Cibyl import config
 
 def doJasmin(filename):
     f = filename
