@@ -155,7 +155,7 @@ private:
   int n_functionSymbols;
   int n_dataSymbols;
   ElfSymbolTable_t m_symbolTable;
-  ght_hash_table_t *symbols_by_addr;
+  ElfSymbolTable_t m_symbolsByAddr;
 
   ght_hash_table_t *sections_by_name;
   ght_hash_table_t *relocations_by_symbol;

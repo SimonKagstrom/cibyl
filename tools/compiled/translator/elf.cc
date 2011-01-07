@@ -64,8 +64,7 @@ void CibylElf::handleSymtab(Elf_Scn *scn)
               s->st_size, type, sym_name);
 
           this->symbols[n_syms++] = this->functionSymbols[n_fns++] = sym;
-          ght_insert(this->symbols_by_addr, (void*)sym,
-              sizeof(sym->addr), (void*)&sym->addr);
+          this->m_symbolsByAddr[sym->addr] = sym;
       }
       else if (type == STT_OBJECT || type == STT_COMMON || type == STT_TLS)
         this->symbols[n_syms++] = this->dataSymbols[n_datas++] = new ElfSymbol(i, binding, (uint32_t)s->st_value,
@@ -168,7 +167,6 @@ CibylElf::CibylElf(const char *filename)
   size_t shstrndx;
   int fd;
 
-  this->symbols_by_addr = ght_create(1024);
   this->sections_by_name = ght_create(32);
   this->relocations_by_symbol = ght_create(512);
 
@@ -381,7 +379,5 @@ ElfReloc *CibylElf::getRelocationBySymbol(ElfSymbol *sym)
 
 ElfSymbol *CibylElf::getSymbolByAddr(unsigned long addr)
 {
-  return (ElfSymbol *)ght_get(this->symbols_by_addr,
-      sizeof(uint32_t), (void*)&addr);
-
+  return this->m_symbolsByAddr[addr];
 }
