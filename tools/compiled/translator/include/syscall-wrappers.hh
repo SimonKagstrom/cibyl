@@ -13,7 +13,7 @@
 #define __SYSCALL_WRAPPERS_HH__
 
 #include <syscall.hh>
-#include <ght_hash_table.h>
+#include <controller.hh>
 
 class SyscallWrapperGenerator
 {
@@ -33,7 +33,7 @@ public:
   SyscallWrapperGenerator(const char **defines, const char *dstdir,
                           int n_syscall_dirs, char **syscall_dirs,
                           int n_syscall_sets, char **syscall_sets,
-                          ght_hash_table_t *used_syscalls);
+                          Controller::CibylDbTable_t &used_syscalls);
 
   /* No pass1 - this will not be created until after pass1 */
   bool pass2();
@@ -60,7 +60,7 @@ private:
   int n_syscall_sets;
   char **syscall_sets;
   int *set_usage;
-  ght_hash_table_t *used_syscalls;
+  Controller::CibylDbTable_t &m_used_syscalls;
 };
 
 #endif /* !__SYSCALL_WRAPPERS_HH__ */

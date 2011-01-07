@@ -29,7 +29,6 @@ Controller::Controller(const char **defines,
 
   this->package_name = NULL;
   memset(this->jasmin_package_path, 0, sizeof(this->jasmin_package_path));
-  this->syscall_used_table = ght_create(1024);
 
   this->dstdir = dstdir;
   this->instructions = NULL;
@@ -353,8 +352,7 @@ Syscall *Controller::getSyscall(uint32_t value)
       this->syscalls[value] = new Syscall(p->name, p->nrArgs,
                                           p->returns ? 'I' : 'V' );
       /* Insert into the table for the syscall wrappers */
-      ght_insert(this->syscall_used_table, p,
-                 strlen(p->name), (void*)p->name);
+      this->m_syscall_used_table[p->name] = p;
     }
   return this->syscalls[value];
 }
@@ -750,7 +748,7 @@ bool Controller::pass2()
   syscallWrappers = new SyscallWrapperGenerator(this->defines, strdup(path),
                                                 this->n_syscall_dirs, this->syscall_dirs,
                                                 this->n_syscall_sets, this->syscall_sets,
-                                                this->syscall_used_table);
+                                                this->m_syscall_used_table);
   syscallWrappers->pass2();
 
   return out;

@@ -19,27 +19,24 @@
 SyscallWrapperGenerator::SyscallWrapperGenerator(const char **defines, const char *dstdir,
                                                  int n_syscall_dirs, char **syscall_dirs,
                                                  int n_syscall_sets, char **syscall_sets,
-                                                 ght_hash_table_t *used_syscalls)
+                                                 Controller::CibylDbTable_t &used_syscalls) : m_used_syscalls(used_syscalls)
 {
-  cibyl_db_entry_t *p;
-  ght_iterator_t it;
-  const void *key;
-
   this->dstdir = dstdir;
   this->n_syscall_dirs = n_syscall_dirs;
   this->syscall_dirs = syscall_dirs;
   this->n_syscall_sets = n_syscall_sets;
   this->syscall_sets = syscall_sets;
-  this->used_syscalls = used_syscalls;
   this->defines = defines;
 
   this->set_usage = (int*)xcalloc( n_syscall_sets, sizeof(int) );
 
   /* Fixup set usage */
-  for (p = (cibyl_db_entry_t *)ght_first(this->used_syscalls, &it, &key);
-       p;
-       p = (cibyl_db_entry_t *)ght_next(this->used_syscalls, &it, &key))
+  for (Controller::CibylDbTable_t::iterator it = this->m_used_syscalls.begin();
+       it != this->m_used_syscalls.end();
+       ++it)
     {
+      cibyl_db_entry_t *p = it->second;
+
       /* Typically ~10 syscall sets, so this should be OK */
       for (int i = 0; i < this->n_syscall_sets; i++)
         {
@@ -255,10 +252,6 @@ void SyscallWrapperGenerator::generateHelperClasses()
 
 bool SyscallWrapperGenerator::pass2()
 {
-  cibyl_db_entry_t *p;
-  ght_iterator_t it;
-  const void *key;
-
   emit->setOutputFile(open_file_in_dir(this->dstdir, "Syscalls.java", "w"));
   emit->generic("/* GENERATED, DON'T EDIT */\n");
   if (controller->getPackageName())
@@ -268,10 +261,12 @@ bool SyscallWrapperGenerator::pass2()
 
   this->generateInits();
 
-  for (p = (cibyl_db_entry_t *)ght_first(this->used_syscalls, &it, &key);
-       p;
-       p = (cibyl_db_entry_t *)ght_next(this->used_syscalls, &it, &key))
+  for (Controller::CibylDbTable_t::iterator it = this->m_used_syscalls.begin();
+       it != this->m_used_syscalls.end();
+       ++it)
     {
+      cibyl_db_entry_t *p = it->second;
+
       if ((p->qualifier & CIBYL_DB_QUALIFIER_NOT_GENERATED) == 0)
         this->doOne(p);
       else

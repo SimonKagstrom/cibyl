@@ -141,8 +141,8 @@ private:
   Syscall **syscalls; /* Sparse table of syscalls */
 
   CibylDbTable_t m_syscall_db_table;
+  CibylDbTable_t m_syscall_used_table;
 
-  ght_hash_table_t *syscall_used_table;
   char **syscall_dirs;
   char **syscall_sets;
 
