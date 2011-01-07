@@ -84,8 +84,7 @@ void CibylElf::handleSymtab(Elf_Scn *scn)
   /* Insert all symbols into a hash table */
   for (int i = 0; i < n_syms; i++)
     {
-      ght_insert(this->symtable, (void*)this->symbols[i],
-                 sizeof(uint32_t), (void*)&this->symbols[i]->index);
+      this->m_symbolTable[this->symbols[i]->index] = this->symbols[i];
     }
 }
 
@@ -169,7 +168,6 @@ CibylElf::CibylElf(const char *filename)
   size_t shstrndx;
   int fd;
 
-  this->symtable = ght_create(1024);
   this->symbols_by_addr = ght_create(1024);
   this->sections_by_name = ght_create(32);
   this->relocations_by_symbol = ght_create(512);
@@ -257,8 +255,7 @@ CibylElf::CibylElf(const char *filename)
             {
               int sym_idx = ELF32_R_SYM(s->r_info);
               int type = ELF32_R_TYPE(s->r_info);
-              ElfSymbol *sym = (ElfSymbol*)ght_get(this->symtable, sizeof(uint32_t),
-                                                   (void*)&sym_idx);
+              ElfSymbol *sym = this->m_symbolTable[sym_idx];
 
               assert(cur < max_relocs);
               this->relocs[cur] = new ElfReloc(s->r_offset, type, sym);

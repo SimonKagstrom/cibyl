@@ -12,12 +12,16 @@
 #ifndef __ELF_HH__
 #define __ELF_HH__
 
+#include <map>
+
 #include <stdint.h>
 #include <stdlib.h>
 
 #include <libelf.h>
 #include <elfutils/libdw.h>
 #include <ght_hash_table.h>
+
+using namespace std;
 
 class CibylElf;
 
@@ -128,6 +132,8 @@ public:
 
   ElfReloc *getRelocationBySymbol(ElfSymbol *sym);
 
+  typedef map<uint32_t, ElfSymbol*> ElfSymbolTable_t;
+
 private:
   void addSection(ElfSection *section);
 
@@ -148,7 +154,7 @@ private:
   int n_symbols;
   int n_functionSymbols;
   int n_dataSymbols;
-  ght_hash_table_t *symtable;
+  ElfSymbolTable_t m_symbolTable;
   ght_hash_table_t *symbols_by_addr;
 
   ght_hash_table_t *sections_by_name;
