@@ -20,6 +20,8 @@
 #include <builtins.hh>
 #include <functioncolocation.hh>
 
+#include <cpp-utils.hh>
+
 #define N_TRY_STACK_ENTRIES 32
 
 class Controller : public CodeBlock
