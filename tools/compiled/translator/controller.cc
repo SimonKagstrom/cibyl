@@ -32,8 +32,6 @@ Controller::Controller(const char **defines,
   this->syscall_db_table = ght_create(1024);
   this->syscall_used_table = ght_create(1024);
 
-  this->method_to_class = ght_create(128);
-
   this->dstdir = dstdir;
   this->instructions = NULL;
   this->functions = NULL;
@@ -319,8 +317,7 @@ void Controller::allocateClasses()
         {
           JavaMethod *mt = this->methods[j];
 
-          ght_insert(this->method_to_class, this->classes[n],
-                     strlen(mt->getName()), mt->getName());
+          this->m_method_to_class[mt->getName()] = this->classes[n];
         }
       first = last;
       n++;
@@ -330,8 +327,7 @@ void Controller::allocateClasses()
   this->classes = (JavaClass**)xrealloc(this->classes, (n+1) * sizeof(JavaClass*));
 
   this->classes[n] = new CallTableClass("CibylCallTable", (JavaMethod**)&this->callTableMethod, 0, 0);
-  ght_insert(this->method_to_class, this->classes[n],
-      strlen(this->callTableMethod->getName()), this->callTableMethod->getName());
+  this->m_method_to_class[this->callTableMethod->getName()] = this->classes[n];
   n++;
 
   this->n_classes = n;

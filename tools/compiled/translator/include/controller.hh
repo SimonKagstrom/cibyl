@@ -12,7 +12,7 @@
 #ifndef __CONTROLLER_HH__
 #define __CONTROLLER_HH__
 
-#include <ght_hash_table.h>
+#include <map>
 
 #include <javamethod.hh>
 #include <javaclass.hh>
@@ -23,6 +23,8 @@
 #include <cpp-utils.hh>
 
 #define N_TRY_STACK_ENTRIES 32
+
+using namespace std;
 
 class Controller : public CodeBlock
 {
@@ -73,8 +75,7 @@ public:
   {
     panic_if(!name, "method name is NULL");
 
-    return (JavaClass *)ght_get(this->method_to_class,
-                                strlen(name), name);
+    return this->m_method_to_class[name];
   }
 
   void addColocation(const char *str);
@@ -96,6 +97,8 @@ public:
   }
 
   void setPackageName(const char *name);
+
+  typedef map<const char *, JavaClass *, cmp_str> JavaClassTable_t;
 
 private:
 
@@ -119,7 +122,7 @@ private:
   Function **functions;
   Instruction **instructions;
 
-  ght_hash_table_t *method_to_class;
+  JavaClassTable_t m_method_to_class;
 
   CallTableMethod *callTableMethod;
 
