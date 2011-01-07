@@ -12,7 +12,9 @@
 #ifndef __FUNCTIONCOLOCATION_HH__
 #define __FUNCTIONCOLOCATION_HH__
 
-#include <ght_hash_table.h>
+#include <map>
+
+using namespace std;
 
 #include "function.hh"
 #include "javamethod.hh"
@@ -29,7 +31,7 @@ public:
   static FunctionColocation *lookup(const char *fn_name);
 
 private:
-  static ght_hash_table_t *name_to_coloc;
+  static map<const char *, FunctionColocation *>name_to_coloc;
 
   Function **fns;
   const char **fn_names;
