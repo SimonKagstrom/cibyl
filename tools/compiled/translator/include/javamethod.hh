@@ -12,7 +12,7 @@
 #ifndef __JAVAMETHOD_HH__
 #define __JAVAMETHOD_HH__
 
-#include <ght_hash_table.h>
+#include <map>
 
 #include <function.hh>
 #include <mips.hh>
@@ -20,6 +20,8 @@
 #include <elf.hh>
 #include <config.hh>
 #include <registerallocator.hh>
+
+using namespace std;
 
 class JavaClass;
 
@@ -198,6 +200,8 @@ public:
     return false;
   }
 
+  typedef map<uint32_t, Function *> JavaFunctionTable_t;
+
 protected:
   /* Generate a method with name @a name, with methods from @a start
    * to @a end */
@@ -208,7 +212,7 @@ protected:
 
   Function **functions;
   cibyl_exported_symbol_t *exp_syms;
-  ght_hash_table_t *function_table;
+  JavaFunctionTable_t m_function_table;
   size_t n_exp_syms;
   int n_function;
 };
