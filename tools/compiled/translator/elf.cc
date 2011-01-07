@@ -167,8 +167,6 @@ CibylElf::CibylElf(const char *filename)
   size_t shstrndx;
   int fd;
 
-  this->relocations_by_symbol = ght_create(512);
-
   panic_if(elf_version(EV_CURRENT) == EV_NONE,
            "ELF version failed on %s\n", filename);
 
@@ -257,8 +255,7 @@ CibylElf::CibylElf(const char *filename)
               assert(cur < max_relocs);
               this->relocs[cur] = new ElfReloc(s->r_offset, type, sym);
               if (sym)
-                ght_insert(this->relocations_by_symbol, (void*)this->relocs[cur],
-                           sizeof(ElfSymbol*), (void*)sym);
+                this->m_relocationsBySymbol[sym] = this->relocs[cur];
               cur++;
               s++;
             }
@@ -371,8 +368,7 @@ int CibylElf::getNumberOfRelocations()
 
 ElfReloc *CibylElf::getRelocationBySymbol(ElfSymbol *sym)
 {
-  return (ElfReloc*)ght_get(this->relocations_by_symbol,
-                            sizeof(ElfSymbol*), sym);
+  return this->m_relocationsBySymbol[sym];
 }
 
 ElfSymbol *CibylElf::getSymbolByAddr(unsigned long addr)

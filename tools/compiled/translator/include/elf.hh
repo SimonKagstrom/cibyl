@@ -19,7 +19,6 @@
 
 #include <libelf.h>
 #include <elfutils/libdw.h>
-#include <ght_hash_table.h>
 
 #include <cpp-utils.hh>
 
@@ -135,6 +134,7 @@ public:
 
   typedef map<uint32_t, ElfSymbol*> ElfSymbolTable_t;
   typedef map<const char *, ElfSection*, cmp_str> ElfSectionTable_t;
+  typedef map<ElfSymbol *, ElfReloc*> ElfRelocationTable_t;
 
 private:
   void addSection(ElfSection *section);
@@ -159,8 +159,7 @@ private:
   ElfSymbolTable_t m_symbolTable;
   ElfSymbolTable_t m_symbolsByAddr;
   ElfSectionTable_t m_sectionsByName;
-
-  ght_hash_table_t *relocations_by_symbol;
+  ElfRelocationTable_t m_relocationsBySymbol;
 
   ElfReloc **relocs;
   int n_relocs;
