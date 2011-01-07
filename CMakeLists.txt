@@ -46,7 +46,7 @@ set(ENV{DESTDIR} ${TOOLCHAIN_PATH})
 # ====================================
 # build all
 # ====================================
-add_subdirectory (tools/compiled/translator)
+add_subdirectory (tools/translator)
 
 # Otimize the target build
 set(CMAKE_BUILD_TYPE distribution)
