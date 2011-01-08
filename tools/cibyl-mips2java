@@ -25,7 +25,7 @@ sys.path.append('%s/python/' % sys.path[0])
 from Cibyl.CompiledHelpers.helpers import *
 
 # Handling of the -I option is done through this callback
-syscallDirectories = []
+syscallDirectories = [ config.sysroot + "/usr/include/" ]
 def includeCallback(option, opt, value, parser):
 	syscallDirectories.append(value)
 
