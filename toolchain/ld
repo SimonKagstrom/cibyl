@@ -1,0 +1,5 @@
+#!/bin/sh
+
+P=`dirname $0`
+
+$P/ld.real -EB -T$P/../sys-root/lib/linker.lds --emit-relocs $*

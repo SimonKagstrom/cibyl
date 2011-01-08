@@ -1,0 +1,5 @@
+#!/bin/sh
+
+P=`dirname $0`
+
+java -jar $P/../lib/jasmin.jar $*
