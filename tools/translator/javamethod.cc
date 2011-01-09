@@ -107,6 +107,7 @@ JavaMethod::JavaMethod(Function **fns,
 
 JavaMethod::~JavaMethod()
 {
+  free(this->m_possibleArguments);
 }
 
 char *JavaMethod::getJavaMethodName()
