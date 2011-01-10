@@ -9,7 +9,7 @@
 ## $Id:$
 ##
 ######################################################################
-import os, sys
+import os, sys, shutil
 import Cibyl.PeepholeOptimizer.parse
 
 from Cibyl import config
@@ -28,6 +28,12 @@ def doJavac(filename):
     if ret != 0:
         sys.exit(1)
 
+def doCopyJavaFiles():
+    base_path = config.sysroot + "/usr/share/java/"
+    files = ["CRunTime.java", "CibylConfig.java"]
+
+    for f in files:
+        shutil.copyfile(base_path + f, config.outDirectory + "/" + f)
 
 def doTranslation(filename, syscallDirectories):
     dbs = ""

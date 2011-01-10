@@ -265,4 +265,6 @@ def doCppCompile():
     if not config.onlyTranslate:
             doJavac(config.outDirectory + config.packageNameJavaPath() + "/CibylCallTable.java")
 
+    doCopyJavaFiles()
+
 doCppCompile()
