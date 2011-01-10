@@ -1,29 +1,22 @@
-######################################################################
-##
-## Copyright (C) 2005,  Blekinge Institute of Technology
-##
-## Filename:      Makefile
-## Author:        Simon Kagstrom <ska@bth.se>
-## Description:   Generic Makefile
-##
-## $Id: Makefile 13560 2007-02-10 07:39:53Z ska $
-##
-######################################################################
-SUBDIRS = c
-RESOURCES=res/program.data.bin
-TARGET   =
+# Example Makefile for Cibyl application
 
-# The compilation options, set to e.g., -O to run all optimizations
-CIBYL_MIPS2JAVA_OPTS ?=-Iinclude -DNOJ2ME
-CIBYL_SYSCALL_SETS ?= ansi hello
-CIBYL_GENERATE_JAVA_WRAPPERS_OPTS=-I include -S syscalls
-JAVA_OPTS=
+all: program.jar
 
-all: include/ $(SUBDIRS)
+include/cibyl-syscalls.db: syscalls/hello/include/hello.h
+	cibyl-generate-c-header -o include syscalls hello
 
-include $(CIBYL_BASE)/build/Rules-java.mk
+program: main.c include/cibyl-syscalls.db
+	mips-cibyl-elf-gcc -I include -Os -o $@ $<
 
-include/: FORCE
-	$(CIBYL_BASE)/tools/cibyl-generate-c-header -o $@ syscalls/ hello
 
-FORCE:
+tmpclasses/Cibyl.j: program
+	cibyl-mips2java -I include -O -d tmpclasses -DNOJ2ME program
+
+program.jar: tmpclasses/Cibyl.j
+	cp `cibyl-config --prefix`/mips-cibyl-elf/sys-root/usr/share/java/StandaloneMain.java tmpclasses
+	cd tmpclasses && javac -source 1.4 *.java
+	cd tmpclasses && jar cfm ../$@ ../manifest.txt *.class program.data.bin
+
+
+clean:
+	rm -rf tmpclasses program program.jar include *~

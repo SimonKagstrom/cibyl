@@ -1,19 +1,18 @@
-######################################################################
-##
-## Copyright (C) 2005,  Blekinge Institute of Technology
-##
-## Filename:      Makefile
-## Author:        Simon Kagstrom <ska@bth.se>
-## Description:   Generic Makefile
-##
-## $Id: Makefile 13560 2007-02-10 07:39:53Z ska $
-##
-######################################################################
-SUBDIRS = c
-RESOURCES=
-TARGET   =
+# Example Makefile for Cibyl application
 
-CIBYL_SYSCALL_SETS ?= ansi
-JAVA_OPTS=
+all: program.jar
 
-include $(CIBYL_BASE)/build/Rules-java.mk
+program: main.c
+	mips-cibyl-elf-gcc -Os -o $@ $<
+
+tmpclasses/Cibyl.j: program
+	cibyl-mips2java -O -d tmpclasses -DNOJ2ME program
+
+program.jar: tmpclasses/Cibyl.j
+	cp `cibyl-config --prefix`/mips-cibyl-elf/sys-root/usr/share/java/StandaloneMain.java tmpclasses
+	cd tmpclasses && javac -source 1.4 *.java
+	cd tmpclasses && jar cfm ../$@ ../manifest.txt *.class program.data.bin
+
+
+clean:
+	rm -rf tmpclasses program program.jar *~

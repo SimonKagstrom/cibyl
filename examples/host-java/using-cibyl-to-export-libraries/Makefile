@@ -1,30 +1,26 @@
-######################################################################
-##
-## Copyright (C) 2005,  Blekinge Institute of Technology
-##
-## Filename:      Makefile
-## Author:        Simon Kagstrom <simon.kagstrom@gmail.com>
-## Description:   Makefile
-##
-## $Id: Makefile 13560 2007-02-10 07:39:53Z ska $
-##
-######################################################################
-SUBDIRS = c
-RESOURCES=
-TARGET   =
+# Example Makefile for Cibyl application
 
-CIBYL_SYSCALL_SETS ?= ansi
-JAVA_OPTS=
+all: program.jar
 
-all: $(SUBDIRS) tmpclasses/ tmpclasses/LibraryWrapper.java
+%.o: %.c
+	mips-cibyl-elf-gcc -c -Os -o $@ $<
 
-include $(CIBYL_BASE)/build/Rules-java.mk
+libtest.a: lib/implementation.o
+	mips-cibyl-elf-ar crs $@ $<
 
-tmpclasses/StandaloneMain.java: StandaloneMain.java
-	cp $< $@
-tmpclasses/LibraryWrapper.java: LibraryWrapper.java
-	cp $< $@
 
-tmpclasses:
-	install -d tmpclasses
-	
+program: exports.o libtest.a
+	mips-cibyl-elf-gcc -Os -o $@ $< -L. -l test
+
+tmpclasses/Cibyl.j: program
+	cibyl-mips2java -O -d tmpclasses -DNOJ2ME program
+
+program.jar: tmpclasses/Cibyl.j
+	cp StandaloneMain.java tmpclasses
+	cp LibraryWrapper.java tmpclasses
+	cd tmpclasses && javac -source 1.4 *.java
+	cd tmpclasses && jar cfm ../$@ ../manifest.txt *.class program.data.bin
+
+
+clean:
+	rm -rf tmpclasses program program.jar *.o *.a *~
