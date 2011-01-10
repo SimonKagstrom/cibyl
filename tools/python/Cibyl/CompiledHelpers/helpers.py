@@ -20,13 +20,13 @@ def doJasmin(filename):
         Cibyl.PeepholeOptimizer.parse.run(config.peepholeIterations, f, f)
     ret = os.system(config.jasmin + " -d " + config.outDirectory + " " + f)
     if ret != 0:
-        sys.exit(ret)
+        sys.exit(1)
 
 def doJavac(filename):
     ret = os.system(config.javac + " -d " + config.outDirectory +
                     " -classpath " + config.outDirectory + " " + filename )
     if ret != 0:
-        sys.exit(ret)
+        sys.exit(1)
 
 
 def doTranslation(filename, syscallDirectories):
@@ -74,4 +74,4 @@ def doTranslation(filename, syscallDirectories):
     call_str = config.xcibyl_translator + " \"" + conf + "\" " + defines + config.outDirectory + " " + config.infile + " " + dbs
     ret = os.system(call_str)
     if ret != 0:
-        sys.exit(ret)
+        sys.exit(1)
