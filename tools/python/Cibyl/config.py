@@ -65,7 +65,7 @@ def getBasePath():
 
 wtk = os.getenv("WTK_PATH", ".")
 
-jasminCommandLine="jasmin"
+jasminCommandLine=getBasePath() + "/bin/cibyl-jasmin"
 javacCommandLine="javac -source 1.4 -bootclasspath " + wtk + "/lib/cldcapi11.jar:" + wtk + "/lib/midpapi20.jar"
 
 # setup some of the environment
