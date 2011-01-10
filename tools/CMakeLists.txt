@@ -5,6 +5,7 @@ install (PROGRAMS
   cibyl-peephole-optimize
   cibyl-generate-syscall-db
   cibyl-mips2java
+  cibyl-config
   DESTINATION ${DESTDIR}/bin)
 
 install (DIRECTORY
