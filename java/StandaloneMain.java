@@ -18,6 +18,13 @@ public class StandaloneMain
   {
     int i;
     RandomAccessFile f;
+
+    if (args.length < 1) {
+	System.err.println("Usage: StandaloneMain <memory-image-file>\n");
+	System.err.println("The memory image is typically program.data.bin");
+	System.exit(1);
+    }
+
     String imageFilename = args[0];
 
     FileInputStream fileIs = null;
