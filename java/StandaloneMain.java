@@ -18,27 +18,37 @@ public class StandaloneMain
   {
     int i;
     RandomAccessFile f;
+    InputStream is = null;
 
-    if (args.length < 1) {
+    if (args.length >= 1) {
 	System.err.println("Usage: StandaloneMain <memory-image-file>\n");
 	System.err.println("The memory image is typically program.data.bin");
 	System.exit(1);
+
+	String imageFilename = args[0];
+	FileInputStream fileIs = null;
+
+	try {
+	    fileIs = new FileInputStream(imageFilename);
+	    is = new DataInputStream( (InputStream)fileIs );
+	}
+	catch (Exception exception) {
+	    System.err.println("Could not open " + imageFilename + "\n");
+	    System.err.println(exception);
+	    System.exit(1);
+	}
+    }
+    else {
+	try {
+	    is = new StandaloneMain().getClass().getResourceAsStream("/program.data.bin");
+	}
+	catch (Exception exception) {
+	    System.err.println("Could not open program.data.bin\n");
+	    System.err.println(exception);
+	    System.exit(1);
+	}
     }
 
-    String imageFilename = args[0];
-
-    FileInputStream fileIs = null;
-    DataInputStream is = null;
-
-    try {
-      fileIs = new FileInputStream(imageFilename);
-      is = new DataInputStream( (InputStream)fileIs );
-    }
-    catch (Exception exception) {
-      System.err.println("Could not open " + imageFilename + "\n");
-      System.err.println(exception);
-      System.exit(1);
-    }
 
     try {
         int start = CibylCallTable.getAddressByName("__start");
