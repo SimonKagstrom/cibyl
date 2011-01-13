@@ -66,6 +66,9 @@ add_subdirectory (java)
 install (FILES
   ${CIBYL_BASE_PATH}/build/linker.lds
   DESTINATION ${LIBRARY_OUTPUT_PATH})
+install (FILES
+  ${CIBYL_BASE_PATH}/build/CMakeCibylToolchain.cmake
+  DESTINATION ${LIBRARY_OUTPUT_PATH})
 install (DIRECTORY
   ${CMAKE_BINARY_DIR}/bin
   USE_SOURCE_PERMISSIONS

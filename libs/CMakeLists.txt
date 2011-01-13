@@ -1,5 +1,5 @@
-INCLUDE(../build/CMakeMipsToolchain.txt)
-SET(CMAKE_TOOLCHAIN_FILE ../build/CMakeMipsToolchain.txt)
+INCLUDE(../build/CMakeCibylToolchain.cmake)
+SET(CMAKE_TOOLCHAIN_FILE ../build/CMakeCibylToolchain.cmake)
 
 include_directories (${INCLUDE_OUTPUT_PATH})
 include_directories (${CIBYL_BASE_PATH}/include) # Not needed after install
