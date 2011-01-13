@@ -25,7 +25,7 @@ OBJS    = main.o run-tests.o console.o \
           tests/assign-to-ra.o tests/64-bit-return.o tests/malloc.o tests/function.o \
           tests/tail_call.o tests/return_in_v1.o tests/sw_in_delay_slot.o \
           tests/mul_tests.o tests/long-long.o tests/store-s-regs.o \
-          tests/store-s-regs-c-helper.o
+          tests/store-s-regs-c-helper.o tests/pass-structs-by-value.o
 LDLIBS  = -lm -lsoftfloat -lmidp -ljsr075
 EXTRA_CLEAN=*.host.o tests/*.host.o
 

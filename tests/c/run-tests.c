@@ -50,6 +50,7 @@ extern void malloc_run(void);
 extern void function_run(void);
 extern void tail_call_run(void);
 extern void store_s_regs_run(void);
+extern void structs_by_value_run(void);
 
 test_run_t all_tests[] =
 {
@@ -73,6 +74,7 @@ test_run_t all_tests[] =
   TEST(function_run),
   TEST(tail_call_run),
   TEST(store_s_regs_run),
+  TEST(structs_by_value_run),
 };
 
 
