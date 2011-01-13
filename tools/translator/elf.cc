@@ -101,7 +101,8 @@ static int reloc_cmp(const void *_a, const void *_b)
   return addr_diff;
 }
 
-extern "C" int mips_arg_size (Elf *elf, Dwarf_Die *functypedie, Dwarf_Attribute *attr);
+extern "C" int mips_arg_size (Elf *elf, Dwarf_Die *functypedie,
+    Dwarf_Attribute *attr, int is_return_val);
 
 void CibylElf::handleDwarfFunction(Dwarf_Die *fun_die)
 {
@@ -120,7 +121,7 @@ void CibylElf::handleDwarfFunction(Dwarf_Die *fun_die)
   attr = dwarf_attr_integrate(fun_die, DW_AT_type, &attr_mem);
 
   sym->n_args = 0;
-  sym->ret_size = mips_arg_size(elf, fun_die, attr);
+  sym->ret_size = mips_arg_size(elf, fun_die, attr, true);
 
   /* No arguments? */
   if (dwarf_child (fun_die, &result) != 0)
@@ -138,7 +139,7 @@ void CibylElf::handleDwarfFunction(Dwarf_Die *fun_die)
     	  return;
       case DW_TAG_formal_parameter:
         attr = dwarf_attr_integrate(&result, DW_AT_type, &attr_mem);
-        arg_size = mips_arg_size(elf, fun_die, attr);
+        arg_size = mips_arg_size(elf, fun_die, attr, false);
 
         if (arg_size != 1)
           {

@@ -1,6 +1,7 @@
 /* All this is from elfutils */
 #include <string.h>
 #include <dwarf.h>
+#include <stdio.h>
 #include <elfutils/libdw.h>
 
 /* The ABI of the file.  Also see EF_MIPS_ABI2 above. */
@@ -160,7 +161,7 @@ static const Dwarf_Op loc_aggregate[] =
   };
 #define nloc_aggregate 1
 
-int mips_arg_size (Elf *elf, Dwarf_Die *functypedie, Dwarf_Attribute *attr)
+int mips_arg_size (Elf *elf, Dwarf_Die *functypedie, Dwarf_Attribute *attr, int is_return_val)
 {
   Dwarf_Attribute attr_mem;
 
@@ -271,7 +272,11 @@ int mips_arg_size (Elf *elf, Dwarf_Die *functypedie, Dwarf_Attribute *attr)
       if ((abi != MIPS_ABI_O32) && (abi != MIPS_ABI_O64))
         return -2;
 
-      return nloc_aggregate;
+      if (is_return_val)
+        return nloc_aggregate;
+
+      /* Pass struct by value */
+      return -1;
     }
 
   /* XXX We don't have a good way to return specific errors from ebl calls.
