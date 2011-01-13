@@ -13,14 +13,19 @@ Get the toolchain directories for Cibyl
 parser = OptionParser(usage = usage)
 parser.add_option("-p", "--prefix", action="store_true", dest="prefix", default=False,
 				  help="Print the base directory of the Cibyl toolchain",
-				  metavar="PREFIX",
-		  )
+				  metavar="PREFIX")
+parser.add_option("-s", "--sysroot", action="store_true", dest="sysroot", default=False,
+				  help="Print the sys-root of the Cibyl toolchain",
+				  metavar="SYSROOT")
 
 (options, args) = parser.parse_args()
 
-if len(args) == 0 and options.prefix == False:
+if options.prefix == False and options.sysroot == False:
     print usage
     sys.exit(1)
 
 if options.prefix != False:
     print config.getBasePath()
+
+if options.sysroot != False:
+    print config.getBasePath() + "/mips-cibyl-elf/sys-root"
