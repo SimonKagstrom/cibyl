@@ -14,4 +14,16 @@ SUBDIRS=host-java/hello-world host-java/floating-point host-java/cpp-test \
         host-java/using-cibyl-to-export-libraries \
         j2me/hello-world j2me/tiles-sprites j2me/sokoban j2me/tafl-client j2me/events j2me/s9
 
-include $(CIBYL_BASE)/build/Rules-common.mk
+all: $(SUBDIRS)
+
+clean:
+	for dir in $(SUBDIRS); do \
+		if [ -f $$dir/Makefile ]; then make clean -C $$dir; fi \
+	done
+	rm -rf $(TARGET) $(EXTRA_CLEAN) *~
+
+# Rule for making subdirectories
+.PHONY: $(SUBDIRS)
+
+$(SUBDIRS):
+	if [ -f $@/Makefile ]; then make -C $@ ; fi
