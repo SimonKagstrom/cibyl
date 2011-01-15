@@ -32,7 +32,32 @@ static void pass_big_struct(void)
   with_big_struct(s);
 }
 
+typedef struct {
+  int quot; /* quotient */
+  int rem;  /* remainder */
+} ldiv_t;
+
+static ldiv_t __attribute__((noinline))ldiv(long num, long den)
+{
+  ldiv_t ret;
+  ret.quot = num/den;
+  ret.rem = num%den;
+  return ret;
+}
+
+static void return_struct_by_val(void)
+{
+	ldiv_t m;
+
+	m = ldiv(100, 7);
+	if (m.quot != 14 || m.rem != 2)
+		FAIL("return-struct-by-val: %d:%d", m.quot, m.rem);
+	else
+		PASS("return-struct-by-val: %d:%d", m.quot, m.rem);
+}
+
 void structs_by_value_run(void)
 {
 	pass_big_struct();
+	return_struct_by_val();
 }
