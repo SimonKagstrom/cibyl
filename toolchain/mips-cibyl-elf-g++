@@ -2,4 +2,4 @@
 
 P=`dirname $0`
 
-$P/mips-cibyl-elf-g++.real -G0 -DCIBYL=1 -ggdb -msoft-float -fno-optimize-sibling-calls -Wa,--no-warn -mips1 -mno-check-zero-division -fno-pic -mno-abicalls $*
+$P/mips-cibyl-elf-g++.real -G0 -DCIBYL=1 -ggdb -msoft-float -fno-optimize-sibling-calls -Wa,--no-warn -mips1 -mno-check-zero-division -fno-pic -mno-abicalls -fno-exceptions -fno-rtti $*
