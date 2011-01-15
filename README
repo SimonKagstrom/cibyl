@@ -14,39 +14,46 @@ You need the following to use Cibyl:
 
 - Python (2.3, 2.4 tested)
 - The Jasmin assembler (http://jasmin.sourceforge.net)
-- A GCC MIPS cross-compiler, >= 3.3 (e.g., ELDK)
 - A Java compiler / runtime environment
 - The jasmin java assembler (http://jasmin.sourceforge.net)
 - For J2ME support, MIDPath (http://midpath.thenesis.org) or the Sun
   Wireless Toolkit
 
-Setting up Cibyl
-----------------
+Building Cibyl
+--------------
 To setup Cibyl, do the following steps:
 
-1. Edit env.sh and correct the paths there
+1. Download a pre-built toolchain from http://cibyl.org or build it:
 
-2. Run
+     cd toolchain
+     make # (this will take some hours)
 
-   $ source env.sh
+2. Unpack the toolchain
 
-   to setup the environment variables
+     cp mips-cibyl-elf.tar.bz2 /path/to/install/dir
+     tar -xjf mips-cibyl-elf.tar.bz2
 
-3. Run
 
-   $ make
+3. Add the Cibyl binaries to your path:
 
-   To compile Cibyl header files and the binary translator
+     export PATH=$PATH:/path/to/install/dir/bin
 
-4. Build the examples by running
+   If you downloaded the pre-built toolchain, you can stop here.
 
-   $ cd examples
-   $ make
 
-5. Run the examples by
+4. Build the translator and the cibyl libraries
+
+     mkdir build
+     cd build
+     cmake ../
+     make && make install
+
+   this will install the libraries and tools in /path/to/install/dir
+
+5. Build the examples by
 
    $ cd examples/sokoban
-   $ make run
+   $ make
 
 --
 // Simon Kagstrom <simon.kagstrom@gmail.com>
