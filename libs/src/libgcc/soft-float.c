@@ -167,7 +167,7 @@ double __floatunsidf (unsigned int i)
 {
 	double_union_t res;
 
-	res.i = __floatunsidf_helper(i);
+	__floatunsidf_helper(&res.i, i);
 
 	return res.f;
 }
