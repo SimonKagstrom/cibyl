@@ -11,6 +11,8 @@
 ######################################################################
 import os,sys
 
+import which
+
 verbose = False
 outDirectory = "."
 pruneUnusedFunctions = True
@@ -55,6 +57,19 @@ profileFile = None
 
 packageName = ""
 
+def getWtkPath():
+    try:
+        preverify = which.which("preverify")
+    except e:
+        return "/usr"
+    dn = os.path.dirname(preverify)
+    base = os.path.dirname(os.path.realpath(dn))
+
+    if base == None:
+	base = "/usr/local/share/cibyl"
+    return base
+
+
 def getBasePath():
     dn = os.path.dirname(sys.argv[0])
     base = os.path.dirname(os.path.realpath(dn))
@@ -63,7 +78,7 @@ def getBasePath():
 	base = "/usr/local/share/cibyl"
     return base
 
-wtk = os.getenv("WTK_PATH", ".")
+wtk = getWtkPath()
 
 jasminCommandLine=getBasePath() + "/bin/cibyl-jasmin"
 javacCommandLine="javac -source 1.4 -bootclasspath " + wtk + "/lib/cldcapi11.jar:" + wtk + "/lib/midpapi20.jar"
