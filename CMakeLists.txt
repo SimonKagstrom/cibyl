@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 2.6)
 # ====================================
 # project name and version
 # ====================================
-project (kcov)
+project (cibyl)
 set (PROJECT_VERSION_MAJOR  22)
 set (PROJECT_VERSION_MINOR  0)
 set (PROJECT_VERSION_PATCH  0)
