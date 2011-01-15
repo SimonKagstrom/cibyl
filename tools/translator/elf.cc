@@ -182,10 +182,6 @@ void CibylElf::handleDwarfFunction(Dwarf_Die *fun_die)
 
         sym->n_args++;
         break;
-      case DW_TAG_inlined_subroutine:
-        /* Recurse further down */
-        this->handleDwarfFunction(&result);
-        break;
       default:
         break;
       }
