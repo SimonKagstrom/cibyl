@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <elfutils/libdw.h>
 
+#include <mips-dwarf.h>
+
 /* The ABI of the file.  Also see EF_MIPS_ABI2 above. */
 #define EF_MIPS_ABI             0x0000F000
 
@@ -161,7 +163,7 @@ static const Dwarf_Op loc_aggregate[] =
   };
 #define nloc_aggregate 1
 
-int mips_arg_size (Elf *elf, Dwarf_Die *functypedie, Dwarf_Attribute *attr, int is_return_val)
+enum mips_arg mips_arg_size (Elf *elf, Dwarf_Die *functypedie, Dwarf_Attribute *attr)
 {
   Dwarf_Attribute attr_mem;
 
@@ -170,25 +172,25 @@ int mips_arg_size (Elf *elf, Dwarf_Die *functypedie, Dwarf_Attribute *attr, int 
 
   /* Something went seriously wrong while trying to figure out the ABI */
   if (abi == MIPS_ABI_LAST)
-    return -1;
+    return UNKNOWN;
 
   /* We couldn't identify the ABI, but the file seems valid */
   if (abi == MIPS_ABI_UNKNOWN)
-    return -2;
+    return UNKNOWN;
 
   /* Can't handle EABI variants */
   if ((abi == MIPS_ABI_EABI32) || (abi == MIPS_ABI_EABI64))
-    return -2;
+    return UNKNOWN;
 
   unsigned int regsize = mips_abi_regsize (abi);
   if (!regsize)
-    return -2;
+    return UNKNOWN;
 
   /* Start with the function's type, and get the DW_AT_type attribute,
      which is the type of the return value.  */
   if (attr == NULL)
     /* The function has no return value, like a `void' function in C.  */
-    return 0;
+    return VOID;
 
   Dwarf_Die die_mem;
   Dwarf_Die *typedie = dwarf_formref_die (attr, &die_mem);
@@ -207,7 +209,7 @@ int mips_arg_size (Elf *elf, Dwarf_Die *functypedie, Dwarf_Attribute *attr, int 
   switch (tag)
     {
     case -1:
-      return -1;
+      return UNKNOWN;
 
     case DW_TAG_subrange_type:
       if (! dwarf_hasattr_integrate (typedie, DW_AT_byte_size))
@@ -230,35 +232,35 @@ int mips_arg_size (Elf *elf, Dwarf_Die *functypedie, Dwarf_Attribute *attr, int 
             if (tag == DW_TAG_pointer_type || tag == DW_TAG_ptr_to_member_type)
               size = regsize;
             else
-              return -1;
+              return UNKNOWN;
           }
         if (tag == DW_TAG_base_type)
           {
             Dwarf_Word encoding;
             if (dwarf_formudata (dwarf_attr_integrate (typedie, DW_AT_encoding,
                                              &attr_mem), &encoding) != 0)
-              return -1;
+              return UNKNOWN;
 
 #define ABI_LOC(loc, regsize) ((regsize) == 4 ? (loc ## _o32) : (loc))
 
             if (encoding == DW_ATE_float)
               {
                 if (size <= regsize)
-                    return nloc_fpreg;
+                    return N_1;
 
                 if (size <= 2*regsize)
-                  return nloc_fpregpair;
+                  return N_4;
 
                 if (size <= 4*regsize && abi == MIPS_ABI_O32)
-                  return nloc_fpregquad;
+                  return UNKNOWN;
 
                 goto aggregate;
               }
           }
         if (size <= regsize)
-          return nloc_intreg;
+          return N_1;
         if (size <= 2*regsize)
-          return nloc_intregpair;
+          return N_4;
 
         /* Else fall through. Shouldn't happen though (at least with gcc) */
       }
@@ -270,17 +272,14 @@ int mips_arg_size (Elf *elf, Dwarf_Die *functypedie, Dwarf_Attribute *attr, int 
     aggregate:
       /* XXX TODO: Can't handle structure return with other ABI's yet :-/ */
       if ((abi != MIPS_ABI_O32) && (abi != MIPS_ABI_O64))
-        return -2;
-
-      if (is_return_val)
-        return nloc_aggregate;
+        return UNKNOWN;
 
       /* Pass struct by value */
-      return -1;
+      return AGGREGATE;
     }
 
   /* XXX We don't have a good way to return specific errors from ebl calls.
      This value means we do not understand the type, but it is well-formed
      DWARF and might be valid.  */
-  return -2;
+  return UNKNOWN;
 }

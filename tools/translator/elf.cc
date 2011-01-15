@@ -20,6 +20,7 @@
 #include <dwarf.h>
 #include <elfutils/libdw.h>
 
+#include <mips-dwarf.h>
 #include <utils.h>
 #include <elf.hh>
 
@@ -101,9 +102,6 @@ static int reloc_cmp(const void *_a, const void *_b)
   return addr_diff;
 }
 
-extern "C" int mips_arg_size (Elf *elf, Dwarf_Die *functypedie,
-    Dwarf_Attribute *attr, int is_return_val);
-
 void CibylElf::handleDwarfFunction(Dwarf_Die *fun_die)
 {
   Dwarf_Die result;
@@ -121,7 +119,41 @@ void CibylElf::handleDwarfFunction(Dwarf_Die *fun_die)
   attr = dwarf_attr_integrate(fun_die, DW_AT_type, &attr_mem);
 
   sym->n_args = 0;
-  sym->ret_size = mips_arg_size(elf, fun_die, attr, true);
+  sym->ret_size = 0;
+
+  /* Handle the return value */
+  enum mips_arg ret_val = mips_arg_size(elf, fun_die, attr);
+
+  switch (ret_val) {
+  case VOID:
+	  sym->ret_size = 0;
+	  break;
+  case N_1:
+	  sym->ret_size = 1;
+	  break;
+  case N_2:
+	  sym->ret_size = 2;
+	  break;
+  case AGGREGATE:
+	  /*
+	   * From the "SYSTEM V APPLICATION BINARY INTERFACE, MIPS RISC Processor
+	   * Supplement 3rd Edition" (3-18):
+	   *
+	   *   If the called function returns a structure or union, the caller passes the address
+	   *   of an area that is large enough to hold the structure to the function
+	   *   in $4. The called function copies the returned structure into this area before
+	   *   it returns. This address becomes the first argument to the function for
+	   *   the purposes of argument register allocation and all user arguments are
+	   *   shifted down by one.
+	   */
+	  sym->ret_size = 1;
+	  sym->n_args++;
+	  break;
+  case UNKNOWN:
+  default:
+	  sym->ret_size = -1;
+	  break;
+  }
 
   /* No arguments? */
   if (dwarf_child (fun_die, &result) != 0)
@@ -129,7 +161,7 @@ void CibylElf::handleDwarfFunction(Dwarf_Die *fun_die)
 
   /* There are arguments */
   do {
-      int arg_size;
+      enum mips_arg arg_size;
 
       switch (dwarf_tag (&result))
       {
@@ -139,9 +171,9 @@ void CibylElf::handleDwarfFunction(Dwarf_Die *fun_die)
     	  return;
       case DW_TAG_formal_parameter:
         attr = dwarf_attr_integrate(&result, DW_AT_type, &attr_mem);
-        arg_size = mips_arg_size(elf, fun_die, attr, false);
+        arg_size = mips_arg_size(elf, fun_die, attr);
 
-        if (arg_size != 1)
+        if (arg_size != N_1)
           {
             /* Better safe than sorry - skip this */
             sym->n_args = -1;
