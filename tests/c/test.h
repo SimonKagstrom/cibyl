@@ -14,6 +14,10 @@
 
 #include "console.h"
 
+#ifndef VERBOSE
+# define VERBOSE 0
+#endif
+
 #include <stdio.h>
 #define __USE_BSD /* M_PI */
 #include <math.h>
