@@ -60,7 +60,7 @@ packageName = ""
 def getWtkPath():
     try:
         preverify = which.which("preverify")
-    except e:
+    except:
         return "/usr"
     dn = os.path.dirname(preverify)
     base = os.path.dirname(os.path.realpath(dn))
