@@ -1,32 +1,44 @@
-######################################################################
-##
-## Copyright (C) 2005,  Blekinge Institute of Technology
-##
-## Filename:      Makefile
-## Author:        Simon Kagstrom <ska@bth.se>
-## Description:   Generic Makefile
-##
-## $Id: Makefile 15431 2007-05-19 11:54:12Z ska $
-##
-######################################################################
-SUBDIRS = c
-RESOURCES=res/program.data.bin
-TARGET   =include/ tmpclasses/CibylConfig.java midlet.jar midlet.jad
+# Example Makefile for Cibyl application
 
-# This is actually not needed since we include Rules-j2me, but
-# we keep it here to show how new syscall sets are added. Further,
-# ansi is implicitly implied by j2me, so that can be removed as well
-CIBYL_SYSCALL_SETS ?= javax.microedition ansi resource_manager command_mgr
-CIBYL_GENERATE_JAVA_WRAPPERS_OPTS=-S syscalls -I include
-CIBYL_MIPS2JAVA_OPTS +=-Iinclude
+# Find out the path to the wireless toolkit
+PREVERIFY_BINARY_PATH=$(shell which preverify)
+PREVERIFY_REAL_PATH=$(shell readlink -f $(PREVERIFY_BINARY_PATH))
+PREVERIFY_DIRNAME=$(shell dirname $(PREVERIFY_BINARY_PATH))
+WTK_PATH=$(PREVERIFY_DIRNAME)/../
 
-all: include
 
-include $(CIBYL_BASE)/build/Rules-j2me.mk
 
-tmpclasses/CibylConfig.java: CibylConfig.java
-	cp $< $@
+OBJS=src/main.o src/s9_input.o
 
-include/: FORCE
-	$(CIBYL_BASE)/tools/cibyl-generate-c-header -o $@ syscalls/ command_mgr
-FORCE:
+all: midlet.jad
+
+%.o: %.c include/cibyl-syscalls.db
+	mips-cibyl-elf-gcc -I include -c -Os -o $@ $<
+
+include/cibyl-syscalls.db: syscalls/command_mgr/include/command_mgr.h
+	cibyl-generate-c-header -o include syscalls command_mgr
+
+program: $(OBJS)
+	mips-cibyl-elf-gcc -Os -o $@ $+ -ls9
+
+tmpclasses/Cibyl.j: program
+	cibyl-mips2java -I include -O -d tmpclasses program
+
+
+midlet.jar: tmpclasses/Cibyl.j
+	install -d res
+	cp `cibyl-config --prefix`/mips-cibyl-elf/sys-root/usr/share/java/Main.java tmpclasses
+	cp `cibyl-config --prefix`/mips-cibyl-elf/sys-root/usr/share/java/GameScreenCanvas.java tmpclasses
+	cd tmpclasses && javac -classpath : -source 1.4 -bootclasspath $(WTK_PATH)/lib/cldcapi11.jar:$(WTK_PATH)/lib/midpapi20.jar -source 1.4 *.java
+	preverify -classpath $(WTK_PATH)/lib/cldcapi11.jar:$(WTK_PATH)/lib/midpapi20.jar: -d classes/ tmpclasses/
+	cp tmpclasses/program.data.bin res/
+	jar cfm $@ MANIFEST.MF -C classes . -C res .
+
+midlet.jad: midlet.jad.templ midlet.jar
+	cat $< > $@
+	echo -n "MIDlet-Jar-Size: " >> $@
+	wc -c midlet.jar | cut -d ' ' -f -1 >> $@
+
+
+clean:
+	rm -rf classes tmpclasses program *.jar *.jad *~ res $(OBJS) include

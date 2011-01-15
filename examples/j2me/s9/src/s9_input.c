@@ -25,7 +25,7 @@ typedef struct
 
   void *it;
   int   n_matches;
-  char *cur_word;
+  const char *cur_word;
 
   s9_t *s9;
 } s9_input_t;

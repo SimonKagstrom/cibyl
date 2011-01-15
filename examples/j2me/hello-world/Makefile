@@ -1,21 +1,35 @@
-######################################################################
-##
-## Copyright (C) 2005,  Blekinge Institute of Technology
-##
-## Filename:      Makefile
-## Author:        Simon Kagstrom <ska@bth.se>
-## Description:   Generic Makefile
-##
-## $Id: Makefile 9745 2006-09-04 18:04:52Z ska $
-##
-######################################################################
-SUBDIRS = c
-RESOURCES=res/program.data.bin
-TARGET   =midlet.jar midlet.jad
+# Example Makefile for Cibyl application
 
-# This is actually not needed since we include Rules-j2me, but
-# we keep it here to show how new syscall sets are added. Further,
-# ansi is implicitly implied by j2me, so that can be removed as well
-CIBYL_SYSCALL_SETS ?= javax.microedition ansi
+# Find out the path to the wireless toolkit
+PREVERIFY_BINARY_PATH=$(shell which preverify)
+PREVERIFY_REAL_PATH=$(shell readlink -f $(PREVERIFY_BINARY_PATH))
+PREVERIFY_DIRNAME=$(shell dirname $(PREVERIFY_BINARY_PATH))
+WTK_PATH=$(PREVERIFY_DIRNAME)/../
 
-include $(CIBYL_BASE)/build/Rules-j2me.mk
+
+all: midlet.jad
+
+program: main.c
+	mips-cibyl-elf-gcc -Os -o $@ $<
+
+tmpclasses/Cibyl.j: program
+	cibyl-mips2java -O -d tmpclasses program
+
+
+midlet.jar: tmpclasses/Cibyl.j
+	install -d res
+	cp `cibyl-config --prefix`/mips-cibyl-elf/sys-root/usr/share/java/Main.java tmpclasses
+	cp `cibyl-config --prefix`/mips-cibyl-elf/sys-root/usr/share/java/GameScreenCanvas.java tmpclasses
+	cd tmpclasses && javac -classpath : -source 1.4 -bootclasspath $(WTK_PATH)/lib/cldcapi11.jar:$(WTK_PATH)/lib/midpapi20.jar -source 1.4 *.java
+	preverify -classpath $(WTK_PATH)/lib/cldcapi11.jar:$(WTK_PATH)/lib/midpapi20.jar: -d classes/ tmpclasses/
+	cp tmpclasses/program.data.bin res/
+	jar cfm $@ MANIFEST.MF -C classes . -C res .
+
+midlet.jad: midlet.jad.templ midlet.jar
+	cat $< > $@
+	echo -n "MIDlet-Jar-Size: " >> $@
+	wc -c midlet.jar | cut -d ' ' -f -1 >> $@
+
+
+clean:
+	rm -rf classes tmpclasses program *.jar *.jad *~ res
