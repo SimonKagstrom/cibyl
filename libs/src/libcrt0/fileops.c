@@ -31,8 +31,8 @@ typedef struct
   int n_ops;
 } all_dops_t;
 
-all_fops_t fops;
-all_dops_t dops;
+static all_fops_t fops;
+static all_dops_t dops;
 
 static void register_op(all_fops_t *f, const char *uri, cibyl_fops_t *fop, int is_default)
 {
