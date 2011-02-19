@@ -23,11 +23,11 @@ SECTIONS
 	}
        	.bss : ALIGN(16) {
 	     *(.bss) *(.scommon) *(.sbss)
-	     PROVIDE(__edata = .);
 	}
 
         /* Exported symbols (to Java) */
-       	.cibylexpsyms : { *(.cibylexpsyms) }
+	.cibylexpsyms : { *(.cibylexpsyms) }
+	PROVIDE(__edata = .);
 
 	/* The string table with the exception names */
 	. = 0xfd000000;
