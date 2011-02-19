@@ -1,5 +1,4 @@
 set (lib_SRCS
-  main.c
   s9.c
   )
 
