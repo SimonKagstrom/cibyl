@@ -26,6 +26,8 @@ clean_install: do_chmod
 	rm -rf ${TGT}/mips-cibyl-elf/mips-cibyl-elf/include
 	rm -rf ${TGT}/mips-cibyl-elf/sys-root/lib/*
 	rm -rf ${TGT}/mips-cibyl-elf/sys-root/usr/include/*
+	rm -rf ${TGT}/mips-cibyl-elf/share/man
+	rm -rf ${TGT}/mips-cibyl-elf/lib/ldscripts/elf32ebmip*
 
 jasmin-2.4.zip:
 	wget http://downloads.sourceforge.net/project/jasmin/jasmin/jasmin-2.4/$@
