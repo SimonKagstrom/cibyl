@@ -241,7 +241,7 @@ CibylElf::CibylElf(const char *filename)
           int n = data->d_size / sizeof(Elf32_Rel);
 
           /* Don't count .rel.pdr for now */
-          if (strcmp(name, ".rel.pdr") != 0 && strncmp(name, ".rel.debug", 10) !=0)
+          if (strcmp(name, ".rel.pdr") != 0 && strncmp(name, ".rel.debug", 10) != 0)
             max_relocs += n;
         }
     }
@@ -274,7 +274,7 @@ CibylElf::CibylElf(const char *filename)
           int n = data->d_size / sizeof(Elf32_Rel);
 
           /* Let's not care about .rel.pdr for now */
-          if (strcmp(name, ".rel.pdr") == 0 || strncmp(name, ".rel.debug", 10) ==0)
+          if (strcmp(name, ".rel.pdr") == 0 || strncmp(name, ".rel.debug", 10) == 0)
             continue;
 
           for (int i = 0; i < n; i++)
@@ -288,15 +288,15 @@ CibylElf::CibylElf(const char *filename)
 	
               if(sym && sym->type == STT_SECTION && type == R_MIPS_32)
                 {
-        	      /* Set addend from contents of location to be modified */
-        	      ElfSection* sec = this->getSection(name+4); // should use shdr->sh_link instead
-        	      if(sec)
+                  /* Set addend from contents of location to be modified */
+                  ElfSection* sec = this->getSection(name+4); // should use shdr->sh_link instead
+                  if(sec)
                     {
-                      uint32_t* data = (uint32_t*) sec->data;		  
+                      uint32_t* data = (uint32_t*) sec->data;
                       uint32_t offset = s->r_offset - sec->addr;
                       this->relocs[cur]->addend = be32_to_host( data[offset/4] );
                     }
-              }
+                }
 		    
               if (sym)
                 this->m_relocationsBySymbol[sym] = this->relocs[cur];
