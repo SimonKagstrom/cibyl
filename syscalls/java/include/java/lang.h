@@ -33,8 +33,10 @@ void NOPH_delete(NOPH_Object_t obj); /* Not generated */
  * @param obj the String object to write
  * @param addr the address to write to
  * @param maxlen the length of the passed address
+ *
+ * @return the number of characters written
  */
-void NOPH_String_toCharPtr(NOPH_String_t obj, char* addr, int maxlen); /* Not generated */
+int NOPH_String_toCharPtr(NOPH_String_t obj, char* addr, int maxlen); /* Not generated */
 
 /* Should return a 64-bit value - we get wraparound problems otherwise! */
 void __NOPH_System_currentTimeMillis(int64_t* p); /* Not generated */

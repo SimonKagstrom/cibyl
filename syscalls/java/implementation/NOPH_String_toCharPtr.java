@@ -1,4 +1,4 @@
-public static void NOPH_String_toCharPtr(int __str, int addr, int maxlen)
+public static int NOPH_String_toCharPtr(int __str, int addr, int maxlen)
 {
     String str = (String)CRunTime.objectRepository[__str];
     int i;
@@ -11,4 +11,6 @@ public static void NOPH_String_toCharPtr(int __str, int addr, int maxlen)
         }
     /* NULL-terminate */
     CRunTime.memoryWriteByte( addr+i, '\0' );
+
+    return i;
 }
