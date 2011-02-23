@@ -554,8 +554,24 @@ void Controller::lookupRelocations(JavaClass *cl)
               if (fn->getAddress() == rel->sym->addr)
                 this->callTableMethod->addFunction(fn);
             }
+          else if(rel->sym->type == STT_SECTION && rel->type == R_MIPS_32)
+          {
+            JavaMethod *mt = cl->getMethodByAddress(rel->addend);
+            Function *fn;
+
+            /* If this method is not in this class  */
+            if (!mt)
+              continue;
+	      
+            fn = mt->getFunctionByAddress(rel->addend);
+            panic_if(!fn, "No function for address 0x%x in method %s!\n",
+                     rel->sym->addr, mt->getName());
+
+            if (fn->getAddress() == rel->addend)
+              this->callTableMethod->addFunction(fn);
+          }
         }
-      else if (rel->type == R_MIPS_HI16 || rel->type == R_MIPS_LO16)
+      if (rel->type == R_MIPS_HI16 || rel->type == R_MIPS_LO16)
         {
           int idx;
           JavaMethod *reloc_mt = cl->getMethodByAddress(rel->addr, &idx);
@@ -609,6 +625,12 @@ void Controller::lookupRelocations(JavaClass *cl)
           panic_if(!a, "Cannot find instruction for REL_HI at address 0x%x\n",
                    rel_hi->addr);
 
+          if (a->isDelaySlotNop())
+            {
+              Instruction *parent = this->getInstructionByAddress(rel_hi->addr - 4);
+              a = parent->getDelayed();
+            }
+		
           for (int l = hilo->lo_start; l <= hilo->lo_end; l++)
             {
               ElfReloc *rel_lo = relocs[l];

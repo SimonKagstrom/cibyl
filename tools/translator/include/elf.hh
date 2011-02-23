@@ -63,30 +63,34 @@ public:
     this->addr = addr;
     this->type = type;
     this->sym = sym;
+    this->addend = 0;
   }
 
   uint32_t addr;
   int type;
   ElfSymbol *sym;
+  uint32_t addend;
 };
 
 class ElfSection
 {
 public:
   ElfSection(const char *name, uint8_t *data, size_t size,
-             int type, uint32_t align)
+             int type, uint32_t align, uint32_t addr)
   {
     this->name = name;
     this->data = data;
     this->size = size;
     this->type = type;
     this->align = align;
+    this->addr = addr;
   }
 
   uint8_t *data;
   size_t   size;
   int      type;
   uint32_t align;
+  uint32_t addr;
   const char *name;
 };
 

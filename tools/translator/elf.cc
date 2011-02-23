@@ -71,6 +71,8 @@ void CibylElf::handleSymtab(Elf_Scn *scn)
         this->symbols[n_syms++] = this->dataSymbols[n_datas++] = new ElfSymbol(i, binding, (uint32_t)s->st_value,
                                                                                (uint32_t)s->st_size,
                                                                                type, sym_name);
+      else if ( type == STT_SECTION)
+        this->symbols[n_syms++] = new ElfSymbol(i, binding, s->st_value, s->st_size, type, sym_name);
       s++;
     }
 
@@ -227,7 +229,7 @@ CibylElf::CibylElf(const char *filename)
 
       this->addSection(new ElfSection(name, (uint8_t*)data->d_buf,
                                       data->d_size, shdr->sh_type,
-                                      shdr->sh_addralign));
+                                      shdr->sh_addralign, shdr->sh_addr));
 
       /* Handle symbols */
       if (shdr->sh_type == SHT_SYMTAB)
@@ -239,7 +241,7 @@ CibylElf::CibylElf(const char *filename)
           int n = data->d_size / sizeof(Elf32_Rel);
 
           /* Don't count .rel.pdr for now */
-          if (strcmp(name, ".rel.pdr") != 0)
+          if (strcmp(name, ".rel.pdr") != 0 && strncmp(name, ".rel.debug", 10) !=0)
             max_relocs += n;
         }
     }
@@ -272,7 +274,7 @@ CibylElf::CibylElf(const char *filename)
           int n = data->d_size / sizeof(Elf32_Rel);
 
           /* Let's not care about .rel.pdr for now */
-          if (strcmp(name, ".rel.pdr") == 0)
+          if (strcmp(name, ".rel.pdr") == 0 || strncmp(name, ".rel.debug", 10) ==0)
             continue;
 
           for (int i = 0; i < n; i++)
@@ -283,6 +285,19 @@ CibylElf::CibylElf(const char *filename)
 
               assert(cur < max_relocs);
               this->relocs[cur] = new ElfReloc(s->r_offset, type, sym);
+	
+              if(sym && sym->type == STT_SECTION && type == R_MIPS_32)
+                {
+        	      /* Set addend from contents of location to be modified */
+        	      ElfSection* sec = this->getSection(name+4); // should use shdr->sh_link instead
+        	      if(sec)
+                    {
+                      uint32_t* data = (uint32_t*) sec->data;		  
+                      uint32_t offset = s->r_offset - sec->addr;
+                      this->relocs[cur]->addend = be32_to_host( data[offset/4] );
+                    }
+              }
+		    
               if (sym)
                 this->m_relocationsBySymbol[sym] = this->relocs[cur];
               cur++;
