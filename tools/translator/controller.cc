@@ -541,7 +541,7 @@ void Controller::lookupRelocations(JavaClass *cl)
         {
           if (rel->sym->type == STT_FUNC && rel->type != R_MIPS_26)
             {
-              JavaMethod *mt = cl->getMethodByAddress(rel->sym->addr);
+              JavaMethod *mt = this->getMethodByAddress(rel->sym->addr);
               Function *fn;
 
               /* If this method is not in this class  */
@@ -556,7 +556,7 @@ void Controller::lookupRelocations(JavaClass *cl)
             }
           else if(rel->sym->type == STT_SECTION && rel->type == R_MIPS_32)
           {
-            JavaMethod *mt = cl->getMethodByAddress(rel->addend);
+            JavaMethod *mt = this->getMethodByAddress(rel->addend);
             Function *fn;
 
             /* If this method is not in this class  */
@@ -679,7 +679,8 @@ void Controller::lookupRelocations(JavaClass *cl)
               /* Skip things which can not be code addresses */
               if ((addr & 0x3) != 0)
                 continue;
-              JavaMethod *dst_mt = cl->getMethodByAddress(addr);
+
+              JavaMethod *dst_mt = this->getMethodByAddress(addr);
               if (dst_mt)
                 {
                   Function *fn = dst_mt->getFunctionByAddress(addr);
