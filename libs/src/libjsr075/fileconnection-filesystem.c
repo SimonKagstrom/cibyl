@@ -119,7 +119,7 @@ static FILE *open_file(const char *path, cibyl_fops_open_mode_t mode)
   return fp;
 }
 
-FILE *NOPH_FileConnection_openFILE(const char *path, const char *in_mode)
+__attribute__((weak)) FILE *NOPH_FileConnection_openFILE(const char *path, const char *in_mode)
 {
   cibyl_fops_open_mode_t mode = cibyl_file_get_mode(in_mode);
 
@@ -225,3 +225,5 @@ static void __attribute__((constructor))fileconnection_register_fs(void)
   /* Only one need to be registered */
   cibyl_fops_register("file://", &fileconnection_input_fops, 0);
 }
+
+#include "dirent.c"

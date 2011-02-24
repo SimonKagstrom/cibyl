@@ -15,7 +15,7 @@ typedef struct
   char *path;
 } connector_file_t;
 
-static FILE *open(const char *path,
+static FILE *conn_open(const char *path,
                   cibyl_fops_open_mode_t mode)
 {
   FILE *fp;
@@ -64,7 +64,7 @@ static FILE *open(const char *path,
   return fp;
 }
 
-static int close(FILE *fp)
+static int conn_close(FILE *fp)
 {
   connector_file_t *p = (connector_file_t *)fp->priv;
 
@@ -75,9 +75,10 @@ static int close(FILE *fp)
   return 0;
 }
 
-FILE *NOPH_Connector_openFILE(const char *path, const char *in_mode)
+/* Weak to allow "double linking" which e.g., cmake likes to do */
+__attribute__((weak)) FILE *NOPH_Connector_openFILE(const char *path, const char *in_mode)
 {
-  return open(path, cibyl_file_get_mode(in_mode));
+  return conn_open(path, cibyl_file_get_mode(in_mode));
 }
 
 
@@ -86,8 +87,8 @@ static cibyl_fops_t connector_fops =
 {
   .keep_uri = 1,
   .priv_data_size = sizeof(connector_file_t),
-  .open  = open,
-  .close = close,
+  .open  = conn_open,
+  .close = conn_close,
   .read  = NULL, /* Set below */
   .write = NULL, /* ... */
   .seek  = NULL,
@@ -109,3 +110,7 @@ static void __attribute__((constructor))connector_register_fs(void)
   cibyl_fops_register("socket://", &connector_fops, 0);
   cibyl_fops_register("ssl://", &connector_fops, 0);
 }
+
+
+#include "recordstore-filesystem.c"
+#include "resource-filesystem.c"

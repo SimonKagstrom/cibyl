@@ -1,5 +1,2 @@
-set (lib_SRCS
-  file.c
-  )
-
-add_library (j2se ${lib_SRCS})
+add_custom_target(libj2se.a ALL
+	COMMAND ${CMAKE_C_COMPILER} -Os -c -I ${CIBYL_BASE_PATH}/include ${CMAKE_CURRENT_SOURCE_DIR}/file.c -o ${LIBRARY_OUTPUT_PATH}/libj2se.a)

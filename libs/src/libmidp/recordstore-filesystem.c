@@ -91,7 +91,7 @@ static void *get_record(NOPH_RecordStore_t rs, int id, int *rs_size)
  *
  * (the recordstore:// part is removed by fopen)
  */
-static FILE *open(const char *path,
+static FILE *rs_open(const char *path,
                   cibyl_fops_open_mode_t mode)
 {
   FILE *fp;
@@ -169,7 +169,7 @@ static FILE *open(const char *path,
   return NULL;
 }
 
-static int close(FILE *fp)
+static int rs_close(FILE *fp)
 {
   record_store_file_t *p = (record_store_file_t *)fp->priv;
 
@@ -187,8 +187,8 @@ static int close(FILE *fp)
 static cibyl_fops_t record_store_fops =
 {
   .priv_data_size = sizeof(record_store_file_t),
-  .open  = open,
-  .close = close,
+  .open  = rs_open,
+  .close = rs_close,
   .read  = NULL, /* See below*/
   .write = NULL,
   .seek  = NULL,

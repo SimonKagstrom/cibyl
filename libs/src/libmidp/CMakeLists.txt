@@ -1,7 +1,2 @@
-set (lib_SRCS
-  connector-filesystem.c
-  recordstore-filesystem.c
-  resource-filesystem.c
-  )
-
-add_library (midp ${lib_SRCS})
+add_custom_target(libmidp.a ALL
+	COMMAND ${CMAKE_C_COMPILER} -Os -c -I ${CIBYL_BASE_PATH}/include ${CMAKE_CURRENT_SOURCE_DIR}/connector-filesystem.c -o ${LIBRARY_OUTPUT_PATH}/libmidp.a)

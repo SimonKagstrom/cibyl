@@ -12,7 +12,7 @@ typedef struct
   NOPH_InputStream_file_t is_file;
 } resource_file_t;
 
-static FILE *open(const char *path,
+static FILE *res_open(const char *path,
                   cibyl_fops_open_mode_t mode)
 {
   FILE *fp;
@@ -48,7 +48,7 @@ static FILE *open(const char *path,
 static cibyl_fops_t resource_fops =
 {
   .priv_data_size = sizeof(resource_file_t),
-  .open  = open,
+  .open  = res_open,
   .close = NULL, /* Set below */
   .read  = NULL, /* ... */
   .write = NULL,
