@@ -237,6 +237,7 @@ if options.optimize_all:
 	config.doRegisterValueTracking = True
 	config.doOptimizePruneStackStores = True
 	config.doOptimizeFunctionArguments = True
+	config.doOptimizeIndirectCalls = True
 
 if config.memoryDebug:
 	instruction.setupMemoryDebug()
