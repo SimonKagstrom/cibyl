@@ -24,6 +24,18 @@
 
 using namespace std;
 
+#if !defined(R_MIPS_NONE) // e.g. Cygwin
+
+#define R_MIPS_NONE       0
+#define R_MIPS_16         1
+#define R_MIPS_32         2
+#define R_MIPS_REL32      3
+#define R_MIPS_26         4
+#define R_MIPS_HI16       5
+#define R_MIPS_LO16       6
+
+#endif
+
 class CibylElf;
 
 class ElfSymbol

@@ -6,6 +6,10 @@
 
 #include <mips-dwarf.h>
 
+#if !defined(EF_MIPS_ABI2) /* e.g. Cygwin */
+#define EF_MIPS_ABI2            0x00000020
+#endif
+
 /* The ABI of the file.  Also see EF_MIPS_ABI2 above. */
 #define EF_MIPS_ABI             0x0000F000
 
