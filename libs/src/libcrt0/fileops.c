@@ -222,6 +222,11 @@ FILE *fopen(const char *path, const char *in_mode)
     f = fops.fallback;
   else if (!f->keep_uri && uri != NULL) /* Never for the default */
     len = strlen(uri);
+
+  /* Nothing registered */
+  if (!f)
+      return NULL;
+
   return f->open(path + len, mode);
 }
 
