@@ -1,4 +1,26 @@
 Cibyl (21)
+	* Correct __floatunsisf/sidf
+
+	* Various new peephole optimizations (Marcus Groeber)
+
+	* Improved memset/memcpy (Marcus Groeber)
+
+	* Various fixes for building with newer GCCs (Marcus Groeber, me)
+
+	* Various instruction improvements: sltu/sltiu inlines, better
+	compare-vs-0 implementation etc (Marcus Groeber)
+
+	* Use libstdc++ map instead of GHT hash
+
+	* Use DWARF information to reduce the number of registers that
+	need to be passed to functions. Now only the actual used arguments
+	are passed.
+
+	* Fix relocation bugs: STT_SECTION (Marcus Groeber), check for
+	target addresses in all classes
+
+	* The build system has been completely replaced
+
 	* Correct regression for __ashldi3 and other 64-bit shift operations
 	introduced in v20 (the shift-by argument was passed in the wrong
 	register). This caused s9 (t9) input to malfunction in Sarien.
