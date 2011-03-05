@@ -115,6 +115,9 @@ parser.add_option("--jasmin-command-line", default=None,
 				  help="""Set the jasmin command line. Default 'jasmin'. jasmin must support the
 -d which is passed by the tool""",
 		  dest="jasminCommandLine", metavar="COMMAND_LINE")
+parser.add_option("--package-name", default="",
+				  help="""Set the Java package name of the Cibyl-generated code""",
+		  dest="packageName", metavar="COMMAND_LINE")
 parser.add_option("--optimize-use-profile", default=None,
 				  help="""Use profile-based optimization from a J2ME profiler file""",
 		  dest="profileFile", metavar="PROFILE.prf")
@@ -192,6 +195,7 @@ if options.jasminCommandLine:
 if options.javacCommandLine:
 	config.javac = options.javacCommandLine
 
+config.packageName = options.packageName
 config.callTableHierarchy = int(options.callTableHierarchy)
 config.callTableClasses = int(options.callTableClasses)
 config.peepholeIterations = int(options.peepholeIterations)
