@@ -18,7 +18,7 @@ public class StandaloneMain
   {
     try {
         int start = CibylCallTable.getAddressByName("__start");
-        int destructors = CibylCallTable.getAddressByName("crt0_run_global_destructors");
+        int destructors = CibylCallTable.getAddressByName("__do_global_dtors_aux");
 
         CRunTime.init(is);
         int sp = (CRunTime.memory.length * 4) - 8;
@@ -36,7 +36,7 @@ public class StandaloneMain
   {
 
     try {
-        int destructors = CibylCallTable.getAddressByName("crt0_run_global_destructors");
+        int destructors = CibylCallTable.getAddressByName("__do_global_dtors_aux");
 
         int sp = (CRunTime.memory.length * 4) - 8;
         CibylCallTable.call(destructors, sp, 0, 0, 0, 0);
