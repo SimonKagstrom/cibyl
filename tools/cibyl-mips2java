@@ -254,8 +254,7 @@ def doCompile():
 
 def doCppCompile():
     doTranslation(config.infile, syscallDirectories)
-    if not config.onlyTranslate:
-            doJasmin(config.outDirectory + config.packageNameJavaPath() + "/Cibyl.j")
+    jfiles = [config.outDirectory + config.packageNameJavaPath() + "/Cibyl.j"]
     i = 1
     while True:
             cur = config.outDirectory + config.packageNameJavaPath() + "/Cibyl" + str(i) + ".j"
@@ -264,10 +263,10 @@ def doCppCompile():
             except:
                     # No more classes!
                     break
-            if not config.onlyTranslate:
-                    doJasmin(cur)
+            jfiles.append(cur)
             i = i + 1
     if not config.onlyTranslate:
+            doJasmin(jfiles)
             doJavac(config.outDirectory + config.packageNameJavaPath() + "/CibylCallTable.java")
 
     doCopyJavaFiles()

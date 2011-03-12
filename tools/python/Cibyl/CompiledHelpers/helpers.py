@@ -14,11 +14,13 @@ import Cibyl.PeepholeOptimizer.parse
 
 from Cibyl import config
 
-def doJasmin(filename):
-    f = filename
+def doJasmin(filenames):
     if config.doPeepholeOptimize:
-        Cibyl.PeepholeOptimizer.parse.run(config.peepholeIterations, f, f)
-    ret = os.system(config.jasmin + " -d " + config.outDirectory + " " + f)
+        print "Running peephole optimizer"
+        for f in filenames:
+          Cibyl.PeepholeOptimizer.parse.run(config.peepholeIterations, f, f)
+    print "Running jasmin"
+    ret = os.system(config.jasmin + " -d " + config.outDirectory + " " + " ".join(filenames))
     if ret != 0:
         sys.exit(1)
 
