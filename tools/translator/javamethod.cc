@@ -226,6 +226,7 @@ int JavaMethod::addReturnLocation(uint32_t address)
                                               this->n_returnLocations * sizeof(uint32_t*));
 
   this->returnLocations[out] = address;
+  controller->getBranchTarget(address)->setBranchTarget();
 
   return out;
 }

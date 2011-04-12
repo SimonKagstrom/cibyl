@@ -15,15 +15,14 @@
 FunctionColocation::FunctionColocation(const char *str)
 {
   char *cpy = xstrdup(str);
-  char *p;
+  char *p = cpy;
 
   this->in_str = xstrdup(str);
   this->fns = NULL;
   this->fn_names = NULL;
   this->n_fns = 0;
 
-  p = strtok(cpy, ";");
-  while (p)
+  while (*p)
     {
       int n = this->n_fns;
 
@@ -31,12 +30,24 @@ FunctionColocation::FunctionColocation(const char *str)
       this->fns = (Function**)xrealloc(this->fns, sizeof(Function*) * this->n_fns);
       this->fn_names = (const char**)xrealloc(this->fn_names, sizeof(const char*) * this->n_fns);
 
+      char *pnext = strchr(p, ';');
+      if (pnext)
+        {
+          *pnext = '\0';
+        }
       this->fn_names[n] = xstrdup(p);
       FunctionColocation::name_to_coloc[this->fn_names[n]] = this;
 
       this->fns[n] = NULL;
 
-      p = strtok(NULL, ";");
+      if (pnext)
+        {
+          p = pnext+1;
+        }
+      else
+        {
+          p += strlen(p);
+        }
     }
   panic_if(this->n_fns == 0,
            "Function coloc string %s has the wrong format\n", str);
@@ -71,4 +82,4 @@ FunctionColocation *FunctionColocation::lookup(const char *fn_name)
   return FunctionColocation::name_to_coloc[fn_name];
 }
 
-map<const char *, FunctionColocation *>FunctionColocation::name_to_coloc;
+map<const char *, FunctionColocation *, cmp_str>FunctionColocation::name_to_coloc;
