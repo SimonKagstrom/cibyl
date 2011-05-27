@@ -90,5 +90,25 @@ int main(int argc, char* argv[])
 
   printf("blabla %d\n", argc);
 
+  a = 100.0;
+  ad = 100.0;
+
+  printf("log(%f) = %f\n", ad, log(ad));
+  printf("logf(%f) = %f\n", a, logf(a));
+  printf("log10(%f) = %f\n", ad, log10(ad));
+  printf("log10f(%f) = %f\n", a, log10f(a));
+
+  a = 8.0;
+  ad = 8.0;
+
+  printf("exp(%f) = %f\n", ad, exp(ad));
+  printf("expf(%f)= %f\n", a, expf(a));
+
+  b = 4.5;
+  bd = 4.5;
+
+  printf("pow(%f, %f) = %f\n", ad, bd, pow(ad, bd));
+  printf("powf(%f, %f) = %f\n", a, b, powf(a, b));
+
   return 0;
 }
