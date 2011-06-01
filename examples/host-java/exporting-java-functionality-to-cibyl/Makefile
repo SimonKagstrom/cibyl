@@ -14,7 +14,7 @@ tmpclasses/Cibyl.j: program
 
 program.jar: tmpclasses/Cibyl.j
 	cp `cibyl-config --prefix`/mips-cibyl-elf/sys-root/usr/share/java/StandaloneMain.java tmpclasses
-	cd tmpclasses && javac -source 1.4 *.java
+	javac -d tmpclasses -classpath tmpclasses -source 1.4 tmpclasses/*.java
 	cd tmpclasses && jar cfm ../$@ ../manifest.txt *.class program.data.bin
 
 
