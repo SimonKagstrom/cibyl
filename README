@@ -12,6 +12,7 @@ Prerequisites
 -------------
 You need the following to use Cibyl:
 
+- unzip, gcc, g++, tar, gzip, make, cmake
 - Python (2.3, 2.4 tested)
 - The Jasmin assembler (http://jasmin.sourceforge.net)
 - A Java compiler / runtime environment
