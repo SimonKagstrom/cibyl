@@ -52,7 +52,6 @@
 # include <config.h>
 #endif
 
-#include <error.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <sys/param.h>
