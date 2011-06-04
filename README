@@ -24,7 +24,10 @@ Building Cibyl
 --------------
 To setup Cibyl, do the following steps:
 
-1. Download a pre-built toolchain from http://cibyl.org or build it:
+1. Download a pre-built toolchain from http://cibyl.org. In this
+    case you can skip directly to step 2.
+
+   Alternatively, build it first using the following command:
 
      cd toolchain
      make # (this will take some hours)
@@ -34,13 +37,11 @@ To setup Cibyl, do the following steps:
      cp mips-cibyl-elf.tar.bz2 /path/to/install/dir
      tar -xjf mips-cibyl-elf.tar.bz2
 
-
 3. Add the Cibyl binaries to your path:
 
      export PATH=$PATH:/path/to/install/dir/bin
 
    If you downloaded the pre-built toolchain, you can stop here.
-
 
 4. Build the translator and the cibyl libraries
 
@@ -53,7 +54,7 @@ To setup Cibyl, do the following steps:
 
 5. Build the examples by
 
-   $ cd examples/sokoban
+   $ cd examples/j2me/sokoban
    $ make
 
 --
