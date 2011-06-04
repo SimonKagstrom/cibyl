@@ -50,4 +50,4 @@ include_directories(
 )
 
 add_executable (xcibyl-translator ${translator_SRCS})
-target_link_libraries (xcibyl-translator elf)
+target_link_libraries (xcibyl-translator elf intl)

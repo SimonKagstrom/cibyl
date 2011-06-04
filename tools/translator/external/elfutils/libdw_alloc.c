@@ -94,5 +94,5 @@ __attribute ((noreturn, visibility ("hidden")))
 __libdw_oom (void)
 {
   while (1)
-    error (EXIT_FAILURE, ENOMEM, "libdw");
+    exit (EXIT_FAILURE);
 }
