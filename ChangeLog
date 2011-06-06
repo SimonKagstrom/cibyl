@@ -1,4 +1,12 @@
 Cibyl (21)
+	* Add a --package-name option to cibyl-mips2java (although a bit more
+	support is neeeded for this to be complete)
+
+	* Integrate elfutils as part of the Cibyl source code to make building
+	windows easier (Marcus Groeber, me)
+
+	* Support powf, exp, log etc for host-builds (Maik Merten)
+
 	* Correct __floatunsisf/sidf
 
 	* Various new peephole optimizations (Marcus Groeber)
@@ -32,7 +40,7 @@ Cibyl (21)
 	* Make the Java stack size dynamically allocated (might reduce the
 	memory usage just a tiny bit)
 
-	-- Simon Kagstrom <simon.kagstrom@gmail.com>,
+	-- Simon Kagstrom <simon.kagstrom@gmail.com>, Mon Jun  6 09:10:09 CEST 2011
 
 Cibyl (20)
 	* Fixed bug caused by removing some stores of s-registers in function
