@@ -8,7 +8,7 @@ Setting up Cibyl
 
 2. Add the Cibyl binaries to your path:
 
-     export PATH=$PATH:/path/to/install/dir/bin
+     export PATH=$PATH:/path/to/install/dir/mips-cibyl-elf/bin
 
 
 Building an example

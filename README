@@ -34,12 +34,12 @@ To setup Cibyl, do the following steps:
 
 2. Unpack the toolchain
 
-     cp mips-cibyl-elf.tar.bz2 /path/to/install/dir
-     tar -xjf mips-cibyl-elf.tar.bz2
+     cp cibyl-bin-PLATFORM-VERSION.tar.bz2 /path/to/install/dir
+     tar -xjf cibyl-bin-PLATFORM-VERSION.tar.bz2
 
 3. Add the Cibyl binaries to your path:
 
-     export PATH=$PATH:/path/to/install/dir/bin
+     export PATH=$PATH:/path/to/install/dir/mips-cibyl-elf/bin
 
    If you downloaded the pre-built toolchain, you can stop here.
 
