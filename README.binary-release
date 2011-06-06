@@ -1,0 +1,27 @@
+Setting up Cibyl
+----------------
+
+1. Unpack the toolchain (you have probably already done this!)
+
+     cp cibyl-bin-PLATFORM-VERSION.tar.bz2 /path/to/install/dir
+     tar -xjf cibyl-bin-PLATFORM-VERSION.tar.bz2
+
+2. Add the Cibyl binaries to your path:
+
+     export PATH=$PATH:/path/to/install/dir/bin
+
+
+Building an example
+-------------------
+
+The examples are in the examples/ directory.
+
+1. To build an example, do
+
+    cd examples/j2me/sokoban
+    make
+
+
+More information
+----------------
+See http://cibyl.org for more information and help.
