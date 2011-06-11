@@ -41,6 +41,8 @@ public:
 private:
   const char *getJavaReturnString(int r);
 
+  const char *lookupFilePath(const char *filename);
+
   void doOneArgumentGet(cibyl_db_entry_t *p, cibyl_db_arg_t *a );
 
   void doOne(cibyl_db_entry_t *p);
@@ -58,6 +60,7 @@ private:
   const char *m_dstdir;
   int n_syscall_dirs;
   char **syscall_dirs;
+  char *m_globalSyscallDirectory;
   int n_syscall_sets;
   char **syscall_sets;
   int *set_usage;

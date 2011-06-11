@@ -28,6 +28,13 @@ SyscallWrapperGenerator::SyscallWrapperGenerator(const char **defines, const cha
   this->syscall_sets = syscall_sets;
   this->defines = defines;
 
+  const char *syscallPath = "mips-cibyl-elf/sys-root/usr/share/syscalls";
+  size_t syscallDirLen = strlen(controller->getInstallDirectory()) + strlen(syscallPath) + 4;
+  this->m_globalSyscallDirectory = (char *)xcalloc(syscallDirLen, sizeof(char));
+
+  xsnprintf(this->m_globalSyscallDirectory, syscallDirLen,
+      "%s/%s/", controller->getInstallDirectory(), syscallPath);
+
   this->set_usage = (int*)xcalloc( n_syscall_sets, sizeof(int) );
 
   /* Fixup set usage */
@@ -64,11 +71,28 @@ void SyscallWrapperGenerator::doOneArgumentGet(cibyl_db_entry_t *p, cibyl_db_arg
   emit->generic(";\n");
 }
 
-void SyscallWrapperGenerator::doOneNonGenerated(const char *dir,
+const char *SyscallWrapperGenerator::lookupFilePath(const char *filename)
+{
+  struct stat st;
+  const char *out = this->m_globalSyscallDirectory;
+
+  for (int i = 0; i < this->n_syscall_dirs; i++) {
+      if (strcmp(filename, this->syscall_dirs[i]) == 0 &&
+          file_exists(this->syscall_dirs[i])) {
+          out = this->syscall_dirs[i];
+          break;
+      }
+  }
+
+  return out;
+}
+
+void SyscallWrapperGenerator::doOneNonGenerated(const char *inDir,
                                                 cibyl_db_entry_t *p)
 {
   const char* data;
   size_t size;
+  const char *dir = this->lookupFilePath(inDir);
 
   data = (const char*)read_cpp(&size, this->defines, "%s/%s/implementation/%s.java",
                                dir, p->set, p->name);
@@ -157,7 +181,7 @@ void SyscallWrapperGenerator::generateImports()
    * all dirs and all sets */
   for (int i = 0; i < this->n_syscall_dirs; i++)
     {
-      char *dir = this->syscall_dirs[i];
+      const char *dir = this->lookupFilePath(this->syscall_dirs[i]);
 
       for (int j = 0; j < this->n_syscall_sets; j++)
         {
@@ -182,7 +206,7 @@ void SyscallWrapperGenerator::generateInits()
    * all dirs and all sets */
   for (int i = 0; i < this->n_syscall_dirs; i++)
     {
-      char *dir = this->syscall_dirs[i];
+      const char *dir = this->lookupFilePath(this->syscall_dirs[i]);
 
       for (int j = 0; j < this->n_syscall_sets; j++)
         {
@@ -208,7 +232,7 @@ void SyscallWrapperGenerator::generateHelperClasses()
    * all dirs and all sets */
   for (int i = 0; i < this->n_syscall_dirs; i++)
     {
-      char *dirname = this->syscall_dirs[i];
+      const char *dirname = this->lookupFilePath(this->syscall_dirs[i]);
 
       for (int j = 0; j < this->n_syscall_sets; j++)
         {
