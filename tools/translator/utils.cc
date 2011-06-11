@@ -135,6 +135,24 @@ void *read_file(size_t *out_size, const char *fmt, ...)
   return data;
 }
 
+int file_exists(const char *fmt, ...)
+{
+  struct stat buf;
+  char path[2048];
+  va_list ap;
+
+  /* Create the filename */
+  assert ( fmt != NULL );
+  va_start(ap, fmt);
+  vsnprintf(path, sizeof(path), fmt, ap);
+  va_end(ap);
+
+  if (lstat(path, &buf) < 0)
+    return 0;
+
+  return 1;
+}
+
 static void create_dir_structure(const char *dir)
 {
   char *p, *dst;

@@ -43,6 +43,7 @@ static inline uint32_t signext_16(uint16_t in)
   return out;
 }
 
+int file_exists(const char *fmt, ...);
 
 void *read_file(size_t *out_size, const char *fmt, ...);
 
