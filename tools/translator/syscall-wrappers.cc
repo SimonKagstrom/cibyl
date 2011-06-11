@@ -21,7 +21,7 @@ SyscallWrapperGenerator::SyscallWrapperGenerator(const char **defines, const cha
                                                  int n_syscall_sets, char **syscall_sets,
                                                  Controller::CibylDbTable_t &used_syscalls) : m_used_syscalls(used_syscalls)
 {
-  this->dstdir = dstdir;
+  this->m_dstdir = xstrdup(dstdir);
   this->n_syscall_dirs = n_syscall_dirs;
   this->syscall_dirs = syscall_dirs;
   this->n_syscall_sets = n_syscall_sets;
@@ -240,7 +240,7 @@ void SyscallWrapperGenerator::generateHelperClasses()
                                            dirname, cur, de->d_name);
               if (data)
                 {
-                  emit->setOutputFile(open_file_in_dir(this->dstdir, de->d_name, "w"));
+                  emit->setOutputFile(open_file_in_dir(this->m_dstdir, de->d_name, "w"));
                   emit->output(data);
                   emit->closeOutputFile();
                 }
@@ -252,7 +252,7 @@ void SyscallWrapperGenerator::generateHelperClasses()
 
 bool SyscallWrapperGenerator::pass2()
 {
-  emit->setOutputFile(open_file_in_dir(this->dstdir, "Syscalls.java", "w"));
+  emit->setOutputFile(open_file_in_dir(this->m_dstdir, "Syscalls.java", "w"));
   emit->generic("/* GENERATED, DON'T EDIT */\n");
   if (controller->getPackageName())
     emit->generic("package %s;\n", controller->getPackageName());

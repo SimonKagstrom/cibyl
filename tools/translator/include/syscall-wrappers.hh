@@ -40,6 +40,7 @@ public:
 
 private:
   const char *getJavaReturnString(int r);
+
   void doOneArgumentGet(cibyl_db_entry_t *p, cibyl_db_arg_t *a );
 
   void doOne(cibyl_db_entry_t *p);
@@ -54,7 +55,7 @@ private:
                          cibyl_db_entry_t *p);
 
   const char **defines;
-  const char *dstdir;
+  const char *m_dstdir;
   int n_syscall_dirs;
   char **syscall_dirs;
   int n_syscall_sets;
