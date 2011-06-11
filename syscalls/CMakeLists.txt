@@ -5,3 +5,7 @@ add_custom_command (
   )
 
 ADD_CUSTOM_TARGET(cibyl-syscalls ALL DEPENDS ${INCLUDE_OUTPUT_PATH}/cibyl-syscalls.db)
+
+install (DIRECTORY
+  ${CIBYL_BASE_PATH}/syscalls
+  DESTINATION ${TOOLCHAIN_PATH}/mips-cibyl-elf/sys-root/usr/share)
