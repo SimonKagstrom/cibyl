@@ -29,7 +29,7 @@ using namespace std;
 class Controller : public CodeBlock
 {
 public:
-  Controller(const char **defines,
+  Controller(const char *argv0, const char **defines,
              const char *dstdir, const char *elf_filename,
              int n_dbs, const char **database_filenames);
 
@@ -98,6 +98,8 @@ public:
 
   void setPackageName(const char *name);
 
+  const char *getInstallDirectory();
+
   typedef map<const char *, JavaClass *, cmp_str> JavaClassTable_t;
   typedef map<const char *, cibyl_db_entry_t *, cmp_str> CibylDbTable_t;
 
@@ -137,6 +139,8 @@ private:
   size_t textSize;
 
   const char *dstdir;
+
+  char *m_baseDir;
 
   Syscall **syscalls; /* Sparse table of syscalls */
 

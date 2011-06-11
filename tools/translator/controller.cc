@@ -21,7 +21,10 @@
 #include <syscall-wrappers.hh>
 #include <config.hh>
 
-Controller::Controller(const char **defines,
+#include <libgen.h>
+#include <unistd.h>
+
+Controller::Controller(const char *argv0, const char **defines,
                        const char *dstdir, const char *elf_filename,
                        int n_dbs, const char **database_filenames) : CodeBlock()
 {
@@ -29,6 +32,29 @@ Controller::Controller(const char **defines,
 
   this->package_name = NULL;
   memset(this->jasmin_package_path, 0, sizeof(this->jasmin_package_path));
+
+
+  // Ugly hack to get the directory path of the cibyl installation
+  char cwdBuf[4096];
+  char *cwd = getcwd(cwdBuf, sizeof(cwdBuf));
+  panic_if(!cwd, "Can't read current directory!\n");
+
+  char *cpy = (char *)xstrdup(argv0);
+  const char *dn = dirname(cpy);
+  const char *syscallRelativePath = "..";
+
+  size_t len = strlen(dn) + strlen(syscallRelativePath) + 4;
+  bool isRelative = dn[0] != '/';
+
+  if (isRelative)
+    len += strlen(cwd);
+
+  this->m_baseDir = (char *)xcalloc(len, sizeof(char));
+  xsnprintf(this->m_baseDir, len, "%s%s%s/%s/",
+      isRelative ? cwd : "", isRelative ? "/" : "",
+      dn, syscallRelativePath);
+
+  free(cpy);
 
   this->dstdir = dstdir;
   this->instructions = NULL;
@@ -57,6 +83,12 @@ Controller::Controller(const char **defines,
 
   this->builtins = new BuiltinFactory();
 }
+
+const char *Controller::getInstallDirectory()
+{
+  return this->m_baseDir;
+}
+
 
 unsigned long Controller::getSyscallFileLong(void *_p, int offset)
 {
@@ -914,7 +946,7 @@ int main(int argc, const char **argv)
   emit = new Emit();
 
   regalloc = new RegisterAllocator();
-  controller = new Controller(defines, argv[n], argv[n+1],
+  controller = new Controller(argv[0], defines, argv[n], argv[n+1],
                               argc - n - 2, &argv[n + 2]);
   parse_config(controller, config, argv[1] + strlen("config:"));
 
