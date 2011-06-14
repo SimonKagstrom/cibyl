@@ -2,4 +2,8 @@
 
 P=`dirname $0`
 
+if uname | grep -iq cygwin; then
+  P=`cygpath -m $P`
+fi
+
 java -jar $P/../lib/jasmin.jar $*
