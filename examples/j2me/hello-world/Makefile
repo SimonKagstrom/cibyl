@@ -20,9 +20,9 @@ midlet.jar: tmpclasses/Cibyl.j
 	install -d res
 	cp `cibyl-config --prefix`/mips-cibyl-elf/sys-root/usr/share/java/Main.java tmpclasses
 	cp `cibyl-config --prefix`/mips-cibyl-elf/sys-root/usr/share/java/GameScreenCanvas.java tmpclasses
-	cd tmpclasses && javac -classpath : -source 1.4 -bootclasspath $(WTK_PATH)/lib/cldcapi11.jar:$(WTK_PATH)/lib/midpapi20.jar -source 1.4 *.java
-	preverify -classpath $(WTK_PATH)/lib/cldcapi11.jar:$(WTK_PATH)/lib/midpapi20.jar: -d classes/ tmpclasses/
-	cp tmpclasses/program.data.bin res/
+	javac -d tmpclasses -classpath tmpclasses -source 1.4 -bootclasspath $(WTK_PATH)/lib/cldcapi11.jar:$(WTK_PATH)/lib/midpapi20.jar -source 1.4 tmpclasses/*.java
+	preverify -classpath $(WTK_PATH)/lib/cldcapi11.jar:$(WTK_PATH)/lib/midpapi20.jar -d classes tmpclasses
+	cp tmpclasses/program.data.bin res
 	jar cfm $@ MANIFEST.MF -C classes . -C res .
 
 midlet.jad: midlet.jad.templ midlet.jar
