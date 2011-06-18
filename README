@@ -52,10 +52,10 @@ To setup Cibyl, do the following steps:
 
    this will install the libraries and tools in /path/to/install/dir
 
-5. Build the examples by
+5. Build the examples by e.g.,
 
-   $ cd examples/j2me/sokoban
-   $ make
+     cd examples/host-java/hello-world
+     make
 
 --
 // Simon Kagstrom <simon.kagstrom@gmail.com>

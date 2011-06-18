@@ -16,9 +16,9 @@ Building an example
 
 The examples are in the examples/ directory.
 
-1. To build an example, do
+1. To build an example, do e.g.,
 
-    cd examples/j2me/sokoban
+    cd examples/host-java/hello-world
     make
 
 
