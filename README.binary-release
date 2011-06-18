@@ -21,6 +21,17 @@ The examples are in the examples/ directory.
     cd examples/host-java/hello-world
     make
 
+2. To build a J2ME example, do
+
+   2.1 For windows:
+
+      cd examples/j2me/hello-world
+      make -f Makefile.cygwin
+
+   2.2 For other platforms:
+
+      cd examples/j2me/hello-world
+      make
 
 More information
 ----------------

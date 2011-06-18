@@ -57,5 +57,19 @@ To setup Cibyl, do the following steps:
      cd examples/host-java/hello-world
      make
 
+
+6. To build a J2ME example, do
+
+   6.1 For windows:
+
+      cd examples/j2me/hello-world
+      make -f Makefile.cygwin
+
+   6.2 For other platforms:
+
+      cd examples/j2me/hello-world
+      make
+
+
 --
 // Simon Kagstrom <simon.kagstrom@gmail.com>
