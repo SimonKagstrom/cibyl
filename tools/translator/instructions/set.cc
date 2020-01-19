@@ -148,7 +148,8 @@ public:
 
   bool pass2()
   {
-    emit->bc_pushconst_l( extra );
+    emit->bc_pushconst( this->extra );
+    emit->bc_i2l();
     emit->bc_pushregister( this->rs );
     emit->bc_i2l();
     emit->bc_lcmp();		// rt<rs -> -1, rt==rs -> 0, rt>rs -> 1
