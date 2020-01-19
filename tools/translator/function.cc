@@ -14,6 +14,9 @@
 #include <utils.h>
 #include <function.hh>
 
+#include <algorithm>
+using namespace std; // for std::max
+
 Function::Function(const char *name, Instruction **insns,
 		   int first_insn, int last_insn) : CodeBlock()
 {
