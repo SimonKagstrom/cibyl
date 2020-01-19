@@ -1,0 +1,9 @@
+#!/usr/bin/python3
+
+import os, sys
+
+os.putenv('PATH', os.getenv('PATH').split(':', 1)[1])
+
+while '-m32' in sys.argv: del sys.argv[sys.argv.index('-m32')]
+
+os.execvp(sys.argv[0].rsplit('/', 1)[-1], sys.argv)
